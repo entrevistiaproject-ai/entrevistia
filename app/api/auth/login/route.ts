@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verifica se a conta está ativa
-    if (!user.is_active || user.deleted_at) {
+    if (!user.isActive || user.deletedAt) {
       return NextResponse.json(
         { error: "Conta inativa ou excluída", field: "geral" },
         { status: 403 }
@@ -48,24 +48,24 @@ export async function POST(request: NextRequest) {
     }
 
     // Verifica a senha
-    const senhaValida = await bcrypt.compare(senha, user.password_hash);
+    const senhaValida = await bcrypt.compare(senha, user.passwordHash);
     if (!senhaValida) {
       // Log de tentativa de login falha
       const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
       const userAgent = request.headers.get("user-agent") || "unknown";
 
       await db.insert(auditLogs).values({
-        user_id: user.id,
-        user_email: user.email,
+        userId: user.id,
+        userEmail: user.email,
         acao: "login_failed",
         entidade: "users",
-        entidade_id: user.id,
+        entidadeId: user.id,
         descricao: "Tentativa de login com senha incorreta",
-        tipo_operacao_lgpd: "autenticacao",
-        base_juridica: "execucao_contrato",
+        tipoOperacaoLGPD: "autenticacao",
+        baseJuridica: "execucao_contrato",
         finalidade: "Segurança e auditoria de acessos",
-        ip_address: ipAddress,
-        user_agent: userAgent,
+        ipAddress: ipAddress,
+        userAgent: userAgent,
       });
 
       return NextResponse.json(
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verifica se o email foi verificado
-    if (!user.email_verified) {
+    if (!user.emailVerified) {
       return NextResponse.json(
         {
           error: "Email não verificado. Verifique sua caixa de entrada.",
@@ -92,27 +92,27 @@ export async function POST(request: NextRequest) {
 
     // Log de login bem-sucedido
     await db.insert(auditLogs).values({
-      user_id: user.id,
-      user_email: user.email,
+      userId: user.id,
+      userEmail: user.email,
       acao: "login_success",
       entidade: "users",
-      entidade_id: user.id,
+      entidadeId: user.id,
       descricao: "Login realizado com sucesso",
-      tipo_operacao_lgpd: "autenticacao",
-      base_juridica: "execucao_contrato",
+      tipoOperacaoLGPD: "autenticacao",
+      baseJuridica: "execucao_contrato",
       finalidade: "Autenticação e controle de acesso ao sistema",
-      ip_address: ipAddress,
-      user_agent: userAgent,
+      ipAddress: ipAddress,
+      userAgent: userAgent,
     });
 
-    // Atualiza updated_at
+    // Atualiza updatedAt
     await db
       .update(users)
-      .set({ updated_at: new Date() })
+      .set({ updatedAt: new Date() })
       .where(eq(users.id, user.id));
 
     // Remove dados sensíveis
-    const { password_hash, ...userWithoutPassword } = user;
+    const { passwordHash, ...userWithoutPassword } = user;
 
     // Em produção, você criaria um JWT ou session token aqui
     // Por enquanto, retornamos os dados do usuário
