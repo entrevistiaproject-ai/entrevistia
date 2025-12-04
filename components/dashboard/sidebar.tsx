@@ -13,7 +13,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 
-const menuItems = [
+const mainMenuItems = [
   {
     title: "Dashboard",
     href: "/dashboard",
@@ -39,13 +39,16 @@ const menuItems = [
     href: "/candidatos",
     icon: Users,
   },
+];
+
+const secondaryMenuItems = [
   {
-    title: "Custos",
+    title: "Custos e Uso",
     href: "/custos",
     icon: DollarSign,
   },
   {
-    title: "Conta",
+    title: "Minha Conta",
     href: "/conta",
     icon: User,
   },
@@ -63,27 +66,60 @@ export function Sidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 px-3 py-4">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href;
+        <nav className="flex-1 space-y-6 px-3 py-4 overflow-y-auto">
+          {/* Menu Principal */}
+          <div className="space-y-1">
+            <p className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Principal
+            </p>
+            {mainMenuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                )}
-              >
-                <Icon className="h-5 w-5" />
-                {item.title}
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  )}
+                >
+                  <Icon className="h-5 w-5" />
+                  {item.title}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Menu Secundário */}
+          <div className="space-y-1">
+            <p className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Configurações
+            </p>
+            {secondaryMenuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  )}
+                >
+                  <Icon className="h-5 w-5" />
+                  {item.title}
+                </Link>
+              );
+            })}
+          </div>
         </nav>
 
         {/* User Info */}

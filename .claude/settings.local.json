@@ -19,7 +19,16 @@
       "Bash(vercel env:*)",
       "Bash(openssl rand:*)",
       "Bash(vercel ls:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(curl:*)",
+      "Bash(cat:*)",
+      "Bash(psql:*)",
+      "Bash(npx drizzle-kit:*)",
+      "Bash(rm:*)",
+      "Bash(printf:*)",
+      "Bash(npx tsx:*)",
+      "Bash(node scripts/create-table-perguntas.js:*)",
+      "Bash(npx shadcn@latest add:*)"
     ],
     "deny": [],
     "ask": []
