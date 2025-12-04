@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ export default function VerificarEmailPage() {
   const emailParam = searchParams.get("email");
 
   const [code, setCode] = useState("");
-  const [email, setEmail] = useState(emailParam || "");
+  const [email] = useState(emailParam || "");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);

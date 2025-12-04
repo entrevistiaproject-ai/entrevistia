@@ -36,16 +36,11 @@ export const cadastroCandidatoSchema = z.object({
 
   // Consentimentos LGPD (obrigatórios para participar de entrevista)
   aceitouTermosEntrevista: z.literal(true, {
-    errorMap: () => ({
-      message: "Você deve aceitar os termos para participar da entrevista",
-    }),
+    message: "Você deve aceitar os termos para participar da entrevista",
   }),
 
   consentimentoTratamentoDados: z.literal(true, {
-    errorMap: () => ({
-      message:
-        "Você deve consentir com o tratamento de seus dados pessoais",
-    }),
+    message: "Você deve consentir com o tratamento de seus dados pessoais",
   }),
 
   finalidadeTratamento: z

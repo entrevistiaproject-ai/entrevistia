@@ -23,7 +23,6 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailVerificado = searchParams.get("email_verificado");
-  const cadastroSucesso = searchParams.get("cadastro");
 
   const [formData, setFormData] = useState({
     email: "",

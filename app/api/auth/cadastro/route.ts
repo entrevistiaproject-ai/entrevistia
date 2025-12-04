@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Remove dados sensíveis da resposta
-    const { passwordHash: _, ...userWithoutPassword } = newUser;
+    const { passwordHash: _passwordHash, ...userWithoutPassword } = newUser;
 
     return NextResponse.json(
       {

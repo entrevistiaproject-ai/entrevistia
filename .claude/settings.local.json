@@ -12,7 +12,9 @@
       "Bash(chmod:*)",
       "Bash(node scripts/push-db.js:*)",
       "Bash(npx drizzle-kit push)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(git checkout f816efa)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []

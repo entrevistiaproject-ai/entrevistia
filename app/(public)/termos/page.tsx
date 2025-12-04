@@ -29,7 +29,7 @@ export default function TermosPage() {
                 1. Aceitação dos Termos
               </h2>
               <p className="text-gray-700 leading-relaxed">
-                Ao acessar e utilizar a plataforma EntrevistIA ("Plataforma"), você
+                Ao acessar e utilizar a plataforma EntrevistIA (&quot;Plataforma&quot;), você
                 concorda em cumprir e estar vinculado aos presentes Termos de Uso.
                 Se você não concordar com qualquer parte destes termos, não deverá
                 utilizar nossos serviços.
@@ -179,7 +179,7 @@ export default function TermosPage() {
                 7. Limitação de Responsabilidade
               </h2>
               <p className="text-gray-700 leading-relaxed">
-                <strong>7.1.</strong> A plataforma é fornecida "como está", sem
+                <strong>7.1.</strong> A plataforma é fornecida &quot;como está&quot;, sem
                 garantias de qualquer tipo.
               </p>
               <p className="text-gray-700 leading-relaxed">

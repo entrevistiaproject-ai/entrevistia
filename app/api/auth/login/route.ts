@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
       .where(eq(users.id, user.id));
 
     // Remove dados sensíveis
-    const { passwordHash, ...userWithoutPassword } = user;
+    const { passwordHash: _passwordHash, ...userWithoutPassword } = user;
 
     // Em produção, você criaria um JWT ou session token aqui
     // Por enquanto, retornamos os dados do usuário

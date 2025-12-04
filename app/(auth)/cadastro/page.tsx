@@ -70,7 +70,7 @@ export default function CadastroPage() {
         // Erros de validação
         if (data.details?.issues) {
           const zodErrors: Record<string, string> = {};
-          data.details.issues.forEach((issue: any) => {
+          data.details.issues.forEach((issue: { path: string[]; message: string }) => {
             zodErrors[issue.path[0]] = issue.message;
           });
           setErrors(zodErrors);

@@ -46,13 +46,11 @@ export const cadastroUserSchema = z.object({
 
   // Consentimentos LGPD (obrigatórios)
   aceitouTermos: z.literal(true, {
-    errorMap: () => ({ message: "Você deve aceitar os Termos de Uso" }),
+    message: "Você deve aceitar os Termos de Uso",
   }),
 
   aceitouPrivacidade: z.literal(true, {
-    errorMap: () => ({
-      message: "Você deve aceitar a Política de Privacidade",
-    }),
+    message: "Você deve aceitar a Política de Privacidade",
   }),
 
   // Opcional

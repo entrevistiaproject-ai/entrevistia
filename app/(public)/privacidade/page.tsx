@@ -47,7 +47,7 @@ export default function PrivacidadePage() {
                 1. Introdução
               </h2>
               <p className="text-gray-700 leading-relaxed">
-                A EntrevistIA ("nós", "nosso" ou "plataforma") está comprometida com
+                A EntrevistIA (&quot;nós&quot;, &quot;nosso&quot; ou &quot;plataforma&quot;) está comprometida com
                 a proteção da privacidade e dos dados pessoais de seus usuários. Esta
                 Política de Privacidade descreve como coletamos, usamos,
                 armazenamos e compartilhamos informações, em conformidade com a
