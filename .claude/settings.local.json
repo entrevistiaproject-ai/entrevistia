@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(npm install:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdiciona landing page profissional com foco em conversão\n\n- Hero section com CTAs claros\n- Seção de estatísticas (90% redução de tempo, 70% economia)\n- Cards de benefícios com ícones\n- Como funciona em 3 passos\n- Casos de uso ideais\n- Footer completo com links\n- Design responsivo e moderno\n- Paleta azul consistente\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
