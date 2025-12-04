@@ -6,8 +6,10 @@ import * as schema from './schema';
 function getDatabaseUrl(): string {
   const url = process.env.DATABASE_URL;
   if (!url) {
+    console.error('❌ DATABASE_URL não encontrada!');
+    console.error('Variáveis de ambiente disponíveis:', Object.keys(process.env).filter(k => !k.includes('SECRET') && !k.includes('KEY')));
     throw new Error(
-      '🔴 DATABASE_URL não encontrada! Configure no arquivo .env.local'
+      '🔴 DATABASE_URL não encontrada nas variáveis de ambiente'
     );
   }
   return url;
