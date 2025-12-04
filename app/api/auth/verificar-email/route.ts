@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verifica se o email já foi verificado
-    if (user.email_verified) {
+    if (user.emailVerified) {
       return NextResponse.json(
         { error: "Email já foi verificado" },
         { status: 400 }
@@ -52,14 +52,14 @@ export async function POST(request: NextRequest) {
       .from(verificationCodes)
       .where(
         and(
-          eq(verificationCodes.user_id, user.id),
+          eq(verificationCodes.userId, user.id),
           eq(verificationCodes.email, email),
           eq(verificationCodes.type, "email_verification"),
           eq(verificationCodes.used, "false"),
-          gt(verificationCodes.expires_at, new Date())
+          gt(verificationCodes.expiresAt, new Date())
         )
       )
-      .orderBy(verificationCodes.created_at)
+      .orderBy(verificationCodes.createdAt)
       .limit(1);
 
     if (!verificationCode) {
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
       .update(verificationCodes)
       .set({
         used: "true",
-        used_at: new Date(),
+        usedAt: new Date(),
       })
       .where(eq(verificationCodes.id, verificationCode.id));
 
@@ -107,8 +107,8 @@ export async function POST(request: NextRequest) {
     await db
       .update(users)
       .set({
-        email_verified: new Date(),
-        updated_at: new Date(),
+        emailVerified: new Date(),
+        updatedAt: new Date(),
       })
       .where(eq(users.id, user.id));
 

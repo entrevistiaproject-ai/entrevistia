@@ -58,9 +58,9 @@ export async function POST(request: NextRequest) {
       .from(verificationCodes)
       .where(
         and(
-          eq(verificationCodes.user_id, user.id),
+          eq(verificationCodes.userId, user.id),
           eq(verificationCodes.type, "email_verification"),
-          gt(verificationCodes.created_at, new Date(Date.now() - 5 * 60 * 1000)) // últimos 5 minutos
+          gt(verificationCodes.createdAt, new Date(Date.now() - 5 * 60 * 1000)) // últimos 5 minutos
         )
       );
 
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       .set({ used: "true" })
       .where(
         and(
-          eq(verificationCodes.user_id, user.id),
+          eq(verificationCodes.userId, user.id),
           eq(verificationCodes.type, "email_verification"),
           eq(verificationCodes.used, "false")
         )
@@ -90,14 +90,14 @@ export async function POST(request: NextRequest) {
 
     // Insere no banco
     await db.insert(verificationCodes).values({
-      user_id: user.id,
+      userId: user.id,
       email: user.email,
       code,
       type: "email_verification",
-      expires_at: expiresAt,
+      expiresAt: expiresAt,
       used: "false",
       attempts: 0,
-      ip_address: ipAddress,
+      ipAddress: ipAddress,
     });
 
     // Envia email
