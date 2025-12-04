@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDB } from "@/lib/db";
 import { perguntasTemplates } from "@/lib/db/schema";
+import { isNull, desc } from "drizzle-orm";
 
 export async function POST(request: Request) {
   try {
@@ -60,8 +61,8 @@ export async function GET(request: Request) {
     const perguntas = await db
       .select()
       .from(perguntasTemplates)
-      .where((fields) => fields.deletedAt === null)
-      .orderBy((fields) => fields.createdAt);
+      .where(isNull(perguntasTemplates.deletedAt))
+      .orderBy(desc(perguntasTemplates.createdAt));
 
     return NextResponse.json(perguntas);
   } catch (error) {
