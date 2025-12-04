@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import {
   AlertCircle
 } from "lucide-react";
 
-export default function VerificarEmailPage() {
+function VerificarEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailParam = searchParams.get("email");
@@ -285,5 +285,17 @@ export default function VerificarEmailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VerificarEmailPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
+    }>
+      <VerificarEmailContent />
+    </Suspense>
   );
 }
