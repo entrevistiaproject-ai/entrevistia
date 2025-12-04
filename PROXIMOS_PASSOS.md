@@ -18,23 +18,40 @@
 ### 3. **Banco de Dados**
 - ✅ 7 tabelas criadas (users, candidatos, entrevistas, perguntas, respostas, audit_logs, verification_codes)
 - ✅ Migrations geradas
-- ⚠️ **PRECISA**: Aplicar migrations com `npm run db:push` (responder "Yes")
+- ✅ Migrations aplicadas com sucesso no banco Neon
+
+### 4. **Sistema de Verificação de Email**
+- ✅ Página `/verificar-email` com input de código
+- ✅ API `/api/auth/verificar-email` com validação
+- ✅ API `/api/auth/reenviar-codigo` com rate limiting
+- ✅ Limite de tentativas (5 tentativas)
+- ✅ Expiração de código (15 minutos)
+
+### 5. **Sistema de Login**
+- ✅ Página `/login` com formulário
+- ✅ API `/api/auth/login` com autenticação
+- ✅ Verificação de email obrigatória
+- ✅ Logs de auditoria (sucesso e falha)
+- ✅ Redirecionamento contextual
 
 ---
 
 ## 🔧 O que VOCÊ precisa fazer AGORA
 
-### 1. **Aplicar Migrations no Banco**
+### 1. **Testar o Fluxo Completo**
 
 ```bash
-# Execute este comando e confirme com "Yes, I want to execute all statements"
-npm run db:push
+npm run dev
 ```
 
-Ou rode manualmente e aperte a seta para baixo + Enter quando aparecer a opção "Yes":
-```bash
-npx drizzle-kit push
-```
+**Fluxo de teste:**
+1. Acesse: http://localhost:3000/cadastro
+2. Preencha o formulário e cadastre-se
+3. Copie o código de 6 dígitos do console
+4. Digite o código na página de verificação
+5. Faça login com seu email e senha
+
+**Nota:** Os códigos aparecem no console porque estamos em modo dev (sem RESEND_API_KEY)
 
 ### 2. **(Opcional) Configurar Resend para enviar emails reais**
 
@@ -46,48 +63,48 @@ Acesse: https://resend.com
 RESEND_API_KEY="re_xxxxxxxxxxxxx"
 ```
 
-**Nota:** Se não configurar, os emails aparecerão no console (modo dev)
-
-### 3. **Testar o Cadastro**
-
-```bash
-npm run dev
-```
-
-Acesse: http://localhost:3000/cadastro
-
-1. Preencha o formulário
-2. Clique em "Criar minha conta"
-3. Veja o código de 6 dígitos no console (se não configurou Resend)
+Após configurar, os emails serão enviados de verdade!
 
 ---
 
 ## 📋 O que FALTA implementar
 
-### 1. **Página de Verificação de Email** ⚠️ PRÓXIMO PASSO
-- Página onde o usuário digita o código de 6 dígitos
-- API para validar o código
-- Marcar email como verificado
+### 1. **Sistema de Sessão/JWT** ⚠️ PRÓXIMO PASSO IMPORTANTE
+- Implementar NextAuth.js ou JWT
+- Criar middleware de autenticação
+- Proteger rotas privadas
+- Sistema de logout
+- Refresh tokens
 
-### 2. **Página de Login**
-- Formulário de login (email + senha)
-- Validação
-- Verificar se email foi confirmado
+### 2. **Dashboard**
+- Página inicial após login
+- Resumo de entrevistas
+- Estatísticas básicas
+- Menu lateral
 
-### 3. **API de Login**
-- Verificar credenciais
-- Criar sessão
-- Retornar token/cookie
+### 3. **CRUD de Entrevistas**
+- Criar nova entrevista
+- Listar entrevistas
+- Editar entrevista
+- Deletar entrevista
 
-### 4. **NextAuth.js / Sessões**
-- Configurar NextAuth
-- Provider de credenciais
-- Middleware de proteção de rotas
-- Logout
+### 4. **CRUD de Candidatos**
+- Adicionar candidatos
+- Importar CSV
+- Gerenciar candidatos
+- Histórico de entrevistas
 
-### 5. **Redirecionamento pós-login**
-- Se email não verificado → redirecionar para verificação
-- Se verificado → redirecionar para dashboard
+### 5. **Sistema de Perguntas**
+- Criar perguntas
+- Banco de perguntas
+- Templates prontos
+- Ordenação de perguntas
+
+### 6. **Integração com IA**
+- Análise de respostas
+- Geração de perguntas
+- Feedback automático
+- Pontuação inteligente
 
 ---
 
