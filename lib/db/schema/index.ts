@@ -7,6 +7,7 @@ export * from "./perguntas-templates";
 export * from "./respostas";
 export * from "./audit-logs";
 export * from "./verification-codes";
+export * from "./transacoes";
 
 // Export schema for Drizzle migrations
 import { users } from "./users";
@@ -17,6 +18,7 @@ import { perguntasTemplates } from "./perguntas-templates";
 import { respostas } from "./respostas";
 import { auditLogs } from "./audit-logs";
 import { verificationCodes } from "./verification-codes";
+import { transacoes, saldos, recargas } from "./transacoes";
 
 export const schema = {
   users,
@@ -27,4 +29,7 @@ export const schema = {
   respostas,
   auditLogs,
   verificationCodes,
+  transacoes,
+  saldos,
+  recargas,
 };
