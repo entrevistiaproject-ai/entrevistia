@@ -21,7 +21,7 @@ export default function LandingPage() {
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary" />
-            <span className="text-xl font-bold text-primary">Entrevistia</span>
+            <span className="text-xl font-bold text-primary">EntrevistIA</span>
           </div>
           <nav className="hidden md:flex gap-6">
             <a href="#beneficios" className="text-sm font-medium hover:text-primary transition-colors">
@@ -105,7 +105,7 @@ export default function LandingPage() {
       <section id="beneficios" className="container mx-auto px-4 py-20">
         <div className="mx-auto max-w-3xl text-center mb-12">
           <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-            Por que usar o Entrevistia?
+            Por que usar o EntrevistIA?
           </h2>
           <p className="text-lg text-muted-foreground">
             Economize tempo, reduza custos e melhore a qualidade das suas contratações
@@ -299,7 +299,7 @@ export default function LandingPage() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <div className="h-8 w-8 rounded-lg bg-primary" />
-                <span className="text-lg font-bold">Entrevistia</span>
+                <span className="text-lg font-bold">EntrevistIA</span>
               </div>
               <p className="text-sm text-muted-foreground">
                 Inteligência artificial a serviço do seu talento humano.
@@ -329,7 +329,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2024 Entrevistia. Todos os direitos reservados.</p>
+            <p>&copy; 2024 EntrevistIA. Todos os direitos reservados.</p>
           </div>
         </div>
       </footer>

@@ -53,7 +53,7 @@ export function Sidebar() {
       <div className="flex h-full flex-col">
         {/* Logo/Header */}
         <div className="flex h-16 items-center border-b border-border px-6">
-          <h1 className="text-xl font-bold text-primary">Entrevistia</h1>
+          <h1 className="text-xl font-bold text-primary">EntrevistIA</h1>
         </div>
 
         {/* Navigation */}
