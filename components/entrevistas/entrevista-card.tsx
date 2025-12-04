@@ -69,7 +69,7 @@ export function EntrevistaCard({ entrevista }: EntrevistaCardProps) {
   return (
     <Card className="group relative overflow-hidden hover:shadow-lg transition-all duration-300 border-2 hover:border-blue-500/50">
       {/* Background gradient - estilo cartão de crédito */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute inset-0 bg-linear-to-br from-blue-600 via-blue-700 to-blue-900 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
       {/* Pattern de fundo sutil */}
       <div className="absolute inset-0 opacity-5">
@@ -201,7 +201,7 @@ export function EntrevistaCard({ entrevista }: EntrevistaCardProps) {
             >
               <Link href={`/entrevistas/${entrevista.id}`}>
                 <ExternalLink className="h-3.5 w-3.5" />
-                Abrir
+                Gerenciar
               </Link>
             </Button>
           </div>
@@ -210,7 +210,7 @@ export function EntrevistaCard({ entrevista }: EntrevistaCardProps) {
 
       {/* Shine effect no hover */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-shine" />
+        <div className="absolute top-0 left-0 w-full h-full bg-linear-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-shine" />
       </div>
     </Card>
   );

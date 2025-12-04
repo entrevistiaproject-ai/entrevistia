@@ -32,10 +32,9 @@ export function FormularioPergunta() {
   // Form state
   const [texto, setTexto] = useState("");
   const [cargo, setCargo] = useState("");
-  const [nivel, setNivel] = useState("");
   const [categoria, setCategoria] = useState("");
   const [competencia, setCompetencia] = useState("");
-  const [tipo, setTipo] = useState("texto");
+  const [tipo, setTipo] = useState("audio");
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
 
@@ -74,7 +73,7 @@ export function FormularioPergunta() {
         body: JSON.stringify({
           texto,
           cargo,
-          nivel,
+          nivel: "multinivel", // Valor padrão pois perguntas podem ser multiníveis
           categoria,
           competencia,
           tipo,
@@ -119,34 +118,16 @@ export function FormularioPergunta() {
             />
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="cargo">Cargo *</Label>
-              <AutocompleteCargo
-                value={cargo}
-                onChange={setCargo}
-                placeholder="Digite ou selecione o cargo"
-              />
-              <p className="text-xs text-muted-foreground">
-                Selecione um cargo existente ou digite um novo
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="nivel">Nível *</Label>
-              <Select value={nivel} onValueChange={setNivel} required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o nível" />
-                </SelectTrigger>
-                <SelectContent>
-                  {NIVEIS_HIERARQUICOS.map((nivel) => (
-                    <SelectItem key={nivel.value} value={nivel.value}>
-                      {nivel.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="cargo">Cargo *</Label>
+            <AutocompleteCargo
+              value={cargo}
+              onChange={setCargo}
+              placeholder="Digite ou selecione o cargo"
+            />
+            <p className="text-xs text-muted-foreground">
+              Selecione um cargo existente ou digite um novo
+            </p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -166,14 +147,17 @@ export function FormularioPergunta() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="competencia">Competência *</Label>
+              <Label htmlFor="competencia">Competência Avaliada *</Label>
               <Input
                 id="competencia"
-                placeholder="Ex: Direito Contratual"
+                placeholder="Ex: Direito Contratual, Liderança, Comunicação"
                 value={competencia}
                 onChange={(e) => setCompetencia(e.target.value)}
                 required
               />
+              <p className="text-xs text-muted-foreground">
+                Competência específica que esta pergunta avalia
+              </p>
             </div>
           </div>
 
@@ -185,10 +169,12 @@ export function FormularioPergunta() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="texto">Texto</SelectItem>
-                <SelectItem value="video">Vídeo</SelectItem>
                 <SelectItem value="audio">Áudio</SelectItem>
               </SelectContent>
             </Select>
+            <p className="text-xs text-muted-foreground">
+              Atualmente trabalhamos apenas com respostas em texto e áudio
+            </p>
           </div>
         </CardContent>
       </Card>
