@@ -9,6 +9,7 @@ import {
   Users,
   BarChart3,
   User,
+  HelpCircle,
 } from "lucide-react";
 
 const navItems = [
@@ -26,6 +27,11 @@ const navItems = [
     href: "/criar-entrevista",
     icon: PlusCircle,
     label: "Criar",
+  },
+  {
+    href: "/perguntas",
+    icon: HelpCircle,
+    label: "Perguntas",
   },
   {
     href: "/candidatos",

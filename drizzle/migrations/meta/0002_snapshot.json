@@ -1,0 +1,1139 @@
+{
+  "id": "072fbb6e-f22a-40ba-a670-b31c8775bd51",
+  "prevId": "f2bb73b0-6e0a-44a0-b9ad-2acc2a450f37",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email_verified": {
+          "name": "email_verified",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "telefone": {
+          "name": "telefone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "empresa": {
+          "name": "empresa",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cargo": {
+          "name": "cargo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "aceitou_termos": {
+          "name": "aceitou_termos",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "aceitou_privacidade": {
+          "name": "aceitou_privacidade",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "data_aceite_termos": {
+          "name": "data_aceite_termos",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aceita_email_marketing": {
+          "name": "aceita_email_marketing",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ip_cadastro": {
+          "name": "ip_cadastro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_agent_cadastro": {
+          "name": "user_agent_cadastro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.candidatos": {
+      "name": "candidatos",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "telefone": {
+          "name": "telefone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "linkedin": {
+          "name": "linkedin",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "curriculo": {
+          "name": "curriculo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "observacoes": {
+          "name": "observacoes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aceitou_termos_entrevista": {
+          "name": "aceitou_termos_entrevista",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "data_aceite_termos": {
+          "name": "data_aceite_termos",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "consentimento_tratamento_dados": {
+          "name": "consentimento_tratamento_dados",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "finalidade_tratamento": {
+          "name": "finalidade_tratamento",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "solicitou_acesso": {
+          "name": "solicitou_acesso",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "solicitou_correcao": {
+          "name": "solicitou_correcao",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "solicitou_exclusao": {
+          "name": "solicitou_exclusao",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "data_exclusao_agendada": {
+          "name": "data_exclusao_agendada",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ip_cadastro": {
+          "name": "ip_cadastro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "origem_cadastro": {
+          "name": "origem_cadastro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "candidatos_user_id_users_id_fk": {
+          "name": "candidatos_user_id_users_id_fk",
+          "tableFrom": "candidatos",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.entrevistas": {
+      "name": "entrevistas",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "candidato_id": {
+          "name": "candidato_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "titulo": {
+          "name": "titulo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "descricao": {
+          "name": "descricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cargo": {
+          "name": "cargo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "empresa": {
+          "name": "empresa",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'rascunho'"
+        },
+        "duracao": {
+          "name": "duracao",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tempo_resposta": {
+          "name": "tempo_resposta",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "permitir_revisao": {
+          "name": "permitir_revisao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'false'"
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "link_publico": {
+          "name": "link_publico",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expiracao_link": {
+          "name": "expiracao_link",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "anonimizar_dados": {
+          "name": "anonimizar_dados",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'false'"
+        },
+        "periodo_retencao": {
+          "name": "periodo_retencao",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 90
+        },
+        "nota_total": {
+          "name": "nota_total",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aprovado": {
+          "name": "aprovado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "feedback": {
+          "name": "feedback",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "configuracoes": {
+          "name": "configuracoes",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "iniciada_em": {
+          "name": "iniciada_em",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "concluida_em": {
+          "name": "concluida_em",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "entrevistas_user_id_users_id_fk": {
+          "name": "entrevistas_user_id_users_id_fk",
+          "tableFrom": "entrevistas",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "entrevistas_candidato_id_candidatos_id_fk": {
+          "name": "entrevistas_candidato_id_candidatos_id_fk",
+          "tableFrom": "entrevistas",
+          "tableTo": "candidatos",
+          "columnsFrom": [
+            "candidato_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "entrevistas_slug_unique": {
+          "name": "entrevistas_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.perguntas": {
+      "name": "perguntas",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "entrevista_id": {
+          "name": "entrevista_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "texto": {
+          "name": "texto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ordem": {
+          "name": "ordem",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'texto'"
+        },
+        "obrigatoria": {
+          "name": "obrigatoria",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'true'"
+        },
+        "tempo_maximo": {
+          "name": "tempo_maximo",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pontuacao_maxima": {
+          "name": "pontuacao_maxima",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 100
+        },
+        "opcoes": {
+          "name": "opcoes",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criterios_avaliacao": {
+          "name": "criterios_avaliacao",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "perguntas_entrevista_id_entrevistas_id_fk": {
+          "name": "perguntas_entrevista_id_entrevistas_id_fk",
+          "tableFrom": "perguntas",
+          "tableTo": "entrevistas",
+          "columnsFrom": [
+            "entrevista_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.perguntas_templates": {
+      "name": "perguntas_templates",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "texto": {
+          "name": "texto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cargo": {
+          "name": "cargo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nivel": {
+          "name": "nivel",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "categoria": {
+          "name": "categoria",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "competencia": {
+          "name": "competencia",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'texto'"
+        },
+        "is_padrao": {
+          "name": "is_padrao",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "criterios_avaliacao": {
+          "name": "criterios_avaliacao",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tags": {
+          "name": "tags",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "perguntas_templates_user_id_users_id_fk": {
+          "name": "perguntas_templates_user_id_users_id_fk",
+          "tableFrom": "perguntas_templates",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.respostas": {
+      "name": "respostas",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "pergunta_id": {
+          "name": "pergunta_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "candidato_id": {
+          "name": "candidato_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entrevista_id": {
+          "name": "entrevista_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "texto_resposta": {
+          "name": "texto_resposta",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arquivo_url": {
+          "name": "arquivo_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arquivo_tipo": {
+          "name": "arquivo_tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "transcricao": {
+          "name": "transcricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pontuacao": {
+          "name": "pontuacao",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nota": {
+          "name": "nota",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "feedback": {
+          "name": "feedback",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "analise_ia": {
+          "name": "analise_ia",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tempo_resposta": {
+          "name": "tempo_resposta",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tentativas": {
+          "name": "tentativas",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 1
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ip_resposta": {
+          "name": "ip_resposta",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "respostas_pergunta_id_perguntas_id_fk": {
+          "name": "respostas_pergunta_id_perguntas_id_fk",
+          "tableFrom": "respostas",
+          "tableTo": "perguntas",
+          "columnsFrom": [
+            "pergunta_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "respostas_candidato_id_candidatos_id_fk": {
+          "name": "respostas_candidato_id_candidatos_id_fk",
+          "tableFrom": "respostas",
+          "tableTo": "candidatos",
+          "columnsFrom": [
+            "candidato_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "respostas_entrevista_id_entrevistas_id_fk": {
+          "name": "respostas_entrevista_id_entrevistas_id_fk",
+          "tableFrom": "respostas",
+          "tableTo": "entrevistas",
+          "columnsFrom": [
+            "entrevista_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.audit_logs": {
+      "name": "audit_logs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_email": {
+          "name": "user_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "acao": {
+          "name": "acao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entidade": {
+          "name": "entidade",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entidade_id": {
+          "name": "entidade_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "descricao": {
+          "name": "descricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dados_antigos": {
+          "name": "dados_antigos",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dados_novos": {
+          "name": "dados_novos",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tipo_operacao_lgpd": {
+          "name": "tipo_operacao_lgpd",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "base_juridica": {
+          "name": "base_juridica",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "finalidade": {
+          "name": "finalidade",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "localizacao": {
+          "name": "localizacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "audit_logs_user_id_users_id_fk": {
+          "name": "audit_logs_user_id_users_id_fk",
+          "tableFrom": "audit_logs",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.verification_codes": {
+      "name": "verification_codes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "used": {
+          "name": "used",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'false'"
+        },
+        "used_at": {
+          "name": "used_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "attempts": {
+          "name": "attempts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "verification_codes_user_id_users_id_fk": {
+          "name": "verification_codes_user_id_users_id_fk",
+          "tableFrom": "verification_codes",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

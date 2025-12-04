@@ -10,6 +10,7 @@ import {
   BarChart3,
   DollarSign,
   User,
+  HelpCircle,
 } from "lucide-react";
 
 const menuItems = [
@@ -27,6 +28,11 @@ const menuItems = [
     title: "Criar Entrevista",
     href: "/criar-entrevista",
     icon: PlusCircle,
+  },
+  {
+    title: "Banco de Perguntas",
+    href: "/perguntas",
+    icon: HelpCircle,
   },
   {
     title: "Banco de Candidatos",
