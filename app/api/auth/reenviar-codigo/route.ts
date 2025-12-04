@@ -4,7 +4,7 @@ import { verificationCodes, users } from "@/lib/db/schema";
 import { eq, and, gt } from "drizzle-orm";
 import { z } from "zod";
 import { enviarEmail } from "@/lib/email/resend";
-import { emailVerificationTemplate } from "@/lib/email/templates";
+import { emailVerificacaoTemplate } from "@/lib/email/templates";
 
 const resendCodeSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -102,7 +102,11 @@ export async function POST(request: NextRequest) {
 
     // Envia email
     try {
-      const htmlContent = emailVerificationTemplate(user.nome, code);
+      const htmlContent = emailVerificacaoTemplate({
+        nome: user.nome,
+        codigo: code,
+        email: user.email,
+      });
 
       await enviarEmail({
         to: user.email,
