@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
+import { AutocompleteCargo } from "@/components/entrevista/autocomplete-cargo";
+import { NIVEIS_HIERARQUICOS } from "@/lib/constants/niveis";
 
 export function FormularioPergunta() {
   const router = useRouter();
@@ -120,13 +122,14 @@ export function FormularioPergunta() {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="cargo">Cargo *</Label>
-              <Input
-                id="cargo"
-                placeholder="Ex: Advogado"
+              <AutocompleteCargo
                 value={cargo}
-                onChange={(e) => setCargo(e.target.value)}
-                required
+                onChange={setCargo}
+                placeholder="Digite ou selecione o cargo"
               />
+              <p className="text-xs text-muted-foreground">
+                Selecione um cargo existente ou digite um novo
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -136,9 +139,11 @@ export function FormularioPergunta() {
                   <SelectValue placeholder="Selecione o nível" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="junior">Júnior</SelectItem>
-                  <SelectItem value="pleno">Pleno</SelectItem>
-                  <SelectItem value="senior">Sênior</SelectItem>
+                  {NIVEIS_HIERARQUICOS.map((nivel) => (
+                    <SelectItem key={nivel.value} value={nivel.value}>
+                      {nivel.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

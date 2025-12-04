@@ -27,6 +27,7 @@ import {
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { NIVEIS_HIERARQUICOS } from "@/lib/constants/niveis";
 
 interface PerguntaSelecionada {
   id: string;
@@ -179,9 +180,11 @@ export default function CriarEntrevistaPage() {
                     <SelectValue placeholder="Selecione o nível" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="junior">Júnior</SelectItem>
-                    <SelectItem value="pleno">Pleno</SelectItem>
-                    <SelectItem value="senior">Sênior</SelectItem>
+                    {NIVEIS_HIERARQUICOS.map((nivel) => (
+                      <SelectItem key={nivel.value} value={nivel.value}>
+                        {nivel.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
