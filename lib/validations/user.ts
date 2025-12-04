@@ -19,14 +19,18 @@ export const cadastroUserSchema = z.object({
   telefone: z
     .string()
     .optional()
+    .transform((val) => {
+      if (!val) return undefined;
+      // Remove todos os caracteres não numéricos
+      return val.replace(/\D/g, "");
+    })
     .refine(
       (val) => {
         if (!val) return true;
-        // Remove caracteres não numéricos
-        const numbers = val.replace(/\D/g, "");
-        return numbers.length >= 10 && numbers.length <= 11;
+        // Valida se tem 10 ou 11 dígitos (com ou sem DDD)
+        return val.length >= 10 && val.length <= 11;
       },
-      { message: "Telefone inválido" }
+      { message: "Telefone deve ter 10 ou 11 dígitos" }
     ),
 
   empresa: z.string().max(100, "Nome da empresa muito longo").optional(),

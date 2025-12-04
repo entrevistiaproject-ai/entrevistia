@@ -14,7 +14,12 @@
       "Bash(npx drizzle-kit push)",
       "Bash(echo:*)",
       "Bash(git checkout f816efa)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(vercel --version:*)",
+      "Bash(vercel env:*)",
+      "Bash(openssl rand:*)",
+      "Bash(vercel ls:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []

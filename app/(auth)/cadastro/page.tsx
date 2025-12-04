@@ -40,12 +40,39 @@ export default function CadastroPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  // Função para formatar telefone
+  const formatarTelefone = (valor: string) => {
+    // Remove tudo que não é número
+    const numeros = valor.replace(/\D/g, "");
+
+    // Aplica a máscara (11) 99999-9999 ou (11) 9999-9999
+    if (numeros.length <= 10) {
+      return numeros
+        .replace(/(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{4})(\d)/, "$1-$2");
+    } else {
+      return numeros
+        .replace(/(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{5})(\d)/, "$1-$2")
+        .replace(/(-\d{4})\d+?$/, "$1");
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
+
+    let newValue = value;
+
+    // Aplica máscara no telefone
+    if (name === "telefone") {
+      newValue = formatarTelefone(value);
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value
+      [name]: type === "checkbox" ? checked : newValue
     }));
+
     // Limpa o erro do campo
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -239,8 +266,12 @@ export default function CadastroPage() {
                   placeholder="(11) 99999-9999"
                   value={formData.telefone}
                   onChange={handleChange}
+                  className={errors.telefone ? "border-red-500" : ""}
                   disabled={isLoading}
                 />
+                {errors.telefone && (
+                  <p className="text-sm text-red-600">{errors.telefone}</p>
+                )}
               </div>
 
               {/* Empresa */}
@@ -256,8 +287,12 @@ export default function CadastroPage() {
                   placeholder="Nome da empresa"
                   value={formData.empresa}
                   onChange={handleChange}
+                  className={errors.empresa ? "border-red-500" : ""}
                   disabled={isLoading}
                 />
+                {errors.empresa && (
+                  <p className="text-sm text-red-600">{errors.empresa}</p>
+                )}
               </div>
 
               {/* Cargo */}
@@ -273,8 +308,12 @@ export default function CadastroPage() {
                   placeholder="Ex: Gerente de RH"
                   value={formData.cargo}
                   onChange={handleChange}
+                  className={errors.cargo ? "border-red-500" : ""}
                   disabled={isLoading}
                 />
+                {errors.cargo && (
+                  <p className="text-sm text-red-600">{errors.cargo}</p>
+                )}
               </div>
 
               {/* Senha */}

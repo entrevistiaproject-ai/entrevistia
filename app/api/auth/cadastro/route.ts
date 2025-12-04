@@ -124,11 +124,14 @@ export async function POST(request: NextRequest) {
     console.error("Erro no cadastro:", error);
 
     // Erros de validação do Zod
-    if (error instanceof Error && error.name === "ZodError") {
+    if (error && typeof error === 'object' && 'issues' in error) {
+      const zodError = error as { issues: Array<{ path: string[]; message: string }> };
       return NextResponse.json(
         {
           error: "Dados inválidos",
-          details: error,
+          details: {
+            issues: zodError.issues
+          },
         },
         { status: 400 }
       );
