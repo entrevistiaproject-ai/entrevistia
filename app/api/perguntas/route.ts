@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { getDB } from "@/lib/db";
 import { perguntasTemplates } from "@/lib/db/schema";
-import { isNull, desc } from "drizzle-orm";
+import { isNull, desc, or, eq } from "drizzle-orm";
+
+// Função helper para pegar userId do header (temporário até implementar JWT)
+function getUserIdFromRequest(request: Request): string | null {
+  const userId = request.headers.get("x-user-id");
+  return userId;
+}
 
 export async function POST(request: Request) {
   try {
@@ -25,9 +31,12 @@ export async function POST(request: Request) {
       );
     }
 
+    // Pega o userId (temporário - quando tiver auth real, pegar da sessão)
+    const userId = getUserIdFromRequest(request);
+
     const db = getDB();
 
-    // Inserir pergunta
+    // Inserir pergunta vinculada ao usuário
     const [novaPergunta] = await db
       .insert(perguntasTemplates)
       .values({
@@ -40,7 +49,7 @@ export async function POST(request: Request) {
         tags: tags || [],
         criteriosAvaliacao: criteriosAvaliacao || {},
         isPadrao: false,
-        userId: null, // TODO: pegar do auth quando implementarmos
+        userId: userId, // Vincula ao usuário logado
       })
       .returning();
 
@@ -58,10 +67,20 @@ export async function GET(request: Request) {
   try {
     const db = getDB();
 
+    // Pega o userId (temporário - quando tiver auth real, pegar da sessão)
+    const userId = getUserIdFromRequest(request);
+
+    // Busca perguntas padrão do sistema OU perguntas do próprio usuário
+    // Cada recrutador vê apenas suas perguntas + as padrão do sistema
     const perguntas = await db
       .select()
       .from(perguntasTemplates)
-      .where(isNull(perguntasTemplates.deletedAt))
+      .where(
+        or(
+          eq(perguntasTemplates.isPadrao, true), // Perguntas padrão do sistema
+          userId ? eq(perguntasTemplates.userId, userId) : undefined // Perguntas do usuário logado
+        )
+      )
       .orderBy(desc(perguntasTemplates.createdAt));
 
     return NextResponse.json(perguntas);

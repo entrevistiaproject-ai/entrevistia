@@ -1,23 +1,24 @@
 import { Suspense } from "react";
 import { getDB } from "@/lib/db";
 import { perguntasTemplates } from "@/lib/db/schema";
-import { desc, eq, or, isNull } from "drizzle-orm";
+import { desc, eq, or } from "drizzle-orm";
 import { PerguntasListagem } from "@/components/perguntas/perguntas-listagem";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 
-async function getPerguntas() {
+async function getPerguntas(userId?: string) {
   const db = getDB();
 
-  // Buscar perguntas padrão do sistema e do usuário (quando implementarmos auth)
+  // Buscar perguntas padrão do sistema OU perguntas do próprio usuário
+  // Cada recrutador vê apenas suas perguntas + as padrão do sistema
   const perguntas = await db
     .select()
     .from(perguntasTemplates)
     .where(
       or(
-        eq(perguntasTemplates.isPadrao, true),
-        isNull(perguntasTemplates.deletedAt)
+        eq(perguntasTemplates.isPadrao, true), // Perguntas padrão do sistema
+        userId ? eq(perguntasTemplates.userId, userId) : undefined // Perguntas do usuário logado
       )
     )
     .orderBy(desc(perguntasTemplates.createdAt));
