@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verifica se o email já foi verificado
-    if (user.email_verified) {
+    if (user.emailVerified) {
       return NextResponse.json(
         { error: "Email já foi verificado" },
         { status: 400 }
