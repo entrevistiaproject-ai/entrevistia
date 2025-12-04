@@ -14,6 +14,11 @@ import {
 
 const menuItems = [
   {
+    title: "Dashboard",
+    href: "/dashboard",
+    icon: BarChart3,
+  },
+  {
     title: "Minhas Entrevistas",
     href: "/entrevistas",
     icon: Briefcase,
@@ -27,11 +32,6 @@ const menuItems = [
     title: "Banco de Candidatos",
     href: "/candidatos",
     icon: Users,
-  },
-  {
-    title: "Dashboards",
-    href: "/dashboard",
-    icon: BarChart3,
   },
   {
     title: "Custos",
@@ -49,7 +49,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-card">
+    <aside className="fixed left-0 top-0 z-40 hidden h-screen w-64 border-r border-border bg-card md:block">
       <div className="flex h-full flex-col">
         {/* Logo/Header */}
         <div className="flex h-16 items-center border-b border-border px-6">
