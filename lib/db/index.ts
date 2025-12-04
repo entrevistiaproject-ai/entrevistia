@@ -5,13 +5,26 @@ import * as schema from './schema';
 // Função para obter a DATABASE_URL com validação
 function getDatabaseUrl(): string {
   const url = process.env.DATABASE_URL;
-  if (!url) {
-    console.error('❌ DATABASE_URL não encontrada!');
+
+  if (!url || url === '' || url === 'undefined') {
+    console.error('❌ DATABASE_URL não encontrada ou vazia!');
+    console.error('Valor atual:', url);
+    console.error('Tipo:', typeof url);
     console.error('Variáveis de ambiente disponíveis:', Object.keys(process.env).filter(k => !k.includes('SECRET') && !k.includes('KEY')));
+
+    // Tenta acessar diretamente do objeto process.env
+    const allEnvKeys = Object.keys(process.env);
+    const dbUrlKey = allEnvKeys.find(k => k === 'DATABASE_URL');
+    console.error('DATABASE_URL existe nas chaves?', !!dbUrlKey);
+    if (dbUrlKey) {
+      console.error('Valor acessando pela chave:', process.env[dbUrlKey]);
+    }
+
     throw new Error(
-      '🔴 DATABASE_URL não encontrada nas variáveis de ambiente'
+      '🔴 DATABASE_URL não encontrada ou está vazia nas variáveis de ambiente'
     );
   }
+
   return url;
 }
 

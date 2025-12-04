@@ -1,11 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Garante que as variáveis de ambiente estejam disponíveis no runtime
-  env: {
-    DATABASE_URL: process.env.DATABASE_URL,
-  },
-  // Configurações de runtime para Edge
+  // Configurações de runtime
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
