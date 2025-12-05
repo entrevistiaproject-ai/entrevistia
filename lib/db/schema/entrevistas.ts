@@ -19,6 +19,7 @@ export const entrevistas = pgTable("entrevistas", {
   titulo: text("titulo").notNull(),
   descricao: text("descricao"),
   cargo: text("cargo"),
+  nivel: text("nivel"), // junior, pleno, senior, especialista, etc.
   empresa: text("empresa"),
 
   // Status

@@ -84,6 +84,7 @@ export async function POST(request: NextRequest) {
         titulo: body.titulo,
         descricao: body.descricao || null,
         cargo: body.cargo || null,
+        nivel: body.nivel || null,
         empresa: body.empresa || null,
         duracao: body.duracao || 30,
         slug,
