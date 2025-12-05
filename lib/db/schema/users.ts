@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid, boolean, integer } from "drizzle-orm/pg-core";
 
 /**
  * Tabela de usuários (recrutadores/empresas)
@@ -22,6 +22,16 @@ export const users = pgTable("users", {
 
   // Status da conta
   isActive: boolean("is_active").default(true).notNull(),
+
+  // Plano e limites
+  planType: text("plan_type").default("free_trial").notNull(), // 'free_trial', 'basic', 'professional', 'enterprise'
+  planStatus: text("plan_status").default("active").notNull(), // 'active', 'expired', 'cancelled', 'suspended'
+  planStartedAt: timestamp("plan_started_at", { mode: "date" }).defaultNow(),
+  planExpiresAt: timestamp("plan_expires_at", { mode: "date" }),
+
+  // Contadores de uso (para validação de limites)
+  usageEntrevistas: integer("usage_entrevistas").default(0).notNull(),
+  usageCandidatos: integer("usage_candidatos").default(0).notNull(), // Candidatos únicos totais
 
   // Consentimentos LGPD
   aceitouTermos: boolean("aceitou_termos").default(false).notNull(),
