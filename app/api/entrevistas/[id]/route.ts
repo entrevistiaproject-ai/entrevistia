@@ -10,7 +10,7 @@ function getUserIdFromRequest(request: Request): string | null {
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const userId = getUserIdFromRequest(request);
@@ -21,13 +21,14 @@ export async function GET(
       );
     }
 
+    const { id } = await params;
     const db = getDB();
     const [entrevista] = await db
       .select()
       .from(entrevistas)
       .where(
         and(
-          eq(entrevistas.id, params.id),
+          eq(entrevistas.id, id),
           eq(entrevistas.userId, userId),
           isNull(entrevistas.deletedAt)
         )
@@ -52,7 +53,7 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const userId = getUserIdFromRequest(request);
@@ -63,6 +64,7 @@ export async function PATCH(
       );
     }
 
+    const { id } = await params;
     const body = await request.json();
     const db = getDB();
 
@@ -72,7 +74,7 @@ export async function PATCH(
       .from(entrevistas)
       .where(
         and(
-          eq(entrevistas.id, params.id),
+          eq(entrevistas.id, id),
           eq(entrevistas.userId, userId),
           isNull(entrevistas.deletedAt)
         )
@@ -98,7 +100,7 @@ export async function PATCH(
         ...body,
         updatedAt: new Date(),
       })
-      .where(eq(entrevistas.id, params.id))
+      .where(eq(entrevistas.id, id))
       .returning();
 
     return NextResponse.json(entrevistaAtualizada);
