@@ -44,27 +44,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Busca ou cria o candidato
+    // Busca candidato por email (do mesmo recrutador)
     let [candidato] = await db
       .select()
       .from(candidatos)
       .where(
         and(
           eq(candidatos.email, body.candidatoEmail),
-          eq(candidatos.entrevistaId, entrevista.id)
+          eq(candidatos.userId, entrevista.userId)
         )
       )
       .limit(1);
 
     if (!candidato) {
-      // Cria novo candidato
+      // Cria novo candidato vinculado ao recrutador
       [candidato] = await db
         .insert(candidatos)
         .values({
-          entrevistaId: entrevista.id,
+          userId: entrevista.userId,
           email: body.candidatoEmail,
-          nome: body.candidatoNome || null,
-          status: "convidado",
+          nome: body.candidatoNome || body.candidatoEmail,
+          aceitouTermosEntrevista: true,
+          consentimentoTratamentoDados: true,
+          finalidadeTratamento: `Entrevista: ${entrevista.titulo}`,
+          origemCadastro: "link_entrevista",
         })
         .returning();
     }
@@ -111,16 +114,6 @@ export async function POST(request: NextRequest) {
         podeRefazer: false,
       });
     }
-
-    // Atualiza status do candidato
-    await db
-      .update(candidatos)
-      .set({
-        status: "em_andamento",
-        iniciadaEm: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(candidatos.id, candidato.id));
 
     return NextResponse.json(
       {

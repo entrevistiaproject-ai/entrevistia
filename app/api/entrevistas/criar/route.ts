@@ -83,12 +83,11 @@ export async function POST(request: NextRequest) {
         userId,
         titulo: body.titulo,
         descricao: body.descricao || null,
-        cargo: body.cargo,
-        nivel: body.nivel || null,
+        cargo: body.cargo || null,
         empresa: body.empresa || null,
         duracao: body.duracao || 30,
         slug,
-        status: "draft",
+        status: "rascunho",
       })
       .returning();
 
@@ -120,11 +119,10 @@ export async function POST(request: NextRequest) {
           .insert(perguntasTemplates)
           .values({
             texto: pergunta.texto,
-            competencia: pergunta.competencia || null,
-            categoria: pergunta.categoria || null,
-            cargo: body.cargo,
-            nivel: body.nivel || null,
-            isPublica: false, // Privada por padrão
+            competencia: pergunta.competencia || "Geral",
+            categoria: pergunta.categoria || "tecnica",
+            cargo: body.cargo || "Geral",
+            nivel: body.nivel || "pleno",
             userId: userId,
           })
           .returning();
@@ -133,9 +131,6 @@ export async function POST(request: NextRequest) {
           entrevistaId: novaEntrevista.id,
           texto: pergunta.texto,
           ordem: i + 1,
-          competencia: pergunta.competencia || null,
-          categoria: pergunta.categoria || null,
-          templateId: template.id,
         });
       } else if (pergunta.origem === "banco" && pergunta.id) {
         // Se for do banco de perguntas, busca os dados completos
@@ -150,9 +145,6 @@ export async function POST(request: NextRequest) {
             entrevistaId: novaEntrevista.id,
             texto: template.texto,
             ordem: i + 1,
-            competencia: template.competencia,
-            categoria: template.categoria,
-            templateId: template.id,
           });
         }
       } else {
@@ -161,9 +153,6 @@ export async function POST(request: NextRequest) {
           entrevistaId: novaEntrevista.id,
           texto: pergunta.texto,
           ordem: i + 1,
-          competencia: pergunta.competencia || null,
-          categoria: pergunta.categoria || null,
-          templateId: null,
         });
       }
     }
