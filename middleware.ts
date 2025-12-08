@@ -9,14 +9,18 @@ export default auth((req) => {
 
   // Se não está logado e tenta acessar rota protegida
   if (!isPublicRoute && !isLoggedIn) {
-    const loginUrl = new URL("/login", req.nextUrl.clone());
+    const loginUrl = req.nextUrl.clone();
+    loginUrl.pathname = "/login";
     loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
     return Response.redirect(loginUrl);
   }
 
   // Se está logado e tenta acessar login/cadastro, redireciona para dashboard
   if (isLoggedIn && (req.nextUrl.pathname === "/login" || req.nextUrl.pathname === "/cadastro")) {
-    return Response.redirect(new URL("/dashboard", req.nextUrl.clone()));
+    const dashboardUrl = req.nextUrl.clone();
+    dashboardUrl.pathname = "/dashboard";
+    dashboardUrl.search = "";
+    return Response.redirect(dashboardUrl);
   }
 
   return;
