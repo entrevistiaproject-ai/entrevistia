@@ -25,7 +25,8 @@ export const authConfig = {
         if (isLoggedIn) return true;
         return false; // Redireciona para /login
       } else if (isLoggedIn && (nextUrl.pathname === "/login" || nextUrl.pathname === "/cadastro")) {
-        return Response.redirect(new URL("/dashboard", nextUrl));
+        const dashboardUrl = new URL("/dashboard", nextUrl.origin || `https://${nextUrl.host}`);
+        return Response.redirect(dashboardUrl);
       }
       return true;
     },
