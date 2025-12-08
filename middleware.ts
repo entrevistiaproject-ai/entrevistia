@@ -1,23 +1,22 @@
 import { auth } from "@/auth";
 
 export default auth((req) => {
-  const { pathname, origin } = req.nextUrl;
   const isLoggedIn = !!req.auth;
 
   // Rotas públicas
   const publicRoutes = ["/", "/login", "/cadastro", "/termos", "/privacidade", "/verificar-email"];
-  const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith("/api/auth");
+  const isPublicRoute = publicRoutes.includes(req.nextUrl.pathname) || req.nextUrl.pathname.startsWith("/api/auth");
 
   // Se não está logado e tenta acessar rota protegida
   if (!isPublicRoute && !isLoggedIn) {
-    const loginUrl = new URL("/login", origin);
-    loginUrl.searchParams.set("callbackUrl", pathname);
+    const loginUrl = new URL("/login", req.nextUrl.clone());
+    loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
     return Response.redirect(loginUrl);
   }
 
   // Se está logado e tenta acessar login/cadastro, redireciona para dashboard
-  if (isLoggedIn && (pathname === "/login" || pathname === "/cadastro")) {
-    return Response.redirect(new URL("/dashboard", origin));
+  if (isLoggedIn && (req.nextUrl.pathname === "/login" || req.nextUrl.pathname === "/cadastro")) {
+    return Response.redirect(new URL("/dashboard", req.nextUrl.clone()));
   }
 
   return;
