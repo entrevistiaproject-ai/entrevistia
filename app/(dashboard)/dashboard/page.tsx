@@ -1,9 +1,28 @@
-"use client";
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, Briefcase, Users, TrendingUp } from "lucide-react";
+import { BarChart3, Briefcase, Users } from "lucide-react";
+import { UsageFinanceiroCard } from "@/components/dashboard/usage-financeiro-card";
+import { getUsageData } from "./actions";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  // Busca dados de uso do servidor
+  const usageResult = await getUsageData();
+
+  // Valores padrão para novos usuários ou em caso de erro
+  const usageData = usageResult.success ? usageResult.data : null;
+  const financeiro = usageData?.financeiro || {
+    totalGasto: 0,
+    limiteFinanceiro: 50,
+    saldoRestante: 50,
+    percentualUsado: 0,
+    limiteAtingido: false,
+    totalTransacoes: 0,
+  };
+  const limits = usageData?.limits || {
+    entrevistas: { used: 0, limit: 4, canCreate: true },
+    perguntas: { used: 0, limit: 12, canCreate: true },
+    candidatos: { used: 0, limit: 5, canCreate: true },
+  };
+
   return (
     <div className="space-y-8">
       <div>
@@ -13,49 +32,52 @@ export default function DashboardPage() {
         </p>
       </div>
 
+      {/* Card de Uso Financeiro */}
+      <UsageFinanceiroCard
+        totalGasto={financeiro.totalGasto}
+        limiteFinanceiro={financeiro.limiteFinanceiro}
+        saldoRestante={financeiro.saldoRestante}
+        percentualUsado={financeiro.percentualUsado}
+        limiteAtingido={financeiro.limiteAtingido}
+        totalTransacoes={financeiro.totalTransacoes}
+      />
+
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Entrevistas Ativas</CardTitle>
+            <CardTitle className="text-sm font-medium">Entrevistas Criadas</CardTitle>
             <Briefcase className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">+2 desde o mês passado</p>
+            <div className="text-2xl font-bold">{limits.entrevistas.used}</div>
+            <p className="text-xs text-muted-foreground">
+              de {limits.entrevistas.limit} disponíveis
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Candidatos</CardTitle>
+            <CardTitle className="text-sm font-medium">Candidatos Únicos</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">248</div>
-            <p className="text-xs text-muted-foreground">+18% desde o mês passado</p>
+            <div className="text-2xl font-bold">{limits.candidatos.used}</div>
+            <p className="text-xs text-muted-foreground">
+              de {limits.candidatos.limit} disponíveis
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Links Ativos</CardTitle>
+            <CardTitle className="text-sm font-medium">Limite por Entrevista</CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">32</div>
-            <p className="text-xs text-muted-foreground">8 expiram em 24h</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Taxa de Aprovação</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">68%</div>
-            <p className="text-xs text-muted-foreground">+5% desde o mês passado</p>
+            <div className="text-2xl font-bold">{limits.perguntas.limit}</div>
+            <p className="text-xs text-muted-foreground">perguntas por entrevista</p>
           </CardContent>
         </Card>
       </div>
@@ -69,46 +91,49 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[
-                { title: "Desenvolvedor Full Stack", candidates: 24 },
-                { title: "UX Designer Senior", candidates: 18 },
-                { title: "Product Manager", candidates: 32 },
-              ].map((entrevista, i) => (
-                <div key={i} className="flex items-center justify-between border-b pb-3 last:border-0">
-                  <div>
-                    <p className="font-medium">{entrevista.title}</p>
-                    <p className="text-sm text-muted-foreground">{entrevista.candidates} candidatos</p>
-                  </div>
-                  <Briefcase className="h-4 w-4 text-muted-foreground" />
+              {limits.entrevistas.used === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p className="text-sm">Nenhuma entrevista criada ainda</p>
+                  <p className="text-xs mt-2">Crie sua primeira entrevista para começar!</p>
                 </div>
-              ))}
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p className="text-sm">Carregue suas entrevistas na página de Entrevistas</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Links Recentes</CardTitle>
-            <CardDescription>Últimos links gerados</CardDescription>
+            <CardTitle>Resumo de Uso</CardTitle>
+            <CardDescription>Status do seu plano Free Trial</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[
-                { name: "João Silva", position: "Desenvolvedor Full Stack", status: "Pendente", expira: "2 dias" },
-                { name: "Maria Santos", position: "UX Designer", status: "Em andamento", expira: "5 dias" },
-                { name: "Pedro Costa", position: "Product Manager", status: "Concluído", expira: "Expirado" },
-              ].map((link, i) => (
-                <div key={i} className="flex items-center justify-between border-b pb-3 last:border-0">
-                  <div>
-                    <p className="font-medium">{link.name}</p>
-                    <p className="text-sm text-muted-foreground">{link.position}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-primary">{link.status}</p>
-                    <p className="text-xs text-muted-foreground">Expira em {link.expira}</p>
-                  </div>
-                </div>
-              ))}
+              <div className="flex justify-between items-center border-b pb-3">
+                <span className="text-sm text-muted-foreground">Status do Plano</span>
+                <span className="font-medium text-green-600">Free Trial Ativo</span>
+              </div>
+              <div className="flex justify-between items-center border-b pb-3">
+                <span className="text-sm text-muted-foreground">Entrevistas Restantes</span>
+                <span className="font-medium">
+                  {(limits.entrevistas.limit || 0) - limits.entrevistas.used}
+                </span>
+              </div>
+              <div className="flex justify-between items-center border-b pb-3">
+                <span className="text-sm text-muted-foreground">Candidatos Restantes</span>
+                <span className="font-medium">
+                  {(limits.candidatos.limit || 0) - limits.candidatos.used}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Saldo Financeiro</span>
+                <span className="font-medium text-green-600">
+                  R$ {financeiro.saldoRestante.toFixed(2)}
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>

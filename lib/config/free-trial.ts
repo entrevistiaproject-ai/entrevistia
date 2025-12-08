@@ -19,6 +19,12 @@ export const FREE_TRIAL_LIMITS = {
    * (considera candidatos únicos em todas as entrevistas)
    */
   MAX_CANDIDATOS_TOTAL: 5,
+
+  /**
+   * Limite financeiro em reais para o free trial
+   * Valor total que o usuário pode gastar gratuitamente
+   */
+  LIMITE_FINANCEIRO: 50.00,
 } as const;
 
 /**

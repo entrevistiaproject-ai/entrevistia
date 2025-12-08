@@ -32,15 +32,14 @@ function LoginForm() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(emailVerificado === "true");
 
   useEffect(() => {
-    if (emailVerificado === "true") {
-      setShowSuccessMessage(true);
+    if (showSuccessMessage) {
       const timer = setTimeout(() => setShowSuccessMessage(false), 5000);
       return () => clearTimeout(timer);
     }
-  }, [emailVerificado]);
+  }, [showSuccessMessage]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
