@@ -12,24 +12,8 @@ export const authConfig = {
     error: "/login",
   },
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith("/dashboard") ||
-                            nextUrl.pathname.startsWith("/entrevistas") ||
-                            nextUrl.pathname.startsWith("/candidatos") ||
-                            nextUrl.pathname.startsWith("/perguntas") ||
-                            nextUrl.pathname.startsWith("/custos") ||
-                            nextUrl.pathname.startsWith("/criar-entrevista");
-
-      if (isOnDashboard) {
-        if (isLoggedIn) return true;
-        return false; // Redireciona para /login
-      } else if (isLoggedIn && (nextUrl.pathname === "/login" || nextUrl.pathname === "/cadastro")) {
-        const dashboardUrl = nextUrl.clone();
-        dashboardUrl.pathname = "/dashboard";
-        dashboardUrl.search = "";
-        return Response.redirect(dashboardUrl);
-      }
+    authorized() {
+      // Lógica de autorização movida para o middleware
       return true;
     },
     async jwt({ token, user }) {
