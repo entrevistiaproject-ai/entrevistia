@@ -1,6 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3, Briefcase, Users } from "lucide-react";
-import { UsageFinanceiroCard } from "@/components/dashboard/usage-financeiro-card";
 import { getUsageData } from "./actions";
 
 export default async function DashboardPage() {
@@ -9,14 +8,6 @@ export default async function DashboardPage() {
 
   // Valores padrão para novos usuários ou em caso de erro
   const usageData = usageResult.success ? usageResult.data : null;
-  const financeiro = usageData?.financeiro || {
-    totalGasto: 0,
-    limiteFinanceiro: 50,
-    saldoRestante: 50,
-    percentualUsado: 0,
-    limiteAtingido: false,
-    totalTransacoes: 0,
-  };
   const limits = usageData?.limits || {
     entrevistas: { used: 0, limit: 4, canCreate: true },
     perguntas: { used: 0, limit: 12, canCreate: true },
@@ -31,16 +22,6 @@ export default async function DashboardPage() {
           Visão geral do seu processo de recrutamento
         </p>
       </div>
-
-      {/* Card de Uso Financeiro */}
-      <UsageFinanceiroCard
-        totalGasto={financeiro.totalGasto}
-        limiteFinanceiro={financeiro.limiteFinanceiro}
-        saldoRestante={financeiro.saldoRestante}
-        percentualUsado={financeiro.percentualUsado}
-        limiteAtingido={financeiro.limiteAtingido}
-        totalTransacoes={financeiro.totalTransacoes}
-      />
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -122,16 +103,10 @@ export default async function DashboardPage() {
                   {(limits.entrevistas.limit || 0) - limits.entrevistas.used}
                 </span>
               </div>
-              <div className="flex justify-between items-center border-b pb-3">
+              <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Candidatos Restantes</span>
                 <span className="font-medium">
                   {(limits.candidatos.limit || 0) - limits.candidatos.used}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Saldo Financeiro</span>
-                <span className="font-medium text-green-600">
-                  R$ {financeiro.saldoRestante.toFixed(2)}
                 </span>
               </div>
             </div>

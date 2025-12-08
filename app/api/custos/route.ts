@@ -76,12 +76,6 @@ export async function GET(request: Request) {
       .select({
         total: sql<number>`COUNT(*)::int`,
         custoTotal: sql<number>`COALESCE(SUM(${transacoes.valorCobrado}), 0)::numeric`,
-        custoPorTipo: sql<Record<string, number>>`
-          jsonb_object_agg(
-            ${transacoes.tipo},
-            COALESCE(SUM(${transacoes.valorCobrado}), 0)
-          )
-        `,
       })
       .from(transacoes)
       .where(
@@ -90,6 +84,26 @@ export async function GET(request: Request) {
           gte(transacoes.createdAt, dataInicio)
         )
       );
+
+    // Buscar custo por tipo separadamente
+    const custoPorTipo = await db
+      .select({
+        tipo: transacoes.tipo,
+        custo: sql<number>`SUM(${transacoes.valorCobrado})::numeric`,
+      })
+      .from(transacoes)
+      .where(
+        and(
+          eq(transacoes.userId, userId),
+          gte(transacoes.createdAt, dataInicio)
+        )
+      )
+      .groupBy(transacoes.tipo);
+
+    const custoPorTipoMap = custoPorTipo.reduce((acc, item) => {
+      acc[item.tipo] = Number(item.custo);
+      return acc;
+    }, {} as Record<string, number>);
 
     // 3. Custo por entrevista
     const custosPorEntrevista = await db
@@ -174,7 +188,7 @@ export async function GET(request: Request) {
         dataFim: hoje.toISOString(),
         totalTransacoes: transacoesPeriodo[0]?.total || 0,
         custoTotal: Number(transacoesPeriodo[0]?.custoTotal || 0),
-        custoPorTipo: transacoesPeriodo[0]?.custoPorTipo || {},
+        custoPorTipo: custoPorTipoMap,
       },
       medias: {
         custoPorCandidato: Number(custoMedioPorCandidato.toFixed(2)),
