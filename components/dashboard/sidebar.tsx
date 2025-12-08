@@ -16,7 +16,7 @@ import {
 const mainMenuItems = [
   {
     title: "Dashboard",
-    href: "/",
+    href: "/dashboard",
     icon: BarChart3,
   },
   {
