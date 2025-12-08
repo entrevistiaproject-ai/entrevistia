@@ -15,12 +15,12 @@ export default auth((req) => {
     return Response.redirect(loginUrl);
   }
 
-  // Se está logado e tenta acessar login/cadastro, redireciona para dashboard
+  // Se está logado e tenta acessar login/cadastro, redireciona para home
   if (isLoggedIn && (req.nextUrl.pathname === "/login" || req.nextUrl.pathname === "/cadastro")) {
-    const dashboardUrl = req.nextUrl.clone();
-    dashboardUrl.pathname = "/dashboard";
-    dashboardUrl.search = "";
-    return Response.redirect(dashboardUrl);
+    const homeUrl = req.nextUrl.clone();
+    homeUrl.pathname = "/";
+    homeUrl.search = "";
+    return Response.redirect(homeUrl);
   }
 
   return;

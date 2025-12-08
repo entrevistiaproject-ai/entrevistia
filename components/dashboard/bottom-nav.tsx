@@ -26,7 +26,7 @@ import { Button } from "@/components/ui/button";
 
 const navItems = [
   {
-    href: "/dashboard",
+    href: "/",
     icon: BarChart3,
     label: "Dashboard",
   },

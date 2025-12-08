@@ -148,7 +148,7 @@ Após configurar, os emails serão enviados de verdade!
    ↓
 9. Sistema verifica se email está verificado
    ↓
-10. Se SIM → redireciona para /dashboard
+10. Se SIM → redireciona para / (dashboard)
     Se NÃO → redireciona para /verificar-email
 ```
 

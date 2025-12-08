@@ -14,21 +14,21 @@ export const authConfig = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith("/dashboard") ||
-                            nextUrl.pathname.startsWith("/entrevistas") ||
-                            nextUrl.pathname.startsWith("/candidatos") ||
-                            nextUrl.pathname.startsWith("/perguntas") ||
-                            nextUrl.pathname.startsWith("/custos") ||
-                            nextUrl.pathname.startsWith("/criar-entrevista");
+      const isOnPrivateRoute = nextUrl.pathname.startsWith("/entrevistas") ||
+                               nextUrl.pathname.startsWith("/candidatos") ||
+                               nextUrl.pathname.startsWith("/perguntas") ||
+                               nextUrl.pathname.startsWith("/custos") ||
+                               nextUrl.pathname.startsWith("/criar-entrevista") ||
+                               nextUrl.pathname.startsWith("/conta");
 
-      if (isOnDashboard) {
+      if (isOnPrivateRoute) {
         if (isLoggedIn) return true;
         return false; // Redireciona para /login
       } else if (isLoggedIn && (nextUrl.pathname === "/login" || nextUrl.pathname === "/cadastro")) {
-        const dashboardUrl = nextUrl.clone();
-        dashboardUrl.pathname = "/dashboard";
-        dashboardUrl.search = "";
-        return Response.redirect(dashboardUrl);
+        const homeUrl = nextUrl.clone();
+        homeUrl.pathname = "/";
+        homeUrl.search = "";
+        return Response.redirect(homeUrl);
       }
       return true;
     },
