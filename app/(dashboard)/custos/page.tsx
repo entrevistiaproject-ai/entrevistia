@@ -11,7 +11,6 @@ import {
   Briefcase,
   CreditCard,
   AlertCircle,
-  Plus,
   Loader2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -65,7 +64,8 @@ export default function CustosPage() {
   const fetchDados = async () => {
     try {
       setLoading(true);
-      const userId = "123e4567-e89b-12d3-a456-426614174000";
+      // TODO: Substituir por session real quando implementar autenticação
+      const userId = "f0614cc6-8441-4255-bd79-caebe1982e79";
 
       const response = await fetch(`/api/custos?periodo=${periodo}`, {
         headers: { "x-user-id": userId },
