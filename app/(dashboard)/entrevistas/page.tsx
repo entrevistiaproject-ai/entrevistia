@@ -35,14 +35,10 @@ export default function EntrevistasPage() {
       try {
         setLoading(true);
 
-        // TODO: Substituir por session real quando implementar autenticação
-        const userId = "123e4567-e89b-12d3-a456-426614174000";
+        
 
         const response = await fetch("/api/entrevistas", {
-          headers: {
-            "x-user-id": userId,
-          },
-        });
+          });
 
         if (!response.ok) {
           throw new Error("Erro ao buscar entrevistas");

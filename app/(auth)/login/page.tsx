@@ -11,18 +11,19 @@ import {
   Building2,
   Mail,
   Lock,
-  ArrowLeft,
   Home,
   ChevronRight,
   Loader2,
   CheckCircle2,
   AlertCircle
 } from "lucide-react";
+import { signIn } from "next-auth/react";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailVerificado = searchParams.get("email_verificado");
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
   const [formData, setFormData] = useState({
     email: "",
@@ -36,7 +37,8 @@ function LoginForm() {
   useEffect(() => {
     if (emailVerificado === "true") {
       setShowSuccessMessage(true);
-      setTimeout(() => setShowSuccessMessage(false), 5000);
+      const timer = setTimeout(() => setShowSuccessMessage(false), 5000);
+      return () => clearTimeout(timer);
     }
   }, [emailVerificado]);
 
@@ -58,36 +60,25 @@ function LoginForm() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+      const result = await signIn("credentials", {
+        redirect: false,
+        email: formData.email,
+        password: formData.senha,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (data.needsVerification) {
-          // Email não verificado - redireciona para verificação
-          router.push(`/verificar-email?email=${encodeURIComponent(formData.email)}`);
-          return;
-        }
-
-        if (data.field) {
-          setErrors({ [data.field]: data.error });
-        } else {
-          setErrors({ geral: data.error || "Erro ao fazer login" });
-        }
+      if (result?.error) {
+        setErrors({ geral: "Email ou senha inválidos" });
+        setIsLoading(false);
         return;
       }
 
-      // Sucesso - redireciona para dashboard
-      router.push("/dashboard");
-
+      if (result?.ok) {
+        router.push(callbackUrl);
+        router.refresh();
+      }
     } catch (error) {
-      console.error("Erro:", error);
-      setErrors({ geral: "Erro ao conectar com o servidor" });
-    } finally {
+      console.error("Erro no login:", error);
+      setErrors({ geral: "Erro ao fazer login. Tente novamente." });
       setIsLoading(false);
     }
   };
@@ -119,7 +110,7 @@ function LoginForm() {
             {/* Botão mobile */}
             <Link href="/" className="md:hidden">
               <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4" />
+                <Home className="w-4 h-4" />
               </Button>
             </Link>
           </div>

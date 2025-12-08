@@ -64,12 +64,10 @@ export default function CustosPage() {
   const fetchDados = async () => {
     try {
       setLoading(true);
-      // TODO: Substituir por session real quando implementar autenticação
-      const userId = "f0614cc6-8441-4255-bd79-caebe1982e79";
+      
 
       const response = await fetch(`/api/custos?periodo=${periodo}`, {
-        headers: { "x-user-id": userId },
-      });
+        });
 
       if (response.ok) {
         const data = await response.json();

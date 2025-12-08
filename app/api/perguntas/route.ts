@@ -1,13 +1,8 @@
 import { NextResponse } from "next/server";
+import { getUserId } from "@/lib/auth/get-user";
 import { getDB } from "@/lib/db";
 import { perguntasTemplates } from "@/lib/db/schema";
 import { isNull, desc, or, eq } from "drizzle-orm";
-
-// Função helper para pegar userId do header (temporário até implementar JWT)
-function getUserIdFromRequest(request: Request): string | null {
-  const userId = request.headers.get("x-user-id");
-  return userId;
-}
 
 export async function POST(request: Request) {
   try {
@@ -32,7 +27,7 @@ export async function POST(request: Request) {
     }
 
     // Pega o userId (temporário - quando tiver auth real, pegar da sessão)
-    const userId = getUserIdFromRequest(request);
+    const userId = await getUserId();
 
     const db = getDB();
 
@@ -68,7 +63,7 @@ export async function GET(request: Request) {
     const db = getDB();
 
     // Pega o userId (temporário - quando tiver auth real, pegar da sessão)
-    const userId = getUserIdFromRequest(request);
+    const userId = await getUserId();
 
     // Busca perguntas padrão do sistema OU perguntas do próprio usuário
     // Cada recrutador vê apenas suas perguntas + as padrão do sistema

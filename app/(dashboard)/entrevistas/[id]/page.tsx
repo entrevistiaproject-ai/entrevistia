@@ -62,12 +62,11 @@ export default function EntrevistaDetalhesPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const userId = "123e4567-e89b-12d3-a456-426614174000";
+      
 
       // Buscar entrevista
       const resEntrevista = await fetch(`/api/entrevistas/${params.id}`, {
-        headers: { "x-user-id": userId },
-      });
+        });
 
       if (resEntrevista.ok) {
         const data = await resEntrevista.json();
@@ -76,8 +75,7 @@ export default function EntrevistaDetalhesPage() {
 
       // Buscar candidatos
       const resCandidatos = await fetch("/api/candidatos", {
-        headers: { "x-user-id": userId },
-      });
+        });
 
       if (resCandidatos.ok) {
         const data = await resCandidatos.json();

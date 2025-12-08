@@ -1,19 +1,16 @@
 import { NextResponse } from "next/server";
+import { getUserId } from "@/lib/auth/get-user";
 import { getDB } from "@/lib/db";
 import { entrevistas } from "@/lib/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { nanoid } from "nanoid";
-
-function getUserIdFromRequest(request: Request): string | null {
-  return request.headers.get("x-user-id");
-}
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = getUserIdFromRequest(request);
+    const userId = await getUserId();
     if (!userId) {
       return NextResponse.json(
         { error: "Não autenticado" },
@@ -56,7 +53,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = getUserIdFromRequest(request);
+    const userId = await getUserId();
     if (!userId) {
       return NextResponse.json(
         { error: "Não autenticado" },

@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getUserId } from "@/lib/auth/get-user";
 import { getDB } from "@/lib/db";
 import { entrevistas, perguntas, perguntasTemplates } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { canCreateEntrevista, canAddPerguntas, incrementEntrevistasCount } from "@/lib/services/plan-limits";
-
-// Função helper para pegar userId do header (temporário até implementar JWT)
-function getUserIdFromRequest(request: Request): string | null {
-  const userId = request.headers.get("x-user-id");
-  return userId;
-}
 
 interface PerguntaRequest {
   id?: string; // ID se for do banco de perguntas
@@ -32,7 +27,7 @@ interface CreateEntrevistaRequest {
 export async function POST(request: NextRequest) {
   try {
     const db = getDB();
-    const userId = getUserIdFromRequest(request);
+    const userId = await getUserId();
 
     if (!userId) {
       return NextResponse.json({ error: "Usuário não autenticado" }, { status: 401 });

@@ -2,17 +2,12 @@ import { NextResponse } from "next/server";
 import { getDB } from "@/lib/db";
 import { entrevistas, candidatos, perguntas, respostas } from "@/lib/db/schema";
 import { desc, eq, and, isNull, count, sql } from "drizzle-orm";
-
-// Função helper para pegar userId do header (temporário até implementar JWT)
-function getUserIdFromRequest(request: Request): string | null {
-  const userId = request.headers.get("x-user-id");
-  return userId;
-}
+import { getUserId } from "@/lib/auth/get-user";
 
 export async function GET(request: Request) {
   try {
     const db = getDB();
-    const userId = getUserIdFromRequest(request);
+    const userId = await getUserId();
 
     if (!userId) {
       return NextResponse.json(
@@ -32,7 +27,7 @@ export async function GET(request: Request) {
       statusFilter ? eq(entrevistas.status, statusFilter) : undefined
     );
 
-    let query = db
+    const query = db
       .select({
         id: entrevistas.id,
         titulo: entrevistas.titulo,
@@ -44,37 +39,32 @@ export async function GET(request: Request) {
         slug: entrevistas.slug,
         createdAt: entrevistas.createdAt,
         updatedAt: entrevistas.updatedAt,
-        iniciadaEm: entrevistas.iniciadaEm,
-        concluidaEm: entrevistas.concluidaEm,
-        // Contagem de respostas únicas por candidato (quantos candidatos realizaram)
+        // Contagem de candidatos usando sql agregado
         totalCandidatos: sql<number>`(
-          SELECT COUNT(DISTINCT ${respostas.candidatoId})::int
-          FROM ${respostas}
-          WHERE ${respostas.entrevistaId} = ${entrevistas.id}
-        )`.as('total_candidatos'),
-        // Contagem total de respostas (todas as respostas individuais)
+          SELECT COUNT(DISTINCT c.id)::int
+          FROM ${candidatos} c
+          INNER JOIN ${respostas} r ON r.candidato_id = c.id
+          WHERE r.entrevista_id = ${entrevistas.id}
+            AND c.user_id = ${userId}
+        )`,
+        // Contagem de respostas
         totalRespostas: sql<number>`(
-          SELECT COUNT(${respostas.id})::int
-          FROM ${respostas}
-          WHERE ${respostas.entrevistaId} = ${entrevistas.id}
-        )`.as('total_respostas'),
-        // Contagem de perguntas na entrevista
-        totalPerguntas: sql<number>`(
-          SELECT COUNT(${perguntas.id})::int
-          FROM ${perguntas}
-          WHERE ${perguntas.entrevistaId} = ${entrevistas.id}
-        )`.as('total_perguntas'),
+          SELECT COUNT(*)::int
+          FROM ${respostas} r
+          WHERE r.entrevista_id = ${entrevistas.id}
+        )`,
       })
       .from(entrevistas)
-      .where(baseWhere);
+      .where(baseWhere)
+      .orderBy(desc(entrevistas.createdAt));
 
-    const resultado = await query.orderBy(desc(entrevistas.createdAt));
+    const result = await query;
 
-    return NextResponse.json(resultado);
+    return NextResponse.json({ entrevistas: result });
   } catch (error) {
-    console.error("Erro ao buscar entrevistas:", error);
+    console.error("[GET /api/entrevistas] Erro:", error);
     return NextResponse.json(
-      { error: "Erro interno do servidor" },
+      { error: "Erro ao buscar entrevistas" },
       { status: 500 }
     );
   }

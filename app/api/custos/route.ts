@@ -2,14 +2,11 @@ import { NextResponse } from "next/server";
 import { getDB } from "@/lib/db";
 import { transacoes, faturas, entrevistas } from "@/lib/db/schema";
 import { eq, and, gte, desc, sql } from "drizzle-orm";
-
-function getUserIdFromRequest(request: Request): string | null {
-  return request.headers.get("x-user-id");
-}
+import { getUserId } from "@/lib/auth/get-user";
 
 export async function GET(request: Request) {
   try {
-    const userId = getUserIdFromRequest(request);
+    const userId = await getUserId();
     if (!userId) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
