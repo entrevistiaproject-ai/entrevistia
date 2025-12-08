@@ -18,11 +18,17 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
 interface DadosCustos {
-  saldo: {
-    atual: number;
-    totalGasto: number;
-    totalRecargado: number;
-    limiteAlerta: number;
+  faturaAtual: {
+    id: string;
+    mesReferencia: number;
+    anoReferencia: number;
+    valorTotal: number;
+    valorPago: number;
+    status: string;
+  };
+  totais: {
+    totalGastoHistorico: number;
+    totalPagoHistorico: number;
   };
   periodo: {
     dataInicio: string;
@@ -97,9 +103,10 @@ export default function CustosPage() {
     );
   }
 
-  const { saldo, periodo: periodoData, medias, entrevistas, evolucao } = dados;
-  const saldoPercentual = saldo.totalRecargado > 0 ? (saldo.atual / saldo.totalRecargado) * 100 : 0;
-  const alertaSaldo = saldo.atual < saldo.limiteAlerta;
+  const { faturaAtual, totais, periodo: periodoData, medias, entrevistas, evolucao } = dados;
+  const saldoAPagar = faturaAtual.valorTotal - faturaAtual.valorPago;
+  const mesNome = new Date(faturaAtual.anoReferencia, faturaAtual.mesReferencia - 1).toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+  const alertaFatura = faturaAtual.status === "fechada" || faturaAtual.status === "vencida";
 
   return (
     <div className="space-y-6">
@@ -112,27 +119,27 @@ export default function CustosPage() {
           </p>
         </div>
         <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Adicionar Créditos
+          <CreditCard className="mr-2 h-4 w-4" />
+          Ver Fatura Completa
         </Button>
       </div>
 
-      {/* Alerta de Saldo Baixo */}
-      {alertaSaldo && (
+      {/* Alerta de Fatura */}
+      {alertaFatura && saldoAPagar > 0 && (
         <Card className="border-orange-500 bg-orange-50 dark:bg-orange-950/20">
           <CardContent className="flex items-center gap-3 pt-6">
             <AlertCircle className="h-5 w-5 text-orange-600" />
             <div className="flex-1">
               <p className="font-medium text-orange-900 dark:text-orange-100">
-                Saldo Baixo
+                Fatura {faturaAtual.status === "vencida" ? "Vencida" : "Fechada"}
               </p>
               <p className="text-sm text-orange-700 dark:text-orange-200">
-                Seu saldo está abaixo de R$ {saldo.limiteAlerta.toFixed(2)}. Considere
-                adicionar créditos para continuar usando a plataforma.
+                Você tem R$ {saldoAPagar.toFixed(2)} a pagar referente a {mesNome}.
+                {faturaAtual.status === "vencida" && " A fatura está vencida!"}
               </p>
             </div>
             <Button variant="outline" className="border-orange-600 text-orange-600">
-              Recarregar
+              Pagar Agora
             </Button>
           </CardContent>
         </Card>
@@ -150,20 +157,22 @@ export default function CustosPage() {
 
       {/* Cards de Resumo */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {/* Saldo Atual */}
+        {/* Fatura Atual */}
         <Card className="border-2 border-blue-200 dark:border-blue-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Saldo Disponível</CardTitle>
+            <CardTitle className="text-sm font-medium">Fatura Atual</CardTitle>
             <CreditCard className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-blue-600">
-              R$ {saldo.atual.toFixed(2)}
+              R$ {faturaAtual.valorTotal.toFixed(2)}
             </div>
-            <Progress value={saldoPercentual} className="mt-3 h-2" />
             <p className="text-xs text-muted-foreground mt-2">
-              {saldoPercentual.toFixed(0)}% do total recarregado
+              {mesNome}
             </p>
+            <Badge variant={faturaAtual.status === "aberta" ? "default" : "secondary"} className="mt-2">
+              {faturaAtual.status}
+            </Badge>
           </CardContent>
         </Card>
 
@@ -199,7 +208,7 @@ export default function CustosPage() {
           </CardContent>
         </Card>
 
-        {/* Total Gasto */}
+        {/* Total Gasto Histórico */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Investido</CardTitle>
@@ -207,7 +216,7 @@ export default function CustosPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">
-              R$ {saldo.totalGasto.toFixed(2)}
+              R$ {totais.totalGastoHistorico.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-2">
               Desde o início

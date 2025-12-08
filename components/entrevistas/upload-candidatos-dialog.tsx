@@ -29,7 +29,7 @@ export function UploadCandidatosDialog({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [arquivo, setArquivo] = useState<File | null>(null);
-  const [preview, setPreview] = useState<any[]>([]);
+  const [preview, setPreview] = useState<Record<string, string>[]>([]);
   const [erro, setErro] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -69,7 +69,7 @@ Maria Santos,maria@example.com,(11) 88888-8888,https://linkedin.com/in/mariasant
         }
 
         // Validar colunas necessárias
-        const data = results.data as any[];
+        const data = results.data as Record<string, string>[];
         if (data.length === 0) {
           setErro("O arquivo está vazio.");
           return;

@@ -19,7 +19,7 @@ import { perguntasTemplates } from "./perguntas-templates";
 import { respostas } from "./respostas";
 import { auditLogs } from "./audit-logs";
 import { verificationCodes } from "./verification-codes";
-import { transacoes, saldos, recargas } from "./transacoes";
+import { faturas, transacoes } from "./transacoes";
 import { candidatoEntrevistas } from "./candidato-entrevistas";
 
 export const schema = {
@@ -31,8 +31,7 @@ export const schema = {
   respostas,
   auditLogs,
   verificationCodes,
+  faturas,
   transacoes,
-  saldos,
-  recargas,
   candidatoEntrevistas,
 };

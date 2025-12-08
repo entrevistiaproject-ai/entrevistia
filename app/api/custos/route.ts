@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDB } from "@/lib/db";
-import { transacoes, saldos, entrevistas } from "@/lib/db/schema";
-import { eq, and, gte, lte, desc, sql, isNull } from "drizzle-orm";
+import { transacoes, faturas, entrevistas } from "@/lib/db/schema";
+import { eq, and, gte, desc, sql } from "drizzle-orm";
 
 function getUserIdFromRequest(request: Request): string | null {
   return request.headers.get("x-user-id");
@@ -38,26 +38,48 @@ export async function GET(request: Request) {
         break;
     }
 
-    // 1. Buscar saldo do usuário
-    let [saldo] = await db
-      .select()
-      .from(saldos)
-      .where(eq(saldos.userId, userId));
+    // 1. Buscar fatura atual do usuário
+    const mesAtual = hoje.getMonth() + 1;
+    const anoAtual = hoje.getFullYear();
 
-    // Se não existe, criar um
-    if (!saldo) {
-      [saldo] = await db
-        .insert(saldos)
-        .values({ userId })
+    let [faturaAtual] = await db
+      .select()
+      .from(faturas)
+      .where(
+        and(
+          eq(faturas.userId, userId),
+          eq(faturas.mesReferencia, mesAtual),
+          eq(faturas.anoReferencia, anoAtual)
+        )
+      );
+
+    // Se não existe, criar uma
+    if (!faturaAtual) {
+      [faturaAtual] = await db
+        .insert(faturas)
+        .values({
+          userId,
+          mesReferencia: mesAtual,
+          anoReferencia: anoAtual,
+        })
         .returning();
     }
+
+    // Calcular totais históricos
+    const totaisHistoricos = await db
+      .select({
+        totalGasto: sql<number>`COALESCE(SUM(${faturas.valorTotal}), 0)::numeric`,
+        totalPago: sql<number>`COALESCE(SUM(${faturas.valorPago}), 0)::numeric`,
+      })
+      .from(faturas)
+      .where(eq(faturas.userId, userId));
 
     // 2. Estatísticas de transações no período
     const transacoesPeriodo = await db
       .select({
         total: sql<number>`COUNT(*)::int`,
         custoTotal: sql<number>`COALESCE(SUM(${transacoes.valorCobrado}), 0)::numeric`,
-        custoPorTipo: sql<any>`
+        custoPorTipo: sql<Record<string, number>>`
           jsonb_object_agg(
             ${transacoes.tipo},
             COALESCE(SUM(${transacoes.valorCobrado}), 0)
@@ -138,11 +160,17 @@ export async function GET(request: Request) {
     const top5Entrevistas = custosPorEntrevista.slice(0, 5);
 
     return NextResponse.json({
-      saldo: {
-        atual: Number(saldo.saldoAtual),
-        totalGasto: Number(saldo.totalGasto),
-        totalRecargado: Number(saldo.totalRecargado),
-        limiteAlerta: Number(saldo.limiteAlerta),
+      faturaAtual: {
+        id: faturaAtual.id,
+        mesReferencia: faturaAtual.mesReferencia,
+        anoReferencia: faturaAtual.anoReferencia,
+        valorTotal: Number(faturaAtual.valorTotal),
+        valorPago: Number(faturaAtual.valorPago),
+        status: faturaAtual.status,
+      },
+      totais: {
+        totalGastoHistorico: Number(totaisHistoricos[0]?.totalGasto || 0),
+        totalPagoHistorico: Number(totaisHistoricos[0]?.totalPago || 0),
       },
       periodo: {
         dataInicio: dataInicio.toISOString(),
