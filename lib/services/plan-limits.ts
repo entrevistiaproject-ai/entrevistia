@@ -176,7 +176,7 @@ export async function candidatoJaParticipou(
     .select({
       status: candidatoEntrevistas.status,
       podeRefazer: candidatoEntrevistas.podeRefazer,
-      completouEm: candidatoEntrevistas.completouEm,
+      concluidaEm: candidatoEntrevistas.concluidaEm,
     })
     .from(candidatoEntrevistas)
     .where(
@@ -192,7 +192,7 @@ export async function candidatoJaParticipou(
   }
 
   // Se completou e não pode refazer, bloqueia
-  if (participacao.completouEm && !participacao.podeRefazer) {
+  if (participacao.concluidaEm && !participacao.podeRefazer) {
     return { participou: true, podeRefazer: false };
   }
 

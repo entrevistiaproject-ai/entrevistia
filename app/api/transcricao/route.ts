@@ -2,11 +2,18 @@ import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 
 const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
+  apiKey: process.env.GROQ_API_KEY || "placeholder-for-build",
 });
 
 export async function POST(request: Request) {
   try {
+    if (!process.env.GROQ_API_KEY) {
+      return NextResponse.json(
+        { error: "GROQ_API_KEY não configurada" },
+        { status: 500 }
+      );
+    }
+
     const formData = await request.formData();
     const audioFile = formData.get("audio") as File;
 
@@ -37,7 +44,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       transcricao: transcription.text,
-      duracao: transcription.duration,
     });
   } catch (error) {
     console.error("Erro ao transcrever áudio:", error);

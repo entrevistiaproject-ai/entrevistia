@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
         .update(candidatoEntrevistas)
         .set({
           status: "in_progress",
-          iniciouEm: new Date(),
+          iniciadaEm: new Date(),
           updatedAt: new Date(),
         })
         .where(
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
         candidatoId: candidato.id,
         entrevistaId: entrevista.id,
         status: "in_progress",
-        iniciouEm: new Date(),
+        iniciadaEm: new Date(),
         podeRefazer: false,
       });
     }
