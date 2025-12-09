@@ -135,7 +135,6 @@ export const saveAnalysisTool = tool(
     pontosFortes,
     pontosMelhoria,
     recomendacao,
-    avaliacoesCompetencias,
   }: {
     candidatoId: string;
     entrevistaId: string;
@@ -144,44 +143,46 @@ export const saveAnalysisTool = tool(
     pontosFortes: string[];
     pontosMelhoria: string[];
     recomendacao: string;
-    avaliacoesCompetencias: Array<{
-      competenciaId: string;
-      nota: number;
-      feedback: string;
-    }>;
   }) => {
-    // TODO: Implementar quando o schema avaliacoes for criado
     try {
-      // const { getDB } = await import('@/lib/db');
-      // const {
-      //   avaliacoes,
-      //   avaliacoesCompetencias: avaliacoesCompetenciasTable
-      // } = await import('@/lib/db/schema');
-      // const { eq, and } = await import('drizzle-orm');
+      const { getDB } = await import('@/lib/db');
+      const { candidatoEntrevistas } = await import('@/lib/db/schema');
+      const { eq, and } = await import('drizzle-orm');
 
-      // const db = getDB();
-      // Verifica se já existe uma avaliação
-      const existingAvaliacao = null; // TODO: implementar busca quando schema existir
-      // const existingAvaliacao = await db
-      //   .select()
-      //   .from(avaliacoes)
-      //   .where(and(
-      //     eq(avaliacoes.candidatoId, candidatoId),
-      //     eq(avaliacoes.entrevistaId, entrevistaId)
-      //   ))
-      //   .limit(1);
+      const db = getDB();
 
-      // TODO: Implementar quando schema for criado
-      // let avaliacaoId: string;
-      // if (existingAvaliacao) {
-      //   await db.update(avaliacoes)...
-      // } else {
-      //   const [newAvaliacao] = await db.insert(avaliacoes)...
-      // }
+      // Formata o resumo incluindo pontos fortes e de melhoria
+      const resumoCompleto = `${resumoGeral}\n\n**Pontos Fortes:**\n${pontosFortes.map(p => `- ${p}`).join('\n')}\n\n**Pontos de Melhoria:**\n${pontosMelhoria.map(p => `- ${p}`).join('\n')}`;
+
+      // Atualiza a tabela candidato_entrevistas com a avaliação
+      const [updated] = await db
+        .update(candidatoEntrevistas)
+        .set({
+          notaGeral,
+          resumoGeral: resumoCompleto,
+          recomendacao,
+          avaliadoEm: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(candidatoEntrevistas.candidatoId, candidatoId),
+            eq(candidatoEntrevistas.entrevistaId, entrevistaId)
+          )
+        )
+        .returning({ id: candidatoEntrevistas.id });
+
+      if (!updated) {
+        return {
+          success: false,
+          error: 'Candidato não encontrado na entrevista',
+        };
+      }
 
       return {
-        success: false,
-        error: 'Schema de avaliações ainda não implementado',
+        success: true,
+        avaliacaoId: updated.id,
+        message: 'Avaliação salva com sucesso',
       };
     } catch (error) {
       console.error('Erro ao salvar análise:', error);
@@ -202,13 +203,6 @@ export const saveAnalysisTool = tool(
       pontosFortes: z.array(z.string()).describe('Lista de pontos fortes identificados'),
       pontosMelhoria: z.array(z.string()).describe('Lista de pontos de melhoria identificados'),
       recomendacao: z.enum(['recomendado', 'recomendado_com_ressalvas', 'nao_recomendado']).describe('Recomendação final'),
-      avaliacoesCompetencias: z.array(
-        z.object({
-          competenciaId: z.string().describe('ID da competência'),
-          nota: z.number().min(0).max(10).describe('Nota da competência (0-10)'),
-          feedback: z.string().describe('Feedback específico sobre a competência'),
-        })
-      ).describe('Avaliações detalhadas por competência'),
     }),
   }
 );

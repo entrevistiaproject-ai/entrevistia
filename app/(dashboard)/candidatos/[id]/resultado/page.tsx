@@ -6,23 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft,
   CheckCircle2,
   XCircle,
-  TrendingUp,
-  TrendingDown,
   AlertCircle,
-  Download,
-  Send,
-  Eye,
-  EyeOff,
   Loader2,
   RefreshCw,
   Sparkles,
+  MessageSquare,
+  Clock,
 } from "lucide-react";
-import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 
 interface Candidato {
@@ -32,36 +26,38 @@ interface Candidato {
   status: string;
   concluidoEm?: Date;
   entrevistaId?: string;
+  notaGeral?: number;
+  recomendacao?: string;
 }
 
-interface CompetenciaAvaliacao {
-  competenciaId: string;
-  competencia: string;
-  nota: number;
-  feedback: string;
+interface PerguntaResposta {
+  pergunta: {
+    id: string;
+    texto: string;
+    ordem: number;
+    tipo: string;
+  };
+  resposta: {
+    id: string;
+    texto: string | null;
+    transcricao: string | null;
+    tempoResposta: number | null;
+  };
 }
 
-interface Avaliacao {
-  id: string;
-  notaGeral: number;
-  resumoGeral: string;
-  pontosFortes: string[];
-  pontosMelhoria: string[];
-  recomendacao: 'recomendado' | 'recomendado_com_ressalvas' | 'nao_recomendado';
-  analisadoEm?: Date;
-  competencias: CompetenciaAvaliacao[];
+interface Participacao {
+  status: string;
+  notaGeral: number | null;
+  recomendacao: string | null;
+  resumoGeral: string | null;
+  avaliadoEm: Date | null;
+  concluidaEm: Date | null;
 }
 
 const getScoreColor = (score: number) => {
   if (score >= 8.5) return "text-green-600";
   if (score >= 7.0) return "text-yellow-600";
   return "text-red-600";
-};
-
-const getScoreBgColor = (score: number) => {
-  if (score >= 8.5) return "bg-green-100";
-  if (score >= 7.0) return "bg-yellow-100";
-  return "bg-red-100";
 };
 
 const getScoreLabel = (score: number) => {
@@ -71,7 +67,7 @@ const getScoreLabel = (score: number) => {
   return "Insuficiente";
 };
 
-const getRecomendacaoConfig = (recomendacao: string) => {
+const getRecomendacaoConfig = (recomendacao: string | null) => {
   switch (recomendacao) {
     case "recomendado":
       return {
@@ -101,14 +97,7 @@ const getRecomendacaoConfig = (recomendacao: string) => {
         iconColor: "text-yellow-600",
       };
     default:
-      return {
-        label: "Análise Pendente",
-        icon: AlertCircle,
-        bgColor: "bg-gray-50",
-        borderColor: "border-gray-200",
-        textColor: "text-gray-700",
-        iconColor: "text-gray-600",
-      };
+      return null;
   }
 };
 
@@ -116,50 +105,49 @@ export default function ResultadoCandidatoPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const [mostrarJustificativa, setMostrarJustificativa] = useState(false);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [candidato, setCandidato] = useState<Candidato | null>(null);
-  const [avaliacao, setAvaliacao] = useState<Avaliacao | null>(null);
+  const [participacao, setParticipacao] = useState<Participacao | null>(null);
+  const [perguntasRespostas, setPerguntasRespostas] = useState<PerguntaResposta[]>([]);
 
   const candidatoId = params.id as string;
 
-  // Busca dados do candidato e avaliação
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
+  // Busca dados do candidato, participação e respostas
+  const fetchData = async () => {
+    try {
+      setLoading(true);
 
-        // Busca dados do candidato
-        const candidatoRes = await fetch(`/api/candidatos/${candidatoId}`);
-        if (!candidatoRes.ok) throw new Error('Erro ao buscar candidato');
-        const candidatoData = await candidatoRes.json();
-        setCandidato(candidatoData);
+      // Busca dados do candidato
+      const candidatoRes = await fetch(`/api/candidatos/${candidatoId}`);
+      if (!candidatoRes.ok) throw new Error('Erro ao buscar candidato');
+      const candidatoData = await candidatoRes.json();
+      setCandidato(candidatoData);
 
-        // Busca avaliação se existir
-        if (candidatoData.entrevistaId) {
-          const avaliacaoRes = await fetch(
-            `/api/analise-entrevista?candidatoId=${candidatoId}&entrevistaId=${candidatoData.entrevistaId}`
-          );
-          if (avaliacaoRes.ok) {
-            const avaliacaoData = await avaliacaoRes.json();
-            if (avaliacaoData.exists) {
-              setAvaliacao(avaliacaoData.avaliacao);
-            }
-          }
+      // Busca respostas se tiver entrevistaId
+      if (candidatoData.entrevistaId) {
+        const respostasRes = await fetch(
+          `/api/candidatos/${candidatoId}/respostas?entrevistaId=${candidatoData.entrevistaId}`
+        );
+        if (respostasRes.ok) {
+          const respostasData = await respostasRes.json();
+          setParticipacao(respostasData.participacao);
+          setPerguntasRespostas(respostasData.perguntasRespostas);
         }
-      } catch (error) {
-        console.error('Erro ao carregar dados:', error);
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar os dados do candidato",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os dados do candidato",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, [candidatoId]);
 
@@ -174,7 +162,7 @@ export default function ResultadoCandidatoPage() {
       return;
     }
 
-    if (candidato.status !== 'concluido') {
+    if (participacao?.status !== 'concluida') {
       toast({
         title: "Aviso",
         description: "O candidato ainda não concluiu a entrevista",
@@ -188,7 +176,7 @@ export default function ResultadoCandidatoPage() {
 
       toast({
         title: "Análise iniciada",
-        description: "O Claude está analisando a entrevista. Isso pode levar alguns minutos...",
+        description: "O Claude está analisando a entrevista. Isso pode levar alguns segundos...",
       });
 
       const response = await fetch('/api/analise-entrevista', {
@@ -213,16 +201,8 @@ export default function ResultadoCandidatoPage() {
         description: "A avaliação foi gerada com sucesso",
       });
 
-      // Recarrega a avaliação
-      const avaliacaoRes = await fetch(
-        `/api/analise-entrevista?candidatoId=${candidatoId}&entrevistaId=${candidato.entrevistaId}`
-      );
-      if (avaliacaoRes.ok) {
-        const avaliacaoData = await avaliacaoRes.json();
-        if (avaliacaoData.exists) {
-          setAvaliacao(avaliacaoData.avaliacao);
-        }
-      }
+      // Recarrega os dados
+      await fetchData();
     } catch (error) {
       console.error('Erro ao analisar:', error);
       toast({
@@ -251,69 +231,9 @@ export default function ResultadoCandidatoPage() {
     );
   }
 
-  // Se não há avaliação, mostra opção para gerar
-  if (!avaliacao) {
-    return (
-      <div className="space-y-6 pb-8">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => router.back()}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold tracking-tight">Resultado da Avaliação</h1>
-            <p className="text-muted-foreground mt-1">{candidato.nome}</p>
-          </div>
-        </div>
-
-        <Card className="border-2 border-dashed">
-          <CardHeader className="text-center pb-4">
-            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-              <Sparkles className="h-6 w-6 text-primary" />
-            </div>
-            <CardTitle>Análise com IA Disponível</CardTitle>
-            <CardDescription>
-              Gere uma avaliação completa do candidato usando inteligência artificial
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center pb-6">
-            <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
-              O Claude irá analisar todas as respostas do candidato e gerar uma avaliação
-              detalhada com notas por competência, pontos fortes, áreas de melhoria e uma
-              recomendação final.
-            </p>
-            <Button
-              onClick={handleAnalisar}
-              disabled={analyzing || candidato.status !== 'concluido'}
-              size="lg"
-            >
-              {analyzing ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Analisando...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Gerar Avaliação com IA
-                </>
-              )}
-            </Button>
-            {candidato.status !== 'concluido' && (
-              <p className="text-xs text-muted-foreground mt-4">
-                Candidato precisa concluir a entrevista antes de gerar a avaliação
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  const recomendacaoConfig = getRecomendacaoConfig(avaliacao.recomendacao);
-  const RecomendacaoIcon = recomendacaoConfig.icon;
-
-  // Agrupa competências (se tiver informação de categoria, poderia agrupar)
-  const todasCompetencias = avaliacao.competencias;
+  const recomendacaoConfig = getRecomendacaoConfig(participacao?.recomendacao || null);
+  const RecomendacaoIcon = recomendacaoConfig?.icon;
+  const temAvaliacao = participacao?.notaGeral !== null && participacao?.notaGeral !== undefined;
 
   return (
     <div className="space-y-6 pb-8">
@@ -323,204 +243,203 @@ export default function ResultadoCandidatoPage() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold tracking-tight">Resultado da Avaliação</h1>
-          <p className="text-muted-foreground mt-1">{candidato.nome}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{candidato.nome}</h1>
+          <p className="text-muted-foreground mt-1">{candidato.email}</p>
         </div>
         <div className="flex gap-2">
           <Button
-            variant="outline"
+            variant={temAvaliacao ? "outline" : "default"}
             size="sm"
             onClick={handleAnalisar}
-            disabled={analyzing}
+            disabled={analyzing || participacao?.status !== 'concluida'}
           >
             {analyzing ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Analisando...
+              </>
             ) : (
-              <RefreshCw className="h-4 w-4 mr-2" />
+              <>
+                {temAvaliacao ? <RefreshCw className="h-4 w-4 mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                {temAvaliacao ? "Reanalisar" : "Analisar com IA"}
+              </>
             )}
-            Reanalisar
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Exportar PDF
-          </Button>
-          <Button size="sm">
-            <Send className="h-4 w-4 mr-2" />
-            Enviar Resultado
           </Button>
         </div>
       </div>
 
-      {/* Score Geral e Recomendação */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Score Geral */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Nota Geral</CardTitle>
-            <CardDescription>Pontuação consolidada da avaliação</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center py-8">
-              <div className="relative">
-                <svg className="w-48 h-48 transform -rotate-90">
-                  <circle
-                    cx="96"
-                    cy="96"
-                    r="88"
-                    stroke="currentColor"
-                    strokeWidth="12"
-                    fill="none"
-                    className="text-muted"
-                  />
-                  <circle
-                    cx="96"
-                    cy="96"
-                    r="88"
-                    stroke="currentColor"
-                    strokeWidth="12"
-                    fill="none"
-                    strokeDasharray={`${2 * Math.PI * 88}`}
-                    strokeDashoffset={`${2 * Math.PI * 88 * (1 - avaliacao.notaGeral / 10)}`}
-                    className={getScoreColor(avaliacao.notaGeral)}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className={`text-5xl font-bold ${getScoreColor(avaliacao.notaGeral)}`}>
-                    {avaliacao.notaGeral.toFixed(1)}
-                  </span>
-                  <span className="text-sm text-muted-foreground mt-1">
-                    {getScoreLabel(avaliacao.notaGeral)}
-                  </span>
+      {/* Aviso se não concluiu */}
+      {participacao?.status !== 'concluida' && (
+        <Card className="border-yellow-200 bg-yellow-50">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-yellow-600" />
+              <p className="text-yellow-800">
+                O candidato ainda não concluiu a entrevista. Status atual: <strong>{participacao?.status || 'pendente'}</strong>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Score Geral e Recomendação (se tiver avaliação) */}
+      {temAvaliacao && (
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Score Geral */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Nota Geral</CardTitle>
+              <CardDescription>Pontuação consolidada da avaliação</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center py-8">
+                <div className="relative">
+                  <svg className="w-48 h-48 transform -rotate-90">
+                    <circle
+                      cx="96"
+                      cy="96"
+                      r="88"
+                      stroke="currentColor"
+                      strokeWidth="12"
+                      fill="none"
+                      className="text-muted"
+                    />
+                    <circle
+                      cx="96"
+                      cy="96"
+                      r="88"
+                      stroke="currentColor"
+                      strokeWidth="12"
+                      fill="none"
+                      strokeDasharray={`${2 * Math.PI * 88}`}
+                      strokeDashoffset={`${2 * Math.PI * 88 * (1 - (participacao?.notaGeral || 0) / 10)}`}
+                      className={getScoreColor(participacao?.notaGeral || 0)}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className={`text-5xl font-bold ${getScoreColor(participacao?.notaGeral || 0)}`}>
+                      {participacao?.notaGeral?.toFixed(1)}
+                    </span>
+                    <span className="text-sm text-muted-foreground mt-1">
+                      {getScoreLabel(participacao?.notaGeral || 0)}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Recomendação */}
-        <Card className={`border-2 ${recomendacaoConfig.borderColor} ${recomendacaoConfig.bgColor}`}>
-          <CardHeader>
-            <CardTitle>Recomendação</CardTitle>
-            <CardDescription>Decisão sobre seguir no processo seletivo</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col items-center justify-center py-8 space-y-4">
-              <RecomendacaoIcon className={`w-20 h-20 ${recomendacaoConfig.iconColor}`} />
-              <div className="text-center">
-                <h3 className={`text-2xl font-bold ${recomendacaoConfig.textColor}`}>
-                  {recomendacaoConfig.label}
-                </h3>
-                {avaliacao.analisadoEm && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Avaliação realizada em {new Date(avaliacao.analisadoEm).toLocaleDateString('pt-BR')}
-                  </p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          {/* Recomendação */}
+          {recomendacaoConfig && RecomendacaoIcon && (
+            <Card className={`border-2 ${recomendacaoConfig.borderColor} ${recomendacaoConfig.bgColor}`}>
+              <CardHeader>
+                <CardTitle>Recomendação da IA</CardTitle>
+                <CardDescription>Decisão sobre seguir no processo seletivo</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                  <RecomendacaoIcon className={`w-20 h-20 ${recomendacaoConfig.iconColor}`} />
+                  <div className="text-center">
+                    <h3 className={`text-2xl font-bold ${recomendacaoConfig.textColor}`}>
+                      {recomendacaoConfig.label}
+                    </h3>
+                    {participacao?.avaliadoEm && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Avaliação em {new Date(participacao.avaliadoEm).toLocaleDateString('pt-BR')}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
 
-      {/* Resumo Executivo */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Resumo Executivo</CardTitle>
-          <CardDescription>Visão geral do desempenho do candidato</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm leading-relaxed">{avaliacao.resumoGeral}</p>
-        </CardContent>
-      </Card>
-
-      {/* Pontos Fortes e Melhorias */}
-      <div className="grid gap-6 md:grid-cols-2">
+      {/* Resumo da Avaliação (se tiver) */}
+      {participacao?.resumoGeral && (
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-              <CardTitle>Pontos Fortes</CardTitle>
-            </div>
-            <CardDescription>Competências e qualidades destacadas</CardDescription>
+            <CardTitle>Resumo da Avaliação</CardTitle>
+            <CardDescription>Análise detalhada gerada pela IA</CardDescription>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-3">
-              {avaliacao.pontosFortes.map((ponto, index) => (
-                <li key={index} className="flex gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                  <span className="text-sm">{ponto}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <TrendingDown className="h-5 w-5 text-orange-600" />
-              <CardTitle>Pontos de Melhoria</CardTitle>
+            <div className="prose prose-sm max-w-none">
+              {participacao.resumoGeral.split('\n').map((line, i) => {
+                if (line.startsWith('**') && line.endsWith('**')) {
+                  return <h4 key={i} className="font-semibold mt-4 mb-2">{line.replace(/\*\*/g, '')}</h4>;
+                }
+                if (line.startsWith('- ')) {
+                  return <li key={i} className="ml-4">{line.substring(2)}</li>;
+                }
+                if (line.trim()) {
+                  return <p key={i} className="text-sm text-muted-foreground">{line}</p>;
+                }
+                return null;
+              })}
             </div>
-            <CardDescription>Áreas para desenvolvimento</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3">
-              {avaliacao.pontosMelhoria.map((ponto, index) => (
-                <li key={index} className="flex gap-3">
-                  <AlertCircle className="h-5 w-5 text-orange-600 shrink-0 mt-0.5" />
-                  <span className="text-sm">{ponto}</span>
-                </li>
-              ))}
-            </ul>
           </CardContent>
         </Card>
-      </div>
+      )}
 
-      {/* Competências Avaliadas */}
+      {/* Perguntas e Respostas */}
       <Card>
         <CardHeader>
-          <CardTitle>Competências Avaliadas</CardTitle>
-          <CardDescription>Análise detalhada por competência</CardDescription>
+          <CardTitle className="flex items-center gap-2">
+            <MessageSquare className="h-5 w-5" />
+            Perguntas e Respostas
+          </CardTitle>
+          <CardDescription>
+            {perguntasRespostas.length} pergunta{perguntasRespostas.length !== 1 ? 's' : ''} respondida{perguntasRespostas.length !== 1 ? 's' : ''}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {todasCompetencias.map((comp, index) => (
-            <div key={index} className="space-y-3">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <p className="text-sm font-medium">{comp.competencia}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{comp.feedback}</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Badge variant="outline" className={getScoreBgColor(comp.nota)}>
-                    {getScoreLabel(comp.nota)}
-                  </Badge>
-                  <span className={`text-xl font-bold min-w-[3rem] text-right ${getScoreColor(comp.nota)}`}>
-                    {comp.nota.toFixed(1)}
-                  </span>
-                </div>
-              </div>
-              <div className="w-full bg-muted rounded-full h-2.5">
-                <div
-                  className={`h-2.5 rounded-full transition-all ${
-                    comp.nota >= 8.5
-                      ? 'bg-green-500'
-                      : comp.nota >= 7.0
-                      ? 'bg-yellow-500'
-                      : 'bg-red-500'
-                  }`}
-                  style={{ width: `${(comp.nota / 10) * 100}%` }}
-                />
-              </div>
-              {index < todasCompetencias.length - 1 && <Separator className="mt-4" />}
+          {perguntasRespostas.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Nenhuma resposta registrada ainda</p>
             </div>
-          ))}
+          ) : (
+            perguntasRespostas.map((item, index) => (
+              <div key={item.pergunta.id} className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold shrink-0">
+                    {item.pergunta.ordem || index + 1}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">{item.pergunta.texto}</p>
+                    <Badge variant="outline" className="mt-1 text-xs">
+                      {item.pergunta.tipo}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="ml-11 p-4 bg-muted/50 rounded-lg">
+                  <p className="text-sm leading-relaxed">
+                    {item.resposta.texto || item.resposta.transcricao || (
+                      <span className="text-muted-foreground italic">Sem resposta</span>
+                    )}
+                  </p>
+                  {item.resposta.tempoResposta && (
+                    <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      <span>{item.resposta.tempoResposta} segundos</span>
+                    </div>
+                  )}
+                </div>
+
+                {index < perguntasRespostas.length - 1 && <Separator className="mt-4" />}
+              </div>
+            ))
+          )}
         </CardContent>
       </Card>
 
       {/* Informações da Entrevista */}
       <Card>
         <CardHeader>
-          <CardTitle>Informações da Entrevista</CardTitle>
+          <CardTitle>Informações</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
@@ -529,18 +448,18 @@ export default function ResultadoCandidatoPage() {
               <p className="text-sm font-semibold mt-1">{candidato.nome}</p>
               <p className="text-xs text-muted-foreground">{candidato.email}</p>
             </div>
-            {candidato.concluidoEm && (
+            {participacao?.concluidaEm && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Concluída em</p>
                 <p className="text-sm font-semibold mt-1">
-                  {new Date(candidato.concluidoEm).toLocaleDateString('pt-BR', {
+                  {new Date(participacao.concluidaEm).toLocaleDateString('pt-BR', {
                     day: '2-digit',
                     month: 'long',
                     year: 'numeric',
                   })}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {new Date(candidato.concluidoEm).toLocaleTimeString('pt-BR', {
+                  {new Date(participacao.concluidaEm).toLocaleTimeString('pt-BR', {
                     hour: '2-digit',
                     minute: '2-digit',
                   })}
@@ -549,7 +468,9 @@ export default function ResultadoCandidatoPage() {
             )}
             <div>
               <p className="text-sm font-medium text-muted-foreground">Status</p>
-              <p className="text-sm font-semibold mt-1 capitalize">{candidato.status}</p>
+              <Badge variant={participacao?.status === 'concluida' ? 'secondary' : 'outline'} className="mt-1">
+                {participacao?.status || 'Pendente'}
+              </Badge>
             </div>
           </div>
         </CardContent>
