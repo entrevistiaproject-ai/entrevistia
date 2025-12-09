@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getUserId } from "@/lib/auth/get-user";
 import { getDB } from "@/lib/db";
 import { perguntasTemplates } from "@/lib/db/schema";
-import { isNull, desc, or, eq } from "drizzle-orm";
+import { isNull, desc, or, eq, and } from "drizzle-orm";
 
 export async function POST(request: Request) {
   try {
@@ -71,9 +71,12 @@ export async function GET(request: Request) {
       .select()
       .from(perguntasTemplates)
       .where(
-        or(
-          eq(perguntasTemplates.isPadrao, true), // Perguntas padrão do sistema
-          userId ? eq(perguntasTemplates.userId, userId) : undefined // Perguntas do usuário logado
+        and(
+          isNull(perguntasTemplates.deletedAt),
+          or(
+            eq(perguntasTemplates.isPadrao, true), // Perguntas padrão do sistema
+            userId ? eq(perguntasTemplates.userId, userId) : undefined // Perguntas do usuário logado
+          )
         )
       )
       .orderBy(desc(perguntasTemplates.createdAt));

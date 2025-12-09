@@ -1,33 +1,38 @@
 import { Suspense } from "react";
 import { getDB } from "@/lib/db";
 import { perguntasTemplates } from "@/lib/db/schema";
-import { desc, eq, or } from "drizzle-orm";
+import { desc, eq, or, isNull, and } from "drizzle-orm";
 import { PerguntasListagem } from "@/components/perguntas/perguntas-listagem";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
+import { getUserId } from "@/lib/auth/get-user";
 
 async function getPerguntas(userId?: string) {
   const db = getDB();
 
   // Buscar perguntas padrão do sistema OU perguntas do próprio usuário
   // Cada recrutador vê apenas suas perguntas + as padrão do sistema
+  const conditions = [
+    isNull(perguntasTemplates.deletedAt),
+    or(
+      eq(perguntasTemplates.isPadrao, true), // Perguntas padrão do sistema
+      userId ? eq(perguntasTemplates.userId, userId) : undefined // Perguntas do usuário logado
+    )
+  ].filter(Boolean);
+
   const perguntas = await db
     .select()
     .from(perguntasTemplates)
-    .where(
-      or(
-        eq(perguntasTemplates.isPadrao, true), // Perguntas padrão do sistema
-        userId ? eq(perguntasTemplates.userId, userId) : undefined // Perguntas do usuário logado
-      )
-    )
+    .where(conditions.length > 1 ? and(...conditions as any) : conditions[0])
     .orderBy(desc(perguntasTemplates.createdAt));
 
   return perguntas;
 }
 
 export default async function PerguntasPage() {
-  const perguntas = await getPerguntas();
+  const userId = await getUserId();
+  const perguntas = await getPerguntas(userId || undefined);
 
   return (
     <div className="space-y-6">

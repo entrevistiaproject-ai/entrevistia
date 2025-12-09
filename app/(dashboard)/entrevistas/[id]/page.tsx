@@ -44,6 +44,18 @@ interface Candidato {
   createdAt: Date;
 }
 
+interface Pergunta {
+  id: string;
+  entrevistaId: string;
+  texto: string;
+  ordem: number;
+  tipo: string;
+  obrigatoria: string;
+  tempoMaximo: number | null;
+  pontuacaoMaxima: number;
+  createdAt: Date;
+}
+
 const statusConfig: Record<string, { label: string; variant: any; color: string }> = {
   rascunho: { label: "Rascunho", variant: "secondary", color: "bg-gray-500" },
   publicada: { label: "Ativa", variant: "default", color: "bg-green-500" },
@@ -57,12 +69,13 @@ export default function EntrevistaDetalhesPage() {
   const router = useRouter();
   const [entrevista, setEntrevista] = useState<Entrevista | null>(null);
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
+  const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      
+
 
       // Buscar entrevista
       const resEntrevista = await fetch(`/api/entrevistas/${params.id}`, {
@@ -71,6 +84,15 @@ export default function EntrevistaDetalhesPage() {
       if (resEntrevista.ok) {
         const data = await resEntrevista.json();
         setEntrevista(data);
+      }
+
+      // Buscar perguntas da entrevista
+      const resPerguntas = await fetch(`/api/entrevistas/${params.id}/perguntas`, {
+        });
+
+      if (resPerguntas.ok) {
+        const data = await resPerguntas.json();
+        setPerguntas(data);
       }
 
       // Buscar candidatos
@@ -152,7 +174,7 @@ export default function EntrevistaDetalhesPage() {
             <FileQuestion className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{perguntas.length}</div>
             <p className="text-xs text-muted-foreground">Na entrevista</p>
           </CardContent>
         </Card>
@@ -267,13 +289,49 @@ export default function EntrevistaDetalhesPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12">
-                <FileQuestion className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                <p className="text-lg font-semibold">Em desenvolvimento</p>
-                <p className="text-muted-foreground">
-                  Funcionalidade de gerenciamento de perguntas em breve
-                </p>
-              </div>
+              {perguntas.length === 0 ? (
+                <div className="text-center py-12">
+                  <FileQuestion className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+                  <p className="text-lg font-semibold">Nenhuma pergunta ainda</p>
+                  <p className="text-muted-foreground">
+                    As perguntas adicionadas na criação da entrevista aparecerão aqui
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {perguntas.map((pergunta, index) => (
+                    <div
+                      key={pergunta.id}
+                      className="flex items-start gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold shrink-0">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <p className="font-medium">{pergunta.texto}</p>
+                        <div className="flex gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            {pergunta.tipo}
+                          </Badge>
+                          {pergunta.obrigatoria === "true" && (
+                            <Badge variant="secondary" className="text-xs">
+                              Obrigatória
+                            </Badge>
+                          )}
+                          {pergunta.tempoMaximo && (
+                            <Badge variant="outline" className="text-xs">
+                              {pergunta.tempoMaximo}s
+                            </Badge>
+                          )}
+                          <Badge variant="outline" className="text-xs">
+                            {pergunta.pontuacaoMaxima} pts
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
