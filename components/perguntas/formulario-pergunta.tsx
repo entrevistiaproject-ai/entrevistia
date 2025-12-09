@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,23 +22,71 @@ import {
 } from "@/components/ui/card";
 import { AutocompleteCargo } from "@/components/entrevista/autocomplete-cargo";
 import { NIVEIS_HIERARQUICOS } from "@/lib/constants/niveis";
+import { useToast } from "@/hooks/use-toast";
 
-export function FormularioPergunta() {
+interface CriteriosAvaliacao {
+  palavrasChave?: string[];
+  topicos?: string[];
+  aspectosAvaliar?: string[];
+}
+
+interface PerguntaInicial {
+  id?: string;
+  texto?: string;
+  cargo?: string;
+  nivel?: string;
+  categoria?: string;
+  competencia?: string | null;
+  tipo?: string;
+  criteriosAvaliacao?: CriteriosAvaliacao | null;
+}
+
+interface FormularioPerguntaProps {
+  perguntaInicial?: PerguntaInicial;
+  modoEdicao?: boolean;
+}
+
+export function FormularioPergunta({
+  perguntaInicial,
+  modoEdicao = false,
+}: FormularioPerguntaProps) {
   const router = useRouter();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
   // Form state
-  const [texto, setTexto] = useState("");
-  const [cargo, setCargo] = useState("");
-  const [nivel, setNivel] = useState("");
-  const [categoria, setCategoria] = useState("");
-  const [competencia, setCompetencia] = useState("");
-  const [tipo, setTipo] = useState("audio");
+  const [texto, setTexto] = useState(perguntaInicial?.texto || "");
+  const [cargo, setCargo] = useState(perguntaInicial?.cargo || "");
+  const [nivel, setNivel] = useState(perguntaInicial?.nivel || "");
+  const [categoria, setCategoria] = useState(perguntaInicial?.categoria || "");
+  const [competencia, setCompetencia] = useState(perguntaInicial?.competencia || "");
+  const [tipo, setTipo] = useState(perguntaInicial?.tipo || "audio");
 
   // Critérios de avaliação
-  const [palavrasChave, setPalavrasChave] = useState("");
-  const [topicos, setTopicos] = useState("");
-  const [aspectosAvaliar, setAspectosAvaliar] = useState("");
+  const [palavrasChave, setPalavrasChave] = useState(
+    perguntaInicial?.criteriosAvaliacao?.palavrasChave?.join(", ") || ""
+  );
+  const [topicos, setTopicos] = useState(
+    perguntaInicial?.criteriosAvaliacao?.topicos?.join(", ") || ""
+  );
+  const [aspectosAvaliar, setAspectosAvaliar] = useState(
+    perguntaInicial?.criteriosAvaliacao?.aspectosAvaliar?.join(", ") || ""
+  );
+
+  // Atualizar campos quando os dados iniciais mudarem
+  useEffect(() => {
+    if (perguntaInicial) {
+      setTexto(perguntaInicial.texto || "");
+      setCargo(perguntaInicial.cargo || "");
+      setNivel(perguntaInicial.nivel || "");
+      setCategoria(perguntaInicial.categoria || "");
+      setCompetencia(perguntaInicial.competencia || "");
+      setTipo(perguntaInicial.tipo || "audio");
+      setPalavrasChave(perguntaInicial.criteriosAvaliacao?.palavrasChave?.join(", ") || "");
+      setTopicos(perguntaInicial.criteriosAvaliacao?.topicos?.join(", ") || "");
+      setAspectosAvaliar(perguntaInicial.criteriosAvaliacao?.aspectosAvaliar?.join(", ") || "");
+    }
+  }, [perguntaInicial]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,8 +99,14 @@ export function FormularioPergunta() {
         aspectosAvaliar: aspectosAvaliar.split(",").map((a) => a.trim()).filter(Boolean),
       };
 
-      const response = await fetch("/api/perguntas", {
-        method: "POST",
+      const url = modoEdicao && perguntaInicial?.id
+        ? `/api/perguntas/${perguntaInicial.id}`
+        : "/api/perguntas";
+
+      const method = modoEdicao ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
@@ -68,14 +122,24 @@ export function FormularioPergunta() {
       });
 
       if (!response.ok) {
-        throw new Error("Erro ao criar pergunta");
+        const data = await response.json();
+        throw new Error(data.error || `Erro ao ${modoEdicao ? "atualizar" : "criar"} pergunta`);
       }
+
+      toast({
+        title: modoEdicao ? "Pergunta atualizada" : "Pergunta criada",
+        description: `A pergunta foi ${modoEdicao ? "atualizada" : "criada"} com sucesso.`,
+      });
 
       router.push("/perguntas");
       router.refresh();
-    } catch (error) {
-      console.error("Erro ao criar pergunta:", error);
-      alert("Erro ao criar pergunta. Tente novamente.");
+    } catch (error: any) {
+      console.error(`Erro ao ${modoEdicao ? "atualizar" : "criar"} pergunta:`, error);
+      toast({
+        title: "Erro",
+        description: error.message || `Erro ao ${modoEdicao ? "atualizar" : "criar"} pergunta. Tente novamente.`,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -235,7 +299,7 @@ export function FormularioPergunta() {
           Cancelar
         </Button>
         <Button type="submit" disabled={loading}>
-          {loading ? "Salvando..." : "Salvar Pergunta"}
+          {loading ? "Salvando..." : modoEdicao ? "Salvar Alterações" : "Salvar Pergunta"}
         </Button>
       </div>
     </form>

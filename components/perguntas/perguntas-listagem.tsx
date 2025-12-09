@@ -27,6 +27,8 @@ interface PerguntasListagemProps {
   perguntasOcultasIds?: string[];
   onOcultarPergunta?: (perguntaId: string) => void;
   onReexibirPergunta?: (perguntaId: string) => void;
+  onEditarPergunta?: (perguntaId: string) => void;
+  onDeletarPergunta?: (perguntaId: string) => void;
 }
 
 const categoriaColors: Record<string, string> = {
@@ -50,6 +52,8 @@ export function PerguntasListagem({
   perguntasOcultasIds = [],
   onOcultarPergunta,
   onReexibirPergunta,
+  onEditarPergunta,
+  onDeletarPergunta,
 }: PerguntasListagemProps) {
   const [filtroTexto, setFiltroTexto] = useState("");
   const [filtroCargo, setFiltroCargo] = useState<string>("todos");
@@ -224,10 +228,22 @@ export function PerguntasListagem({
                     {/* Botões de editar/deletar para perguntas do usuário */}
                     {!pergunta.isPadrao && (
                       <>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => onEditarPergunta?.(pergunta.id)}
+                          title="Editar pergunta"
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          onClick={() => onDeletarPergunta?.(pergunta.id)}
+                          title="Excluir pergunta"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </>
