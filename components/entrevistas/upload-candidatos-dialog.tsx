@@ -101,51 +101,65 @@ Maria Santos,maria@example.com`;
         header: true,
         skipEmptyLines: true,
         complete: async (results) => {
-          const candidatos = results.data;
+          try {
+            const candidatos = results.data;
 
-          // TODO: Substituir por sessão real
-          const userId = "123e4567-e89b-12d3-a456-426614174000";
+            const response = await fetch("/api/candidatos/lote", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                candidatos,
+                entrevistaId,
+              }),
+            });
 
-          const response = await fetch("/api/candidatos/lote", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-user-id": userId,
-            },
-            body: JSON.stringify({
-              candidatos,
-              entrevistaId,
-            }),
-          });
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error || "Erro ao importar candidatos");
+            }
 
-          if (!response.ok) {
-            throw new Error("Erro ao importar candidatos");
+            const resultado = await response.json();
+
+            setOpen(false);
+            setArquivo(null);
+            setPreview([]);
+
+            if (onSuccess) {
+              onSuccess();
+            }
+
+            let mensagem = `✅ Importação concluída!\n\n`;
+            mensagem += `Total processado: ${resultado.total}\n`;
+            mensagem += `Inseridos com sucesso: ${resultado.inseridos}\n`;
+
+            if (resultado.duplicados > 0) {
+              mensagem += `Duplicados (já existiam): ${resultado.duplicados}\n`;
+            }
+
+            if (resultado.invalidos > 0) {
+              mensagem += `Inválidos (dados incompletos): ${resultado.invalidos}\n`;
+            }
+
+            alert(mensagem);
+
+            router.refresh();
+          } catch (error) {
+            console.error("Erro ao importar candidatos:", error);
+            setErro(error instanceof Error ? error.message : "Erro ao importar candidatos. Tente novamente.");
+            setLoading(false);
           }
-
-          const resultado = await response.json();
-
-          setOpen(false);
-          setArquivo(null);
-          setPreview([]);
-
-          if (onSuccess) {
-            onSuccess();
-          }
-
-          alert(
-            `✅ Importação concluída!\n\n` +
-              `Total processado: ${resultado.total}\n` +
-              `Inseridos: ${resultado.inseridos}\n` +
-              `Rejeitados: ${resultado.rejeitados}`
-          );
-
-          router.refresh();
+        },
+        error: (error) => {
+          console.error("Erro ao processar arquivo:", error);
+          setErro("Erro ao processar o arquivo. Verifique o formato.");
+          setLoading(false);
         },
       });
     } catch (error) {
       console.error("Erro ao importar candidatos:", error);
       setErro("Erro ao importar candidatos. Tente novamente.");
-    } finally {
       setLoading(false);
     }
   };

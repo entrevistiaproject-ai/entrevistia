@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { getUserId } from "@/lib/auth/get-user";
 import { getDB } from "@/lib/db";
 import { candidatos } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
+
+// Validador de email simples
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
 
 export async function POST(request: Request) {
   try {
@@ -25,44 +32,76 @@ export async function POST(request: Request) {
 
     const db = getDB();
 
-    // Validar dados básicos
+    // Validar dados básicos e email
     const candidatosValidos = candidatosData.filter(
-      (c) => c.nome && c.email
+      (c) => c.nome && c.email && isValidEmail(c.email.trim())
     );
 
     if (candidatosValidos.length === 0) {
       return NextResponse.json(
-        { error: "Nenhum candidato válido encontrado" },
+        { error: "Nenhum candidato válido encontrado. Verifique se os emails são válidos." },
         { status: 400 }
       );
     }
 
-    // Inserir todos os candidatos
-    const candidatosInseridos = await db
-      .insert(candidatos)
-      .values(
-        candidatosValidos.map((c) => ({
-          userId,
-          nome: c.nome,
-          email: c.email,
-          telefone: c.telefone || null,
-          linkedin: c.linkedin || null,
-          aceitouTermosEntrevista: false,
-          consentimentoTratamentoDados: false,
-          finalidadeTratamento: entrevistaId
-            ? `Processo seletivo - Entrevista ${entrevistaId}`
-            : "Processo seletivo",
-          origemCadastro: "importacao_csv",
-        }))
-      )
-      .returning();
+    // Normalizar emails (trim e lowercase)
+    const candidatosNormalizados = candidatosValidos.map((c) => ({
+      ...c,
+      email: c.email.trim().toLowerCase(),
+      nome: c.nome.trim(),
+    }));
+
+    // Buscar candidatos existentes para evitar duplicatas
+    const emailsImportar = candidatosNormalizados.map((c) => c.email);
+    const candidatosExistentes = await db
+      .select({ email: candidatos.email })
+      .from(candidatos)
+      .where(
+        and(
+          eq(candidatos.userId, userId)
+        )
+      );
+
+    const emailsExistentes = new Set(candidatosExistentes.map((c) => c.email));
+
+    // Filtrar apenas candidatos novos
+    const candidatosNovos = candidatosNormalizados.filter(
+      (c) => !emailsExistentes.has(c.email)
+    );
+
+    let candidatosInseridos: any[] = [];
+
+    if (candidatosNovos.length > 0) {
+      // Inserir apenas candidatos novos
+      candidatosInseridos = await db
+        .insert(candidatos)
+        .values(
+          candidatosNovos.map((c) => ({
+            userId,
+            nome: c.nome,
+            email: c.email,
+            aceitouTermosEntrevista: false,
+            consentimentoTratamentoDados: false,
+            finalidadeTratamento: entrevistaId
+              ? `Processo seletivo - Entrevista ${entrevistaId}`
+              : "Processo seletivo",
+            origemCadastro: "importacao_csv",
+          }))
+        )
+        .returning();
+    }
+
+    const duplicados = candidatosNormalizados.length - candidatosNovos.length;
+    const invalidos = candidatosData.length - candidatosValidos.length;
 
     return NextResponse.json(
       {
         success: true,
         total: candidatosData.length,
         inseridos: candidatosInseridos.length,
-        rejeitados: candidatosData.length - candidatosValidos.length,
+        duplicados,
+        invalidos,
+        rejeitados: duplicados + invalidos,
         candidatos: candidatosInseridos,
       },
       { status: 201 }
