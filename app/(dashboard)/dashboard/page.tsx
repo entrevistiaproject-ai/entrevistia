@@ -19,8 +19,12 @@ export default async function DashboardPage() {
   };
 
   // Calcula porcentagens para as barras de progresso
-  const entrevistasPercent = (limits.entrevistas.used / limits.entrevistas.limit) * 100;
-  const candidatosPercent = (limits.candidatos.used / limits.candidatos.limit) * 100;
+  const entrevistasPercent = limits.entrevistas.limit
+    ? (limits.entrevistas.used / limits.entrevistas.limit) * 100
+    : 0;
+  const candidatosPercent = limits.candidatos.limit
+    ? (limits.candidatos.used / limits.candidatos.limit) * 100
+    : 0;
 
   return (
     <div className="space-y-6 sm:space-y-8">

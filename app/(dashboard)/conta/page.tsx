@@ -1,22 +1,206 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { User, Mail, Phone, Building, Lock, Eye, EyeOff, Camera, Bell, Moon, Sun, Monitor } from "lucide-react";
+import { User, Mail, Phone, Building, Lock, Eye, EyeOff, Bell, Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/ui/page-header";
 import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
+
+interface UserData {
+  id: string;
+  nome: string;
+  email: string;
+  telefone: string | null;
+  empresa: string | null;
+  cargo: string | null;
+  planType: string;
+  planStatus: string;
+  createdAt: string;
+}
 
 export default function ContaPage() {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
+
+  // Dados do usuário
+  const [user, setUser] = useState<UserData | null>(null);
+  const [nome, setNome] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [empresa, setEmpresa] = useState("");
+
+  // Campos de senha
+  const [senhaAtual, setSenhaAtual] = useState("");
+  const [novaSenha, setNovaSenha] = useState("");
+  const [confirmarSenha, setConfirmarSenha] = useState("");
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Preferências
   const [emailNotifications, setEmailNotifications] = useState(true);
-  const [pushNotifications, setPushNotifications] = useState(false);
+
+  // Carregar dados do usuário
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await fetch("/api/user");
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data);
+          setNome(data.nome || "");
+          setTelefone(data.telefone || "");
+          setEmpresa(data.empresa || "");
+        }
+      } catch (error) {
+        console.error("Erro ao carregar usuário:", error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar seus dados",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchUser();
+  }, [toast]);
+
+  // Salvar perfil
+  const handleSaveProfile = async () => {
+    if (!nome.trim()) {
+      toast({
+        title: "Erro",
+        description: "O nome é obrigatório",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await fetch("/api/user", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome, telefone, empresa }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setUser((prev) => (prev ? { ...prev, ...data } : null));
+        toast({
+          title: "Sucesso",
+          description: "Perfil atualizado com sucesso",
+        });
+      } else {
+        const error = await res.json();
+        toast({
+          title: "Erro",
+          description: error.error || "Erro ao atualizar perfil",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao salvar perfil:", error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar perfil",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Alterar senha
+  const handleChangePassword = async () => {
+    if (!senhaAtual || !novaSenha || !confirmarSenha) {
+      toast({
+        title: "Erro",
+        description: "Preencha todos os campos de senha",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (novaSenha !== confirmarSenha) {
+      toast({
+        title: "Erro",
+        description: "A nova senha e a confirmação não coincidem",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (novaSenha.length < 6) {
+      toast({
+        title: "Erro",
+        description: "A nova senha deve ter pelo menos 6 caracteres",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSavingPassword(true);
+    try {
+      const res = await fetch("/api/user/senha", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ senhaAtual, novaSenha, confirmarSenha }),
+      });
+
+      if (res.ok) {
+        setSenhaAtual("");
+        setNovaSenha("");
+        setConfirmarSenha("");
+        toast({
+          title: "Sucesso",
+          description: "Senha alterada com sucesso",
+        });
+      } else {
+        const error = await res.json();
+        toast({
+          title: "Erro",
+          description: error.error || "Erro ao alterar senha",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao alterar senha:", error);
+      toast({
+        title: "Erro",
+        description: "Erro ao alterar senha",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
+  // Iniciais do nome para o avatar
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -35,26 +219,14 @@ export default function ContaPage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-            <div className="relative">
-              <Avatar className="h-24 w-24 sm:h-20 sm:w-20">
-                <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
-                  AP
-                </AvatarFallback>
-              </Avatar>
-              <button
-                className="absolute bottom-0 right-0 p-2 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
-                aria-label="Alterar foto"
-              >
-                <Camera className="h-4 w-4" />
-              </button>
-            </div>
+            <Avatar className="h-24 w-24 sm:h-20 sm:w-20">
+              <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+                {user?.nome ? getInitials(user.nome) : "?"}
+              </AvatarFallback>
+            </Avatar>
             <div className="text-center sm:text-left">
-              <Button variant="outline" size="touch" className="w-full sm:w-auto">
-                Alterar Foto
-              </Button>
-              <p className="mt-2 text-sm text-muted-foreground">
-                JPG, PNG ou GIF. Máximo 2MB.
-              </p>
+              <p className="font-medium text-lg">{user?.nome}</p>
+              <p className="text-sm text-muted-foreground">{user?.email}</p>
             </div>
           </div>
 
@@ -67,8 +239,10 @@ export default function ContaPage() {
                 <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="nome"
-                  defaultValue="Avaliador Principal"
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
                   className="pl-10"
+                  placeholder="Seu nome completo"
                 />
               </div>
             </div>
@@ -80,10 +254,14 @@ export default function ContaPage() {
                 <Input
                   id="email"
                   type="email"
-                  defaultValue="avaliador@email.com"
+                  value={user?.email || ""}
                   className="pl-10"
+                  disabled
                 />
               </div>
+              <p className="text-xs text-muted-foreground">
+                O email não pode ser alterado
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -92,8 +270,10 @@ export default function ContaPage() {
                 <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="telefone"
-                  defaultValue="(11) 98765-4321"
+                  value={telefone}
+                  onChange={(e) => setTelefone(e.target.value)}
                   className="pl-10"
+                  placeholder="(11) 99999-9999"
                 />
               </div>
             </div>
@@ -104,15 +284,25 @@ export default function ContaPage() {
                 <Building className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="empresa"
-                  defaultValue="EntrevistIA Corp"
+                  value={empresa}
+                  onChange={(e) => setEmpresa(e.target.value)}
                   className="pl-10"
+                  placeholder="Nome da empresa"
                 />
               </div>
             </div>
           </div>
 
           <div className="flex justify-end pt-2">
-            <Button size="touch" className="w-full sm:w-auto">Salvar Alterações</Button>
+            <Button
+              size="touch"
+              className="w-full sm:w-auto"
+              onClick={handleSaveProfile}
+              disabled={saving}
+            >
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Salvar Alterações
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -133,7 +323,10 @@ export default function ContaPage() {
               <Input
                 id="senha-atual"
                 type={showCurrentPassword ? "text" : "password"}
+                value={senhaAtual}
+                onChange={(e) => setSenhaAtual(e.target.value)}
                 className="pl-10 pr-10"
+                placeholder="Digite sua senha atual"
               />
               <button
                 type="button"
@@ -154,7 +347,10 @@ export default function ContaPage() {
                 <Input
                   id="nova-senha"
                   type={showNewPassword ? "text" : "password"}
+                  value={novaSenha}
+                  onChange={(e) => setNovaSenha(e.target.value)}
                   className="pl-10 pr-10"
+                  placeholder="Nova senha (min. 6 caracteres)"
                 />
                 <button
                   type="button"
@@ -174,7 +370,10 @@ export default function ContaPage() {
                 <Input
                   id="confirmar-senha"
                   type={showConfirmPassword ? "text" : "password"}
+                  value={confirmarSenha}
+                  onChange={(e) => setConfirmarSenha(e.target.value)}
                   className="pl-10 pr-10"
+                  placeholder="Confirme a nova senha"
                 />
                 <button
                   type="button"
@@ -189,7 +388,15 @@ export default function ContaPage() {
           </div>
 
           <div className="flex justify-end pt-2">
-            <Button size="touch" className="w-full sm:w-auto">Alterar Senha</Button>
+            <Button
+              size="touch"
+              className="w-full sm:w-auto"
+              onClick={handleChangePassword}
+              disabled={savingPassword}
+            >
+              {savingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Alterar Senha
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -199,7 +406,7 @@ export default function ContaPage() {
         <CardHeader>
           <CardTitle>Preferências</CardTitle>
           <CardDescription>
-            Configure suas preferências de notificações e sistema
+            Configure suas preferências de notificações
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -220,55 +427,6 @@ export default function ContaPage() {
               onCheckedChange={setEmailNotifications}
               className="shrink-0"
             />
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-primary/10 shrink-0">
-                <Bell className="h-5 w-5 text-primary" />
-              </div>
-              <div className="space-y-0.5">
-                <Label className="text-base">Notificações Push</Label>
-                <p className="text-sm text-muted-foreground">
-                  Receber notificações no navegador
-                </p>
-              </div>
-            </div>
-            <Switch
-              checked={pushNotifications}
-              onCheckedChange={setPushNotifications}
-              className="shrink-0"
-            />
-          </div>
-
-          <Separator className="my-2" />
-
-          <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-primary/10 shrink-0">
-                <Monitor className="h-5 w-5 text-primary" />
-              </div>
-              <div className="space-y-0.5">
-                <Label className="text-base">Tema do Sistema</Label>
-                <p className="text-sm text-muted-foreground">
-                  Escolha entre claro, escuro ou automático
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2 pl-12">
-              <Button variant="outline" size="touch" className="flex-1 sm:flex-none gap-2">
-                <Sun className="h-4 w-4" />
-                Claro
-              </Button>
-              <Button variant="outline" size="touch" className="flex-1 sm:flex-none gap-2">
-                <Moon className="h-4 w-4" />
-                Escuro
-              </Button>
-              <Button variant="default" size="touch" className="flex-1 sm:flex-none gap-2">
-                <Monitor className="h-4 w-4" />
-                Auto
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
