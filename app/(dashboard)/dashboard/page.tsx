@@ -53,7 +53,7 @@ export default async function DashboardPage() {
             <div className="text-2xl font-bold">{limits.entrevistas.used}</div>
             <Progress value={entrevistasPercent} className="h-2" />
             <p className="text-xs text-muted-foreground">
-              {limits.entrevistas.limit - limits.entrevistas.used} de {limits.entrevistas.limit} disponíveis
+              {(limits.entrevistas.limit || 0) - limits.entrevistas.used} de {limits.entrevistas.limit || 0} disponíveis
             </p>
           </CardContent>
         </Card>
@@ -69,7 +69,7 @@ export default async function DashboardPage() {
             <div className="text-2xl font-bold">{limits.candidatos.used}</div>
             <Progress value={candidatosPercent} className="h-2" />
             <p className="text-xs text-muted-foreground">
-              {limits.candidatos.limit - limits.candidatos.used} de {limits.candidatos.limit} disponíveis
+              {(limits.candidatos.limit || 0) - limits.candidatos.used} de {limits.candidatos.limit || 0} disponíveis
             </p>
           </CardContent>
         </Card>
@@ -82,7 +82,7 @@ export default async function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="text-2xl font-bold">{limits.perguntas.limit}</div>
+            <div className="text-2xl font-bold">{limits.perguntas.limit || 0}</div>
             <p className="text-xs text-muted-foreground">perguntas por entrevista</p>
           </CardContent>
         </Card>
