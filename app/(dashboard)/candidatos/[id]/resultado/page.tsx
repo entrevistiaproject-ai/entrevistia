@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,93 +18,61 @@ import {
   Send,
   Eye,
   EyeOff,
+  Loader2,
+  RefreshCw,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
 
-// Mock data - substituir por dados reais da API
-const mockCandidato = {
-  id: "1",
-  nome: "Ana Carolina Silva",
-  email: "ana.silva@email.com",
-  cargo: "Desenvolvedora Full Stack Sênior",
-  dataEntrevista: "2025-12-05T14:30:00",
-  duracao: "32 minutos",
-};
+interface Candidato {
+  id: string;
+  nome: string;
+  email: string;
+  status: string;
+  concluidoEm?: Date;
+}
 
-const mockResultado = {
-  scoreGeral: 82,
-  recomendacao: "aprovar",
-  resumo: "Candidata demonstrou excelente domínio técnico e forte capacidade de comunicação. Experiência sólida em desenvolvimento full stack com foco em React e Node.js. Apresentou bom raciocínio lógico e capacidade analítica acima da média. Soft skills bem desenvolvidas, especialmente trabalho em equipe e proatividade.",
-  pontosFortes: [
-    "Domínio técnico excepcional em JavaScript/TypeScript e ecossistema React",
-    "Excelente capacidade de comunicação e clareza na expressão de ideias complexas",
-    "Forte proatividade e senso de dono demonstrados em projetos anteriores",
-    "Boa adaptabilidade e abertura para aprender novas tecnologias",
-    "Experiência prática com metodologias ágeis e trabalho em equipe",
-  ],
-  pontosFracos: [
-    "Conhecimento limitado em infraestrutura cloud (AWS/GCP)",
-    "Pouca experiência com testes automatizados end-to-end",
-    "Pode melhorar habilidades de liderança técnica e mentoria",
-  ],
-  justificativaInterna: "Candidata apresenta perfil técnico muito forte e fit cultural excelente. Apesar de algumas lacunas em cloud e testes, demonstrou grande capacidade de aprendizado. Recomendo fortemente para próxima fase. Considerar para posição sênior com potencial de crescimento para tech lead em 12-18 meses. Salário sugerido: R$ 12-14k.",
-};
+interface CompetenciaAvaliacao {
+  competenciaId: string;
+  competencia: string;
+  nota: number;
+  feedback: string;
+}
 
-const competenciasSelecionadas = [
-  // Habilidades Técnicas
-  { nome: "Conhecimento Técnico", categoria: "Habilidades Técnicas", nota: 88, descricao: "Domínio de ferramentas e tecnologias da função" },
-  { nome: "Resolução de Problemas", categoria: "Habilidades Técnicas", nota: 85, descricao: "Raciocínio lógico e analítico" },
-  { nome: "Qualidade do Trabalho", categoria: "Habilidades Técnicas", nota: 78, descricao: "Atenção aos detalhes e precisão" },
-  { nome: "Capacidade de Aprendizado", categoria: "Habilidades Técnicas", nota: 82, descricao: "Velocidade e facilidade para aprender" },
-
-  // Comunicação
-  { nome: "Clareza na Comunicação", categoria: "Comunicação", nota: 90, descricao: "Expressão verbal e escrita clara" },
-  { nome: "Escuta Ativa", categoria: "Comunicação", nota: 85, descricao: "Compreensão e atenção ao interlocutor" },
-  { nome: "Capacidade de Síntese", categoria: "Comunicação", nota: 87, descricao: "Resumir ideias complexas objetivamente" },
-
-  // Atitude & Iniciativa
-  { nome: "Proatividade", categoria: "Atitude & Iniciativa", nota: 88, descricao: "Iniciativa própria e antecipação" },
-  { nome: "Senso de Dono", categoria: "Atitude & Iniciativa", nota: 85, descricao: "Responsabilidade e comprometimento" },
-  { nome: "Autonomia", categoria: "Atitude & Iniciativa", nota: 83, descricao: "Capacidade de trabalhar independentemente" },
-
-  // Adaptabilidade
-  { nome: "Flexibilidade", categoria: "Adaptabilidade", nota: 80, descricao: "Adaptação a mudanças e novos contextos" },
-  { nome: "Gestão de Pressão", categoria: "Adaptabilidade", nota: 75, descricao: "Performance sob prazos e desafios" },
-  { nome: "Abertura a Feedback", categoria: "Adaptabilidade", nota: 82, descricao: "Receptividade e aplicação de feedback" },
-
-  // Colaboração
-  { nome: "Trabalho em Equipe", categoria: "Colaboração", nota: 85, descricao: "Cooperação e sinergia com colegas" },
-  { nome: "Compartilhamento", categoria: "Colaboração", nota: 82, descricao: "Troca de conhecimento e experiências" },
-
-  // Motivação & Engajamento
-  { nome: "Interesse pela Vaga", categoria: "Motivação & Engajamento", nota: 90, descricao: "Genuíno interesse e alinhamento com oportunidade" },
-  { nome: "Energia e Entusiasmo", categoria: "Motivação & Engajamento", nota: 87, descricao: "Motivação e disposição demonstradas" },
-];
-
-const categorias = Array.from(new Set(competenciasSelecionadas.map(c => c.categoria)));
+interface Avaliacao {
+  id: string;
+  notaGeral: number;
+  resumoGeral: string;
+  pontosFortes: string[];
+  pontosMelhoria: string[];
+  recomendacao: 'recomendado' | 'recomendado_com_ressalvas' | 'nao_recomendado';
+  analisadoEm?: Date;
+  competencias: CompetenciaAvaliacao[];
+}
 
 const getScoreColor = (score: number) => {
-  if (score >= 85) return "text-green-600";
-  if (score >= 70) return "text-yellow-600";
+  if (score >= 8.5) return "text-green-600";
+  if (score >= 7.0) return "text-yellow-600";
   return "text-red-600";
 };
 
 const getScoreBgColor = (score: number) => {
-  if (score >= 85) return "bg-green-100";
-  if (score >= 70) return "bg-yellow-100";
+  if (score >= 8.5) return "bg-green-100";
+  if (score >= 7.0) return "bg-yellow-100";
   return "bg-red-100";
 };
 
 const getScoreLabel = (score: number) => {
-  if (score >= 85) return "Excelente";
-  if (score >= 70) return "Bom";
-  if (score >= 50) return "Regular";
+  if (score >= 8.5) return "Excelente";
+  if (score >= 7.0) return "Bom";
+  if (score >= 5.0) return "Regular";
   return "Insuficiente";
 };
 
 const getRecomendacaoConfig = (recomendacao: string) => {
   switch (recomendacao) {
-    case "aprovar":
+    case "recomendado":
       return {
         label: "Recomendado para Próxima Fase",
         icon: CheckCircle2,
@@ -113,7 +81,7 @@ const getRecomendacaoConfig = (recomendacao: string) => {
         textColor: "text-green-700",
         iconColor: "text-green-600",
       };
-    case "rejeitar":
+    case "nao_recomendado":
       return {
         label: "Não Recomendado",
         icon: XCircle,
@@ -122,14 +90,23 @@ const getRecomendacaoConfig = (recomendacao: string) => {
         textColor: "text-red-700",
         iconColor: "text-red-600",
       };
-    default:
+    case "recomendado_com_ressalvas":
       return {
-        label: "Análise Pendente",
+        label: "Recomendado com Ressalvas",
         icon: AlertCircle,
         bgColor: "bg-yellow-50",
         borderColor: "border-yellow-200",
         textColor: "text-yellow-700",
         iconColor: "text-yellow-600",
+      };
+    default:
+      return {
+        label: "Análise Pendente",
+        icon: AlertCircle,
+        bgColor: "bg-gray-50",
+        borderColor: "border-gray-200",
+        textColor: "text-gray-700",
+        iconColor: "text-gray-600",
       };
   }
 };
@@ -137,22 +114,205 @@ const getRecomendacaoConfig = (recomendacao: string) => {
 export default function ResultadoCandidatoPage() {
   const params = useParams();
   const router = useRouter();
+  const { toast } = useToast();
   const [mostrarJustificativa, setMostrarJustificativa] = useState(false);
-  const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>("todas");
+  const [loading, setLoading] = useState(true);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [candidato, setCandidato] = useState<Candidato | null>(null);
+  const [avaliacao, setAvaliacao] = useState<Avaliacao | null>(null);
 
-  const recomendacaoConfig = getRecomendacaoConfig(mockResultado.recomendacao);
+  const candidatoId = params.id as string;
+
+  // Busca dados do candidato e avaliação
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        // Busca dados do candidato
+        const candidatoRes = await fetch(`/api/candidatos/${candidatoId}`);
+        if (!candidatoRes.ok) throw new Error('Erro ao buscar candidato');
+        const candidatoData = await candidatoRes.json();
+        setCandidato(candidatoData);
+
+        // Busca avaliação se existir
+        if (candidatoData.entrevistaId) {
+          const avaliacaoRes = await fetch(
+            `/api/analise-entrevista?candidatoId=${candidatoId}&entrevistaId=${candidatoData.entrevistaId}`
+          );
+          if (avaliacaoRes.ok) {
+            const avaliacaoData = await avaliacaoRes.json();
+            if (avaliacaoData.exists) {
+              setAvaliacao(avaliacaoData.avaliacao);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar os dados do candidato",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [candidatoId]);
+
+  // Inicia análise com IA
+  const handleAnalisar = async () => {
+    if (!candidato?.entrevistaId) {
+      toast({
+        title: "Erro",
+        description: "Candidato não possui entrevista vinculada",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (candidato.status !== 'concluido') {
+      toast({
+        title: "Aviso",
+        description: "O candidato ainda não concluiu a entrevista",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setAnalyzing(true);
+
+      toast({
+        title: "Análise iniciada",
+        description: "O Claude está analisando a entrevista. Isso pode levar alguns minutos...",
+      });
+
+      const response = await fetch('/api/analise-entrevista', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          candidatoId,
+          entrevistaId: candidato.entrevistaId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao analisar entrevista');
+      }
+
+      toast({
+        title: "Análise concluída!",
+        description: "A avaliação foi gerada com sucesso",
+      });
+
+      // Recarrega a avaliação
+      const avaliacaoRes = await fetch(
+        `/api/analise-entrevista?candidatoId=${candidatoId}&entrevistaId=${candidato.entrevistaId}`
+      );
+      if (avaliacaoRes.ok) {
+        const avaliacaoData = await avaliacaoRes.json();
+        if (avaliacaoData.exists) {
+          setAvaliacao(avaliacaoData.avaliacao);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao analisar:', error);
+      toast({
+        title: "Erro na análise",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
+        variant: "destructive",
+      });
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!candidato) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">Candidato não encontrado</p>
+      </div>
+    );
+  }
+
+  // Se não há avaliação, mostra opção para gerar
+  if (!avaliacao) {
+    return (
+      <div className="space-y-6 pb-8">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" onClick={() => router.back()}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold tracking-tight">Resultado da Avaliação</h1>
+            <p className="text-muted-foreground mt-1">{candidato.nome}</p>
+          </div>
+        </div>
+
+        <Card className="border-2 border-dashed">
+          <CardHeader className="text-center pb-4">
+            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <Sparkles className="h-6 w-6 text-primary" />
+            </div>
+            <CardTitle>Análise com IA Disponível</CardTitle>
+            <CardDescription>
+              Gere uma avaliação completa do candidato usando inteligência artificial
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center pb-6">
+            <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+              O Claude irá analisar todas as respostas do candidato e gerar uma avaliação
+              detalhada com notas por competência, pontos fortes, áreas de melhoria e uma
+              recomendação final.
+            </p>
+            <Button
+              onClick={handleAnalisar}
+              disabled={analyzing || candidato.status !== 'concluido'}
+              size="lg"
+            >
+              {analyzing ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Analisando...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Gerar Avaliação com IA
+                </>
+              )}
+            </Button>
+            {candidato.status !== 'concluido' && (
+              <p className="text-xs text-muted-foreground mt-4">
+                Candidato precisa concluir a entrevista antes de gerar a avaliação
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const recomendacaoConfig = getRecomendacaoConfig(avaliacao.recomendacao);
   const RecomendacaoIcon = recomendacaoConfig.icon;
 
-  const competenciasFiltradas = categoriaSelecionada === "todas"
-    ? competenciasSelecionadas
-    : competenciasSelecionadas.filter(c => c.categoria === categoriaSelecionada);
-
-  const mediaPorCategoria = categorias.reduce((acc, categoria) => {
-    const comps = competenciasSelecionadas.filter(c => c.categoria === categoria);
-    const media = comps.reduce((sum, c) => sum + c.nota, 0) / comps.length;
-    acc[categoria] = Math.round(media);
-    return acc;
-  }, {} as Record<string, number>);
+  // Agrupa competências (se tiver informação de categoria, poderia agrupar)
+  const todasCompetencias = avaliacao.competencias;
 
   return (
     <div className="space-y-6 pb-8">
@@ -163,11 +323,22 @@ export default function ResultadoCandidatoPage() {
         </Button>
         <div className="flex-1">
           <h1 className="text-3xl font-bold tracking-tight">Resultado da Avaliação</h1>
-          <p className="text-muted-foreground mt-1">
-            {mockCandidato.nome} • {mockCandidato.cargo}
-          </p>
+          <p className="text-muted-foreground mt-1">{candidato.nome}</p>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleAnalisar}
+            disabled={analyzing}
+          >
+            {analyzing ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            Reanalisar
+          </Button>
           <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Exportar PDF
@@ -184,7 +355,7 @@ export default function ResultadoCandidatoPage() {
         {/* Score Geral */}
         <Card>
           <CardHeader>
-            <CardTitle>Score Geral</CardTitle>
+            <CardTitle>Nota Geral</CardTitle>
             <CardDescription>Pontuação consolidada da avaliação</CardDescription>
           </CardHeader>
           <CardContent>
@@ -208,17 +379,17 @@ export default function ResultadoCandidatoPage() {
                     strokeWidth="12"
                     fill="none"
                     strokeDasharray={`${2 * Math.PI * 88}`}
-                    strokeDashoffset={`${2 * Math.PI * 88 * (1 - mockResultado.scoreGeral / 100)}`}
-                    className={getScoreColor(mockResultado.scoreGeral)}
+                    strokeDashoffset={`${2 * Math.PI * 88 * (1 - avaliacao.notaGeral / 10)}`}
+                    className={getScoreColor(avaliacao.notaGeral)}
                     strokeLinecap="round"
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className={`text-5xl font-bold ${getScoreColor(mockResultado.scoreGeral)}`}>
-                    {mockResultado.scoreGeral}
+                  <span className={`text-5xl font-bold ${getScoreColor(avaliacao.notaGeral)}`}>
+                    {avaliacao.notaGeral.toFixed(1)}
                   </span>
                   <span className="text-sm text-muted-foreground mt-1">
-                    {getScoreLabel(mockResultado.scoreGeral)}
+                    {getScoreLabel(avaliacao.notaGeral)}
                   </span>
                 </div>
               </div>
@@ -239,9 +410,11 @@ export default function ResultadoCandidatoPage() {
                 <h3 className={`text-2xl font-bold ${recomendacaoConfig.textColor}`}>
                   {recomendacaoConfig.label}
                 </h3>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Avaliação realizada em {new Date(mockCandidato.dataEntrevista).toLocaleDateString('pt-BR')}
-                </p>
+                {avaliacao.analisadoEm && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Avaliação realizada em {new Date(avaliacao.analisadoEm).toLocaleDateString('pt-BR')}
+                  </p>
+                )}
               </div>
             </div>
           </CardContent>
@@ -255,11 +428,11 @@ export default function ResultadoCandidatoPage() {
           <CardDescription>Visão geral do desempenho do candidato</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm leading-relaxed">{mockResultado.resumo}</p>
+          <p className="text-sm leading-relaxed">{avaliacao.resumoGeral}</p>
         </CardContent>
       </Card>
 
-      {/* Pontos Fortes e Fracos */}
+      {/* Pontos Fortes e Melhorias */}
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -271,7 +444,7 @@ export default function ResultadoCandidatoPage() {
           </CardHeader>
           <CardContent>
             <ul className="space-y-3">
-              {mockResultado.pontosFortes.map((ponto, index) => (
+              {avaliacao.pontosFortes.map((ponto, index) => (
                 <li key={index} className="flex gap-3">
                   <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
                   <span className="text-sm">{ponto}</span>
@@ -285,13 +458,13 @@ export default function ResultadoCandidatoPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <TrendingDown className="h-5 w-5 text-orange-600" />
-              <CardTitle>Pontos de Atenção</CardTitle>
+              <CardTitle>Pontos de Melhoria</CardTitle>
             </div>
             <CardDescription>Áreas para desenvolvimento</CardDescription>
           </CardHeader>
           <CardContent>
             <ul className="space-y-3">
-              {mockResultado.pontosFracos.map((ponto, index) => (
+              {avaliacao.pontosMelhoria.map((ponto, index) => (
                 <li key={index} className="flex gap-3">
                   <AlertCircle className="h-5 w-5 text-orange-600 shrink-0 mt-0.5" />
                   <span className="text-sm">{ponto}</span>
@@ -302,142 +475,44 @@ export default function ResultadoCandidatoPage() {
         </Card>
       </div>
 
-      {/* Justificativa Interna */}
-      <Card className="border-2 border-amber-200 bg-amber-50">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-amber-600" />
-              <CardTitle className="text-amber-900">Justificativa Interna</CardTitle>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setMostrarJustificativa(!mostrarJustificativa)}
-            >
-              {mostrarJustificativa ? (
-                <>
-                  <EyeOff className="h-4 w-4 mr-2" />
-                  Ocultar
-                </>
-              ) : (
-                <>
-                  <Eye className="h-4 w-4 mr-2" />
-                  Mostrar
-                </>
-              )}
-            </Button>
-          </div>
-          <CardDescription className="text-amber-700">
-            Informação confidencial - não será compartilhada com o candidato
-          </CardDescription>
-        </CardHeader>
-        {mostrarJustificativa && (
-          <CardContent>
-            <p className="text-sm leading-relaxed text-amber-900">
-              {mockResultado.justificativaInterna}
-            </p>
-          </CardContent>
-        )}
-      </Card>
-
       {/* Competências Avaliadas */}
       <Card>
         <CardHeader>
           <CardTitle>Competências Avaliadas</CardTitle>
-          <CardDescription>Análise detalhada por categoria de competências</CardDescription>
+          <CardDescription>Análise detalhada por competência</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Médias por Categoria */}
-          <div>
-            <h3 className="text-sm font-semibold mb-4">Médias por Categoria</h3>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {categorias.map((categoria) => {
-                const media = mediaPorCategoria[categoria];
-                return (
-                  <div
-                    key={categoria}
-                    className="p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors cursor-pointer"
-                    onClick={() => setCategoriaSelecionada(categoria)}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">{categoria}</span>
-                      <span className={`text-lg font-bold ${getScoreColor(media)}`}>
-                        {media}
-                      </span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full transition-all ${
-                          media >= 85 ? 'bg-green-500' : media >= 70 ? 'bg-yellow-500' : 'bg-red-500'
-                        }`}
-                        style={{ width: `${media}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Filtro de Categorias */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Button
-                variant={categoriaSelecionada === "todas" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setCategoriaSelecionada("todas")}
-              >
-                Todas
-              </Button>
-              {categorias.map((categoria) => (
-                <Button
-                  key={categoria}
-                  variant={categoriaSelecionada === categoria ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setCategoriaSelecionada(categoria)}
-                >
-                  {categoria}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Lista de Competências */}
-          <div className="space-y-4">
-            {competenciasFiltradas.map((competencia, index) => (
-              <div key={index} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium">{competencia.nome}</p>
-                    <p className="text-xs text-muted-foreground">{competencia.descricao}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline" className={getScoreBgColor(competencia.nota)}>
-                      {getScoreLabel(competencia.nota)}
-                    </Badge>
-                    <span className={`text-xl font-bold min-w-[3rem] text-right ${getScoreColor(competencia.nota)}`}>
-                      {competencia.nota}
-                    </span>
-                  </div>
+          {todasCompetencias.map((comp, index) => (
+            <div key={index} className="space-y-3">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{comp.competencia}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{comp.feedback}</p>
                 </div>
-                <div className="w-full bg-muted rounded-full h-2.5">
-                  <div
-                    className={`h-2.5 rounded-full transition-all ${
-                      competencia.nota >= 85
-                        ? 'bg-green-500'
-                        : competencia.nota >= 70
-                        ? 'bg-yellow-500'
-                        : 'bg-red-500'
-                    }`}
-                    style={{ width: `${competencia.nota}%` }}
-                  />
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className={getScoreBgColor(comp.nota)}>
+                    {getScoreLabel(comp.nota)}
+                  </Badge>
+                  <span className={`text-xl font-bold min-w-[3rem] text-right ${getScoreColor(comp.nota)}`}>
+                    {comp.nota.toFixed(1)}
+                  </span>
                 </div>
               </div>
-            ))}
-          </div>
+              <div className="w-full bg-muted rounded-full h-2.5">
+                <div
+                  className={`h-2.5 rounded-full transition-all ${
+                    comp.nota >= 8.5
+                      ? 'bg-green-500'
+                      : comp.nota >= 7.0
+                      ? 'bg-yellow-500'
+                      : 'bg-red-500'
+                  }`}
+                  style={{ width: `${(comp.nota / 10) * 100}%` }}
+                />
+              </div>
+              {index < todasCompetencias.length - 1 && <Separator className="mt-4" />}
+            </div>
+          ))}
         </CardContent>
       </Card>
 
@@ -450,28 +525,30 @@ export default function ResultadoCandidatoPage() {
           <div className="grid gap-4 md:grid-cols-3">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Candidato</p>
-              <p className="text-sm font-semibold mt-1">{mockCandidato.nome}</p>
-              <p className="text-xs text-muted-foreground">{mockCandidato.email}</p>
+              <p className="text-sm font-semibold mt-1">{candidato.nome}</p>
+              <p className="text-xs text-muted-foreground">{candidato.email}</p>
             </div>
+            {candidato.concluidoEm && (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Concluída em</p>
+                <p className="text-sm font-semibold mt-1">
+                  {new Date(candidato.concluidoEm).toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {new Date(candidato.concluidoEm).toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </p>
+              </div>
+            )}
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Data da Entrevista</p>
-              <p className="text-sm font-semibold mt-1">
-                {new Date(mockCandidato.dataEntrevista).toLocaleDateString('pt-BR', {
-                  day: '2-digit',
-                  month: 'long',
-                  year: 'numeric',
-                })}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {new Date(mockCandidato.dataEntrevista).toLocaleTimeString('pt-BR', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Duração</p>
-              <p className="text-sm font-semibold mt-1">{mockCandidato.duracao}</p>
+              <p className="text-sm font-medium text-muted-foreground">Status</p>
+              <p className="text-sm font-semibold mt-1 capitalize">{candidato.status}</p>
             </div>
           </div>
         </CardContent>

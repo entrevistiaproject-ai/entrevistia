@@ -3,6 +3,7 @@ import { getDB } from "@/lib/db";
 import { candidatoEntrevistas } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { onCandidatoFinalizouEntrevista } from "@/lib/ai/auto-analyze";
 
 const finalizarSchema = z.object({
   sessaoId: z.string().uuid(),
@@ -47,6 +48,27 @@ export async function POST(
         { error: "Sessão não encontrada" },
         { status: 404 }
       );
+    }
+
+    // Dispara análise automática em background (se configurada)
+    // Não aguarda o resultado para não bloquear a resposta ao candidato
+    if (sessao.candidatoId && sessao.entrevistaId) {
+      // Busca o nome do candidato
+      const { candidatos } = await import("@/lib/db/schema");
+      const candidato = await db.query.candidatos.findFirst({
+        where: eq(candidatos.id, sessao.candidatoId),
+      });
+
+      if (candidato) {
+        // Executa em background sem aguardar
+        onCandidatoFinalizouEntrevista(
+          sessao.candidatoId,
+          sessao.entrevistaId,
+          candidato.nome
+        ).catch((error) => {
+          console.error("Erro ao disparar análise automática:", error);
+        });
+      }
     }
 
     return NextResponse.json({
