@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db/client';
-import { candidatos } from '@/db/schema';
+import { getDB } from '@/lib/db';
+import { candidatos } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
 /**
@@ -14,10 +14,13 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const db = getDB();
 
-    const candidato = await db.query.candidatos.findFirst({
-      where: eq(candidatos.id, id),
-    });
+    const [candidato] = await db
+      .select()
+      .from(candidatos)
+      .where(eq(candidatos.id, id))
+      .limit(1);
 
     if (!candidato) {
       return NextResponse.json(

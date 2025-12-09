@@ -31,6 +31,7 @@ interface Candidato {
   email: string;
   status: string;
   concluidoEm?: Date;
+  entrevistaId?: string;
 }
 
 interface CompetenciaAvaliacao {

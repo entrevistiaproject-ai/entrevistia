@@ -7,13 +7,16 @@ import { z } from 'zod';
 export const getInterviewInfoTool = tool(
   async ({ entrevistaId }: { entrevistaId: string }) => {
     // Esta função será chamada pelo agente quando precisar de informações da vaga
-    const { db } = await import('@/lib/db');
+    const { getDB } = await import('@/lib/db');
     const { entrevistas } = await import('@/lib/db/schema');
     const { eq } = await import('drizzle-orm');
 
-    const entrevista = await db.query.entrevistas.findFirst({
-      where: eq(entrevistas.id, entrevistaId),
-    });
+    const db = getDB();
+    const [entrevista] = await db
+      .select()
+      .from(entrevistas)
+      .where(eq(entrevistas.id, entrevistaId))
+      .limit(1);
 
     if (!entrevista) {
       return { error: 'Entrevista não encontrada' };
@@ -41,32 +44,40 @@ export const getInterviewInfoTool = tool(
  */
 export const getCandidateAnswersTool = tool(
   async ({ candidatoId, entrevistaId }: { candidatoId: string; entrevistaId: string }) => {
-    const { db } = await import('@/db/client');
-    const { respostas, perguntas } = await import('@/db/schema');
+    const { getDB } = await import('@/lib/db');
+    const { respostas, perguntas } = await import('@/lib/db/schema');
     const { eq, and } = await import('drizzle-orm');
 
-    const candidateAnswers = await db.query.respostas.findMany({
-      where: and(
-        eq(respostas.candidatoId, candidatoId),
-        eq(respostas.entrevistaId, entrevistaId)
-      ),
-      with: {
-        pergunta: true,
-      },
-    });
+    const db = getDB();
+    const candidateAnswers = await db
+      .select({
+        id: respostas.id,
+        textoResposta: respostas.textoResposta,
+        arquivoUrl: respostas.arquivoUrl,
+        arquivoTipo: respostas.arquivoTipo,
+        transcricao: respostas.transcricao,
+        pergunta: perguntas,
+      })
+      .from(respostas)
+      .innerJoin(perguntas, eq(respostas.perguntaId, perguntas.id))
+      .where(
+        and(
+          eq(respostas.candidatoId, candidatoId),
+          eq(respostas.entrevistaId, entrevistaId)
+        )
+      );
 
     return candidateAnswers.map(answer => ({
       pergunta: {
         id: answer.pergunta.id,
         texto: answer.pergunta.texto,
         tipo: answer.pergunta.tipo,
-        competencia: answer.pergunta.competenciaId,
       },
       resposta: {
-        texto: answer.respostaTexto,
-        videoUrl: answer.videoUrl,
-        audioUrl: answer.audioUrl,
-        tempoResposta: answer.tempoResposta,
+        texto: answer.textoResposta,
+        arquivoUrl: answer.arquivoUrl,
+        arquivoTipo: answer.arquivoTipo,
+        transcricao: answer.transcricao,
       },
     }));
   },
@@ -85,27 +96,23 @@ export const getCandidateAnswersTool = tool(
  */
 export const getCompetenciasTool = tool(
   async ({ entrevistaId }: { entrevistaId: string }) => {
-    const { db } = await import('@/db/client');
-    const { competencias, entrevistas } = await import('@/db/schema');
+    const { getDB } = await import('@/lib/db');
+    const { entrevistas } = await import('@/lib/db/schema');
     const { eq } = await import('drizzle-orm');
 
-    const entrevista = await db.query.entrevistas.findFirst({
-      where: eq(entrevistas.id, entrevistaId),
-      with: {
-        competencias: true,
-      },
-    });
+    const db = getDB();
+    const [entrevista] = await db
+      .select()
+      .from(entrevistas)
+      .where(eq(entrevistas.id, entrevistaId))
+      .limit(1);
 
     if (!entrevista) {
       return { error: 'Entrevista não encontrada' };
     }
 
-    return entrevista.competencias.map(comp => ({
-      id: comp.id,
-      nome: comp.nome,
-      descricao: comp.descricao,
-      peso: comp.peso,
-    }));
+    // TODO: Buscar competências quando o schema competencias for implementado
+    return [];
   },
   {
     name: 'getCompetencias',
@@ -143,79 +150,38 @@ export const saveAnalysisTool = tool(
       feedback: string;
     }>;
   }) => {
-    const { db } = await import('@/db/client');
-    const {
-      avaliacoes,
-      avaliacoesCompetencias: avaliacoesCompetenciasTable
-    } = await import('@/db/schema');
-    const { eq, and } = await import('drizzle-orm');
-
+    // TODO: Implementar quando o schema avaliacoes for criado
     try {
+      // const { getDB } = await import('@/lib/db');
+      // const {
+      //   avaliacoes,
+      //   avaliacoesCompetencias: avaliacoesCompetenciasTable
+      // } = await import('@/lib/db/schema');
+      // const { eq, and } = await import('drizzle-orm');
+
+      // const db = getDB();
       // Verifica se já existe uma avaliação
-      const existingAvaliacao = await db.query.avaliacoes.findFirst({
-        where: and(
-          eq(avaliacoes.candidatoId, candidatoId),
-          eq(avaliacoes.entrevistaId, entrevistaId)
-        ),
-      });
+      const existingAvaliacao = null; // TODO: implementar busca quando schema existir
+      // const existingAvaliacao = await db
+      //   .select()
+      //   .from(avaliacoes)
+      //   .where(and(
+      //     eq(avaliacoes.candidatoId, candidatoId),
+      //     eq(avaliacoes.entrevistaId, entrevistaId)
+      //   ))
+      //   .limit(1);
 
-      let avaliacaoId: string;
-
-      if (existingAvaliacao) {
-        // Atualiza avaliação existente
-        await db
-          .update(avaliacoes)
-          .set({
-            notaGeral,
-            resumoGeral,
-            pontosFortes,
-            pontosMelhoria,
-            recomendacao,
-            analisadoEm: new Date(),
-          })
-          .where(eq(avaliacoes.id, existingAvaliacao.id));
-
-        avaliacaoId = existingAvaliacao.id;
-
-        // Remove avaliações de competências antigas
-        await db
-          .delete(avaliacoesCompetenciasTable)
-          .where(eq(avaliacoesCompetenciasTable.avaliacaoId, avaliacaoId));
-      } else {
-        // Cria nova avaliação
-        const [newAvaliacao] = await db
-          .insert(avaliacoes)
-          .values({
-            candidatoId,
-            entrevistaId,
-            notaGeral,
-            resumoGeral,
-            pontosFortes,
-            pontosMelhoria,
-            recomendacao,
-            analisadoEm: new Date(),
-          })
-          .returning();
-
-        avaliacaoId = newAvaliacao.id;
-      }
-
-      // Insere avaliações de competências
-      if (avaliacoesCompetencias.length > 0) {
-        await db.insert(avaliacoesCompetenciasTable).values(
-          avaliacoesCompetencias.map(ac => ({
-            avaliacaoId,
-            competenciaId: ac.competenciaId,
-            nota: ac.nota,
-            feedback: ac.feedback,
-          }))
-        );
-      }
+      // TODO: Implementar quando schema for criado
+      // let avaliacaoId: string;
+      // if (existingAvaliacao) {
+      //   await db.update(avaliacoes)...
+      // } else {
+      //   const [newAvaliacao] = await db.insert(avaliacoes)...
+      // }
 
       return {
-        success: true,
-        avaliacaoId,
-        message: 'Análise salva com sucesso',
+        success: false,
+        error: 'Schema de avaliações ainda não implementado',
       };
     } catch (error) {
       console.error('Erro ao salvar análise:', error);

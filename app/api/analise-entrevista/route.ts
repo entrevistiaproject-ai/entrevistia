@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { analyzeInterview } from '@/lib/ai/agent';
-import { db } from '@/db/client';
-import { candidatos, entrevistas } from '@/db/schema';
+import { getDB } from '@/lib/db';
+import { candidatos, candidatoEntrevistas } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 
 export const maxDuration = 300; // 5 minutos - permite análises mais longas
@@ -38,20 +38,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Busca informações do candidato
-    const candidato = await db.query.candidatos.findFirst({
-      where: eq(candidatos.id, candidatoId),
-    });
+    // Busca informações do candidato e da entrevista
+    const db = getDB();
+    const [resultado] = await db
+      .select({
+        candidatoId: candidatos.id,
+        candidatoNome: candidatos.nome,
+        status: candidatoEntrevistas.status,
+      })
+      .from(candidatos)
+      .innerJoin(candidatoEntrevistas, eq(candidatos.id, candidatoEntrevistas.candidatoId))
+      .where(
+        and(
+          eq(candidatos.id, candidatoId),
+          eq(candidatoEntrevistas.entrevistaId, entrevistaId)
+        )
+      )
+      .limit(1);
 
-    if (!candidato) {
+    if (!resultado) {
       return NextResponse.json(
-        { error: 'Candidato não encontrado' },
+        { error: 'Candidato ou entrevista não encontrado' },
         { status: 404 }
       );
     }
 
     // Verifica se o candidato completou a entrevista
-    if (candidato.status !== 'concluido') {
+    if (resultado.status !== 'concluida') {
       return NextResponse.json(
         { error: 'Candidato ainda não completou a entrevista' },
         { status: 400 }
@@ -62,7 +75,7 @@ export async function POST(request: NextRequest) {
     const result = await analyzeInterview(
       candidatoId,
       entrevistaId,
-      candidato.nome
+      resultado.candidatoNome
     );
 
     if (!result.success) {
@@ -111,45 +124,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Busca avaliação existente
-    const { avaliacoes } = await import('@/db/schema');
-    const avaliacao = await db.query.avaliacoes.findFirst({
-      where: and(
-        eq(avaliacoes.candidatoId, candidatoId),
-        eq(avaliacoes.entrevistaId, entrevistaId)
-      ),
-      with: {
-        avaliacoesCompetencias: {
-          with: {
-            competencia: true,
-          },
-        },
-      },
-    });
-
-    if (!avaliacao) {
-      return NextResponse.json({
-        exists: false,
-        message: 'Nenhuma avaliação encontrada',
-      });
-    }
-
+    // TODO: Implementar busca de avaliação quando o schema avaliacoes for criado
+    // Por enquanto, retorna que não existe avaliação
     return NextResponse.json({
-      exists: true,
-      avaliacao: {
-        id: avaliacao.id,
-        notaGeral: avaliacao.notaGeral,
-        resumoGeral: avaliacao.resumoGeral,
-        pontosFortes: avaliacao.pontosFortes,
-        pontosMelhoria: avaliacao.pontosMelhoria,
-        recomendacao: avaliacao.recomendacao,
-        analisadoEm: avaliacao.analisadoEm,
-        competencias: avaliacao.avaliacoesCompetencias.map(ac => ({
-          competencia: ac.competencia.nome,
-          nota: ac.nota,
-          feedback: ac.feedback,
-        })),
-      },
+      exists: false,
+      message: 'Sistema de avaliações ainda não implementado',
     });
   } catch (error) {
     console.error('Erro ao buscar avaliação:', error);

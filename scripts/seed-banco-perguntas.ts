@@ -6,6 +6,7 @@
 
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
+import { eq } from 'drizzle-orm';
 import { Pool } from 'pg';
 import { perguntasTemplates } from '@/lib/db/schema';
 import { todasAsPerguntas, estatisticas } from '@/lib/db/seeds/banco-perguntas-completo';
@@ -38,7 +39,7 @@ async function seedPerguntas() {
     const existentes = await db
       .select({ id: perguntasTemplates.id })
       .from(perguntasTemplates)
-      .where(perguntasTemplates.isPadrao);
+      .where(eq(perguntasTemplates.isPadrao, true));
 
     if (existentes.length > 0) {
       console.log(`⚠️  Encontradas ${existentes.length} perguntas padrão existentes.`);

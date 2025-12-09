@@ -52,25 +52,25 @@ export function PerguntasListagem({ perguntas }: PerguntasListagemProps) {
   const [filtroNivel, setFiltroNivel] = useState<string>("todos");
 
   // Extrair valores únicos para filtros
-  const cargos = Array.from(new Set(perguntas.map((p) => p.cargo)));
+  const cargos = Array.from(new Set(perguntas.flatMap((p) => p.cargos)));
   const categorias = Array.from(new Set(perguntas.map((p) => p.categoria)));
-  const niveis = Array.from(new Set(perguntas.map((p) => p.nivel)));
+  const niveis = Array.from(new Set(perguntas.flatMap((p) => p.niveis)));
 
   // Aplicar filtros
   const perguntasFiltradas = perguntas.filter((pergunta) => {
     const matchTexto =
       filtroTexto === "" ||
       pergunta.texto.toLowerCase().includes(filtroTexto.toLowerCase()) ||
-      pergunta.competencia.toLowerCase().includes(filtroTexto.toLowerCase());
+      (pergunta.competencia && pergunta.competencia.toLowerCase().includes(filtroTexto.toLowerCase()));
 
     const matchCargo =
-      filtroCargo === "todos" || pergunta.cargo === filtroCargo;
+      filtroCargo === "todos" || pergunta.cargos.includes(filtroCargo);
 
     const matchCategoria =
       filtroCategoria === "todas" || pergunta.categoria === filtroCategoria;
 
     const matchNivel =
-      filtroNivel === "todos" || pergunta.nivel === filtroNivel;
+      filtroNivel === "todos" || pergunta.niveis.includes(filtroNivel);
 
     return matchTexto && matchCargo && matchCategoria && matchNivel;
   });
@@ -151,9 +151,9 @@ export function PerguntasListagem({ perguntas }: PerguntasListagemProps) {
                     >
                       {categoriaLabels[pergunta.categoria] || pergunta.categoria}
                     </Badge>
-                    <Badge variant="outline">{pergunta.cargo}</Badge>
+                    <Badge variant="outline">{pergunta.cargos.join(", ")}</Badge>
                     <Badge variant="outline">
-                      {nivelLabels[pergunta.nivel] || pergunta.nivel}
+                      {pergunta.niveis.map(n => nivelLabels[n] || n).join(", ")}
                     </Badge>
                     {pergunta.isPadrao && (
                       <Badge variant="default" className="bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20">

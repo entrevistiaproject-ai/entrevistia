@@ -23,7 +23,7 @@ export function SeletorCategoria({
   className = '',
 }: SeletorCategoriaProps) {
   const [categoriaLocal, setCategoriaLocal] = useState<CategoriaPerguntas>(
-    categoriaAtual || 'tecnica'
+    (categoriaAtual || 'tecnica') as CategoriaPerguntas
   );
   const [sugestao, setSugestao] = useState<ReturnType<typeof sugerirCategoria> | null>(null);
   const [mostrarOpcoes, setMostrarOpcoes] = useState(false);
@@ -32,15 +32,22 @@ export function SeletorCategoria({
   useEffect(() => {
     if (textoPergunta.length > 10) {
       const novaSugestao = sugerirCategoria(textoPergunta);
-      setSugestao(novaSugestao);
 
-      // Se categoria não foi definida manualmente, usa sugestão
-      if (!categoriaAtual) {
-        setCategoriaLocal(novaSugestao.categoria);
-        onChange(novaSugestao.categoria);
-      }
+      // Agenda a atualização de estado para o próximo tick
+      // para evitar chamadas síncronas no corpo do efeito
+      const timer = setTimeout(() => {
+        setSugestao(novaSugestao);
+
+        // Se categoria não foi definida manualmente, usa sugestão
+        if (!categoriaAtual) {
+          setCategoriaLocal(novaSugestao.categoria);
+          onChange(novaSugestao.categoria);
+        }
+      }, 0);
+
+      return () => clearTimeout(timer);
     }
-  }, [textoPergunta]);
+  }, [textoPergunta, categoriaAtual, onChange]);
 
   const handleMudarCategoria = (novaCategoria: CategoriaPerguntas) => {
     setCategoriaLocal(novaCategoria);

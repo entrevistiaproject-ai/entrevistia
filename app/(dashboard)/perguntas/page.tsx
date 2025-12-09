@@ -72,7 +72,7 @@ export default async function PerguntasPage() {
         </div>
         <div className="rounded-lg border bg-card p-6">
           <div className="text-2xl font-bold">
-            {new Set(perguntas.map(p => p.cargo)).size}
+            {new Set(perguntas.flatMap(p => p.cargos)).size}
           </div>
           <p className="text-sm text-muted-foreground">Cargos Cobertos</p>
         </div>

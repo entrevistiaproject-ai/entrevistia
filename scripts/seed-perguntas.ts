@@ -1,7 +1,7 @@
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import * as schema from '../lib/db/schema';
-import { perguntasAdvogadoPleno } from '../lib/db/seeds/perguntas-advogado-pleno';
+// import { perguntasAdvogadoPleno } from '../lib/db/seeds/perguntas-advogado-pleno'; // REMOVED - use banco-perguntas-completo instead
 
 async function seed() {
   console.log('🌱 Iniciando seed do banco de perguntas...\n');
@@ -18,7 +18,9 @@ async function seed() {
     // Inserir perguntas padrão
     console.log('📝 Inserindo 12 perguntas para Advogado Pleno...');
 
-    for (const pergunta of perguntasAdvogadoPleno) {
+    // TODO: Use banco-perguntas-completo instead
+    const perguntas: any[] = []; // TEMPORARY
+    for (const pergunta of perguntas) {
       await db.insert(schema.perguntasTemplates).values({
         ...pergunta,
         isPadrao: true,
@@ -28,10 +30,10 @@ async function seed() {
     }
 
     console.log('\n🎉 Seed concluído com sucesso!');
-    console.log(`\n📊 Total de perguntas inseridas: ${perguntasAdvogadoPleno.length}`);
+    console.log(`\n📊 Total de perguntas inseridas: ${perguntas.length}`);
     console.log('\nCategoria das perguntas:');
 
-    const categorias = perguntasAdvogadoPleno.reduce((acc, p) => {
+    const categorias = perguntas.reduce((acc, p) => {
       acc[p.categoria] = (acc[p.categoria] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);

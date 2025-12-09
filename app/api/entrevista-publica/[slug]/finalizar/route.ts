@@ -55,9 +55,11 @@ export async function POST(
     if (sessao.candidatoId && sessao.entrevistaId) {
       // Busca o nome do candidato
       const { candidatos } = await import("@/lib/db/schema");
-      const candidato = await db.query.candidatos.findFirst({
-        where: eq(candidatos.id, sessao.candidatoId),
-      });
+      const [candidato] = await db
+        .select()
+        .from(candidatos)
+        .where(eq(candidatos.id, sessao.candidatoId))
+        .limit(1);
 
       if (candidato) {
         // Executa em background sem aguardar
