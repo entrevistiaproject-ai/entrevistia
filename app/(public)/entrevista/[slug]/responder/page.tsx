@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { GravadorAudio } from "@/components/gravador-audio";
+import { VerificacaoMicrofone } from "@/components/verificacao-microfone";
+import { TutorialEntrevista } from "@/components/tutorial-entrevista";
 import { Loader2, CheckCircle2, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +26,7 @@ interface EntrevistaPublica {
   tempoResposta?: number;
 }
 
+type EtapaPreparacao = "verificacao-microfone" | "tutorial" | "entrevista";
 type Fase = "reflexao" | "resposta" | "processando" | "concluida";
 
 export default function ResponderEntrevistaPage() {
@@ -39,6 +42,7 @@ export default function ResponderEntrevistaPage() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
+  const [etapaPreparacao, setEtapaPreparacao] = useState<EtapaPreparacao>("verificacao-microfone");
   const [perguntaAtualIndex, setPerguntaAtualIndex] = useState(0);
   const [fase, setFase] = useState<Fase>("reflexao");
   const [tempoReflexao, setTempoReflexao] = useState(45); // 45 segundos
@@ -174,6 +178,40 @@ export default function ResponderEntrevistaPage() {
         <div className="max-w-md w-full text-center">
           <h1 className="text-2xl font-bold text-red-500 mb-4">Erro</h1>
           <p className="text-gray-600 mb-6">{erro || "Entrevista não encontrada"}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Etapa de verificação do microfone
+  if (etapaPreparacao === "verificacao-microfone") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-gray-900">{entrevista.titulo}</h1>
+            <p className="text-gray-600 mt-2">Preparação para a entrevista</p>
+          </div>
+          <VerificacaoMicrofone
+            onMicrofoneVerificado={() => setEtapaPreparacao("tutorial")}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Etapa do tutorial
+  if (etapaPreparacao === "tutorial") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-gray-900">{entrevista.titulo}</h1>
+            <p className="text-gray-600 mt-2">Tutorial de prática</p>
+          </div>
+          <TutorialEntrevista
+            onTutorialCompleto={() => setEtapaPreparacao("entrevista")}
+          />
         </div>
       </div>
     );

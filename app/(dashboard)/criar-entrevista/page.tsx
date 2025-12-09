@@ -25,10 +25,45 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { NIVEIS_HIERARQUICOS } from "@/lib/constants/niveis";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+const TEMPLATE_DESCRICAO = `📋 SOBRE A VAGA
+[Descreva brevemente o contexto da posição, equipe e momento da empresa]
+
+🛠️ STACK / FERRAMENTAS
+- [Tecnologia ou ferramenta 1]
+- [Tecnologia ou ferramenta 2]
+- [Sistema ou metodologia utilizada]
+
+📌 ÁREA DE ATUAÇÃO
+- [Departamento ou projeto específico]
+- [Tipo de clientes/público atendido]
+- [Escopo de trabalho]
+
+✅ RESPONSABILIDADES
+- [Principal atividade ou entrega esperada]
+- [Segunda responsabilidade importante]
+- [Terceira responsabilidade]
+- [Outras atribuições relevantes]
+
+🎯 REQUISITOS DESEJADOS
+- [Tempo de experiência na área]
+- [Conhecimentos técnicos necessários]
+- [Formação ou certificações]
+- [Soft skills importantes para a função]
+
+💡 DIFERENCIAIS
+- [O que faria o candidato se destacar]
+- [Experiências ou conhecimentos extras valorizados]
+
+📊 INFORMAÇÕES ADICIONAIS
+- Modelo: [Presencial/Híbrido/Remoto]
+- Horário: [Período de trabalho]
+- Benefícios: [Principais benefícios oferecidos]`;
 
 interface PerguntaSelecionada {
   id: string;
@@ -43,6 +78,7 @@ export default function CriarEntrevistaPage() {
   const router = useRouter();
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
+  const [empresa, setEmpresa] = useState("");
   const [cargo, setCargo] = useState("");
   const [nivel, setNivel] = useState("");
   const [compartilharResultados, setCompartilharResultados] = useState(false);
@@ -103,6 +139,7 @@ export default function CriarEntrevistaPage() {
         body: JSON.stringify({
           titulo,
           descricao,
+          empresa,
           cargo,
           nivel,
           perguntas,
@@ -166,14 +203,80 @@ export default function CriarEntrevistaPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="descricao">Descrição</Label>
+              <Label htmlFor="empresa">Nome da Empresa</Label>
+              <Input
+                id="empresa"
+                placeholder="Ex: Empresa XYZ Ltda"
+                value={empresa}
+                onChange={(e) => setEmpresa(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Será exibido para os candidatos como informação da vaga
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="descricao">Descrição da Vaga *</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs h-7"
+                  onClick={() => setDescricao(TEMPLATE_DESCRICAO)}
+                >
+                  Usar template
+                </Button>
+              </div>
               <Textarea
                 id="descricao"
-                placeholder="Descreva o contexto da vaga..."
+                placeholder={`Exemplo de descrição estruturada:
+
+📋 SOBRE A VAGA
+Breve contexto sobre a posição e equipe...
+
+🛠️ STACK / FERRAMENTAS
+- Tecnologias, sistemas ou ferramentas utilizadas
+
+📌 ÁREA DE ATUAÇÃO
+- Departamento ou projeto específico
+- Tipo de clientes/público atendido
+
+✅ RESPONSABILIDADES
+- Principal atividade 1
+- Principal atividade 2
+- Principal atividade 3
+
+🎯 REQUISITOS DESEJADOS
+- Experiência necessária
+- Conhecimentos técnicos
+- Soft skills importantes
+
+💡 DIFERENCIAIS
+- O que faria o candidato se destacar`}
                 value={descricao}
                 onChange={(e) => setDescricao(e.target.value)}
-                rows={3}
+                rows={12}
+                required
+                className="font-mono text-sm"
+                maxLength={1000}
               />
+              <div className="flex items-center justify-between text-xs">
+                <span className={descricao.length < 200 ? "text-red-500" : descricao.length > 900 ? "text-yellow-600" : "text-green-600"}>
+                  {descricao.length}/1000 caracteres
+                  {descricao.length < 200 && ` (mínimo: 200)`}
+                </span>
+                <span className="text-muted-foreground">
+                  {descricao.length >= 200 && descricao.length <= 1000 && "✓ Tamanho adequado"}
+                </span>
+              </div>
+              <Alert className="mt-2">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  A descrição é utilizada pela IA para calcular o <strong>score de compatibilidade</strong> dos candidatos com a vaga.
+                  Quanto mais detalhada (200-1000 caracteres), melhor será a análise das respostas.
+                </AlertDescription>
+              </Alert>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -285,7 +388,7 @@ export default function CriarEntrevistaPage() {
               Cancelar
             </Button>
           </Link>
-          <Button type="submit" disabled={loading || perguntas.length === 0}>
+          <Button type="submit" disabled={loading || perguntas.length === 0 || descricao.length < 200}>
             {loading ? "Criando..." : "Criar Entrevista"}
           </Button>
         </div>

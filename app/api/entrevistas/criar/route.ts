@@ -44,6 +44,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const descricaoTrimmed = body.descricao?.trim() || "";
+    if (descricaoTrimmed.length < 200) {
+      return NextResponse.json(
+        { error: `A descrição da vaga deve ter pelo menos 200 caracteres para permitir uma análise de compatibilidade adequada. Atual: ${descricaoTrimmed.length} caracteres.` },
+        { status: 400 }
+      );
+    }
+
+    if (descricaoTrimmed.length > 1000) {
+      return NextResponse.json(
+        { error: `A descrição da vaga deve ter no máximo 1000 caracteres. Atual: ${descricaoTrimmed.length} caracteres.` },
+        { status: 400 }
+      );
+    }
+
     if (!body.perguntas || body.perguntas.length === 0) {
       return NextResponse.json(
         { error: "É necessário adicionar pelo menos uma pergunta" },

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Mic, Square, Loader2 } from "lucide-react";
+import { Mic, Square, Loader2, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface GravadorAudioProps {
@@ -20,11 +20,29 @@ export function GravadorAudio({
   const [transcrevendo, setTranscrevendo] = useState(false);
   const [tempoDecorrido, setTempoDecorrido] = useState(0);
   const [erro, setErro] = useState<string | null>(null);
+  const [nivelAudio, setNivelAudio] = useState(0);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const inicioGravacaoRef = useRef<number>(0);
+  const streamRef = useRef<MediaStream | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+
+  const pararMonitoramentoAudio = useCallback(() => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    analyserRef.current = null;
+    setNivelAudio(0);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -32,19 +50,57 @@ export function GravadorAudio({
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
+      // Parar monitoramento de áudio
+      pararMonitoramentoAudio();
+      // Parar stream
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
       // Parar gravação se estiver ativa
       if (mediaRecorderRef.current && gravando) {
         mediaRecorderRef.current.stop();
       }
     };
-  }, [gravando]);
+  }, [gravando, pararMonitoramentoAudio]);
 
   const iniciarGravacao = async () => {
     try {
       setErro(null);
 
       // Solicitar permissão para usar o microfone
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        }
+      });
+
+      streamRef.current = stream;
+
+      // Configurar análise de áudio para visualização de níveis
+      const audioContext = new AudioContext();
+      audioContextRef.current = audioContext;
+
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.8;
+      analyserRef.current = analyser;
+
+      const source = audioContext.createMediaStreamSource(stream);
+      source.connect(analyser);
+
+      // Monitorar níveis de áudio
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const atualizarNivel = () => {
+        if (!analyserRef.current) return;
+        analyserRef.current.getByteFrequencyData(dataArray);
+        const soma = dataArray.reduce((acc, val) => acc + val, 0);
+        const media = soma / dataArray.length;
+        setNivelAudio(Math.min(100, (media / 128) * 100));
+        animationFrameRef.current = requestAnimationFrame(atualizarNivel);
+      };
+      atualizarNivel();
 
       // Configurar MediaRecorder
       const mediaRecorder = new MediaRecorder(stream, {
@@ -67,8 +123,12 @@ export function GravadorAudio({
         const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
         const duracaoReal = Math.floor((Date.now() - inicioGravacaoRef.current) / 1000);
 
+        // Parar monitoramento de áudio
+        pararMonitoramentoAudio();
+
         // Parar todas as tracks do stream
         stream.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
 
         // Transcrever áudio
         await transcreverAudio(audioBlob, duracaoReal);
@@ -156,12 +216,45 @@ export function GravadorAudio({
   const tempoRestante = tempoMaximo - tempoDecorrido;
   const porcentagemTempo = (tempoDecorrido / tempoMaximo) * 100;
 
+  // Gerar barras do indicador de nível
+  const getNivelBarras = () => {
+    const barras = [];
+    const numBarras = 15;
+    const nivelPorBarra = 100 / numBarras;
+
+    for (let i = 0; i < numBarras; i++) {
+      const limiar = i * nivelPorBarra;
+      const ativo = nivelAudio > limiar;
+
+      let cor = "bg-green-500";
+      if (i >= numBarras * 0.7) {
+        cor = "bg-red-500";
+      } else if (i >= numBarras * 0.5) {
+        cor = "bg-yellow-500";
+      }
+
+      barras.push(
+        <div
+          key={i}
+          className={cn(
+            "w-1.5 rounded-full transition-all duration-75",
+            ativo ? cor : "bg-gray-200"
+          )}
+          style={{
+            height: `${12 + i * 1.5}px`,
+          }}
+        />
+      );
+    }
+    return barras;
+  };
+
   return (
     <div className="flex flex-col items-center gap-4">
       {/* Timer */}
       {gravando && (
         <div className="flex flex-col items-center gap-2">
-          <div className="text-2xl font-mono font-bold">
+          <div className="text-4xl font-mono font-bold text-gray-900">
             {formatarTempo(tempoDecorrido)}
           </div>
           <div className="w-64 h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -176,6 +269,27 @@ export function GravadorAudio({
           <div className="text-sm text-gray-500">
             Tempo restante: {formatarTempo(tempoRestante)}
           </div>
+        </div>
+      )}
+
+      {/* Indicador de nível de áudio */}
+      {gravando && (
+        <div className="flex flex-col items-center gap-2 mt-2">
+          <div className="flex items-center justify-center gap-1 h-10">
+            {getNivelBarras()}
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <Volume2 className="h-4 w-4" />
+            <span>Nível: {Math.round(nivelAudio)}%</span>
+          </div>
+        </div>
+      )}
+
+      {/* Indicador visual de gravação */}
+      {gravando && (
+        <div className="flex items-center gap-2 text-red-500 animate-pulse">
+          <div className="w-3 h-3 bg-red-500 rounded-full" />
+          <span className="text-sm font-medium">Gravando...</span>
         </div>
       )}
 
@@ -217,14 +331,6 @@ export function GravadorAudio({
       {erro && (
         <div className="text-sm text-red-500 text-center max-w-md">
           {erro}
-        </div>
-      )}
-
-      {/* Indicador visual de gravação */}
-      {gravando && (
-        <div className="flex items-center gap-2 text-red-500 animate-pulse">
-          <div className="w-3 h-3 bg-red-500 rounded-full" />
-          <span className="text-sm font-medium">Gravando...</span>
         </div>
       )}
     </div>
