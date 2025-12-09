@@ -40,43 +40,58 @@ export async function POST(request: Request) {
       size: audioFile.size,
     });
 
-    // Determinar extensão baseada no tipo MIME
-    let extension = "webm";
-    const mimeType = audioFile.type || "audio/webm";
-
-    if (mimeType.includes("wav")) {
-      extension = "wav";
-    } else if (mimeType.includes("mp3") || mimeType.includes("mpeg")) {
-      extension = "mp3";
-    } else if (mimeType.includes("mp4")) {
-      extension = "mp4";
-    } else if (mimeType.includes("ogg")) {
-      extension = "ogg";
-    } else if (mimeType.includes("flac")) {
-      extension = "flac";
-    } else if (mimeType.includes("webm")) {
-      extension = "webm";
-    }
-
-    // Converter File para Buffer e criar objeto compatível com OpenAI
+    // Converter File para Buffer
     const arrayBuffer = await audioFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Criar arquivo no formato esperado pela OpenAI SDK
-    const fileName = `audio.${extension}`;
+    // Verificar se o arquivo tem conteúdo
+    if (buffer.length === 0) {
+      return NextResponse.json(
+        { error: "Arquivo de áudio vazio" },
+        { status: 400 }
+      );
+    }
+
+    // Usar extensão do nome original do arquivo ou detectar pelo tipo
+    let fileName = audioFile.name || "audio.webm";
+
+    // Se o nome não tem extensão válida, adicionar baseado no tipo
+    const validExtensions = ["flac", "m4a", "mp3", "mp4", "mpeg", "mpga", "oga", "ogg", "wav", "webm"];
+    const currentExt = fileName.split(".").pop()?.toLowerCase();
+
+    if (!currentExt || !validExtensions.includes(currentExt)) {
+      // Determinar extensão baseada no tipo MIME
+      const mimeType = audioFile.type || "";
+      if (mimeType.includes("webm")) {
+        fileName = "audio.webm";
+      } else if (mimeType.includes("ogg")) {
+        fileName = "audio.ogg";
+      } else if (mimeType.includes("wav")) {
+        fileName = "audio.wav";
+      } else if (mimeType.includes("mp3") || mimeType.includes("mpeg")) {
+        fileName = "audio.mp3";
+      } else if (mimeType.includes("mp4")) {
+        fileName = "audio.mp4";
+      } else if (mimeType.includes("flac")) {
+        fileName = "audio.flac";
+      } else {
+        // Padrão para webm que é o formato do navegador
+        fileName = "audio.webm";
+      }
+    }
 
     console.log("Enviando para Whisper:", {
       fileName,
-      mimeType,
+      originalType: audioFile.type,
       size: buffer.length,
     });
 
-    // Transcrever com OpenAI Whisper usando toFile
-    const file = await toFile(buffer, fileName, { type: mimeType });
+    // Transcrever com OpenAI Whisper - NÃO passar o type, deixar a SDK detectar pela extensão
+    const file = await toFile(buffer, fileName);
     const transcription = await openai.audio.transcriptions.create({
       file: file,
       model: "whisper-1",
-      language: "pt", // Português
+      language: "pt",
       response_format: "json",
     });
 
