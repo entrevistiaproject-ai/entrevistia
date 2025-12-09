@@ -254,10 +254,7 @@ export function GravadorAudio({
       );
     } finally {
       setTranscrevendo(false);
-      // Parar timer geral ao finalizar
-      if (timerGeralRef.current) {
-        clearInterval(timerGeralRef.current);
-      }
+      // Timer continua correndo - não para após transcrição
     }
   };
 
@@ -354,7 +351,7 @@ export function GravadorAudio({
           />
         </div>
         <div className="text-sm text-gray-500">
-          {gravando ? "Gravando - Tempo restante" : transcrevendo ? "Processando áudio..." : "Tempo disponível para resposta"}
+          Tempo restante para responder
         </div>
       </div>
 
