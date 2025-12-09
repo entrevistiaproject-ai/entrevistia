@@ -16,12 +16,12 @@ NEXTAUTH_SECRET=6gygh7BEJBcaBFPSi/ZzNDUaLVdiI6pC+MD6J205Wao=
 
 ### 3. AUTH_URL (para produção)
 ```
-AUTH_URL=https://seu-dominio.vercel.app
+AUTH_URL=https://entrevistia.vercel.app
 ```
 
 ### 4. NEXTAUTH_URL (compatibilidade com código legado)
 ```
-NEXTAUTH_URL=https://seu-dominio.vercel.app
+NEXTAUTH_URL=https://entrevistia.vercel.app
 ```
 
 ### 5. DATABASE_URL
