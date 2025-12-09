@@ -7,15 +7,12 @@ import { z } from 'zod';
 export const getInterviewInfoTool = tool(
   async ({ entrevistaId }: { entrevistaId: string }) => {
     // Esta função será chamada pelo agente quando precisar de informações da vaga
-    const { db } = await import('@/db/client');
-    const { entrevistas, vagas } = await import('@/db/schema');
+    const { db } = await import('@/lib/db');
+    const { entrevistas } = await import('@/lib/db/schema');
     const { eq } = await import('drizzle-orm');
 
     const entrevista = await db.query.entrevistas.findFirst({
       where: eq(entrevistas.id, entrevistaId),
-      with: {
-        vaga: true,
-      },
     });
 
     if (!entrevista) {
@@ -25,11 +22,10 @@ export const getInterviewInfoTool = tool(
     return {
       titulo: entrevista.titulo,
       descricao: entrevista.descricao,
-      vaga: entrevista.vaga ? {
-        titulo: entrevista.vaga.titulo,
-        descricao: entrevista.vaga.descricao,
-        requisitos: entrevista.vaga.requisitos,
-      } : null,
+      cargo: entrevista.cargo,
+      nivel: entrevista.nivel,
+      empresa: entrevista.empresa,
+      requisitos: entrevista.requisitos,
     };
   },
   {

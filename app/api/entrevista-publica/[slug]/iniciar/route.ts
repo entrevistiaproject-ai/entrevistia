@@ -46,7 +46,6 @@ export async function POST(
       .where(
         and(
           eq(entrevistas.slug, slug),
-          eq(entrevistas.status, "publicada"),
           isNull(entrevistas.deletedAt)
         )
       );

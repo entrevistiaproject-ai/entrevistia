@@ -18,6 +18,7 @@ export const entrevistas = pgTable("entrevistas", {
   cargo: text("cargo"),
   nivel: text("nivel"), // junior, pleno, senior, especialista, etc.
   empresa: text("empresa"),
+  requisitos: text("requisitos"), // requisitos técnicos da vaga
 
   // Status
   status: text("status").notNull().default("active"), // active (ativa), completed (concluída), archived (arquivada)

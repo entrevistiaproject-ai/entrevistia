@@ -33,7 +33,6 @@ export async function GET(
       .where(
         and(
           eq(entrevistas.slug, slug),
-          eq(entrevistas.status, "publicada"),
           isNull(entrevistas.deletedAt)
         )
       );
