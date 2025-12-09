@@ -176,7 +176,7 @@ export default function ResultadoCandidatoPage() {
 
       toast({
         title: "Análise iniciada",
-        description: "O Claude está analisando a entrevista. Isso pode levar alguns segundos...",
+        description: "A IA está analisando a entrevista. Isso pode levar alguns segundos...",
       });
 
       const response = await fetch('/api/analise-entrevista', {
