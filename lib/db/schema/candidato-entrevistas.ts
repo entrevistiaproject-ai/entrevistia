@@ -1,6 +1,16 @@
-import { pgTable, uuid, timestamp, text, boolean, real } from "drizzle-orm/pg-core";
+import { pgTable, uuid, timestamp, text, boolean, real, jsonb } from "drizzle-orm/pg-core";
 import { candidatos } from "./candidatos";
 import { entrevistas } from "./entrevistas";
+
+/**
+ * Interface para avaliação de competência individual
+ */
+export interface CompetenciaAvaliada {
+  nome: string;
+  categoria: "Técnicas" | "Comunicação" | "Comportamental" | "Trabalho em Equipe" | "Fit Cultural";
+  nota: number; // 0-100
+  descricao: string;
+}
 
 /**
  * Tabela de associação entre candidatos e entrevistas
@@ -31,6 +41,7 @@ export const candidatoEntrevistas = pgTable("candidato_entrevistas", {
   notaGeral: real("nota_geral"), // Nota de 0 a 10
   recomendacao: text("recomendacao"), // 'recomendado', 'recomendado_com_ressalvas', 'nao_recomendado'
   resumoGeral: text("resumo_geral"), // Resumo executivo da avaliação
+  competencias: jsonb("competencias").$type<CompetenciaAvaliada[]>(), // Avaliação detalhada por competência
   avaliadoEm: timestamp("avaliado_em", { mode: "date" }),
 
   // Auditoria

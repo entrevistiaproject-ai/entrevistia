@@ -33,6 +33,7 @@ export async function GET(
         notaGeral: candidatoEntrevistas.notaGeral,
         recomendacao: candidatoEntrevistas.recomendacao,
         resumoGeral: candidatoEntrevistas.resumoGeral,
+        competencias: candidatoEntrevistas.competencias,
         avaliadoEm: candidatoEntrevistas.avaliadoEm,
         concluidaEm: candidatoEntrevistas.concluidaEm,
       })

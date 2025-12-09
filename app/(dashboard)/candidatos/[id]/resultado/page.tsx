@@ -47,25 +47,39 @@ interface PerguntaResposta {
   };
 }
 
+interface Competencia {
+  nome: string;
+  categoria: "Técnicas" | "Comunicação" | "Comportamental" | "Trabalho em Equipe" | "Fit Cultural";
+  nota: number;
+  descricao: string;
+}
+
 interface Participacao {
   status: string;
   notaGeral: number | null;
   recomendacao: string | null;
   resumoGeral: string | null;
+  competencias: Competencia[] | null;
   avaliadoEm: Date | null;
   concluidaEm: Date | null;
 }
 
 const getScoreColor = (score: number) => {
-  if (score >= 8.5) return "text-green-600";
-  if (score >= 7.0) return "text-yellow-600";
+  if (score >= 85) return "text-green-600";
+  if (score >= 70) return "text-yellow-600";
   return "text-red-600";
 };
 
+const getScoreBgColor = (score: number) => {
+  if (score >= 85) return "bg-green-500";
+  if (score >= 70) return "bg-yellow-500";
+  return "bg-red-500";
+};
+
 const getScoreLabel = (score: number) => {
-  if (score >= 8.5) return "Excelente";
-  if (score >= 7.0) return "Bom";
-  if (score >= 5.0) return "Regular";
+  if (score >= 85) return "Excelente";
+  if (score >= 70) return "Bom";
+  if (score >= 50) return "Regular";
   return "Insuficiente";
 };
 
@@ -135,6 +149,17 @@ function parseResumoGeral(resumo: string | null) {
   return { texto: textoBase, pontosFortes, pontosMelhoria };
 }
 
+// Calcula médias por categoria
+function calcularMediasPorCategoria(competencias: Competencia[]) {
+  const categorias = Array.from(new Set(competencias.map(c => c.categoria)));
+  return categorias.reduce((acc, categoria) => {
+    const comps = competencias.filter(c => c.categoria === categoria);
+    const media = comps.reduce((sum, c) => sum + c.nota, 0) / comps.length;
+    acc[categoria] = Math.round(media);
+    return acc;
+  }, {} as Record<string, number>);
+}
+
 export default function ResultadoCandidatoPage() {
   const params = useParams();
   const router = useRouter();
@@ -144,6 +169,7 @@ export default function ResultadoCandidatoPage() {
   const [candidato, setCandidato] = useState<Candidato | null>(null);
   const [participacao, setParticipacao] = useState<Participacao | null>(null);
   const [perguntasRespostas, setPerguntasRespostas] = useState<PerguntaResposta[]>([]);
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>("todas");
 
   const candidatoId = params.id as string;
 
@@ -270,6 +296,14 @@ export default function ResultadoCandidatoPage() {
   const temAvaliacao = participacao?.notaGeral !== null && participacao?.notaGeral !== undefined;
   const { texto: resumoTexto, pontosFortes, pontosMelhoria } = parseResumoGeral(participacao?.resumoGeral || null);
 
+  // Competências e médias
+  const competencias = participacao?.competencias || [];
+  const categorias = Array.from(new Set(competencias.map(c => c.categoria)));
+  const mediaPorCategoria = competencias.length > 0 ? calcularMediasPorCategoria(competencias) : {};
+  const competenciasFiltradas = categoriaSelecionada === "todas"
+    ? competencias
+    : competencias.filter(c => c.categoria === categoriaSelecionada);
+
   return (
     <div className="space-y-6 pb-8">
       {/* Header */}
@@ -348,16 +382,16 @@ export default function ResultadoCandidatoPage() {
                       fill="none"
                       strokeDasharray={`${2 * Math.PI * 88}`}
                       strokeDashoffset={`${2 * Math.PI * 88 * (1 - (participacao?.notaGeral || 0) / 10)}`}
-                      className={getScoreColor(participacao?.notaGeral || 0)}
+                      className={getScoreColor((participacao?.notaGeral || 0) * 10)}
                       strokeLinecap="round"
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className={`text-5xl font-bold ${getScoreColor(participacao?.notaGeral || 0)}`}>
+                    <span className={`text-5xl font-bold ${getScoreColor((participacao?.notaGeral || 0) * 10)}`}>
                       {participacao?.notaGeral?.toFixed(1)}
                     </span>
                     <span className="text-sm text-muted-foreground mt-1">
-                      {getScoreLabel(participacao?.notaGeral || 0)}
+                      {getScoreLabel((participacao?.notaGeral || 0) * 10)}
                     </span>
                   </div>
                 </div>
@@ -454,6 +488,109 @@ export default function ResultadoCandidatoPage() {
             </Card>
           )}
         </div>
+      )}
+
+      {/* Competências Avaliadas */}
+      {competencias.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Competências Avaliadas</CardTitle>
+            <CardDescription>Análise detalhada por categoria de competências</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Médias por Categoria */}
+            <div>
+              <h3 className="text-sm font-semibold mb-4">Médias por Categoria</h3>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {categorias.map((categoria) => {
+                  const media = mediaPorCategoria[categoria];
+                  return (
+                    <div
+                      key={categoria}
+                      className={`p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors cursor-pointer ${
+                        categoriaSelecionada === categoria ? 'ring-2 ring-primary' : ''
+                      }`}
+                      onClick={() => setCategoriaSelecionada(categoria === categoriaSelecionada ? "todas" : categoria)}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">{categoria}</span>
+                        <span className={`text-lg font-bold ${getScoreColor(media)}`}>
+                          {media}
+                        </span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full transition-all ${getScoreBgColor(media)}`}
+                          style={{ width: `${media}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Filtro de Categorias */}
+            <div>
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <Button
+                  variant={categoriaSelecionada === "todas" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCategoriaSelecionada("todas")}
+                >
+                  Todas
+                </Button>
+                {categorias.map((categoria) => (
+                  <Button
+                    key={categoria}
+                    variant={categoriaSelecionada === categoria ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCategoriaSelecionada(categoria)}
+                  >
+                    {categoria}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Lista de Competências */}
+            <div className="space-y-4">
+              {competenciasFiltradas.map((competencia, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">{competencia.nome}</p>
+                      <p className="text-xs text-muted-foreground">{competencia.descricao}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge
+                        variant="outline"
+                        className={`${
+                          competencia.nota >= 85 ? 'bg-green-100 text-green-800' :
+                          competencia.nota >= 70 ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}
+                      >
+                        {getScoreLabel(competencia.nota)}
+                      </Badge>
+                      <span className={`text-xl font-bold min-w-12 text-right ${getScoreColor(competencia.nota)}`}>
+                        {competencia.nota}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2.5">
+                    <div
+                      className={`h-2.5 rounded-full transition-all ${getScoreBgColor(competencia.nota)}`}
+                      style={{ width: `${competencia.nota}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Perguntas e Respostas */}

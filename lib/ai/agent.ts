@@ -1,8 +1,18 @@
 import { ChatAnthropic } from '@langchain/anthropic';
 import { getDB } from '@/lib/db';
-import { entrevistas, respostas, perguntas, candidatoEntrevistas } from '@/lib/db/schema';
+import { entrevistas, respostas, perguntas, candidatoEntrevistas, CompetenciaAvaliada } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { z } from 'zod';
+
+/**
+ * Schema para competência individual
+ */
+const CompetenciaSchema = z.object({
+  nome: z.string(),
+  categoria: z.enum(['Técnicas', 'Comunicação', 'Comportamental', 'Trabalho em Equipe', 'Fit Cultural']),
+  nota: z.number().min(0).max(100),
+  descricao: z.string(),
+});
 
 /**
  * Schema para validar a resposta da IA
@@ -13,6 +23,7 @@ const AnalysisSchema = z.object({
   pontosFortes: z.array(z.string()),
   pontosMelhoria: z.array(z.string()),
   recomendacao: z.enum(['recomendado', 'recomendado_com_ressalvas', 'nao_recomendado']),
+  competencias: z.array(CompetenciaSchema),
 });
 
 /**
@@ -116,8 +127,34 @@ Analise as respostas acima e retorne APENAS um objeto JSON com esta estrutura ex
   "resumoGeral": "<resumo da performance do candidato>",
   "pontosFortes": ["<ponto forte 1>", "<ponto forte 2>", "<ponto forte 3>"],
   "pontosMelhoria": ["<ponto melhoria 1>", "<ponto melhoria 2>", "<ponto melhoria 3>"],
-  "recomendacao": "<recomendado | recomendado_com_ressalvas | nao_recomendado>"
+  "recomendacao": "<recomendado | recomendado_com_ressalvas | nao_recomendado>",
+  "competencias": [
+    // TÉCNICAS
+    {"nome": "Conhecimento Técnico", "categoria": "Técnicas", "nota": <0-100>, "descricao": "Domínio de ferramentas e tecnologias"},
+    {"nome": "Resolução de Problemas", "categoria": "Técnicas", "nota": <0-100>, "descricao": "Capacidade analítica e lógica"},
+    {"nome": "Qualidade e Detalhes", "categoria": "Técnicas", "nota": <0-100>, "descricao": "Atenção aos detalhes"},
+    {"nome": "Aprendizado Técnico", "categoria": "Técnicas", "nota": <0-100>, "descricao": "Capacidade de aprender novas tecnologias"},
+    // COMUNICAÇÃO
+    {"nome": "Clareza Verbal", "categoria": "Comunicação", "nota": <0-100>, "descricao": "Expressão clara e objetiva"},
+    {"nome": "Escuta Ativa", "categoria": "Comunicação", "nota": <0-100>, "descricao": "Atenção e compreensão"},
+    {"nome": "Capacidade de Síntese", "categoria": "Comunicação", "nota": <0-100>, "descricao": "Resumir ideias complexas"},
+    // COMPORTAMENTAL
+    {"nome": "Proatividade", "categoria": "Comportamental", "nota": <0-100>, "descricao": "Iniciativa e autonomia"},
+    {"nome": "Adaptabilidade", "categoria": "Comportamental", "nota": <0-100>, "descricao": "Flexibilidade a mudanças"},
+    {"nome": "Resiliência", "categoria": "Comportamental", "nota": <0-100>, "descricao": "Gestão de pressão"},
+    // TRABALHO EM EQUIPE
+    {"nome": "Colaboração", "categoria": "Trabalho em Equipe", "nota": <0-100>, "descricao": "Trabalho em grupo"},
+    {"nome": "Compartilhamento de Conhecimento", "categoria": "Trabalho em Equipe", "nota": <0-100>, "descricao": "Ensinar e aprender com o time"},
+    // FIT CULTURAL
+    {"nome": "Motivação", "categoria": "Fit Cultural", "nota": <0-100>, "descricao": "Interesse genuíno pela vaga"}
+  ]
 }
+
+IMPORTANTE para as competências:
+- Avalie TODAS as 13 competências listadas acima
+- A nota deve ser de 0 a 100 (não 0 a 10)
+- Base sua avaliação nas respostas da entrevista
+- Se não houver evidências suficientes para avaliar uma competência, atribua nota 50 (neutra)
 
 Retorne APENAS o JSON, sem texto adicional, sem markdown, sem explicações.`;
 
@@ -144,12 +181,21 @@ Retorne APENAS o JSON, sem texto adicional, sem markdown, sem explicações.`;
     const db = getDB();
     const resumoCompleto = `${analysis.resumoGeral}\n\n**Pontos Fortes:**\n${analysis.pontosFortes.map(p => `- ${p}`).join('\n')}\n\n**Pontos de Melhoria:**\n${analysis.pontosMelhoria.map(p => `- ${p}`).join('\n')}`;
 
+    // Mapeia as competências para o tipo correto
+    const competenciasTyped: CompetenciaAvaliada[] = analysis.competencias.map(c => ({
+      nome: c.nome,
+      categoria: c.categoria,
+      nota: c.nota,
+      descricao: c.descricao,
+    }));
+
     const [updated] = await db
       .update(candidatoEntrevistas)
       .set({
         notaGeral: analysis.notaGeral,
         resumoGeral: resumoCompleto,
         recomendacao: analysis.recomendacao,
+        competencias: competenciasTyped,
         avaliadoEm: new Date(),
         updatedAt: new Date(),
       })
