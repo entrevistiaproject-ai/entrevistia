@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
-import Groq from "groq-sdk";
+import OpenAI from "openai";
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY || "placeholder-for-build",
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || "placeholder-for-build",
 });
 
 export async function POST(request: Request) {
   try {
-    if (!process.env.GROQ_API_KEY) {
+    if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
-        { error: "GROQ_API_KEY não configurada" },
+        { error: "OPENAI_API_KEY não configurada" },
         { status: 500 }
       );
     }
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verificar tamanho do arquivo (25MB no free tier)
+    // Verificar tamanho do arquivo (25MB limite da OpenAI)
     const maxSize = 25 * 1024 * 1024; // 25MB
     if (audioFile.size > maxSize) {
       return NextResponse.json(
@@ -33,13 +33,12 @@ export async function POST(request: Request) {
       );
     }
 
-    // Transcrever com Groq Whisper Large v3 Turbo
-    const transcription = await groq.audio.transcriptions.create({
+    // Transcrever com OpenAI Whisper
+    const transcription = await openai.audio.transcriptions.create({
       file: audioFile,
-      model: "whisper-large-v3-turbo",
+      model: "whisper-1",
       language: "pt", // Português
       response_format: "json",
-      temperature: 0.0, // Maior precisão
     });
 
     return NextResponse.json({
