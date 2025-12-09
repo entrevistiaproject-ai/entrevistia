@@ -10,6 +10,8 @@ import {
   ArrowLeft,
   CheckCircle2,
   XCircle,
+  TrendingUp,
+  TrendingDown,
   AlertCircle,
   Loader2,
   RefreshCw,
@@ -100,6 +102,38 @@ const getRecomendacaoConfig = (recomendacao: string | null) => {
       return null;
   }
 };
+
+// Parse do resumoGeral para extrair pontos fortes e de melhoria
+function parseResumoGeral(resumo: string | null) {
+  if (!resumo) return { texto: '', pontosFortes: [], pontosMelhoria: [] };
+
+  const parts = resumo.split('**Pontos Fortes:**');
+  const textoBase = parts[0]?.trim() || '';
+
+  let pontosFortes: string[] = [];
+  let pontosMelhoria: string[] = [];
+
+  if (parts[1]) {
+    const fortesEMelhoria = parts[1].split('**Pontos de Melhoria:**');
+
+    // Extrair pontos fortes
+    const fortesText = fortesEMelhoria[0] || '';
+    pontosFortes = fortesText
+      .split('\n')
+      .filter(line => line.trim().startsWith('- '))
+      .map(line => line.trim().substring(2));
+
+    // Extrair pontos de melhoria
+    if (fortesEMelhoria[1]) {
+      pontosMelhoria = fortesEMelhoria[1]
+        .split('\n')
+        .filter(line => line.trim().startsWith('- '))
+        .map(line => line.trim().substring(2));
+    }
+  }
+
+  return { texto: textoBase, pontosFortes, pontosMelhoria };
+}
 
 export default function ResultadoCandidatoPage() {
   const params = useParams();
@@ -234,6 +268,7 @@ export default function ResultadoCandidatoPage() {
   const recomendacaoConfig = getRecomendacaoConfig(participacao?.recomendacao || null);
   const RecomendacaoIcon = recomendacaoConfig?.icon;
   const temAvaliacao = participacao?.notaGeral !== null && participacao?.notaGeral !== undefined;
+  const { texto: resumoTexto, pontosFortes, pontosMelhoria } = parseResumoGeral(participacao?.resumoGeral || null);
 
   return (
     <div className="space-y-6 pb-8">
@@ -357,30 +392,68 @@ export default function ResultadoCandidatoPage() {
         </div>
       )}
 
-      {/* Resumo da Avaliação (se tiver) */}
-      {participacao?.resumoGeral && (
+      {/* Resumo Executivo (se tiver) */}
+      {resumoTexto && (
         <Card>
           <CardHeader>
-            <CardTitle>Resumo da Avaliação</CardTitle>
-            <CardDescription>Análise detalhada gerada pela IA</CardDescription>
+            <CardTitle>Resumo Executivo</CardTitle>
+            <CardDescription>Visão geral do desempenho do candidato</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="prose prose-sm max-w-none">
-              {participacao.resumoGeral.split('\n').map((line, i) => {
-                if (line.startsWith('**') && line.endsWith('**')) {
-                  return <h4 key={i} className="font-semibold mt-4 mb-2">{line.replace(/\*\*/g, '')}</h4>;
-                }
-                if (line.startsWith('- ')) {
-                  return <li key={i} className="ml-4">{line.substring(2)}</li>;
-                }
-                if (line.trim()) {
-                  return <p key={i} className="text-sm text-muted-foreground">{line}</p>;
-                }
-                return null;
-              })}
-            </div>
+            <p className="text-sm leading-relaxed">{resumoTexto}</p>
           </CardContent>
         </Card>
+      )}
+
+      {/* Pontos Fortes e de Melhoria */}
+      {(pontosFortes.length > 0 || pontosMelhoria.length > 0) && (
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Pontos Fortes */}
+          {pontosFortes.length > 0 && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-green-600" />
+                  <CardTitle>Pontos Fortes</CardTitle>
+                </div>
+                <CardDescription>Competências e qualidades destacadas</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  {pontosFortes.map((ponto, index) => (
+                    <li key={index} className="flex gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                      <span className="text-sm">{ponto}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Pontos de Melhoria */}
+          {pontosMelhoria.length > 0 && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <TrendingDown className="h-5 w-5 text-orange-600" />
+                  <CardTitle>Pontos de Atenção</CardTitle>
+                </div>
+                <CardDescription>Áreas para desenvolvimento</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  {pontosMelhoria.map((ponto, index) => (
+                    <li key={index} className="flex gap-3">
+                      <AlertCircle className="h-5 w-5 text-orange-600 shrink-0 mt-0.5" />
+                      <span className="text-sm">{ponto}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       )}
 
       {/* Perguntas e Respostas */}
