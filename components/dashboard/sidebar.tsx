@@ -12,7 +12,9 @@ import {
   DollarSign,
   User,
   HelpCircle,
+  LogOut,
 } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 const mainMenuItems = [
   {
@@ -69,10 +71,10 @@ export function Sidebar() {
     fetch("/api/user")
       .then((res) => res.json())
       .then((data) => {
-        if (data.user) {
+        if (data.email) {
           setUserInfo({
-            nome: data.user.nome,
-            email: data.user.email,
+            nome: data.nome,
+            email: data.email,
           });
         }
       })
@@ -174,6 +176,13 @@ export function Sidebar() {
                   {userInfo.email}
                 </p>
               </div>
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="p-2 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                title="Sair"
+              >
+                <LogOut className="h-5 w-5" />
+              </button>
             </div>
           ) : (
             <div className="flex items-center gap-3 animate-pulse">

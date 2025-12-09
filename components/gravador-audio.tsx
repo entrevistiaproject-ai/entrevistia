@@ -30,6 +30,7 @@ export function GravadorAudio({
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const mimeTypeRef = useRef<string>("audio/webm");
 
   const pararMonitoramentoAudio = useCallback(() => {
     if (animationFrameRef.current) {
@@ -102,9 +103,17 @@ export function GravadorAudio({
       };
       atualizarNivel();
 
-      // Configurar MediaRecorder
+      // Configurar MediaRecorder - usar formato compatível com OpenAI Whisper
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : MediaRecorder.isTypeSupported("audio/mp4")
+        ? "audio/mp4"
+        : "audio/webm";
+
+      mimeTypeRef.current = mimeType;
+
       const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: "audio/webm",
+        mimeType,
       });
 
       mediaRecorderRef.current = mediaRecorder;
@@ -120,7 +129,7 @@ export function GravadorAudio({
 
       // Quando a gravação terminar
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const audioBlob = new Blob(chunksRef.current, { type: mimeTypeRef.current });
         const duracaoReal = Math.floor((Date.now() - inicioGravacaoRef.current) / 1000);
 
         // Parar monitoramento de áudio
@@ -175,9 +184,12 @@ export function GravadorAudio({
       setTranscrevendo(true);
       setErro(null);
 
+      // Determinar extensão baseada no mimeType
+      const extensao = mimeTypeRef.current.includes("mp4") ? "mp4" : "webm";
+
       // Preparar FormData
       const formData = new FormData();
-      formData.append("audio", audioBlob, "gravacao.webm");
+      formData.append("audio", audioBlob, `gravacao.${extensao}`);
 
       // Enviar para API de transcrição
       const response = await fetch("/api/transcricao", {

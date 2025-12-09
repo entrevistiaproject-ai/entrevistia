@@ -33,9 +33,15 @@ export async function POST(request: Request) {
       );
     }
 
+    // Garantir que o arquivo tenha extensão correta para o Whisper
+    const fileName = audioFile.name || "audio.webm";
+    const fileWithName = new File([audioFile], fileName, {
+      type: audioFile.type || "audio/webm",
+    });
+
     // Transcrever com OpenAI Whisper
     const transcription = await openai.audio.transcriptions.create({
-      file: audioFile,
+      file: fileWithName,
       model: "whisper-1",
       language: "pt", // Português
       response_format: "json",

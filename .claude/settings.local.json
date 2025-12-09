@@ -47,7 +47,8 @@
       "Bash(psql:*)",
       "Bash(node scripts/verificar-consistencia-perguntas.js:*)",
       "Bash(node scripts/verificar-consistencia-final.js:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npm uninstall:*)"
     ],
     "deny": [],
     "ask": []
