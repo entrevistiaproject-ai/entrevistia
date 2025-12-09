@@ -37,6 +37,7 @@ export async function POST(
       .set({
         status: "concluida",
         concluidaEm: new Date(),
+        updatedAt: new Date(),
       })
       .where(eq(candidatoEntrevistas.id, sessaoId))
       .returning();
