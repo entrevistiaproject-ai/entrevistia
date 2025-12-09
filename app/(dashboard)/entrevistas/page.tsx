@@ -45,8 +45,9 @@ export default function EntrevistasPage() {
         }
 
         const data = await response.json();
-        setEntrevistas(data);
-        setFilteredEntrevistas(data);
+        const entrevistasList = data.entrevistas || data;
+        setEntrevistas(entrevistasList);
+        setFilteredEntrevistas(entrevistasList);
       } catch (error) {
         console.error("Erro ao buscar entrevistas:", error);
       } finally {
