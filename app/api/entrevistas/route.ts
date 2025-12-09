@@ -9,7 +9,10 @@ export async function GET(request: Request) {
     const db = getDB();
     const userId = await getUserId();
 
+    console.log("🔍 [GET /api/entrevistas] userId:", userId);
+
     if (!userId) {
+      console.log("❌ [GET /api/entrevistas] Usuário não autenticado");
       return NextResponse.json(
         { error: "Usuário não autenticado" },
         { status: 401 }
@@ -33,6 +36,9 @@ export async function GET(request: Request) {
       statusFilter ? eq(entrevistas.status, statusFilter) : undefined
     );
 
+    console.log("🔎 [GET /api/entrevistas] Filtrando por userId:", userId);
+    console.log("🔎 [GET /api/entrevistas] statusFilter:", statusFilter);
+
     const query = db
       .select({
         id: entrevistas.id,
@@ -50,20 +56,20 @@ export async function GET(request: Request) {
           SELECT COUNT(DISTINCT c.id)::int
           FROM ${candidatos} c
           INNER JOIN ${respostas} r ON r.candidato_id = c.id
-          WHERE r.entrevista_id = ${entrevistas.id}
+          WHERE r.entrevista_id = ${entrevistas}.id
             AND c.user_id = ${userId}
         )`,
         // Contagem de respostas
         totalRespostas: sql<number>`(
           SELECT COUNT(*)::int
           FROM ${respostas} r
-          WHERE r.entrevista_id = ${entrevistas.id}
+          WHERE r.entrevista_id = ${entrevistas}.id
         )`,
         // Contagem de perguntas
         totalPerguntas: sql<number>`(
           SELECT COUNT(*)::int
           FROM ${perguntas} p
-          WHERE p.entrevista_id = ${entrevistas.id}
+          WHERE p.entrevista_id = ${entrevistas}.id
             AND p.deleted_at IS NULL
         )`,
       })
@@ -72,6 +78,9 @@ export async function GET(request: Request) {
       .orderBy(desc(entrevistas.createdAt));
 
     const result = await query;
+
+    console.log("✅ [GET /api/entrevistas] Encontradas:", result.length, "entrevistas");
+    console.log("📊 [GET /api/entrevistas] Primeira entrevista:", result[0]);
 
     return NextResponse.json({ entrevistas: result });
   } catch (error) {
