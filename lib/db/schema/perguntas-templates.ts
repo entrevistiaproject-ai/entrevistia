@@ -3,12 +3,7 @@ import { users } from "./users";
 
 /**
  * Tabela de templates de perguntas
- * Banco de perguntas reutilizáveis com sistema de tags flexível
- *
- * Sistema de Tags:
- * - Perguntas podem ter múltiplos cargos, níveis, ou nenhum (universal)
- * - Tags vazias = pergunta universal para qualquer contexto
- * - Filtro inteligente seleciona perguntas por relevância semântica
+ * Banco de perguntas reutilizáveis - cada pergunta para 1 cargo e 1 nível específico
  */
 export const perguntasTemplates = pgTable("perguntas_templates", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -19,13 +14,13 @@ export const perguntasTemplates = pgTable("perguntas_templates", {
   // Dados da pergunta
   texto: text("texto").notNull(),
 
-  // Sistema de tags flexível - arrays podem estar vazios para perguntas universais
-  cargos: jsonb("cargos").$type<string[]>().notNull().default([]), // Ex: ["Advogado", "Desenvolvedor"] ou [] para universal
-  niveis: jsonb("niveis").$type<string[]>().notNull().default([]), // Ex: ["pleno", "senior"] ou [] para todos os níveis
+  // Cargo e nível específicos (simplificado)
+  cargo: text("cargo").notNull(), // Ex: "Desenvolvedor", "Advogado"
+  nivel: text("nivel").notNull(), // Ex: "junior", "pleno", "senior"
 
   // Categoria da competência avaliada
-  categoria: text("categoria").notNull(), // conhecimento, experiencia, resolucao_problemas, habilidades_pessoais, qualificacoes
-  competencia: text("competencia"), // Ex: "Direito Civil", "Comunicação" - opcional para perguntas genéricas
+  categoria: text("categoria").notNull(), // tecnica, comportamental, soft_skill, hard_skill
+  competencia: text("competencia"), // Ex: "Direito Civil", "Comunicação"
 
   // Tipo de pergunta
   tipo: text("tipo").notNull().default("texto"), // texto, video, audio
@@ -37,32 +32,8 @@ export const perguntasTemplates = pgTable("perguntas_templates", {
   criteriosAvaliacao: jsonb("criterios_avaliacao").$type<{
     palavrasChave?: string[];
     topicos?: string[];
-    competenciasEsperadas?: string[];
     aspectosAvaliar?: string[];
   }>(),
-
-  // Metadados para filtro inteligente
-  metadados: jsonb("metadados").$type<{
-    // Contextos onde a pergunta é relevante
-    contextos?: string[]; // Ex: ["entrevista técnica", "avaliação comportamental"]
-
-    // Áreas de conhecimento relacionadas
-    areasConhecimento?: string[]; // Ex: ["direito civil", "contratos", "negociação"]
-
-    // Senioridade sugerida (peso 0-1 para cada nível)
-    senioridadePesos?: {
-      junior?: number;
-      pleno?: number;
-      senior?: number;
-      especialista?: number;
-    };
-
-    // Score de relevância para diferentes tipos de vaga (calculado automaticamente)
-    relevanciaCalculada?: Record<string, number>;
-  }>(),
-
-  // Tags customizadas pelo usuário (extraídas automaticamente ou adicionadas manualmente)
-  tags: jsonb("tags").$type<string[]>().notNull().default([]),
 
   // Auditoria
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
@@ -70,5 +41,24 @@ export const perguntasTemplates = pgTable("perguntas_templates", {
   deletedAt: timestamp("deleted_at", { mode: "date" }),
 });
 
+/**
+ * Tabela de perguntas padrão ocultadas pelo usuário
+ * Permite que cada usuário oculte perguntas padrão do sistema sem deletá-las
+ */
+export const perguntasOcultas = pgTable("perguntas_ocultas", {
+  id: uuid("id").defaultRandom().primaryKey(),
+
+  // Usuário que ocultou a pergunta
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+
+  // Pergunta padrão que foi ocultada
+  perguntaId: uuid("pergunta_id").notNull().references(() => perguntasTemplates.id, { onDelete: "cascade" }),
+
+  // Quando foi ocultada
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+});
+
 export type PerguntaTemplate = typeof perguntasTemplates.$inferSelect;
 export type NewPerguntaTemplate = typeof perguntasTemplates.$inferInsert;
+export type PerguntaOculta = typeof perguntasOcultas.$inferSelect;
+export type NewPerguntaOculta = typeof perguntasOcultas.$inferInsert;

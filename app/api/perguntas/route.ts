@@ -10,19 +10,18 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {
       texto,
-      cargos = [], // Array de cargos ou vazio para universal
-      niveis = [], // Array de níveis ou vazio para universal
+      cargo,
+      nivel,
       categoria,
       competencia,
       tipo,
-      tags = [],
       criteriosAvaliacao,
     } = body;
 
     // Validação básica
-    if (!texto) {
+    if (!texto || !cargo || !nivel) {
       return NextResponse.json(
-        { error: "Texto é obrigatório" },
+        { error: "Texto, cargo e nível são obrigatórios" },
         { status: 400 }
       );
     }
@@ -38,14 +37,12 @@ export async function POST(request: Request) {
       .insert(perguntasTemplates)
       .values({
         texto,
-        cargos,
-        niveis,
+        cargo,
+        nivel,
         categoria: categoriaFinal,
         competencia: competencia || null,
         tipo: tipo || "texto",
-        tags,
         criteriosAvaliacao: criteriosAvaliacao || {},
-        metadados: {},
         isPadrao: false,
         userId,
       })
@@ -66,7 +63,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const db = getDB();
 
-    // Pega o userId (temporário - quando tiver auth real, pegar da sessão)
+    // Pega o userId
     const userId = await getUserId();
 
     // Busca perguntas padrão do sistema OU perguntas do próprio usuário
@@ -84,27 +81,22 @@ export async function GET(request: Request) {
       )
       .orderBy(desc(perguntasTemplates.createdAt));
 
-    // Se não há parâmetros de filtro, retorna todas
+    // Parâmetros de filtro
     const cargo = searchParams.get('cargo');
     const nivel = searchParams.get('nivel');
-    const descricao = searchParams.get('descricao');
-    const categorias = searchParams.get('categorias');
-    const limite = searchParams.get('limite');
+    const categoria = searchParams.get('categoria');
 
-    if (!cargo && !nivel && !descricao && !categorias) {
+    // Se não há parâmetros de filtro, retorna todas
+    if (!cargo && !nivel && !categoria) {
       return NextResponse.json(perguntas);
     }
 
-    // Aplica filtro inteligente
-    const { filtrarComDiversidade } = await import('@/lib/services/filtro-perguntas');
-
-    const perguntasFiltradas = filtrarComDiversidade(perguntas, {
-      cargo: cargo || undefined,
-      nivel: nivel || undefined,
-      descricao: descricao || undefined,
-      categorias: categorias ? categorias.split(',') : undefined,
-      limite: limite ? parseInt(limite) : undefined,
-      incluirUniversais: true,
+    // Filtro simples por cargo, nível e categoria
+    const perguntasFiltradas = perguntas.filter(p => {
+      if (cargo && p.cargo !== cargo) return false;
+      if (nivel && p.nivel !== nivel) return false;
+      if (categoria && p.categoria !== categoria) return false;
+      return true;
     });
 
     return NextResponse.json(perguntasFiltradas);

@@ -80,59 +80,33 @@ export function calcularScorePergunta(
   let score = 0;
   const motivos: string[] = [];
 
-  const cargos = (pergunta.cargos as string[] | null) || [];
-  const niveis = (pergunta.niveis as string[] | null) || [];
-  const tags = (pergunta.tags as string[] | null) || [];
-
   // 1. MATCH DE CARGO (peso: 40 pontos)
   if (params.cargo) {
-    if (cargos.length === 0) {
-      // Pergunta universal para cargo
-      score += 15;
-      motivos.push('Pergunta universal (aplicável a qualquer cargo)');
-    } else {
-      // Verifica similaridade com cada cargo da pergunta
-      const melhorMatchCargo = Math.max(
-        ...cargos.map(c => calcularSimilaridade(c, params.cargo!))
-      );
+    const similaridadeCargo = calcularSimilaridade(pergunta.cargo, params.cargo);
 
-      if (melhorMatchCargo >= 0.8) {
-        score += 40;
-        motivos.push(`Match exato de cargo: ${params.cargo}`);
-      } else if (melhorMatchCargo >= 0.5) {
-        score += 25;
-        motivos.push(`Match parcial de cargo (${Math.round(melhorMatchCargo * 100)}%)`);
-      } else {
-        // Verifica nas tags também
-        const matchTag = tags.some(tag =>
-          calcularSimilaridade(tag, params.cargo!) >= 0.6
-        );
-        if (matchTag) {
-          score += 20;
-          motivos.push('Cargo encontrado nas tags');
-        }
-      }
+    if (similaridadeCargo >= 0.8) {
+      score += 40;
+      motivos.push(`Match exato de cargo: ${params.cargo}`);
+    } else if (similaridadeCargo >= 0.5) {
+      score += 25;
+      motivos.push(`Match parcial de cargo (${Math.round(similaridadeCargo * 100)}%)`);
+    } else if (pergunta.cargo === 'Geral') {
+      // Perguntas gerais são aplicáveis a qualquer cargo
+      score += 15;
+      motivos.push('Pergunta geral (aplicável a qualquer cargo)');
     }
   }
 
   // 2. MATCH DE NÍVEL (peso: 30 pontos)
   if (params.nivel) {
-    if (niveis.length === 0) {
-      // Pergunta universal para nível
-      score += 20;
-      motivos.push('Pergunta universal (aplicável a qualquer nível)');
-    } else {
-      const melhorMatchNivel = Math.max(
-        ...niveis.map(n => calcularSimilaridade(n, params.nivel!))
-      );
+    const similaridadeNivel = calcularSimilaridade(pergunta.nivel, params.nivel);
 
-      if (melhorMatchNivel >= 0.8) {
-        score += 30;
-        motivos.push(`Match exato de nível: ${params.nivel}`);
-      } else if (melhorMatchNivel >= 0.5) {
-        score += 15;
-        motivos.push(`Match parcial de nível (${Math.round(melhorMatchNivel * 100)}%)`);
-      }
+    if (similaridadeNivel >= 0.8) {
+      score += 30;
+      motivos.push(`Match exato de nível: ${params.nivel}`);
+    } else if (similaridadeNivel >= 0.5) {
+      score += 15;
+      motivos.push(`Match parcial de nível (${Math.round(similaridadeNivel * 100)}%)`);
     }
   }
 
@@ -141,16 +115,9 @@ export function calcularScorePergunta(
     const palavrasChaveDescricao = extrairPalavrasChave(params.descricao);
     const palavrasChavePergunta = extrairPalavrasChave(pergunta.texto);
 
-    // Adiciona competência e critérios
+    // Adiciona competência
     if (pergunta.competencia) {
       palavrasChavePergunta.push(...extrairPalavrasChave(pergunta.competencia));
-    }
-
-    const metadados = pergunta.metadados as PerguntaTemplate['metadados'];
-    if (metadados?.areasConhecimento) {
-      metadados.areasConhecimento.forEach(area => {
-        palavrasChavePergunta.push(...extrairPalavrasChave(area));
-      });
     }
 
     // Conta palavras-chave em comum
@@ -175,13 +142,7 @@ export function calcularScorePergunta(
     }
   }
 
-  // 5. BONUS: Perguntas totalmente universais (peso extra)
-  if (cargos.length === 0 && niveis.length === 0 && params.incluirUniversais !== false) {
-    score += 5;
-    motivos.push('Pergunta totalmente universal');
-  }
-
-  // 6. BONUS: Perguntas padrão do sistema (mais testadas)
+  // 5. BONUS: Perguntas padrão do sistema (mais testadas)
   if (pergunta.isPadrao) {
     score += 3;
     motivos.push('Pergunta padrão do sistema');

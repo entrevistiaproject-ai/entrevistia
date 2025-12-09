@@ -59,17 +59,9 @@ async function demonstrarFiltro() {
       console.log(`   Perguntas encontradas: ${resultado.length}\n`);
 
       resultado.slice(0, 8).forEach((p, index) => {
-        const cargosDisplay = p.cargos && (p.cargos as string[]).length > 0
-          ? (p.cargos as string[]).join(', ')
-          : '🌍 Universal';
-
-        const niveisDisplay = p.niveis && (p.niveis as string[]).length > 0
-          ? (p.niveis as string[]).join(', ')
-          : 'Todos';
-
         console.log(`   ${index + 1}. [Score: ${p.score}] ${p.categoria.toUpperCase()}`);
         console.log(`      "${p.texto}"`);
-        console.log(`      📊 Cargos: ${cargosDisplay} | Níveis: ${niveisDisplay}`);
+        console.log(`      📊 Cargo: ${p.cargo} | Nível: ${p.nivel}`);
         console.log(`      💡 Motivos: ${p.motivoScore.join(', ')}\n`);
       });
     }

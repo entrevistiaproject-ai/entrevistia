@@ -20,8 +20,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
 import { AutocompleteCargo } from "@/components/entrevista/autocomplete-cargo";
 import { NIVEIS_HIERARQUICOS } from "@/lib/constants/niveis";
 
@@ -32,27 +30,15 @@ export function FormularioPergunta() {
   // Form state
   const [texto, setTexto] = useState("");
   const [cargo, setCargo] = useState("");
+  const [nivel, setNivel] = useState("");
   const [categoria, setCategoria] = useState("");
   const [competencia, setCompetencia] = useState("");
   const [tipo, setTipo] = useState("audio");
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
 
   // Critérios de avaliação
   const [palavrasChave, setPalavrasChave] = useState("");
   const [topicos, setTopicos] = useState("");
   const [aspectosAvaliar, setAspectosAvaliar] = useState("");
-
-  const handleAddTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()]);
-      setTagInput("");
-    }
-  };
-
-  const handleRemoveTag = (tag: string) => {
-    setTags(tags.filter((t) => t !== tag));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,11 +59,10 @@ export function FormularioPergunta() {
         body: JSON.stringify({
           texto,
           cargo,
-          nivel: "multinivel", // Valor padrão pois perguntas podem ser multiníveis
+          nivel,
           categoria,
           competencia,
           tipo,
-          tags,
           criteriosAvaliacao,
         }),
       });
@@ -118,16 +103,31 @@ export function FormularioPergunta() {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="cargo">Cargo *</Label>
-            <AutocompleteCargo
-              value={cargo}
-              onChange={setCargo}
-              placeholder="Digite ou selecione o cargo"
-            />
-            <p className="text-xs text-muted-foreground">
-              Selecione um cargo existente ou digite um novo
-            </p>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="cargo">Cargo *</Label>
+              <AutocompleteCargo
+                value={cargo}
+                onChange={setCargo}
+                placeholder="Digite ou selecione o cargo"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="nivel">Nível *</Label>
+              <Select value={nivel} onValueChange={setNivel} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o nível" />
+                </SelectTrigger>
+                <SelectContent>
+                  {NIVEIS_HIERARQUICOS.map((n) => (
+                    <SelectItem key={n.value} value={n.value}>
+                      {n.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -138,26 +138,23 @@ export function FormularioPergunta() {
                   <SelectValue placeholder="Selecione a categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="tecnica">Técnica</SelectItem>
-                  <SelectItem value="comportamental">Comportamental</SelectItem>
-                  <SelectItem value="soft_skill">Soft Skill</SelectItem>
-                  <SelectItem value="hard_skill">Hard Skill</SelectItem>
+                  <SelectItem value="conhecimento">Conhecimento</SelectItem>
+                  <SelectItem value="experiencia">Experiência</SelectItem>
+                  <SelectItem value="resolucao_problemas">Resolução de Problemas</SelectItem>
+                  <SelectItem value="habilidades_pessoais">Habilidades Pessoais</SelectItem>
+                  <SelectItem value="qualificacoes">Qualificações</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="competencia">Competência Avaliada *</Label>
+              <Label htmlFor="competencia">Competência Avaliada</Label>
               <Input
                 id="competencia"
-                placeholder="Ex: Direito Contratual, Liderança, Comunicação"
+                placeholder="Ex: Direito Contratual, Liderança"
                 value={competencia}
                 onChange={(e) => setCompetencia(e.target.value)}
-                required
               />
-              <p className="text-xs text-muted-foreground">
-                Competência específica que esta pergunta avalia
-              </p>
             </div>
           </div>
 
@@ -225,50 +222,6 @@ export function FormularioPergunta() {
               O que deve ser avaliado na resposta
             </p>
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Tags</CardTitle>
-          <CardDescription>
-            Adicione tags para facilitar a busca
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Digite uma tag e pressione Enter"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleAddTag();
-                }
-              }}
-            />
-            <Button type="button" onClick={handleAddTag} variant="outline">
-              Adicionar
-            </Button>
-          </div>
-
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="gap-1">
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTag(tag)}
-                    className="ml-1 hover:text-destructive"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-          )}
         </CardContent>
       </Card>
 

@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import { getDB } from "@/lib/db";
-import { perguntasTemplates } from "@/lib/db/schema";
+import { perguntasTemplates, perguntasOcultas } from "@/lib/db/schema";
 import { desc, eq, or, isNull, and } from "drizzle-orm";
-import { PerguntasListagem } from "@/components/perguntas/perguntas-listagem";
+import { PerguntasListagemClient } from "@/components/perguntas/perguntas-listagem-client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
@@ -12,12 +12,11 @@ async function getPerguntas(userId?: string) {
   const db = getDB();
 
   // Buscar perguntas padrão do sistema OU perguntas do próprio usuário
-  // Cada recrutador vê apenas suas perguntas + as padrão do sistema
   const conditions = [
     isNull(perguntasTemplates.deletedAt),
     or(
-      eq(perguntasTemplates.isPadrao, true), // Perguntas padrão do sistema
-      userId ? eq(perguntasTemplates.userId, userId) : undefined // Perguntas do usuário logado
+      eq(perguntasTemplates.isPadrao, true),
+      userId ? eq(perguntasTemplates.userId, userId) : undefined
     )
   ].filter(Boolean);
 
@@ -30,9 +29,28 @@ async function getPerguntas(userId?: string) {
   return perguntas;
 }
 
+async function getPerguntasOcultas(userId?: string) {
+  if (!userId) return [];
+
+  const db = getDB();
+  const ocultas = await db
+    .select({ perguntaId: perguntasOcultas.perguntaId })
+    .from(perguntasOcultas)
+    .where(eq(perguntasOcultas.userId, userId));
+
+  return ocultas.map(o => o.perguntaId);
+}
+
 export default async function PerguntasPage() {
   const userId = await getUserId();
-  const perguntas = await getPerguntas(userId || undefined);
+  const [perguntas, ocultasIds] = await Promise.all([
+    getPerguntas(userId || undefined),
+    getPerguntasOcultas(userId || undefined),
+  ]);
+
+  // Estatísticas (excluindo ocultas das contagens visíveis)
+  const perguntasVisiveis = perguntas.filter(p => !ocultasIds.includes(p.id));
+  const cargosUnicos = new Set(perguntasVisiveis.map(p => p.cargo));
 
   return (
     <div className="space-y-6">
@@ -41,7 +59,7 @@ export default async function PerguntasPage() {
         <div>
           <h1 className="text-3xl font-bold">Banco de Perguntas</h1>
           <p className="text-muted-foreground mt-2">
-            Gerencie suas perguntas e use templates para criar entrevistas
+            Gerencie suas perguntas e monte pacotes para cada vaga
           </p>
         </div>
         <Link href="/perguntas/nova">
@@ -55,32 +73,33 @@ export default async function PerguntasPage() {
       {/* Estatísticas */}
       <div className="grid gap-4 md:grid-cols-4">
         <div className="rounded-lg border bg-card p-6">
-          <div className="text-2xl font-bold">{perguntas.length}</div>
-          <p className="text-sm text-muted-foreground">Total de Perguntas</p>
+          <div className="text-2xl font-bold">{perguntasVisiveis.length}</div>
+          <p className="text-sm text-muted-foreground">Perguntas Visíveis</p>
         </div>
         <div className="rounded-lg border bg-card p-6">
           <div className="text-2xl font-bold">
-            {perguntas.filter(p => p.isPadrao).length}
+            {perguntasVisiveis.filter(p => p.isPadrao).length}
           </div>
           <p className="text-sm text-muted-foreground">Perguntas Padrão</p>
         </div>
         <div className="rounded-lg border bg-card p-6">
           <div className="text-2xl font-bold">
-            {perguntas.filter(p => !p.isPadrao).length}
+            {perguntasVisiveis.filter(p => !p.isPadrao).length}
           </div>
           <p className="text-sm text-muted-foreground">Minhas Perguntas</p>
         </div>
         <div className="rounded-lg border bg-card p-6">
-          <div className="text-2xl font-bold">
-            {new Set(perguntas.flatMap(p => p.cargos)).size}
-          </div>
+          <div className="text-2xl font-bold">{cargosUnicos.size}</div>
           <p className="text-sm text-muted-foreground">Cargos Cobertos</p>
         </div>
       </div>
 
       {/* Listagem de Perguntas */}
       <Suspense fallback={<div>Carregando perguntas...</div>}>
-        <PerguntasListagem perguntas={perguntas} />
+        <PerguntasListagemClient
+          perguntas={perguntas}
+          perguntasOcultasIdsInicial={ocultasIds}
+        />
       </Suspense>
     </div>
   );

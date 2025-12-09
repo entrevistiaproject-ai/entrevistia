@@ -120,9 +120,9 @@ export async function POST(request: NextRequest) {
           .values({
             texto: pergunta.texto,
             competencia: pergunta.competencia || "Geral",
-            categoria: pergunta.categoria || "tecnica",
-            cargos: body.cargo ? [body.cargo] : ["Geral"],
-            niveis: body.nivel ? [body.nivel] : ["pleno"],
+            categoria: pergunta.categoria || "conhecimento",
+            cargo: body.cargo || "Geral",
+            nivel: body.nivel || "pleno",
             userId: userId,
           })
           .returning();

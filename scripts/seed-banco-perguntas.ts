@@ -9,7 +9,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { eq } from 'drizzle-orm';
 import { Pool } from 'pg';
 import { perguntasTemplates } from '@/lib/db/schema';
-import { todasAsPerguntas, estatisticas } from '@/lib/db/seeds/banco-perguntas-completo';
+import { todasAsPerguntas, estatisticas } from '@/lib/db/seeds/banco-perguntas-completo-v2';
 
 async function seedPerguntas() {
   const pool = new Pool({
@@ -24,13 +24,14 @@ async function seedPerguntas() {
 
     console.log(`\n📊 Estatísticas do Banco:`);
     console.log(`   Total de perguntas: ${estatisticas.totalPerguntas}`);
-    console.log(`   Universais (qualquer cargo/nível): ${estatisticas.universais}`);
-    console.log(`   Específicas por cargo: ${estatisticas.porCargo}`);
     console.log(`\n   Por categoria:`);
-    console.log(`   - Comportamental: ${estatisticas.porCategoria.comportamental}`);
-    console.log(`   - Técnica: ${estatisticas.porCategoria.tecnica}`);
-    console.log(`   - Soft Skills: ${estatisticas.porCategoria.soft_skill}`);
-    console.log(`   - Hard Skills: ${estatisticas.porCategoria.hard_skill}`);
+    Object.entries(estatisticas.porCategoria).forEach(([cat, count]) => {
+      console.log(`   - ${cat}: ${count}`);
+    });
+    console.log(`\n   Por nível:`);
+    Object.entries(estatisticas.porNivel).forEach(([nivel, count]) => {
+      console.log(`   - ${nivel}: ${count}`);
+    });
 
     console.log('\n' + '='.repeat(60));
     console.log('\n🔄 Iniciando seed...\n');
@@ -43,11 +44,6 @@ async function seedPerguntas() {
 
     if (existentes.length > 0) {
       console.log(`⚠️  Encontradas ${existentes.length} perguntas padrão existentes.`);
-      console.log('   Deseja substituir? Este script irá remover as existentes.\n');
-
-      // Em produção, adicione confirmação aqui
-      // Por segurança, vou apenas adicionar novas sem duplicar
-
       console.log('   ℹ️  Pulando perguntas existentes e adicionando apenas novas...\n');
     }
 
@@ -58,26 +54,22 @@ async function seedPerguntas() {
       try {
         await db.insert(perguntasTemplates).values({
           texto: pergunta.texto,
-          cargos: pergunta.cargos,
-          niveis: pergunta.niveis,
+          cargo: pergunta.cargo,
+          nivel: pergunta.nivel,
           categoria: pergunta.categoria,
           competencia: pergunta.competencia || null,
-          tags: pergunta.tags || [],
-          tipo: 'texto',
-          isPadrao: true, // Marca como pergunta padrão do sistema
-          userId: null, // Null = pergunta do sistema
+          tipo: 'audio',
+          isPadrao: true,
+          userId: null,
           criteriosAvaliacao: {},
-          metadados: {},
         });
 
         inseridas++;
 
-        // Mostra progresso
-        if (inseridas % 10 === 0) {
+        if (inseridas % 50 === 0) {
           process.stdout.write(`\r   ✅ Inseridas: ${inseridas}/${todasAsPerguntas.length}`);
         }
       } catch (error: any) {
-        // Se já existe (unique constraint), pula
         if (error.code === '23505') {
           puladas++;
         } else {
@@ -95,33 +87,12 @@ async function seedPerguntas() {
     console.log('\n' + '='.repeat(60));
     console.log('\n✅ Seed concluído com sucesso!\n');
 
-    // Mostra distribuição por cargo
-    console.log('📈 Distribuição por área:\n');
-
-    const areasCargos = [
-      { nome: 'Tecnologia', cargos: ['Desenvolvedor', 'QA', 'DevOps', 'Data'] },
-      { nome: 'Jurídico', cargos: ['Advogado', 'Paralegal'] },
-      { nome: 'Vendas', cargos: ['Vendedor', 'SDR', 'BDR'] },
-      { nome: 'Marketing', cargos: ['Marketing', 'Social Media', 'Designer'] },
-      { nome: 'RH', cargos: ['Recrutador', 'RH'] },
-      { nome: 'Financeiro', cargos: ['Contador', 'Financeiro'] },
-      { nome: 'Atendimento', cargos: ['Customer Success', 'Suporte', 'SAC'] },
-      { nome: 'Administrativo', cargos: ['Administrativo', 'Assistente'] },
-    ];
-
-    for (const area of areasCargos) {
-      const count = todasAsPerguntas.filter(p =>
-        p.cargos.some(cargo =>
-          area.cargos.some(c => cargo.toLowerCase().includes(c.toLowerCase()))
-        )
-      ).length;
-
+    console.log('📈 Distribuição por cargo:\n');
+    Object.entries(estatisticas.porCargo).forEach(([cargo, count]) => {
       if (count > 0) {
-        console.log(`   ${area.nome.padEnd(20)} ${count.toString().padStart(3)} perguntas`);
+        console.log(`   ${cargo.padEnd(20)} ${count.toString().padStart(3)} perguntas`);
       }
-    }
-
-    console.log(`\n   ${'Universal'.padEnd(20)} ${estatisticas.universais.toString().padStart(3)} perguntas`);
+    });
 
     console.log('\n' + '='.repeat(60));
     console.log('\n🎯 Próximos passos:\n');
@@ -137,7 +108,6 @@ async function seedPerguntas() {
   }
 }
 
-// Executa
 seedPerguntas()
   .then(() => process.exit(0))
   .catch((error) => {
