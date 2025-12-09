@@ -23,7 +23,7 @@ const createModel = () => {
 
   return new ChatAnthropic({
     apiKey,
-    model: 'claude-3-5-sonnet-latest', // Claude 3.5 Sonnet (mais recente)
+    model: 'claude-sonnet-4-5-20250929', // Claude Sonnet 4.5
     temperature: 0.3, // Baixa temperatura para respostas mais consistentes e objetivas
     maxTokens: 8000, // Permite respostas detalhadas
   });
