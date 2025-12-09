@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUserId } from "@/lib/auth/get-user";
 import { getDB } from "@/lib/db";
-import { candidatos } from "@/lib/db/schema";
+import { candidatos, candidatoEntrevistas, entrevistas } from "@/lib/db/schema";
 import { eq, and, isNull, desc } from "drizzle-orm";
 
 export async function POST(request: Request) {
@@ -26,6 +26,27 @@ export async function POST(request: Request) {
 
     const db = getDB();
 
+    // Se tem entrevistaId, verificar se pertence ao usuário
+    if (entrevistaId) {
+      const [entrevista] = await db
+        .select()
+        .from(entrevistas)
+        .where(
+          and(
+            eq(entrevistas.id, entrevistaId),
+            eq(entrevistas.userId, userId)
+          )
+        )
+        .limit(1);
+
+      if (!entrevista) {
+        return NextResponse.json(
+          { error: "Entrevista não encontrada" },
+          { status: 404 }
+        );
+      }
+    }
+
     // Criar candidato
     const [novoCandidato] = await db
       .insert(candidatos)
@@ -43,6 +64,15 @@ export async function POST(request: Request) {
         origemCadastro: "cadastro_manual_recrutador",
       })
       .returning();
+
+    // Se tem entrevistaId, vincular candidato à entrevista
+    if (entrevistaId) {
+      await db.insert(candidatoEntrevistas).values({
+        candidatoId: novoCandidato.id,
+        entrevistaId,
+        status: "pendente",
+      });
+    }
 
     return NextResponse.json(novoCandidato, { status: 201 });
   } catch (error) {

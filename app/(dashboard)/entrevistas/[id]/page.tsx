@@ -46,6 +46,10 @@ interface Candidato {
   telefone: string | null;
   linkedin: string | null;
   createdAt: Date;
+  // Dados da participação na entrevista
+  status: string;
+  iniciadaEm: Date | null;
+  concluidaEm: Date | null;
 }
 
 interface Pergunta {
@@ -64,6 +68,13 @@ const statusConfig: Record<string, { label: string; variant: any; color: string 
   active: { label: "Ativa", variant: "default", color: "bg-green-500" },
   completed: { label: "Encerrada", variant: "outline", color: "bg-gray-400" },
   archived: { label: "Arquivada", variant: "secondary", color: "bg-gray-500" },
+};
+
+const candidatoStatusConfig: Record<string, { label: string; variant: any }> = {
+  pendente: { label: "Pendente", variant: "outline" },
+  em_andamento: { label: "Em andamento", variant: "default" },
+  concluida: { label: "Concluída", variant: "secondary" },
+  cancelada: { label: "Cancelada", variant: "destructive" },
 };
 
 export default function EntrevistaDetalhesPage() {
@@ -98,8 +109,8 @@ export default function EntrevistaDetalhesPage() {
         setPerguntas(data);
       }
 
-      // Buscar candidatos
-      const resCandidatos = await fetch("/api/candidatos", {
+      // Buscar candidatos vinculados à entrevista
+      const resCandidatos = await fetch(`/api/entrevistas/${params.id}/candidatos`, {
         });
 
       if (resCandidatos.ok) {
@@ -329,11 +340,13 @@ export default function EntrevistaDetalhesPage() {
                         <p className="text-sm text-muted-foreground">{candidato.email}</p>
                       </div>
                       {candidato.telefone && (
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground hidden sm:block">
                           {candidato.telefone}
                         </p>
                       )}
-                      <Badge variant="outline">Pendente</Badge>
+                      <Badge variant={candidatoStatusConfig[candidato.status]?.variant || "outline"}>
+                        {candidatoStatusConfig[candidato.status]?.label || "Pendente"}
+                      </Badge>
                     </div>
                   ))}
                 </div>
