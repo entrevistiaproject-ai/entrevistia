@@ -186,7 +186,7 @@ export default function EntrevistaDetalhesPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {entrevista.duracao ? `${entrevista.duracao}m` : "-"}
+              {perguntas.length > 0 ? `${perguntas.length * 4}m` : "-"}
             </div>
             <p className="text-xs text-muted-foreground">Tempo estimado</p>
           </CardContent>
