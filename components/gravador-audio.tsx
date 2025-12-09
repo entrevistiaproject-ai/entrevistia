@@ -266,10 +266,10 @@ export function GravadorAudio({
   const tempoRestante = tempoMaximo - tempoDecorrido;
   const porcentagemTempo = (tempoDecorrido / tempoMaximo) * 100;
 
-  // Gerar barras do indicador de nível
+  // Gerar barras do indicador de nível (estilo da página de teste)
   const getNivelBarras = () => {
     const barras = [];
-    const numBarras = 15;
+    const numBarras = 20;
     const nivelPorBarra = 100 / numBarras;
 
     for (let i = 0; i < numBarras; i++) {
@@ -287,11 +287,11 @@ export function GravadorAudio({
         <div
           key={i}
           className={cn(
-            "w-1.5 rounded-full transition-all duration-75",
+            "w-2 rounded-full transition-all duration-75",
             ativo ? cor : "bg-gray-200"
           )}
           style={{
-            height: `${12 + i * 1.5}px`,
+            height: `${20 + i * 2}px`,
           }}
         />
       );
@@ -300,16 +300,47 @@ export function GravadorAudio({
   };
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-6">
+      {/* Ícone grande do microfone com círculo */}
+      <div className={cn(
+        "w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300",
+        !gravando && !transcrevendo && "bg-gray-100",
+        gravando && "bg-red-100 animate-pulse",
+        transcrevendo && "bg-blue-100"
+      )}>
+        {!gravando && !transcrevendo && (
+          <Mic className="h-12 w-12 text-gray-400" />
+        )}
+        {gravando && (
+          <Mic className="h-12 w-12 text-red-500" />
+        )}
+        {transcrevendo && (
+          <Loader2 className="h-12 w-12 text-blue-500 animate-spin" />
+        )}
+      </div>
+
+      {/* Indicador de nível de áudio - barras grandes como na página de teste */}
+      {gravando && (
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex items-center justify-center gap-1 h-16">
+            {getNivelBarras()}
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Volume2 className="h-4 w-4" />
+            <span>Nível de captação: {Math.round(nivelAudio)}%</span>
+          </div>
+        </div>
+      )}
+
       {/* Timer - sempre visível, mostrando tempo restante */}
       <div className="flex flex-col items-center gap-2">
         <div className={cn(
-          "text-4xl font-mono font-bold",
-          gravando && tempoRestante <= 30 ? "text-red-500" : "text-gray-900"
+          "text-5xl font-mono font-bold",
+          tempoRestante <= 30 ? "text-red-500" : "text-gray-900"
         )}>
           {formatarTempo(tempoRestante)}
         </div>
-        <div className="w-64 h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div className="w-72 h-2 bg-gray-200 rounded-full overflow-hidden">
           <div
             className={cn(
               "h-full transition-all duration-1000",
@@ -319,41 +350,28 @@ export function GravadorAudio({
           />
         </div>
         <div className="text-sm text-gray-500">
-          {gravando ? "Tempo restante" : "Tempo disponível"}
+          {gravando ? "Gravando - Tempo restante" : transcrevendo ? "Processando áudio..." : "Tempo disponível para resposta"}
         </div>
       </div>
 
-      {/* Indicador de nível de áudio */}
-      {gravando && (
-        <div className="flex flex-col items-center gap-2 mt-2">
-          <div className="flex items-center justify-center gap-1 h-10">
-            {getNivelBarras()}
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Volume2 className="h-4 w-4" />
-            <span>Nível: {Math.round(nivelAudio)}%</span>
-          </div>
-        </div>
-      )}
-
       {/* Indicador visual de gravação */}
       {gravando && (
-        <div className="flex items-center gap-2 text-red-500 animate-pulse">
-          <div className="w-3 h-3 bg-red-500 rounded-full" />
-          <span className="text-sm font-medium">Gravando...</span>
+        <div className="flex items-center gap-2 text-red-500">
+          <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+          <span className="text-sm font-medium">Gravando sua resposta...</span>
         </div>
       )}
 
       {/* Botões */}
-      <div className="flex gap-4">
+      <div className="flex gap-4 mt-2">
         {!gravando && !transcrevendo && (
           <Button
             onClick={iniciarGravacao}
             disabled={disabled}
             size="lg"
-            className="gap-2"
+            className="gap-2 px-8 py-6 text-lg"
           >
-            <Mic className="h-5 w-5" />
+            <Mic className="h-6 w-6" />
             Iniciar Gravação
           </Button>
         )}
@@ -363,16 +381,16 @@ export function GravadorAudio({
             onClick={pararGravacao}
             variant="destructive"
             size="lg"
-            className="gap-2"
+            className="gap-2 px-8 py-6 text-lg"
           >
-            <Square className="h-5 w-5" />
-            Parar Gravação
+            <Square className="h-6 w-6" />
+            Parar e Enviar
           </Button>
         )}
 
         {transcrevendo && (
-          <Button disabled size="lg" className="gap-2">
-            <Loader2 className="h-5 w-5 animate-spin" />
+          <Button disabled size="lg" className="gap-2 px-8 py-6 text-lg">
+            <Loader2 className="h-6 w-6 animate-spin" />
             Transcrevendo...
           </Button>
         )}
@@ -380,7 +398,7 @@ export function GravadorAudio({
 
       {/* Mensagem de erro */}
       {erro && (
-        <div className="text-sm text-red-500 text-center max-w-md">
+        <div className="text-sm text-red-500 text-center max-w-md p-3 bg-red-50 border border-red-200 rounded-lg">
           {erro}
         </div>
       )}
