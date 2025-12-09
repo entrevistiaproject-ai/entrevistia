@@ -42,6 +42,15 @@ DATABASE_URL=postgresql://neondb_owner:npg_g2zYchr0DQlE@ep-long-paper-acu62wj1-p
 - Tanto `AUTH_URL` quanto `NEXTAUTH_URL` devem incluir o protocolo `https://`
 - NextAuth v5 beta ainda usa `NEXTAUTH_URL` internamente em alguns casos
 - Por isso mantemos ambas as variáveis para garantir compatibilidade
+- O código já está configurado com `trustHost: true` e tratamento automático de `VERCEL_URL`
+
+## Opcional
+
+Se você NÃO adicionar as variáveis `AUTH_URL` e `NEXTAUTH_URL`, o sistema usará automaticamente:
+- Em produção: `https://${VERCEL_URL}` (definido automaticamente pela Vercel)
+- Em desenvolvimento: `http://localhost:3000`
+
+Porém, é recomendado adicionar as variáveis explicitamente para evitar problemas.
 
 ## Referências
 
