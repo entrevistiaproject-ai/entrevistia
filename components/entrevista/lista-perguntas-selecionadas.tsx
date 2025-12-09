@@ -22,9 +22,16 @@ interface ListaPerguntasSelecionadasProps {
 
 const categoriaColors: Record<string, string> = {
   tecnica: "bg-blue-500/10 text-blue-500",
-  comportamental: "bg-purple-500/10 text-purple-500",
-  soft_skill: "bg-green-500/10 text-green-500",
-  hard_skill: "bg-orange-500/10 text-orange-500",
+  experiencia: "bg-purple-500/10 text-purple-500",
+  comportamental: "bg-green-500/10 text-green-500",
+  situacional: "bg-amber-500/10 text-amber-500",
+};
+
+const categoriaLabels: Record<string, string> = {
+  tecnica: "Técnica",
+  experiencia: "Experiência",
+  comportamental: "Comportamental",
+  situacional: "Situacional",
 };
 
 export function ListaPerguntasSelecionadas({
@@ -82,7 +89,7 @@ export function ListaPerguntasSelecionadas({
                     variant="secondary"
                     className={cn("text-xs", categoriaColors[pergunta.categoria])}
                   >
-                    {pergunta.categoria.replace("_", " ")}
+                    {categoriaLabels[pergunta.categoria] || pergunta.categoria}
                   </Badge>
                 )}
 

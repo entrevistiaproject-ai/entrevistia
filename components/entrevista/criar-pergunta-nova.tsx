@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Save } from "lucide-react";
+import { CATEGORIAS_DISPONIVEIS } from "@/lib/utils/classificacao-perguntas";
 
 interface CriarPerguntaNovaProps {
   cargo?: string;
@@ -126,10 +127,11 @@ export function CriarPerguntaNova({
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="tecnica">Técnica</SelectItem>
-                  <SelectItem value="comportamental">Comportamental</SelectItem>
-                  <SelectItem value="soft_skill">Soft Skill</SelectItem>
-                  <SelectItem value="hard_skill">Hard Skill</SelectItem>
+                  {CATEGORIAS_DISPONIVEIS.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.icone} {cat.nome}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
