@@ -8,6 +8,9 @@ interface SkeletonCardProps {
   showFooter?: boolean
 }
 
+// Widths predefinidas para evitar Math.random() durante render
+const LINE_WIDTHS = ["85%", "70%", "90%", "65%", "80%", "75%"]
+
 export function SkeletonCard({ className, lines = 3, showHeader = true, showFooter = false }: SkeletonCardProps) {
   return (
     <div className={cn("rounded-lg border bg-card p-6 shadow-sm", className)}>
@@ -22,7 +25,7 @@ export function SkeletonCard({ className, lines = 3, showHeader = true, showFoot
           <div
             key={i}
             className="h-4 animate-pulse rounded bg-muted"
-            style={{ width: `${Math.random() * 40 + 60}%` }}
+            style={{ width: LINE_WIDTHS[i % LINE_WIDTHS.length] }}
           />
         ))}
       </div>
