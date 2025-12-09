@@ -22,6 +22,7 @@ interface CreateEntrevistaRequest {
   empresa?: string;
   duracao?: number;
   perguntas: PerguntaRequest[];
+  compartilharResultados?: boolean;
 }
 
 export async function POST(request: NextRequest) {
@@ -84,6 +85,9 @@ export async function POST(request: NextRequest) {
         duracao: body.duracao || 30,
         slug,
         status: "rascunho",
+        configuracoes: {
+          compartilharResultados: body.compartilharResultados || false,
+        },
       })
       .returning();
 

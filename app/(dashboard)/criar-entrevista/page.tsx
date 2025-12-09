@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -44,6 +45,7 @@ export default function CriarEntrevistaPage() {
   const [descricao, setDescricao] = useState("");
   const [cargo, setCargo] = useState("");
   const [nivel, setNivel] = useState("");
+  const [compartilharResultados, setCompartilharResultados] = useState(false);
   const [perguntas, setPerguntas] = useState<PerguntaSelecionada[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -93,22 +95,33 @@ export default function CriarEntrevistaPage() {
     setLoading(true);
 
     try {
-      // TODO: Implementar criação da entrevista
-      console.log({
-        titulo,
-        descricao,
-        cargo,
-        nivel,
-        perguntas,
+      const response = await fetch("/api/entrevistas/criar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          titulo,
+          descricao,
+          cargo,
+          nivel,
+          perguntas,
+          compartilharResultados,
+        }),
       });
 
-      // Simular sucesso
-      setTimeout(() => {
-        router.push("/entrevistas");
-      }, 1000);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Erro ao criar entrevista");
+      }
+
+      const data = await response.json();
+
+      // Redireciona para a página da entrevista criada
+      router.push(`/entrevistas/${data.entrevista.id}`);
     } catch (error) {
       console.error("Erro ao criar entrevista:", error);
-      alert("Erro ao criar entrevista");
+      alert(error instanceof Error ? error.message : "Erro ao criar entrevista");
     } finally {
       setLoading(false);
     }
@@ -188,6 +201,33 @@ export default function CriarEntrevistaPage() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Configurações */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Configurações</CardTitle>
+            <CardDescription>
+              Defina como a entrevista funcionará
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="compartilhar-resultados">
+                  Compartilhar resultados com candidatos
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  Permite que candidatos vejam suas respostas e feedback após completar a entrevista
+                </p>
+              </div>
+              <Switch
+                id="compartilhar-resultados"
+                checked={compartilharResultados}
+                onCheckedChange={setCompartilharResultados}
+              />
             </div>
           </CardContent>
         </Card>
