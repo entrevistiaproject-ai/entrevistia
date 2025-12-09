@@ -83,7 +83,6 @@ export async function POST(request: NextRequest) {
         {
           error: 'Falha na análise',
           details: result.error,
-          log: result.executionLog,
         },
         { status: 500 }
       );
