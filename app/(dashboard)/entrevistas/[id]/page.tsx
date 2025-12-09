@@ -14,6 +14,10 @@ import {
   Users,
   FileQuestion,
   Loader2,
+  Archive,
+  CheckCircle,
+  Play,
+  AlertTriangle,
 } from "lucide-react";
 import Link from "next/link";
 import { AdicionarCandidatoDialog } from "@/components/entrevistas/adicionar-candidato-dialog";
@@ -57,11 +61,9 @@ interface Pergunta {
 }
 
 const statusConfig: Record<string, { label: string; variant: any; color: string }> = {
-  rascunho: { label: "Rascunho", variant: "secondary", color: "bg-gray-500" },
-  publicada: { label: "Ativa", variant: "default", color: "bg-green-500" },
-  em_andamento: { label: "Em Andamento", variant: "default", color: "bg-blue-500" },
-  concluida: { label: "Encerrada", variant: "outline", color: "bg-gray-400" },
-  cancelada: { label: "Cancelada", variant: "destructive", color: "bg-red-500" },
+  active: { label: "Ativa", variant: "default", color: "bg-green-500" },
+  completed: { label: "Encerrada", variant: "outline", color: "bg-gray-400" },
+  archived: { label: "Arquivada", variant: "secondary", color: "bg-gray-500" },
 };
 
 export default function EntrevistaDetalhesPage() {
@@ -71,6 +73,7 @@ export default function EntrevistaDetalhesPage() {
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchData = async () => {
     try {
@@ -110,6 +113,63 @@ export default function EntrevistaDetalhesPage() {
     }
   };
 
+  const handleEncerrar = async () => {
+    if (!entrevista) return;
+
+    setActionLoading("encerrar");
+    try {
+      const res = await fetch(`/api/entrevistas/${entrevista.id}/encerrar`, {
+        method: "POST",
+      });
+
+      if (res.ok) {
+        await fetchData();
+      }
+    } catch (error) {
+      console.error("Erro ao encerrar vaga:", error);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleArquivar = async () => {
+    if (!entrevista) return;
+
+    setActionLoading("arquivar");
+    try {
+      const res = await fetch(`/api/entrevistas/${entrevista.id}/publicar`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        await fetchData();
+      }
+    } catch (error) {
+      console.error("Erro ao arquivar vaga:", error);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReativar = async () => {
+    if (!entrevista) return;
+
+    setActionLoading("reativar");
+    try {
+      const res = await fetch(`/api/entrevistas/${entrevista.id}/publicar`, {
+        method: "POST",
+      });
+
+      if (res.ok) {
+        await fetchData();
+      }
+    } catch (error) {
+      console.error("Erro ao reativar vaga:", error);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, [params.id]);
@@ -133,7 +193,7 @@ export default function EntrevistaDetalhesPage() {
     );
   }
 
-  const statusInfo = statusConfig[entrevista.status] || statusConfig.rascunho;
+  const statusInfo = statusConfig[entrevista.status] || statusConfig.active;
 
   return (
     <div className="space-y-6">
@@ -321,9 +381,9 @@ export default function EntrevistaDetalhesPage() {
         <TabsContent value="configuracoes" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Configurações da Entrevista</CardTitle>
+              <CardTitle>Informações da Vaga</CardTitle>
               <CardDescription>
-                Ajuste as configurações e parâmetros da entrevista
+                Detalhes e configurações da entrevista
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -347,6 +407,134 @@ export default function EntrevistaDetalhesPage() {
                   </Badge>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Card de Gerenciamento da Vaga */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Gerenciar Vaga</CardTitle>
+              <CardDescription>
+                Encerre ou arquive esta vaga conforme necessário
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Ação: Encerrar Vaga */}
+              {entrevista.status === "active" && (
+                <div className="flex items-start justify-between p-4 border rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-amber-100 rounded-lg">
+                      <CheckCircle className="h-5 w-5 text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Encerrar Vaga</p>
+                      <p className="text-sm text-muted-foreground">
+                        Finaliza o processo seletivo. Candidatos não poderão mais responder à entrevista.
+                        Os dados serão mantidos para consulta.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={handleEncerrar}
+                    disabled={actionLoading !== null}
+                  >
+                    {actionLoading === "encerrar" ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                    )}
+                    Encerrar
+                  </Button>
+                </div>
+              )}
+
+              {/* Ação: Arquivar Vaga */}
+              {(entrevista.status === "active" || entrevista.status === "completed") && (
+                <div className="flex items-start justify-between p-4 border rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-gray-100 rounded-lg">
+                      <Archive className="h-5 w-5 text-gray-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Arquivar Vaga</p>
+                      <p className="text-sm text-muted-foreground">
+                        Move a vaga para o arquivo. Ela não aparecerá mais na listagem principal,
+                        mas os dados serão preservados.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={handleArquivar}
+                    disabled={actionLoading !== null}
+                  >
+                    {actionLoading === "arquivar" ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Archive className="h-4 w-4 mr-2" />
+                    )}
+                    Arquivar
+                  </Button>
+                </div>
+              )}
+
+              {/* Ação: Reativar Vaga */}
+              {(entrevista.status === "completed" || entrevista.status === "archived") && (
+                <div className="flex items-start justify-between p-4 border rounded-lg border-green-200 bg-green-50/50">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <Play className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Reativar Vaga</p>
+                      <p className="text-sm text-muted-foreground">
+                        Reativa a vaga para receber novas respostas. Candidatos poderão
+                        acessar e responder à entrevista novamente.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="default"
+                    onClick={handleReativar}
+                    disabled={actionLoading !== null}
+                  >
+                    {actionLoading === "reativar" ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Play className="h-4 w-4 mr-2" />
+                    )}
+                    Reativar
+                  </Button>
+                </div>
+              )}
+
+              {/* Aviso sobre status atual */}
+              {entrevista.status === "archived" && (
+                <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-amber-800">Vaga arquivada</p>
+                    <p className="text-sm text-amber-700">
+                      Esta vaga está arquivada e não está visível na listagem principal.
+                      Você pode reativá-la a qualquer momento.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {entrevista.status === "completed" && (
+                <div className="flex items-start gap-3 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                  <CheckCircle className="h-5 w-5 text-gray-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">Processo encerrado</p>
+                    <p className="text-sm text-gray-600">
+                      O processo seletivo para esta vaga foi encerrado. Candidatos não podem
+                      mais responder à entrevista.
+                    </p>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

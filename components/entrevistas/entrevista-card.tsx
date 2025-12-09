@@ -34,31 +34,26 @@ interface EntrevistaCardProps {
 }
 
 const statusConfig = {
-  publicada: {
+  active: {
     label: "Ativa",
     variant: "default" as const,
     color: "bg-green-500",
   },
-  em_andamento: {
-    label: "Em Andamento",
-    variant: "default" as const,
-    color: "bg-blue-500",
-  },
-  concluida: {
+  completed: {
     label: "Encerrada",
     variant: "outline" as const,
     color: "bg-gray-400",
   },
-  cancelada: {
-    label: "Cancelada",
-    variant: "destructive" as const,
-    color: "bg-red-500",
+  archived: {
+    label: "Arquivada",
+    variant: "secondary" as const,
+    color: "bg-gray-500",
   },
 };
 
 export function EntrevistaCard({ entrevista }: EntrevistaCardProps) {
   const router = useRouter();
-  const statusInfo = statusConfig[entrevista.status as keyof typeof statusConfig] || statusConfig.publicada;
+  const statusInfo = statusConfig[entrevista.status as keyof typeof statusConfig] || statusConfig.active;
 
   // Calcula taxa de conclusão
   const taxaConclusao = entrevista.totalCandidatos > 0
