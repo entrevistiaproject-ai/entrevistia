@@ -307,26 +307,8 @@ export default function EntrevistaDetalhesPage() {
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold shrink-0">
                         {index + 1}
                       </div>
-                      <div className="flex-1 space-y-1">
+                      <div className="flex-1">
                         <p className="font-medium">{pergunta.texto}</p>
-                        <div className="flex gap-2">
-                          <Badge variant="outline" className="text-xs">
-                            {pergunta.tipo}
-                          </Badge>
-                          {pergunta.obrigatoria === "true" && (
-                            <Badge variant="secondary" className="text-xs">
-                              Obrigatória
-                            </Badge>
-                          )}
-                          {pergunta.tempoMaximo && (
-                            <Badge variant="outline" className="text-xs">
-                              {pergunta.tempoMaximo}s
-                            </Badge>
-                          )}
-                          <Badge variant="outline" className="text-xs">
-                            {pergunta.pontuacaoMaxima} pts
-                          </Badge>
-                        </div>
                       </div>
                     </div>
                   ))}
