@@ -1,9 +1,21 @@
 /**
  * Sistema simples de sugestão de classificação de perguntas
  * Não é obrigatório - apenas ajuda o usuário a se organizar
+ *
+ * Categorias intuitivas que dividem bem o espectro de perguntas:
+ * - conhecimento: O que a pessoa SABE (conceitos, teoria)
+ * - experiencia: O que a pessoa JÁ FEZ (casos passados, STAR)
+ * - resolucao_problemas: COMO a pessoa pensa (hipotéticos, estratégia)
+ * - habilidades_pessoais: SOFT SKILLS (comunicação, liderança)
+ * - qualificacoes: CERTIFICAÇÕES (ferramentas, formação)
  */
 
-export type CategoriaPerguntas = 'tecnica' | 'comportamental' | 'soft_skill' | 'hard_skill';
+export type CategoriaPerguntas =
+  | 'conhecimento'
+  | 'experiencia'
+  | 'resolucao_problemas'
+  | 'habilidades_pessoais'
+  | 'qualificacoes';
 
 export interface ClassificacaoSugerida {
   categoria: CategoriaPerguntas;
@@ -18,70 +30,83 @@ export interface ClassificacaoSugerida {
 export function sugerirCategoria(textoPergunta: string): ClassificacaoSugerida {
   const texto = textoPergunta.toLowerCase();
 
-  // Padrões comportamentais (alta confiança)
+  // 1. EXPERIENCIA - Perguntas sobre o passado (método STAR)
   if (
-    /conte.*(sobre|uma vez|exemplo|situação)/i.test(texto) ||
-    /descreva.*(situação|momento|experiência)/i.test(texto) ||
-    /já.*(passou|teve|viveu)/i.test(texto) ||
-    /como você (lidou|reagiu|agiu)/i.test(texto)
+    /conte.*(sobre|uma vez|exemplo)/i.test(texto) ||
+    /descreva.*(situação|momento|experiência|caso|projeto)/i.test(texto) ||
+    /já.*(passou|teve|viveu|trabalhou|liderou|conduziu)/i.test(texto) ||
+    /como você (lidou|reagiu|agiu|conduziu)/i.test(texto) ||
+    /dê um exemplo/i.test(texto)
   ) {
     return {
-      categoria: 'comportamental',
+      categoria: 'experiencia',
       confianca: 'alta',
-      motivo: 'Pergunta sobre experiências/situações passadas',
+      motivo: 'Pergunta sobre experiências e casos passados (STAR)',
     };
   }
 
-  // Padrões técnicos (alta confiança)
+  // 2. CONHECIMENTO - Conceitos e teoria
   if (
-    /como (implementar|funciona|criar|desenvolver)/i.test(texto) ||
-    /qual.*(diferença|vantagem|tecnologia)/i.test(texto) ||
-    /explique.*(conceito|código|algoritmo)/i.test(texto) ||
-    texto.includes('código') ||
-    texto.includes('tecnologia') ||
-    texto.includes('framework')
+    /explique|defin|o que (é|e)|qual.*diferença/i.test(texto) ||
+    /conceito de|fundamento|teoria/i.test(texto) ||
+    /qual.*significado|o que significa/i.test(texto)
   ) {
     return {
-      categoria: 'tecnica',
+      categoria: 'conhecimento',
       confianca: 'alta',
-      motivo: 'Pergunta sobre conhecimento técnico/implementação',
+      motivo: 'Pergunta sobre conceitos e conhecimento teórico',
     };
   }
 
-  // Padrões soft skills (média confiança)
+  // 3. RESOLUCAO_PROBLEMAS - Como pensa e resolve
+  if (
+    /como você (aborda|resolve|priori|organiza|lida)/i.test(texto) ||
+    /qual sua (estratégia|abordagem|metodologia|processo)/i.test(texto) ||
+    /como (implementar|criar|desenvolver|otimizar)/i.test(texto) ||
+    /o que você faria se|como você faria/i.test(texto)
+  ) {
+    return {
+      categoria: 'resolucao_problemas',
+      confianca: 'alta',
+      motivo: 'Pergunta sobre raciocínio e resolução de problemas',
+    };
+  }
+
+  // 4. HABILIDADES_PESSOAIS - Soft skills
   if (
     texto.includes('comunicação') ||
     texto.includes('liderança') ||
     texto.includes('equipe') ||
     texto.includes('conflito') ||
     texto.includes('feedback') ||
-    /trabalho em equipe/i.test(texto)
+    /trabalho em equipe|relacionamento|colabora/i.test(texto) ||
+    /como você se relaciona|como você interage/i.test(texto)
   ) {
     return {
-      categoria: 'soft_skill',
-      confianca: 'media',
-      motivo: 'Menciona habilidades interpessoais',
+      categoria: 'habilidades_pessoais',
+      confianca: 'alta',
+      motivo: 'Pergunta sobre habilidades interpessoais (soft skills)',
     };
   }
 
-  // Padrões hard skills (média confiança)
+  // 5. QUALIFICACOES - Certificações e ferramentas
   if (
-    texto.includes('certificação') ||
-    texto.includes('formação') ||
-    texto.includes('experiência com') ||
-    texto.includes('domínio de') ||
-    /conhecimento em/i.test(texto)
+    /certificação|formação|diploma|graduação/i.test(texto) ||
+    /experiência com|domina|utiliza|conhecimento em/i.test(texto) ||
+    /ferrament|software|sistema|plataforma/i.test(texto) ||
+    /você (tem|possui|já usou|conhece)/i.test(texto) ||
+    /quais.*ferramentas/i.test(texto)
   ) {
     return {
-      categoria: 'hard_skill',
+      categoria: 'qualificacoes',
       confianca: 'media',
-      motivo: 'Menciona conhecimentos/certificações específicas',
+      motivo: 'Pergunta sobre qualificações, ferramentas ou certificações',
     };
   }
 
-  // Default: técnica (baixa confiança)
+  // Default: conhecimento (baixa confiança)
   return {
-    categoria: 'tecnica',
+    categoria: 'conhecimento',
     confianca: 'baixa',
     motivo: 'Não identificado - sugestão padrão',
   };
@@ -92,47 +117,58 @@ export function sugerirCategoria(textoPergunta: string): ClassificacaoSugerida {
  */
 export const CATEGORIAS_DISPONIVEIS = [
   {
-    id: 'comportamental' as const,
-    nome: 'Comportamental',
-    descricao: 'Perguntas sobre experiências e situações passadas',
-    icone: '💭',
+    id: 'conhecimento' as const,
+    nome: 'Conhecimento',
+    descricao: 'O que a pessoa SABE - conceitos, teoria, fundamentos',
+    icone: '📚',
+    exemplos: [
+      'Explique o conceito de...',
+      'Qual a diferença entre...',
+      'O que significa...',
+    ],
+  },
+  {
+    id: 'experiencia' as const,
+    nome: 'Experiência',
+    descricao: 'O que a pessoa JÁ FEZ - casos passados, projetos, situações (STAR)',
+    icone: '💼',
     exemplos: [
       'Conte sobre uma vez que...',
-      'Como você lidou com...',
-      'Descreva uma situação onde...',
+      'Descreva um projeto onde...',
+      'Dê um exemplo de quando você...',
     ],
   },
   {
-    id: 'tecnica' as const,
-    nome: 'Técnica',
-    descricao: 'Perguntas sobre conhecimentos técnicos e implementação',
-    icone: '⚙️',
+    id: 'resolucao_problemas' as const,
+    nome: 'Resolução de Problemas',
+    descricao: 'COMO a pessoa pensa - estratégia, abordagem, raciocínio',
+    icone: '🧩',
     exemplos: [
-      'Como funciona...',
-      'Qual a diferença entre...',
-      'Explique o conceito de...',
+      'Como você abordaria...',
+      'Qual sua estratégia para...',
+      'Como você resolveria...',
     ],
   },
   {
-    id: 'soft_skill' as const,
-    nome: 'Soft Skills',
-    descricao: 'Habilidades interpessoais e comportamentais',
+    id: 'habilidades_pessoais' as const,
+    nome: 'Habilidades Pessoais',
+    descricao: 'SOFT SKILLS - comunicação, liderança, trabalho em equipe',
     icone: '🤝',
     exemplos: [
       'Como você trabalha em equipe?',
-      'Fale sobre sua liderança...',
       'Como você dá feedback?',
+      'Como você lida com conflitos?',
     ],
   },
   {
-    id: 'hard_skill' as const,
-    nome: 'Hard Skills',
-    descricao: 'Conhecimentos técnicos específicos e certificações',
-    icone: '📚',
+    id: 'qualificacoes' as const,
+    nome: 'Qualificações',
+    descricao: 'CERTIFICAÇÕES e FERRAMENTAS - formação, domínio de tecnologias',
+    icone: '🎓',
     exemplos: [
-      'Qual sua experiência com...',
+      'Quais ferramentas você domina?',
       'Você possui certificação em...',
-      'Qual seu domínio de...',
+      'Qual sua experiência com...',
     ],
   },
 ] as const;

@@ -43,7 +43,10 @@
       "Bash(npx tsx:*)",
       "Bash(node scripts/check-entrevistas.mjs:*)",
       "Bash(node scripts/test-perguntas-schema.js:*)",
-      "Bash(node scripts/test-sistema-completo.js:*)"
+      "Bash(node scripts/test-sistema-completo.js:*)",
+      "Bash(psql:*)",
+      "Bash(node scripts/verificar-consistencia-perguntas.js:*)",
+      "Bash(node scripts/verificar-consistencia-final.js:*)"
     ],
     "deny": [],
     "ask": []

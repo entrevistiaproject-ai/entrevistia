@@ -20,11 +20,11 @@ export const perguntasTemplates = pgTable("perguntas_templates", {
   texto: text("texto").notNull(),
 
   // Sistema de tags flexível - arrays podem estar vazios para perguntas universais
-  cargos: jsonb("cargos").$type<string[]>().default([]), // Ex: ["Advogado", "Desenvolvedor"] ou [] para universal
-  niveis: jsonb("niveis").$type<string[]>().default([]), // Ex: ["pleno", "senior"] ou [] para todos os níveis
+  cargos: jsonb("cargos").$type<string[]>().notNull().default([]), // Ex: ["Advogado", "Desenvolvedor"] ou [] para universal
+  niveis: jsonb("niveis").$type<string[]>().notNull().default([]), // Ex: ["pleno", "senior"] ou [] para todos os níveis
 
   // Categoria da competência avaliada
-  categoria: text("categoria").notNull(), // tecnica, comportamental, soft_skill, hard_skill
+  categoria: text("categoria").notNull(), // conhecimento, experiencia, resolucao_problemas, habilidades_pessoais, qualificacoes
   competencia: text("competencia"), // Ex: "Direito Civil", "Comunicação" - opcional para perguntas genéricas
 
   // Tipo de pergunta
@@ -62,7 +62,7 @@ export const perguntasTemplates = pgTable("perguntas_templates", {
   }>(),
 
   // Tags customizadas pelo usuário (extraídas automaticamente ou adicionadas manualmente)
-  tags: jsonb("tags").$type<string[]>().default([]),
+  tags: jsonb("tags").$type<string[]>().notNull().default([]),
 
   // Auditoria
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
