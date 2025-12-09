@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
+import OpenAI, { toFile } from "openai";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || "placeholder-for-build",
@@ -58,21 +58,23 @@ export async function POST(request: Request) {
       extension = "webm";
     }
 
-    // Garantir que o arquivo tenha extensão correta para o Whisper
+    // Converter File para Buffer e criar objeto compatível com OpenAI
+    const arrayBuffer = await audioFile.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // Criar arquivo no formato esperado pela OpenAI SDK
     const fileName = `audio.${extension}`;
-    const fileWithName = new File([audioFile], fileName, {
-      type: mimeType,
-    });
 
     console.log("Enviando para Whisper:", {
       fileName,
       mimeType,
-      size: fileWithName.size,
+      size: buffer.length,
     });
 
-    // Transcrever com OpenAI Whisper
+    // Transcrever com OpenAI Whisper usando toFile
+    const file = await toFile(buffer, fileName, { type: mimeType });
     const transcription = await openai.audio.transcriptions.create({
-      file: fileWithName,
+      file: file,
       model: "whisper-1",
       language: "pt", // Português
       response_format: "json",
