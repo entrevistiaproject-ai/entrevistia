@@ -25,7 +25,6 @@ export const getInterviewInfoTool = tool(
       cargo: entrevista.cargo,
       nivel: entrevista.nivel,
       empresa: entrevista.empresa,
-      requisitos: entrevista.requisitos,
     };
   },
   {
