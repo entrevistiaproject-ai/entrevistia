@@ -1,43 +1,19 @@
 import { ChatAnthropic } from '@langchain/anthropic';
-import { createReactAgent } from '@langchain/langgraph/prebuilt';
-import {
-  getInterviewInfoTool,
-  getCandidateAnswersTool,
-  getCompetenciasTool,
-  saveAnalysisTool,
-} from './tools';
-import {
-  INTERVIEW_ANALYSIS_SYSTEM_PROMPT,
-  buildAnalysisPrompt,
-} from './prompts';
+import { getDB } from '@/lib/db';
+import { entrevistas, respostas, perguntas, candidatoEntrevistas } from '@/lib/db/schema';
+import { eq, and } from 'drizzle-orm';
+import { z } from 'zod';
 
 /**
- * Configuração do modelo Claude da Anthropic
+ * Schema para validar a resposta da IA
  */
-const createModel = () => {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-
-  if (!apiKey) {
-    throw new Error('ANTHROPIC_API_KEY não está configurada no ambiente');
-  }
-
-  return new ChatAnthropic({
-    apiKey,
-    model: 'claude-sonnet-4-5-20250929', // Claude Sonnet 4.5
-    temperature: 0.3, // Baixa temperatura para respostas mais consistentes e objetivas
-    maxTokens: 8000, // Permite respostas detalhadas
-  });
-};
-
-/**
- * Ferramentas disponíveis para o agente
- */
-const tools = [
-  getInterviewInfoTool,
-  getCandidateAnswersTool,
-  getCompetenciasTool,
-  saveAnalysisTool,
-];
+const AnalysisSchema = z.object({
+  notaGeral: z.number().min(0).max(10),
+  resumoGeral: z.string(),
+  pontosFortes: z.array(z.string()),
+  pontosMelhoria: z.array(z.string()),
+  recomendacao: z.enum(['recomendado', 'recomendado_com_ressalvas', 'nao_recomendado']),
+});
 
 /**
  * Interface do resultado da análise
@@ -46,11 +22,43 @@ export interface AnalysisResult {
   success: boolean;
   avaliacaoId?: string;
   error?: string;
-  executionLog?: string[];
 }
 
 /**
- * Analisa uma entrevista de candidato usando o agente com Claude
+ * Busca dados da entrevista diretamente do banco
+ */
+async function fetchInterviewData(candidatoId: string, entrevistaId: string) {
+  const db = getDB();
+
+  // Busca info da entrevista
+  const [entrevista] = await db
+    .select()
+    .from(entrevistas)
+    .where(eq(entrevistas.id, entrevistaId))
+    .limit(1);
+
+  // Busca respostas do candidato
+  const candidateAnswers = await db
+    .select({
+      perguntaTexto: perguntas.texto,
+      perguntaTipo: perguntas.tipo,
+      textoResposta: respostas.textoResposta,
+      transcricao: respostas.transcricao,
+    })
+    .from(respostas)
+    .innerJoin(perguntas, eq(respostas.perguntaId, perguntas.id))
+    .where(
+      and(
+        eq(respostas.candidatoId, candidatoId),
+        eq(respostas.entrevistaId, entrevistaId)
+      )
+    );
+
+  return { entrevista, respostas: candidateAnswers };
+}
+
+/**
+ * Analisa uma entrevista de candidato usando Claude diretamente
  */
 export async function analyzeInterview(
   candidatoId: string,
@@ -58,81 +66,106 @@ export async function analyzeInterview(
   candidatoNome: string
 ): Promise<AnalysisResult> {
   try {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      throw new Error('ANTHROPIC_API_KEY não está configurada');
+    }
+
+    // Busca dados do banco
+    const data = await fetchInterviewData(candidatoId, entrevistaId);
+
+    if (!data.entrevista) {
+      return { success: false, error: 'Entrevista não encontrada' };
+    }
+
+    if (data.respostas.length === 0) {
+      return { success: false, error: 'Nenhuma resposta encontrada para este candidato' };
+    }
+
+    // Formata as respostas para o prompt
+    const respostasFormatadas = data.respostas.map((r, i) =>
+      `**Pergunta ${i + 1}:** ${r.perguntaTexto}\n**Resposta:** ${r.transcricao || r.textoResposta || 'Sem resposta'}`
+    ).join('\n\n');
+
     // Cria o modelo
-    const model = createModel();
-
-    // Cria o agente com React pattern (reasoning + acting)
-    const agent = createReactAgent({
-      llm: model,
-      tools,
+    const model = new ChatAnthropic({
+      apiKey,
+      model: 'claude-sonnet-4-5-20250929',
+      temperature: 0.3,
+      maxTokens: 4000,
     });
 
-    // Prepara as mensagens
-    const messages = [
-      {
-        role: 'system' as const,
-        content: INTERVIEW_ANALYSIS_SYSTEM_PROMPT,
-      },
-      {
-        role: 'user' as const,
-        content: buildAnalysisPrompt(candidatoId, entrevistaId, candidatoNome),
-      },
-    ];
+    // Prompt direto com todos os dados
+    const prompt = `Analise esta entrevista e retorne APENAS um JSON válido.
 
-    // Executa o agente
-    const executionLog: string[] = [];
-    let avaliacaoId: string | undefined;
+## Vaga
+- Título: ${data.entrevista.titulo}
+- Cargo: ${data.entrevista.cargo}
+- Nível: ${data.entrevista.nivel}
+- Descrição: ${data.entrevista.descricao}
 
-    const result = await agent.invoke({
-      messages,
-    });
+## Candidato: ${candidatoNome}
 
-    // Processa o resultado
-    if (result && result.messages) {
-      for (const message of result.messages) {
-        executionLog.push(
-          `[${message.type || 'message'}]: ${
-            typeof message.content === 'string'
-              ? message.content
-              : JSON.stringify(message.content)
-          }`
-        );
+## Respostas da Entrevista
+${respostasFormatadas}
 
-        // Verifica se o agente salvou a análise com sucesso
-        if (
-          message.type === 'tool' &&
-          message.name === 'saveAnalysis' &&
-          message.content
-        ) {
-          try {
-            const toolResult =
-              typeof message.content === 'string'
-                ? JSON.parse(message.content)
-                : message.content;
+## Instruções
+Analise as respostas acima e retorne APENAS um objeto JSON com esta estrutura exata:
+{
+  "notaGeral": <número de 0 a 10>,
+  "resumoGeral": "<resumo da performance do candidato>",
+  "pontosFortes": ["<ponto forte 1>", "<ponto forte 2>", "<ponto forte 3>"],
+  "pontosMelhoria": ["<ponto melhoria 1>", "<ponto melhoria 2>", "<ponto melhoria 3>"],
+  "recomendacao": "<recomendado | recomendado_com_ressalvas | nao_recomendado>"
+}
 
-            if (toolResult.success) {
-              avaliacaoId = toolResult.avaliacaoId;
-            }
-          } catch (e) {
-            console.error('Erro ao processar resultado da tool:', e);
-          }
-        }
-      }
+Retorne APENAS o JSON, sem texto adicional, sem markdown, sem explicações.`;
+
+    const response = await model.invoke([
+      { role: 'user', content: prompt }
+    ]);
+
+    // Extrai o JSON da resposta
+    const content = typeof response.content === 'string'
+      ? response.content
+      : JSON.stringify(response.content);
+
+    // Tenta extrair JSON da resposta
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.error('Resposta da IA não contém JSON válido:', content);
+      return { success: false, error: 'Resposta da IA não contém JSON válido' };
     }
 
-    if (avaliacaoId) {
-      return {
-        success: true,
-        avaliacaoId,
-        executionLog,
-      };
-    } else {
-      return {
-        success: false,
-        error: 'Agente não conseguiu salvar a análise',
-        executionLog,
-      };
+    const analysisData = JSON.parse(jsonMatch[0]);
+    const analysis = AnalysisSchema.parse(analysisData);
+
+    // Salva no banco
+    const db = getDB();
+    const resumoCompleto = `${analysis.resumoGeral}\n\n**Pontos Fortes:**\n${analysis.pontosFortes.map(p => `- ${p}`).join('\n')}\n\n**Pontos de Melhoria:**\n${analysis.pontosMelhoria.map(p => `- ${p}`).join('\n')}`;
+
+    const [updated] = await db
+      .update(candidatoEntrevistas)
+      .set({
+        notaGeral: analysis.notaGeral,
+        resumoGeral: resumoCompleto,
+        recomendacao: analysis.recomendacao,
+        avaliadoEm: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(candidatoEntrevistas.candidatoId, candidatoId),
+          eq(candidatoEntrevistas.entrevistaId, entrevistaId)
+        )
+      )
+      .returning({ id: candidatoEntrevistas.id });
+
+    if (!updated) {
+      return { success: false, error: 'Candidato não encontrado na entrevista' };
     }
+
+    return { success: true, avaliacaoId: updated.id };
   } catch (error) {
     console.error('Erro na análise da entrevista:', error);
     return {
