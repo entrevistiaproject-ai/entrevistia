@@ -61,16 +61,6 @@ async function main() {
       console.log(`  Avaliação ID: ${result.avaliacaoId}`);
       console.log(`  Tempo de execução: ${duration}s`);
       console.log('');
-
-      if (result.executionLog && result.executionLog.length > 0) {
-        console.log('📝 Log de execução:');
-        console.log('');
-        result.executionLog.forEach((log, index) => {
-          console.log(`  ${index + 1}. ${log.substring(0, 100)}${log.length > 100 ? '...' : ''}`);
-        });
-      }
-
-      console.log('');
       console.log('🎉 Você pode visualizar a avaliação em:');
       console.log(`   /candidatos/${candidatoId}/resultado`);
     } else {
@@ -78,15 +68,6 @@ async function main() {
       console.error('❌ Falha na análise');
       console.error('');
       console.error('Erro:', result.error);
-
-      if (result.executionLog && result.executionLog.length > 0) {
-        console.error('');
-        console.error('Log de execução:');
-        result.executionLog.forEach((log, index) => {
-          console.error(`  ${index + 1}. ${log}`);
-        });
-      }
-
       process.exit(1);
     }
   } catch (error) {
