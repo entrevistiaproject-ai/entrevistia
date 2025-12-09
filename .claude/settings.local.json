@@ -27,7 +27,9 @@
       "Bash(git push:*)",
       "Bash(git revert:*)",
       "Bash(npm run dev:*)",
-      "Bash(git ls-tree:*)"
+      "Bash(git ls-tree:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []

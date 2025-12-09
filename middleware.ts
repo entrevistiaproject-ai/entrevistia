@@ -1,37 +1,46 @@
-import { auth } from "@/auth";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export default auth((req) => {
-  try {
-    const isLoggedIn = !!req.auth;
-    const { pathname } = req.nextUrl;
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
-    // Rotas públicas
-    const publicRoutes = ["/", "/login", "/cadastro", "/termos", "/privacidade", "/verificar-email"];
-    const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith("/api/auth");
+  // Rotas públicas que não precisam de autenticação
+  const publicRoutes = [
+    "/",
+    "/login",
+    "/cadastro",
+    "/termos",
+    "/privacidade",
+    "/verificar-email",
+  ];
 
-    // Se não está logado e tenta acessar rota protegida
-    if (!isPublicRoute && !isLoggedIn) {
-      const loginUrl = req.nextUrl.clone();
-      loginUrl.pathname = "/login";
-      loginUrl.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
+  const isPublicRoute =
+    publicRoutes.includes(pathname) ||
+    pathname.startsWith("/api/auth");
 
-    // Se está logado e tenta acessar login/cadastro, redireciona para dashboard
-    if (isLoggedIn && (pathname === "/login" || pathname === "/cadastro")) {
-      const dashboardUrl = req.nextUrl.clone();
-      dashboardUrl.pathname = "/dashboard";
-      dashboardUrl.search = "";
-      return NextResponse.redirect(dashboardUrl);
-    }
-
-    return NextResponse.next();
-  } catch (error) {
-    console.error("[Middleware] Error:", error);
+  // Se for rota pública, permite acesso
+  if (isPublicRoute) {
     return NextResponse.next();
   }
-});
+
+  // Verifica se tem sessão através do cookie
+  const sessionToken = request.cookies.get("authjs.session-token") ||
+                       request.cookies.get("__Secure-authjs.session-token");
+
+  // Se não tem sessão e está tentando acessar rota protegida
+  if (!sessionToken) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Se tem sessão e está tentando acessar login/cadastro
+  if (sessionToken && (pathname === "/login" || pathname === "/cadastro")) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [
