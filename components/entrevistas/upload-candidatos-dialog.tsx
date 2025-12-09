@@ -34,10 +34,10 @@ export function UploadCandidatosDialog({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDownloadModelo = () => {
-    // Criar CSV modelo
-    const csvContent = `nome,email,telefone,linkedin
-João Silva,joao@example.com,(11) 99999-9999,https://linkedin.com/in/joaosilva
-Maria Santos,maria@example.com,(11) 88888-8888,https://linkedin.com/in/mariasantos`;
+    // Criar CSV modelo com apenas nome e email
+    const csvContent = `nome,email
+João Silva,joao@example.com
+Maria Santos,maria@example.com`;
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
@@ -228,7 +228,6 @@ Maria Santos,maria@example.com,(11) 88888-8888,https://linkedin.com/in/mariasant
                     <tr>
                       <th className="p-2 text-left">Nome</th>
                       <th className="p-2 text-left">Email</th>
-                      <th className="p-2 text-left">Telefone</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -236,7 +235,6 @@ Maria Santos,maria@example.com,(11) 88888-8888,https://linkedin.com/in/mariasant
                       <tr key={index} className="border-t">
                         <td className="p-2">{candidato.nome}</td>
                         <td className="p-2">{candidato.email}</td>
-                        <td className="p-2">{candidato.telefone || "-"}</td>
                       </tr>
                     ))}
                   </tbody>
