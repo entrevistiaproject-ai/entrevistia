@@ -16,8 +16,14 @@ export async function GET(request: Request) {
       );
     }
 
-    const { searchParams } = new URL(request.url);
-    const statusFilter = searchParams.get("status");
+    let statusFilter: string | null = null;
+    try {
+      const { searchParams } = new URL(request.url);
+      statusFilter = searchParams.get("status");
+    } catch (error) {
+      // Se falhar ao criar URL (ex: durante build), continua sem filtro
+      console.warn("Falha ao processar URL:", error);
+    }
 
     // Query otimizada: busca entrevistas com contagem de candidatos e respostas em uma única query
     // Usamos subqueries otimizadas para evitar múltiplas queries

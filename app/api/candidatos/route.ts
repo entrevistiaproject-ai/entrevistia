@@ -64,8 +64,14 @@ export async function GET(request: Request) {
       );
     }
 
-    const { searchParams } = new URL(request.url);
-    const entrevistaId = searchParams.get("entrevistaId");
+    let entrevistaId: string | null = null;
+    try {
+      const { searchParams } = new URL(request.url);
+      entrevistaId = searchParams.get("entrevistaId");
+    } catch (error) {
+      // Se falhar ao criar URL (ex: durante build), continua com entrevistaId = null
+      console.warn("Falha ao processar URL:", error);
+    }
 
     const db = getDB();
 

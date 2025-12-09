@@ -11,8 +11,14 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const periodo = searchParams.get("periodo") || "mes"; // mes, trimestre, ano, total
+    let periodo = "mes";
+    try {
+      const { searchParams } = new URL(request.url);
+      periodo = searchParams.get("periodo") || "mes"; // mes, trimestre, ano, total
+    } catch (error) {
+      // Se falhar ao criar URL (ex: durante build), usa período padrão
+      console.warn("Falha ao processar URL:", error);
+    }
 
     const db = getDB();
 
