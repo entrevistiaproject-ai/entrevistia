@@ -3,7 +3,12 @@ import { users } from "./users";
 
 /**
  * Tabela de templates de perguntas
- * Banco de perguntas que podem ser reutilizadas em várias entrevistas
+ * Banco de perguntas reutilizáveis com sistema de tags flexível
+ *
+ * Sistema de Tags:
+ * - Perguntas podem ter múltiplos cargos, níveis, ou nenhum (universal)
+ * - Tags vazias = pergunta universal para qualquer contexto
+ * - Filtro inteligente seleciona perguntas por relevância semântica
  */
 export const perguntasTemplates = pgTable("perguntas_templates", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -13,12 +18,14 @@ export const perguntasTemplates = pgTable("perguntas_templates", {
 
   // Dados da pergunta
   texto: text("texto").notNull(),
-  cargo: text("cargo").notNull(), // Ex: "Advogado", "Desenvolvedor"
-  nivel: text("nivel").notNull(), // junior, pleno, senior
+
+  // Sistema de tags flexível - arrays podem estar vazios para perguntas universais
+  cargos: jsonb("cargos").$type<string[]>().default([]), // Ex: ["Advogado", "Desenvolvedor"] ou [] para universal
+  niveis: jsonb("niveis").$type<string[]>().default([]), // Ex: ["pleno", "senior"] ou [] para todos os níveis
 
   // Categoria da competência avaliada
   categoria: text("categoria").notNull(), // tecnica, comportamental, soft_skill, hard_skill
-  competencia: text("competencia").notNull(), // Ex: "Direito Civil", "Comunicação", "Liderança"
+  competencia: text("competencia"), // Ex: "Direito Civil", "Comunicação" - opcional para perguntas genéricas
 
   // Tipo de pergunta
   tipo: text("tipo").notNull().default("texto"), // texto, video, audio
@@ -34,8 +41,28 @@ export const perguntasTemplates = pgTable("perguntas_templates", {
     aspectosAvaliar?: string[];
   }>(),
 
-  // Tags para facilitar busca
-  tags: jsonb("tags").$type<string[]>(),
+  // Metadados para filtro inteligente
+  metadados: jsonb("metadados").$type<{
+    // Contextos onde a pergunta é relevante
+    contextos?: string[]; // Ex: ["entrevista técnica", "avaliação comportamental"]
+
+    // Áreas de conhecimento relacionadas
+    areasConhecimento?: string[]; // Ex: ["direito civil", "contratos", "negociação"]
+
+    // Senioridade sugerida (peso 0-1 para cada nível)
+    senioridadePesos?: {
+      junior?: number;
+      pleno?: number;
+      senior?: number;
+      especialista?: number;
+    };
+
+    // Score de relevância para diferentes tipos de vaga (calculado automaticamente)
+    relevanciaCalculada?: Record<string, number>;
+  }>(),
+
+  // Tags customizadas pelo usuário (extraídas automaticamente ou adicionadas manualmente)
+  tags: jsonb("tags").$type<string[]>().default([]),
 
   // Auditoria
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),

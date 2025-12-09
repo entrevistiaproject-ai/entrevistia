@@ -41,7 +41,9 @@
       "Bash(pkill:*)",
       "Bash(node -e:*)",
       "Bash(npx tsx:*)",
-      "Bash(node scripts/check-entrevistas.mjs:*)"
+      "Bash(node scripts/check-entrevistas.mjs:*)",
+      "Bash(node scripts/test-perguntas-schema.js:*)",
+      "Bash(node scripts/test-sistema-completo.js:*)"
     ],
     "deny": [],
     "ask": []
