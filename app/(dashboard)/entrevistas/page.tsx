@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Filter, Loader2 } from "lucide-react";
+import { Plus, Search, Filter, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import { EntrevistaCard } from "@/components/entrevistas/entrevista-card";
 import { EntrevistasEmptyState } from "@/components/entrevistas/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { SkeletonCard } from "@/components/ui/skeleton-card";
 
 interface Entrevista {
   id: string;
@@ -100,8 +102,23 @@ export default function EntrevistasPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[500px]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="space-y-6">
+        <PageHeader
+          title="Minhas Entrevistas"
+          description="Gerencie suas entrevistas e acompanhe os candidatos"
+        >
+          <Button asChild size="touch" className="w-full sm:w-auto">
+            <Link href="/criar-entrevista">
+              <Plus className="h-4 w-4" />
+              Nova Entrevista
+            </Link>
+          </Button>
+        </PageHeader>
+        <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+          {[1, 2, 3, 4].map((i) => (
+            <SkeletonCard key={i} lines={4} showFooter />
+          ))}
+        </div>
       </div>
     );
   }
@@ -110,20 +127,17 @@ export default function EntrevistasPage() {
   if (entrevistas.length === 0) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Minhas Entrevistas</h1>
-            <p className="text-muted-foreground">
-              Gerencie suas entrevistas e acompanhe os candidatos
-            </p>
-          </div>
-          <Button asChild>
+        <PageHeader
+          title="Minhas Entrevistas"
+          description="Gerencie suas entrevistas e acompanhe os candidatos"
+        >
+          <Button asChild size="touch" className="w-full sm:w-auto">
             <Link href="/criar-entrevista">
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="h-4 w-4" />
               Nova Entrevista
             </Link>
           </Button>
-        </div>
+        </PageHeader>
         <EntrevistasEmptyState />
       </div>
     );
@@ -132,77 +146,87 @@ export default function EntrevistasPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Minhas Entrevistas</h1>
-          <p className="text-muted-foreground">
-            {counts.todas} {counts.todas === 1 ? "entrevista" : "entrevistas"} no total
-          </p>
-        </div>
-        <Button asChild>
+      <PageHeader
+        title="Minhas Entrevistas"
+        description={`${counts.todas} ${counts.todas === 1 ? "entrevista" : "entrevistas"} no total`}
+      >
+        <Button asChild size="touch" className="w-full sm:w-auto">
           <Link href="/criar-entrevista">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="h-4 w-4" />
             Nova Entrevista
           </Link>
         </Button>
-      </div>
+      </PageHeader>
 
       {/* Filtros e busca */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-4">
         {/* Busca */}
-        <div className="relative flex-1">
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Buscar por título, cargo ou empresa..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className="pl-9 pr-9"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
-        {/* Tabs de filtro */}
-        <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full sm:w-auto">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="todas" className="text-xs sm:text-sm">
-              Todas
-              <span className="ml-1.5 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
-                {counts.todas}
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="ativas" className="text-xs sm:text-sm">
-              Ativas
-              <span className="ml-1.5 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
-                {counts.ativas}
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="encerradas" className="text-xs sm:text-sm">
-              Encerradas
-              <span className="ml-1.5 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
-                {counts.encerradas}
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="arquivadas" className="text-xs sm:text-sm">
-              Arquivadas
-              <span className="ml-1.5 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
-                {counts.arquivadas}
-              </span>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {/* Tabs de filtro - scroll horizontal no mobile */}
+        <div className="scroll-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+          <Tabs value={statusFilter} onValueChange={setStatusFilter}>
+            <TabsList className="inline-flex w-auto min-w-full sm:min-w-0 sm:grid sm:grid-cols-4 sm:w-full lg:w-auto">
+              <TabsTrigger value="todas" className="flex-1 sm:flex-none text-xs sm:text-sm whitespace-nowrap px-3 sm:px-4">
+                Todas
+                <span className="ml-1.5 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
+                  {counts.todas}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="ativas" className="flex-1 sm:flex-none text-xs sm:text-sm whitespace-nowrap px-3 sm:px-4">
+                Ativas
+                <span className="ml-1.5 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
+                  {counts.ativas}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="encerradas" className="flex-1 sm:flex-none text-xs sm:text-sm whitespace-nowrap px-3 sm:px-4">
+                Encerradas
+                <span className="ml-1.5 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
+                  {counts.encerradas}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="arquivadas" className="flex-1 sm:flex-none text-xs sm:text-sm whitespace-nowrap px-3 sm:px-4">
+                Arquivadas
+                <span className="ml-1.5 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
+                  {counts.arquivadas}
+                </span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
 
       {/* Lista de entrevistas */}
       {filteredEntrevistas.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-          <Filter className="h-12 w-12 text-muted-foreground/50" />
+        <div className="flex flex-col items-center justify-center min-h-[300px] py-12 space-y-4">
+          <div className="rounded-full bg-muted p-4">
+            <Filter className="h-8 w-8 text-muted-foreground" />
+          </div>
           <div className="text-center">
             <h3 className="text-lg font-semibold">Nenhuma entrevista encontrada</h3>
-            <p className="text-muted-foreground">
+            <p className="text-sm text-muted-foreground mt-1">
               Tente ajustar os filtros ou a busca
             </p>
           </div>
           <Button
             variant="outline"
+            size="touch"
             onClick={() => {
               setStatusFilter("todas");
               setSearchQuery("");
@@ -212,7 +236,7 @@ export default function EntrevistasPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
           {filteredEntrevistas.map((entrevista) => (
             <EntrevistaCard key={entrevista.id} entrevista={entrevista} />
           ))}

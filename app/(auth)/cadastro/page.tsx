@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Building2,
   Mail,
@@ -18,7 +19,11 @@ import {
   Home,
   ChevronRight,
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  Sparkles
 } from "lucide-react";
 
 export default function CadastroPage() {
@@ -39,6 +44,8 @@ export default function CadastroPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Função para formatar telefone
   const formatarTelefone = (valor: string) => {
@@ -127,47 +134,58 @@ export default function CadastroPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4">
-        <Card className="w-full max-w-md p-8 text-center">
-          <CheckCircle2 className="w-16 h-16 text-green-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Cadastro realizado com sucesso!
-          </h2>
-          <p className="text-gray-600 mb-4">
-            Verifique seu email para confirmar sua conta...
-          </p>
-          <Loader2 className="w-6 h-6 animate-spin text-blue-600 mx-auto" />
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/5 via-background to-primary/10 p-4">
+        <Card className="w-full max-w-md text-center">
+          <CardContent className="pt-8 pb-8">
+            <div className="relative mx-auto w-20 h-20 mb-6">
+              <div className="absolute inset-0 rounded-full bg-green-500/20 animate-ping" />
+              <div className="relative w-full h-full rounded-full bg-green-500/10 flex items-center justify-center">
+                <CheckCircle2 className="h-10 w-10 text-green-500" />
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Sparkles className="h-5 w-5 text-yellow-500" />
+              <h2 className="text-2xl font-bold">
+                Cadastro realizado!
+              </h2>
+              <Sparkles className="h-5 w-5 text-yellow-500" />
+            </div>
+            <p className="text-muted-foreground mb-6">
+              Verifique seu email para confirmar sua conta...
+            </p>
+            <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" />
+          </CardContent>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+    <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-primary/10">
       {/* Header com navegação */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 text-xl font-bold text-blue-600">
+            <Link href="/" className="flex items-center gap-2 text-xl font-bold text-primary">
               <Building2 className="w-6 h-6" />
               EntrevistIA
             </Link>
 
             {/* Links de navegação */}
             <nav className="hidden md:flex items-center gap-6">
-              <Link href="/" className="text-gray-600 hover:text-gray-900">
+              <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
                 Início
               </Link>
-              <Link href="/login" className="text-gray-600 hover:text-gray-900">
+              <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors">
                 Login
               </Link>
             </nav>
 
             {/* Botão mobile */}
             <Link href="/" className="md:hidden">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4" />
+              <Button variant="ghost" size="touch-icon">
+                <ArrowLeft className="w-5 h-5" />
               </Button>
             </Link>
           </div>
@@ -176,301 +194,322 @@ export default function CadastroPage() {
 
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <nav className="flex items-center gap-2 text-sm text-gray-600">
-          <Link href="/" className="hover:text-gray-900 flex items-center gap-1">
+        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Link href="/" className="hover:text-foreground flex items-center gap-1 transition-colors">
             <Home className="w-4 h-4" />
             Início
           </Link>
           <ChevronRight className="w-4 h-4" />
-          <span className="text-gray-900 font-medium">Criar conta</span>
+          <span className="text-foreground font-medium">Criar conta</span>
         </nav>
       </div>
 
       {/* Conteúdo principal */}
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <Card className="p-8 shadow-lg">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-              <Building2 className="w-8 h-8 text-blue-600" />
+        <Card className="shadow-lg">
+          <CardHeader className="text-center pb-2">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 mx-auto">
+              <Building2 className="w-8 h-8 text-primary" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Criar conta</h1>
-            <p className="text-gray-600 mt-2">
+            <CardTitle className="text-2xl sm:text-3xl">Criar conta</CardTitle>
+            <CardDescription>
               Comece a automatizar suas entrevistas hoje
-            </p>
-          </div>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4">
+            {/* Erro geral */}
+            {errors.geral && (
+              <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+                <p className="text-sm text-destructive">{errors.geral}</p>
+              </div>
+            )}
 
-          {/* Erro geral */}
-          {errors.geral && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">{errors.geral}</p>
-            </div>
-          )}
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Grid de 2 colunas */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                {/* Nome Completo */}
+                <div className="space-y-2">
+                  <Label htmlFor="nome" className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-muted-foreground" />
+                    Nome completo *
+                  </Label>
+                  <Input
+                    id="nome"
+                    name="nome"
+                    type="text"
+                    placeholder="João Silva"
+                    value={formData.nome}
+                    onChange={handleChange}
+                    error={!!errors.nome}
+                    disabled={isLoading}
+                  />
+                  {errors.nome && (
+                    <p className="text-sm text-destructive">{errors.nome}</p>
+                  )}
+                </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Grid de 2 colunas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Nome Completo */}
-              <div className="space-y-2">
-                <Label htmlFor="nome" className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-gray-500" />
-                  Nome completo *
-                </Label>
-                <Input
-                  id="nome"
-                  name="nome"
-                  type="text"
-                  placeholder="João Silva"
-                  value={formData.nome}
-                  onChange={handleChange}
-                  className={errors.nome ? "border-red-500" : ""}
-                  disabled={isLoading}
-                />
-                {errors.nome && (
-                  <p className="text-sm text-red-600">{errors.nome}</p>
+                {/* Email */}
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-muted-foreground" />
+                    Email corporativo *
+                  </Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="joao@empresa.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    error={!!errors.email}
+                    disabled={isLoading}
+                  />
+                  {errors.email && (
+                    <p className="text-sm text-destructive">{errors.email}</p>
+                  )}
+                </div>
+
+                {/* Telefone */}
+                <div className="space-y-2">
+                  <Label htmlFor="telefone" className="flex items-center gap-2">
+                    <Phone className="w-4 h-4 text-muted-foreground" />
+                    Telefone
+                  </Label>
+                  <Input
+                    id="telefone"
+                    name="telefone"
+                    type="tel"
+                    placeholder="(11) 99999-9999"
+                    value={formData.telefone}
+                    onChange={handleChange}
+                    error={!!errors.telefone}
+                    disabled={isLoading}
+                  />
+                  {errors.telefone && (
+                    <p className="text-sm text-destructive">{errors.telefone}</p>
+                  )}
+                </div>
+
+                {/* Empresa */}
+                <div className="space-y-2">
+                  <Label htmlFor="empresa" className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-muted-foreground" />
+                    Empresa
+                  </Label>
+                  <Input
+                    id="empresa"
+                    name="empresa"
+                    type="text"
+                    placeholder="Nome da empresa"
+                    value={formData.empresa}
+                    onChange={handleChange}
+                    error={!!errors.empresa}
+                    disabled={isLoading}
+                  />
+                  {errors.empresa && (
+                    <p className="text-sm text-destructive">{errors.empresa}</p>
+                  )}
+                </div>
+
+                {/* Cargo */}
+                <div className="space-y-2">
+                  <Label htmlFor="cargo" className="flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-muted-foreground" />
+                    Cargo
+                  </Label>
+                  <Input
+                    id="cargo"
+                    name="cargo"
+                    type="text"
+                    placeholder="Ex: Gerente de RH"
+                    value={formData.cargo}
+                    onChange={handleChange}
+                    error={!!errors.cargo}
+                    disabled={isLoading}
+                  />
+                  {errors.cargo && (
+                    <p className="text-sm text-destructive">{errors.cargo}</p>
+                  )}
+                </div>
+
+                {/* Senha */}
+                <div className="space-y-2">
+                  <Label htmlFor="senha" className="flex items-center gap-2">
+                    <Lock className="w-4 h-4 text-muted-foreground" />
+                    Senha *
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="senha"
+                      name="senha"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Mínimo 8 caracteres"
+                      value={formData.senha}
+                      onChange={handleChange}
+                      error={!!errors.senha}
+                      disabled={isLoading}
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                      aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  {errors.senha && (
+                    <p className="text-sm text-destructive">{errors.senha}</p>
+                  )}
+                </div>
+
+                {/* Confirmar Senha */}
+                <div className="space-y-2">
+                  <Label htmlFor="confirmarSenha" className="flex items-center gap-2">
+                    <Lock className="w-4 h-4 text-muted-foreground" />
+                    Confirmar senha *
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmarSenha"
+                      name="confirmarSenha"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Repita a senha"
+                      value={formData.confirmarSenha}
+                      onChange={handleChange}
+                      error={!!errors.confirmarSenha}
+                      disabled={isLoading}
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                      aria-label={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  {errors.confirmarSenha && (
+                    <p className="text-sm text-destructive">{errors.confirmarSenha}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Termos e Privacidade */}
+              <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id="aceitouTermos"
+                    checked={formData.aceitouTermos}
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({ ...prev, aceitouTermos: checked as boolean }))
+                    }
+                    disabled={isLoading}
+                  />
+                  <label htmlFor="aceitouTermos" className="text-sm leading-relaxed cursor-pointer">
+                    Li e aceito os{" "}
+                    <Link href="/termos" className="text-primary hover:underline" target="_blank">
+                      Termos de Uso
+                    </Link>{" "}
+                    *
+                  </label>
+                </div>
+                {errors.aceitouTermos && (
+                  <p className="text-sm text-destructive pl-7">{errors.aceitouTermos}</p>
                 )}
-              </div>
 
-              {/* Email */}
-              <div className="space-y-2">
-                <Label htmlFor="email" className="flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-gray-500" />
-                  Email corporativo *
-                </Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="joao@empresa.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={errors.email ? "border-red-500" : ""}
-                  disabled={isLoading}
-                />
-                {errors.email && (
-                  <p className="text-sm text-red-600">{errors.email}</p>
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id="aceitouPrivacidade"
+                    checked={formData.aceitouPrivacidade}
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({ ...prev, aceitouPrivacidade: checked as boolean }))
+                    }
+                    disabled={isLoading}
+                  />
+                  <label htmlFor="aceitouPrivacidade" className="text-sm leading-relaxed cursor-pointer">
+                    Li e aceito a{" "}
+                    <Link href="/privacidade" className="text-primary hover:underline" target="_blank">
+                      Política de Privacidade
+                    </Link>{" "}
+                    *
+                  </label>
+                </div>
+                {errors.aceitouPrivacidade && (
+                  <p className="text-sm text-destructive pl-7">{errors.aceitouPrivacidade}</p>
                 )}
+
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id="aceitaEmailMarketing"
+                    checked={formData.aceitaEmailMarketing}
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({ ...prev, aceitaEmailMarketing: checked as boolean }))
+                    }
+                    disabled={isLoading}
+                  />
+                  <label htmlFor="aceitaEmailMarketing" className="text-sm leading-relaxed cursor-pointer text-muted-foreground">
+                    Aceito receber novidades e promoções por email (opcional)
+                  </label>
+                </div>
               </div>
 
-              {/* Telefone */}
-              <div className="space-y-2">
-                <Label htmlFor="telefone" className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-gray-500" />
-                  Telefone
-                </Label>
-                <Input
-                  id="telefone"
-                  name="telefone"
-                  type="tel"
-                  placeholder="(11) 99999-9999"
-                  value={formData.telefone}
-                  onChange={handleChange}
-                  className={errors.telefone ? "border-red-500" : ""}
-                  disabled={isLoading}
-                />
-                {errors.telefone && (
-                  <p className="text-sm text-red-600">{errors.telefone}</p>
-                )}
-              </div>
-
-              {/* Empresa */}
-              <div className="space-y-2">
-                <Label htmlFor="empresa" className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-gray-500" />
-                  Empresa
-                </Label>
-                <Input
-                  id="empresa"
-                  name="empresa"
-                  type="text"
-                  placeholder="Nome da empresa"
-                  value={formData.empresa}
-                  onChange={handleChange}
-                  className={errors.empresa ? "border-red-500" : ""}
-                  disabled={isLoading}
-                />
-                {errors.empresa && (
-                  <p className="text-sm text-red-600">{errors.empresa}</p>
-                )}
-              </div>
-
-              {/* Cargo */}
-              <div className="space-y-2">
-                <Label htmlFor="cargo" className="flex items-center gap-2">
-                  <Briefcase className="w-4 h-4 text-gray-500" />
-                  Cargo
-                </Label>
-                <Input
-                  id="cargo"
-                  name="cargo"
-                  type="text"
-                  placeholder="Ex: Gerente de RH"
-                  value={formData.cargo}
-                  onChange={handleChange}
-                  className={errors.cargo ? "border-red-500" : ""}
-                  disabled={isLoading}
-                />
-                {errors.cargo && (
-                  <p className="text-sm text-red-600">{errors.cargo}</p>
-                )}
-              </div>
-
-              {/* Senha */}
-              <div className="space-y-2">
-                <Label htmlFor="senha" className="flex items-center gap-2">
-                  <Lock className="w-4 h-4 text-gray-500" />
-                  Senha *
-                </Label>
-                <Input
-                  id="senha"
-                  name="senha"
-                  type="password"
-                  placeholder="Mínimo 8 caracteres"
-                  value={formData.senha}
-                  onChange={handleChange}
-                  className={errors.senha ? "border-red-500" : ""}
-                  disabled={isLoading}
-                />
-                {errors.senha && (
-                  <p className="text-sm text-red-600">{errors.senha}</p>
-                )}
-              </div>
-
-              {/* Confirmar Senha */}
-              <div className="space-y-2">
-                <Label htmlFor="confirmarSenha" className="flex items-center gap-2">
-                  <Lock className="w-4 h-4 text-gray-500" />
-                  Confirmar senha *
-                </Label>
-                <Input
-                  id="confirmarSenha"
-                  name="confirmarSenha"
-                  type="password"
-                  placeholder="Repita a senha"
-                  value={formData.confirmarSenha}
-                  onChange={handleChange}
-                  className={errors.confirmarSenha ? "border-red-500" : ""}
-                  disabled={isLoading}
-                />
-                {errors.confirmarSenha && (
-                  <p className="text-sm text-red-600">{errors.confirmarSenha}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Termos e Privacidade */}
-            <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-start gap-2">
-                <input
-                  type="checkbox"
-                  id="aceitouTermos"
-                  name="aceitouTermos"
-                  className="mt-1"
-                  checked={formData.aceitouTermos}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                />
-                <label htmlFor="aceitouTermos" className="text-sm text-gray-700">
-                  Li e aceito os{" "}
-                  <Link href="/termos" className="text-blue-600 hover:underline" target="_blank">
-                    Termos de Uso
-                  </Link>{" "}
-                  *
-                </label>
-              </div>
-              {errors.aceitouTermos && (
-                <p className="text-sm text-red-600">{errors.aceitouTermos}</p>
-              )}
-
-              <div className="flex items-start gap-2">
-                <input
-                  type="checkbox"
-                  id="aceitouPrivacidade"
-                  name="aceitouPrivacidade"
-                  className="mt-1"
-                  checked={formData.aceitouPrivacidade}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                />
-                <label htmlFor="aceitouPrivacidade" className="text-sm text-gray-700">
-                  Li e aceito a{" "}
-                  <Link href="/privacidade" className="text-blue-600 hover:underline" target="_blank">
-                    Política de Privacidade
-                  </Link>{" "}
-                  *
-                </label>
-              </div>
-              {errors.aceitouPrivacidade && (
-                <p className="text-sm text-red-600">{errors.aceitouPrivacidade}</p>
-              )}
-
-              <div className="flex items-start gap-2">
-                <input
-                  type="checkbox"
-                  id="aceitaEmailMarketing"
-                  name="aceitaEmailMarketing"
-                  className="mt-1"
-                  checked={formData.aceitaEmailMarketing}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                />
-                <label htmlFor="aceitaEmailMarketing" className="text-sm text-gray-700">
-                  Aceito receber novidades e promoções por email (opcional)
-                </label>
-              </div>
-            </div>
-
-            {/* Botão de Submit */}
-            <Button
-              type="submit"
-              className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Criando conta...
-                </>
-              ) : (
-                "Criar minha conta"
-              )}
-            </Button>
-          </form>
-
-          {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Já tem uma conta?{" "}
-              <Link
-                href="/login"
-                className="text-blue-600 hover:underline font-semibold"
+              {/* Botão de Submit */}
+              <Button
+                type="submit"
+                className="w-full"
+                size="touch"
+                disabled={isLoading}
               >
-                Fazer login
-              </Link>
-            </p>
-          </div>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Criando conta...
+                  </>
+                ) : (
+                  "Criar minha conta"
+                )}
+              </Button>
+            </form>
 
-          {/* Benefícios */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-500 text-center mb-4">
-              Ao criar sua conta você terá acesso a:
-            </p>
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-2xl font-bold text-blue-600">∞</p>
-                <p className="text-xs text-gray-600">Entrevistas ilimitadas</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-blue-600">90%</p>
-                <p className="text-xs text-gray-600">Redução de tempo</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-blue-600">24/7</p>
-                <p className="text-xs text-gray-600">Disponibilidade</p>
+            {/* Footer */}
+            <div className="mt-6 text-center">
+              <p className="text-muted-foreground">
+                Já tem uma conta?{" "}
+                <Link
+                  href="/login"
+                  className="text-primary hover:underline font-semibold"
+                >
+                  Fazer login
+                </Link>
+              </p>
+            </div>
+
+            {/* Benefícios */}
+            <div className="mt-8 pt-6 border-t">
+              <p className="text-sm text-muted-foreground text-center mb-4">
+                Ao criar sua conta você terá acesso a:
+              </p>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <Card className="p-3 sm:p-4">
+                  <p className="text-xl sm:text-2xl font-bold text-primary">∞</p>
+                  <p className="text-xs text-muted-foreground">Entrevistas ilimitadas</p>
+                </Card>
+                <Card className="p-3 sm:p-4">
+                  <p className="text-xl sm:text-2xl font-bold text-primary">90%</p>
+                  <p className="text-xs text-muted-foreground">Redução de tempo</p>
+                </Card>
+                <Card className="p-3 sm:p-4">
+                  <p className="text-xl sm:text-2xl font-bold text-primary">24/7</p>
+                  <p className="text-xs text-muted-foreground">Disponibilidade</p>
+                </Card>
               </div>
             </div>
-          </div>
+          </CardContent>
         </Card>
       </div>
     </div>

@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Building2,
   Mail,
@@ -15,7 +15,9 @@ import {
   ChevronRight,
   Loader2,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { signIn } from "next-auth/react";
 
@@ -33,6 +35,7 @@ function LoginForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(emailVerificado === "true");
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (showSuccessMessage) {
@@ -83,24 +86,24 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+    <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-primary/10">
       {/* Header com navegação */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 text-xl font-bold text-blue-600">
+            <Link href="/" className="flex items-center gap-2 text-xl font-bold text-primary">
               <Building2 className="w-6 h-6" />
               EntrevistIA
             </Link>
 
             {/* Links de navegação */}
             <nav className="hidden md:flex items-center gap-6">
-              <Link href="/" className="text-gray-600 hover:text-gray-900">
+              <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
                 Início
               </Link>
               <Link href="/cadastro">
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                <Button size="sm">
                   Criar conta
                 </Button>
               </Link>
@@ -108,8 +111,8 @@ function LoginForm() {
 
             {/* Botão mobile */}
             <Link href="/" className="md:hidden">
-              <Button variant="ghost" size="sm">
-                <Home className="w-4 h-4" />
+              <Button variant="ghost" size="touch-icon">
+                <Home className="w-5 h-5" />
               </Button>
             </Link>
           </div>
@@ -118,13 +121,13 @@ function LoginForm() {
 
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <nav className="flex items-center gap-2 text-sm text-gray-600">
-          <Link href="/" className="hover:text-gray-900 flex items-center gap-1">
+        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Link href="/" className="hover:text-foreground flex items-center gap-1 transition-colors">
             <Home className="w-4 h-4" />
             Início
           </Link>
           <ChevronRight className="w-4 h-4" />
-          <span className="text-gray-900 font-medium">Login</span>
+          <span className="text-foreground font-medium">Login</span>
         </nav>
       </div>
 
@@ -132,137 +135,149 @@ function LoginForm() {
       <div className="max-w-md mx-auto px-4 py-8">
         {/* Mensagem de sucesso */}
         {showSuccessMessage && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
-            <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+          <div className="mb-6 p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg flex items-start gap-3">
+            <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-green-900">Email verificado com sucesso!</p>
-              <p className="text-sm text-green-600">Agora você pode fazer login na sua conta.</p>
+              <p className="text-sm font-semibold text-green-900 dark:text-green-100">Email verificado com sucesso!</p>
+              <p className="text-sm text-green-600 dark:text-green-400">Agora você pode fazer login na sua conta.</p>
             </div>
           </div>
         )}
 
-        <Card className="p-8 shadow-lg">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-              <Building2 className="w-8 h-8 text-blue-600" />
+        <Card className="shadow-lg">
+          <CardHeader className="text-center pb-2">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 mx-auto">
+              <Building2 className="w-8 h-8 text-primary" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Bem-vindo de volta</h1>
-            <p className="text-gray-600 mt-2">
+            <CardTitle className="text-2xl sm:text-3xl">Bem-vindo de volta</CardTitle>
+            <CardDescription>
               Faça login para continuar
-            </p>
-          </div>
-
-          {/* Erro geral */}
-          {errors.geral && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-600">{errors.geral}</p>
-            </div>
-          )}
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-gray-500" />
-                Email
-              </Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="seu@email.com"
-                value={formData.email}
-                onChange={handleChange}
-                className={errors.email ? "border-red-500" : ""}
-                disabled={isLoading}
-                autoFocus
-              />
-              {errors.email && (
-                <p className="text-sm text-red-600">{errors.email}</p>
-              )}
-            </div>
-
-            {/* Senha */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="senha" className="flex items-center gap-2">
-                  <Lock className="w-4 h-4 text-gray-500" />
-                  Senha
-                </Label>
-                <Link
-                  href="/recuperar-senha"
-                  className="text-sm text-blue-600 hover:underline"
-                >
-                  Esqueceu a senha?
-                </Link>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4">
+            {/* Erro geral */}
+            {errors.geral && (
+              <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+                <p className="text-sm text-destructive">{errors.geral}</p>
               </div>
-              <Input
-                id="senha"
-                name="senha"
-                type="password"
-                placeholder="Sua senha"
-                value={formData.senha}
-                onChange={handleChange}
-                className={errors.senha ? "border-red-500" : ""}
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Email */}
+              <div className="space-y-2">
+                <Label htmlFor="email" className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-muted-foreground" />
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  error={!!errors.email}
+                  disabled={isLoading}
+                  autoFocus
+                />
+                {errors.email && (
+                  <p className="text-sm text-destructive">{errors.email}</p>
+                )}
+              </div>
+
+              {/* Senha */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="senha" className="flex items-center gap-2">
+                    <Lock className="w-4 h-4 text-muted-foreground" />
+                    Senha
+                  </Label>
+                  <Link
+                    href="/recuperar-senha"
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Esqueceu a senha?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <Input
+                    id="senha"
+                    name="senha"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Sua senha"
+                    value={formData.senha}
+                    onChange={handleChange}
+                    error={!!errors.senha}
+                    disabled={isLoading}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {errors.senha && (
+                  <p className="text-sm text-destructive">{errors.senha}</p>
+                )}
+              </div>
+
+              {/* Botão de Submit */}
+              <Button
+                type="submit"
+                className="w-full"
+                size="touch"
                 disabled={isLoading}
-              />
-              {errors.senha && (
-                <p className="text-sm text-red-600">{errors.senha}</p>
-              )}
-            </div>
-
-            {/* Botão de Submit */}
-            <Button
-              type="submit"
-              className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Entrando...
-                </>
-              ) : (
-                "Entrar"
-              )}
-            </Button>
-          </form>
-
-          {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Não tem uma conta?{" "}
-              <Link
-                href="/cadastro"
-                className="text-blue-600 hover:underline font-semibold"
               >
-                Criar conta grátis
-              </Link>
-            </p>
-          </div>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Entrando...
+                  </>
+                ) : (
+                  "Entrar"
+                )}
+              </Button>
+            </form>
+
+            {/* Footer */}
+            <div className="mt-6 text-center">
+              <p className="text-muted-foreground">
+                Não tem uma conta?{" "}
+                <Link
+                  href="/cadastro"
+                  className="text-primary hover:underline font-semibold"
+                >
+                  Criar conta grátis
+                </Link>
+              </p>
+            </div>
+          </CardContent>
         </Card>
 
         {/* Benefícios */}
         <div className="mt-8 text-center">
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-muted-foreground mb-4">
             Mais de 500 empresas confiam na EntrevistIA
           </p>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="p-4 bg-white rounded-lg border border-gray-200">
-              <p className="text-lg font-bold text-blue-600">90%</p>
-              <p className="text-xs text-gray-600">Menos tempo</p>
-            </div>
-            <div className="p-4 bg-white rounded-lg border border-gray-200">
-              <p className="text-lg font-bold text-blue-600">70%</p>
-              <p className="text-xs text-gray-600">Economia</p>
-            </div>
-            <div className="p-4 bg-white rounded-lg border border-gray-200">
-              <p className="text-lg font-bold text-blue-600">100%</p>
-              <p className="text-xs text-gray-600">Automação</p>
-            </div>
+          <div className="grid grid-cols-3 gap-3">
+            <Card className="p-4">
+              <p className="text-lg font-bold text-primary">90%</p>
+              <p className="text-xs text-muted-foreground">Menos tempo</p>
+            </Card>
+            <Card className="p-4">
+              <p className="text-lg font-bold text-primary">70%</p>
+              <p className="text-xs text-muted-foreground">Economia</p>
+            </Card>
+            <Card className="p-4">
+              <p className="text-lg font-bold text-primary">100%</p>
+              <p className="text-xs text-muted-foreground">Automação</p>
+            </Card>
           </div>
         </div>
       </div>
@@ -273,8 +288,8 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-primary/10 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     }>
       <LoginForm />

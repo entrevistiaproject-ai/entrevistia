@@ -12,7 +12,6 @@ import {
   User,
   DollarSign,
   PlusCircle,
-  Settings,
 } from "lucide-react";
 import { useState } from "react";
 import {
@@ -22,7 +21,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 
 const navItems = [
   {
@@ -76,7 +74,7 @@ export function BottomNav() {
   const isMoreActive = moreItems.some(item => pathname === item.href);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-sm shadow-[0_-2px_10px_rgba(0,0,0,0.05)] md:hidden pb-safe">
       <div className="flex items-center justify-around">
         {/* Itens principais */}
         {navItems.map((item) => {
@@ -88,14 +86,19 @@ export function BottomNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-3 transition-colors",
+                "flex flex-col items-center justify-center gap-1 min-w-16 min-h-14 px-2 py-2 transition-all duration-200 active:scale-95",
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <Icon className={cn("h-6 w-6", isActive && "fill-primary/20")} />
-              <span className="text-xs font-medium">{item.label}</span>
+              <div className={cn(
+                "flex items-center justify-center w-8 h-8 rounded-lg transition-colors",
+                isActive && "bg-primary/10"
+              )}>
+                <Icon className={cn("h-5 w-5", isActive && "fill-primary/20")} />
+              </div>
+              <span className="text-[10px] font-medium">{item.label}</span>
             </Link>
           );
         })}
@@ -105,21 +108,26 @@ export function BottomNav() {
           <SheetTrigger asChild>
             <button
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-3 transition-colors",
+                "flex flex-col items-center justify-center gap-1 min-w-16 min-h-14 px-2 py-2 transition-all duration-200 active:scale-95",
                 isMoreActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <MoreHorizontal className={cn("h-6 w-6", isMoreActive && "fill-primary/20")} />
-              <span className="text-xs font-medium">Mais</span>
+              <div className={cn(
+                "flex items-center justify-center w-8 h-8 rounded-lg transition-colors",
+                isMoreActive && "bg-primary/10"
+              )}>
+                <MoreHorizontal className={cn("h-5 w-5", isMoreActive && "fill-primary/20")} />
+              </div>
+              <span className="text-[10px] font-medium">Mais</span>
             </button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="h-auto">
+          <SheetContent side="bottom" className="h-auto rounded-t-2xl pb-safe">
             <SheetHeader>
               <SheetTitle>Mais Opções</SheetTitle>
             </SheetHeader>
-            <div className="mt-6 space-y-2">
+            <div className="mt-6 space-y-2 pb-4">
               {moreItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
@@ -130,14 +138,14 @@ export function BottomNav() {
                     href={item.href}
                     onClick={() => setIsMoreOpen(false)}
                     className={cn(
-                      "flex items-center gap-4 rounded-lg p-4 transition-colors",
+                      "flex items-center gap-4 rounded-xl p-4 transition-all duration-200 active:scale-[0.98]",
                       isActive
                         ? "bg-primary/10 text-primary"
-                        : "hover:bg-accent"
+                        : "hover:bg-accent active:bg-accent"
                     )}
                   >
                     <div className={cn(
-                      "flex h-12 w-12 items-center justify-center rounded-lg",
+                      "flex h-12 w-12 items-center justify-center rounded-xl transition-colors",
                       isActive ? "bg-primary/20" : "bg-muted"
                     )}>
                       <Icon className="h-6 w-6" />

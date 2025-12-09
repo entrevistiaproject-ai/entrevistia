@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { PageHeader } from "@/components/ui/page-header";
+import { SkeletonStats, SkeletonCard } from "@/components/ui/skeleton-card";
 
 interface DadosCustos {
   faturaAtual: {
@@ -86,8 +88,16 @@ export default function CustosPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[500px]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="space-y-6">
+        <PageHeader
+          title="Gerenciamento de Custos"
+          description="Acompanhe seus gastos e otimize seus investimentos"
+        />
+        <SkeletonStats count={4} />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <SkeletonCard lines={5} />
+          <SkeletonCard lines={5} />
+        </div>
       </div>
     );
   }
@@ -109,24 +119,21 @@ export default function CustosPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Gerenciamento de Custos</h1>
-          <p className="text-muted-foreground">
-            Acompanhe seus gastos e otimize seus investimentos
-          </p>
-        </div>
-        <Button>
-          <CreditCard className="mr-2 h-4 w-4" />
+      <PageHeader
+        title="Gerenciamento de Custos"
+        description="Acompanhe seus gastos e otimize seus investimentos"
+      >
+        <Button size="touch" className="w-full sm:w-auto">
+          <CreditCard className="h-4 w-4" />
           Ver Fatura Completa
         </Button>
-      </div>
+      </PageHeader>
 
       {/* Alerta de Fatura */}
       {alertaFatura && saldoAPagar > 0 && (
         <Card className="border-orange-500 bg-orange-50 dark:bg-orange-950/20">
-          <CardContent className="flex items-center gap-3 pt-6">
-            <AlertCircle className="h-5 w-5 text-orange-600" />
+          <CardContent className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-6">
+            <AlertCircle className="h-5 w-5 text-orange-600 shrink-0" />
             <div className="flex-1">
               <p className="font-medium text-orange-900 dark:text-orange-100">
                 Fatura {faturaAtual.status === "vencida" ? "Vencida" : "Fechada"}
@@ -136,91 +143,95 @@ export default function CustosPage() {
                 {faturaAtual.status === "vencida" && " A fatura está vencida!"}
               </p>
             </div>
-            <Button variant="outline" className="border-orange-600 text-orange-600">
+            <Button variant="outline" className="border-orange-600 text-orange-600 w-full sm:w-auto" size="touch">
               Pagar Agora
             </Button>
           </CardContent>
         </Card>
       )}
 
-      {/* Filtros de Período */}
-      <Tabs value={periodo} onValueChange={setPeriodo}>
-        <TabsList>
-          <TabsTrigger value="mes">Último Mês</TabsTrigger>
-          <TabsTrigger value="trimestre">Trimestre</TabsTrigger>
-          <TabsTrigger value="ano">Ano</TabsTrigger>
-          <TabsTrigger value="total">Total</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      {/* Filtros de Período - scroll horizontal no mobile */}
+      <div className="scroll-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+        <Tabs value={periodo} onValueChange={setPeriodo}>
+          <TabsList className="inline-flex w-auto sm:w-full sm:grid sm:grid-cols-4 h-11 sm:h-10">
+            <TabsTrigger value="mes" className="whitespace-nowrap px-4 text-xs sm:text-sm">Último Mês</TabsTrigger>
+            <TabsTrigger value="trimestre" className="whitespace-nowrap px-4 text-xs sm:text-sm">Trimestre</TabsTrigger>
+            <TabsTrigger value="ano" className="whitespace-nowrap px-4 text-xs sm:text-sm">Ano</TabsTrigger>
+            <TabsTrigger value="total" className="whitespace-nowrap px-4 text-xs sm:text-sm">Total</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
 
-      {/* Cards de Resumo */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {/* Fatura Atual */}
-        <Card className="border-2 border-blue-200 dark:border-blue-800">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Fatura Atual</CardTitle>
-            <CreditCard className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-blue-600">
-              R$ {faturaAtual.valorTotal.toFixed(2)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              {mesNome}
-            </p>
-            <Badge variant={faturaAtual.status === "aberta" ? "default" : "secondary"} className="mt-2">
-              {faturaAtual.status}
-            </Badge>
-          </CardContent>
-        </Card>
+      {/* Cards de Resumo - scroll horizontal no mobile */}
+      <div className="scroll-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="inline-flex gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+          {/* Fatura Atual */}
+          <Card className="border-2 border-blue-200 dark:border-blue-800 min-w-40 sm:min-w-0 shrink-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Fatura Atual</CardTitle>
+              <CreditCard className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl sm:text-3xl font-bold text-blue-600">
+                R$ {faturaAtual.valorTotal.toFixed(2)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {mesNome}
+              </p>
+              <Badge variant={faturaAtual.status === "aberta" ? "default" : "secondary"} className="mt-2">
+                {faturaAtual.status}
+              </Badge>
+            </CardContent>
+          </Card>
 
-        {/* Gasto no Período */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Gasto no Período</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
-              R$ {periodoData.custoTotal.toFixed(2)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              {periodoData.totalTransacoes} transações
-            </p>
-          </CardContent>
-        </Card>
+          {/* Gasto no Período */}
+          <Card className="min-w-40 sm:min-w-0 shrink-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Gasto no Período</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl sm:text-3xl font-bold">
+                R$ {periodoData.custoTotal.toFixed(2)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {periodoData.totalTransacoes} transações
+              </p>
+            </CardContent>
+          </Card>
 
-        {/* Custo Médio por Candidato */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Custo/Candidato</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
-              R$ {medias.custoPorCandidato.toFixed(2)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              {medias.totalCandidatos} candidatos avaliados
-            </p>
-          </CardContent>
-        </Card>
+          {/* Custo Médio por Candidato */}
+          <Card className="min-w-40 sm:min-w-0 shrink-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Custo/Candidato</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl sm:text-3xl font-bold">
+                R$ {medias.custoPorCandidato.toFixed(2)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {medias.totalCandidatos} candidatos avaliados
+              </p>
+            </CardContent>
+          </Card>
 
-        {/* Média de Custo por Vaga */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Custo/Vaga</CardTitle>
-            <Briefcase className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
-              R$ {entrevistas.total > 0 ? (periodoData.custoTotal / entrevistas.total).toFixed(2) : "0.00"}
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              {entrevistas.total} {entrevistas.total === 1 ? "vaga" : "vagas"} no período
-            </p>
-          </CardContent>
-        </Card>
+          {/* Média de Custo por Vaga */}
+          <Card className="min-w-40 sm:min-w-0 shrink-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Custo/Vaga</CardTitle>
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl sm:text-3xl font-bold">
+                R$ {entrevistas.total > 0 ? (periodoData.custoTotal / entrevistas.total).toFixed(2) : "0.00"}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {entrevistas.total} {entrevistas.total === 1 ? "vaga" : "vagas"} no período
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

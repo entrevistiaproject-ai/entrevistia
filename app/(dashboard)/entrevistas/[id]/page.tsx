@@ -198,85 +198,87 @@ export default function EntrevistaDetalhesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" asChild>
+      <div className="flex items-start gap-4">
+        <Button variant="outline" size="touch-icon" asChild className="shrink-0 mt-1">
           <Link href="/entrevistas">
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold tracking-tight">{entrevista.titulo}</h1>
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">{entrevista.titulo}</h1>
             <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
           </div>
           {entrevista.descricao && (
-            <p className="text-muted-foreground mt-2">{entrevista.descricao}</p>
+            <p className="text-sm sm:text-base text-muted-foreground mt-2 whitespace-pre-line line-clamp-3 sm:line-clamp-none">{entrevista.descricao}</p>
           )}
         </div>
       </div>
 
-      {/* Cards de Resumo */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Candidatos</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{candidatos.length}</div>
-            <p className="text-xs text-muted-foreground">Total cadastrados</p>
-          </CardContent>
-        </Card>
+      {/* Cards de Resumo - scroll horizontal no mobile */}
+      <div className="scroll-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="inline-flex gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+          <Card className="min-w-[140px] sm:min-w-0 shrink-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Candidatos</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{candidatos.length}</div>
+              <p className="text-xs text-muted-foreground">Total cadastrados</p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Perguntas</CardTitle>
-            <FileQuestion className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{perguntas.length}</div>
-            <p className="text-xs text-muted-foreground">Na entrevista</p>
-          </CardContent>
-        </Card>
+          <Card className="min-w-[140px] sm:min-w-0 shrink-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Perguntas</CardTitle>
+              <FileQuestion className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{perguntas.length}</div>
+              <p className="text-xs text-muted-foreground">Na entrevista</p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Duração</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {perguntas.length > 0 ? `${perguntas.length * 4}m` : "-"}
-            </div>
-            <p className="text-xs text-muted-foreground">Tempo estimado</p>
-          </CardContent>
-        </Card>
+          <Card className="min-w-[140px] sm:min-w-0 shrink-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Duração</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {perguntas.length > 0 ? `${perguntas.length * 4}m` : "-"}
+              </div>
+              <p className="text-xs text-muted-foreground">Tempo estimado</p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Criada</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm font-bold">
-              {formatDistanceToNow(new Date(entrevista.createdAt), {
-                addSuffix: true,
-                locale: ptBR,
-              })}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {new Date(entrevista.createdAt).toLocaleDateString("pt-BR")}
-            </p>
-          </CardContent>
-        </Card>
+          <Card className="min-w-[140px] sm:min-w-0 shrink-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Criada</CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-sm font-bold">
+                {formatDistanceToNow(new Date(entrevista.createdAt), {
+                  addSuffix: true,
+                  locale: ptBR,
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {new Date(entrevista.createdAt).toLocaleDateString("pt-BR")}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Tabs */}
       <Tabs defaultValue="candidatos" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="candidatos">Candidatos</TabsTrigger>
-          <TabsTrigger value="perguntas">Perguntas</TabsTrigger>
-          <TabsTrigger value="configuracoes">Configurações</TabsTrigger>
+        <TabsList className="w-full sm:w-auto grid grid-cols-3 sm:inline-flex h-11 sm:h-10">
+          <TabsTrigger value="candidatos" className="text-xs sm:text-sm">Candidatos</TabsTrigger>
+          <TabsTrigger value="perguntas" className="text-xs sm:text-sm">Perguntas</TabsTrigger>
+          <TabsTrigger value="configuracoes" className="text-xs sm:text-sm">Configurações</TabsTrigger>
         </TabsList>
 
         <TabsContent value="candidatos" className="space-y-4">

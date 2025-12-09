@@ -12,7 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle, Briefcase, Users, Building2, Shield } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface EntrevistaPublica {
   id: string;
@@ -137,188 +139,222 @@ export default function CadastroEntrevistaPage() {
 
   if (carregando) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      <div className="min-h-screen flex items-center justify-center bg-muted/30">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Carregando entrevista...</p>
+        </div>
       </div>
     );
   }
 
   if (erro && !entrevista) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center">
-          <h1 className="text-2xl font-bold text-red-500 mb-4">Erro</h1>
-          <p className="text-gray-600 mb-6">{erro}</p>
-          <Button onClick={carregarEntrevista}>Tentar Novamente</Button>
-        </div>
+      <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
+        <Card className="max-w-md w-full">
+          <CardContent className="pt-6 text-center">
+            <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+              <AlertCircle className="h-8 w-8 text-destructive" />
+            </div>
+            <h1 className="text-2xl font-bold mb-2">Erro</h1>
+            <p className="text-muted-foreground mb-6">{erro}</p>
+            <Button onClick={carregarEntrevista} size="touch" className="w-full">
+              Tentar Novamente
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-primary/10 py-8 sm:py-12 px-4">
+      <div className="max-w-2xl mx-auto space-y-6">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {entrevista?.titulo}
-          </h1>
-          {entrevista?.descricao && (
-            <p className="text-gray-600 mb-4">{entrevista.descricao}</p>
-          )}
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-2xl sm:text-3xl">{entrevista?.titulo}</CardTitle>
+            {entrevista?.descricao && (
+              <CardDescription className="text-base whitespace-pre-line">
+                {entrevista.descricao}
+              </CardDescription>
+            )}
+          </CardHeader>
           {(entrevista?.cargo || entrevista?.nivel || entrevista?.empresa) && (
-            <div className="flex flex-wrap gap-2 text-sm">
-              {entrevista.cargo && (
-                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
-                  {entrevista.cargo}
-                </span>
-              )}
-              {entrevista.nivel && (
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full">
-                  {entrevista.nivel}
-                </span>
-              )}
-              {entrevista.empresa && (
-                <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
-                  {entrevista.empresa}
-                </span>
-              )}
-            </div>
+            <CardContent className="pt-0">
+              <div className="flex flex-wrap gap-2">
+                {entrevista?.cargo && (
+                  <Badge variant="secondary" className="gap-1.5 py-1.5 px-3">
+                    <Briefcase className="h-3.5 w-3.5" />
+                    {entrevista.cargo}
+                  </Badge>
+                )}
+                {entrevista?.nivel && (
+                  <Badge variant="outline" className="gap-1.5 py-1.5 px-3">
+                    <Users className="h-3.5 w-3.5" />
+                    {entrevista.nivel}
+                  </Badge>
+                )}
+                {entrevista?.empresa && (
+                  <Badge variant="outline" className="gap-1.5 py-1.5 px-3">
+                    <Building2 className="h-3.5 w-3.5" />
+                    {entrevista.empresa}
+                  </Badge>
+                )}
+              </div>
+            </CardContent>
           )}
-        </div>
+        </Card>
 
         {/* Formulário */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Cadastro do Candidato
-          </h2>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Nome */}
-            <div>
-              <Label htmlFor="nome">Nome Completo *</Label>
-              <Input
-                id="nome"
-                type="text"
-                value={formData.nome}
-                onChange={(e) =>
-                  setFormData({ ...formData, nome: e.target.value })
-                }
-                placeholder="Seu nome completo"
-                className={errosForm.nome ? "border-red-500" : ""}
-              />
-              {errosForm.nome && (
-                <p className="text-sm text-red-500 mt-1">{errosForm.nome}</p>
-              )}
-            </div>
-
-            {/* Email */}
-            <div>
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                placeholder="seu@email.com"
-                className={errosForm.email ? "border-red-500" : ""}
-              />
-              {errosForm.email && (
-                <p className="text-sm text-red-500 mt-1">{errosForm.email}</p>
-              )}
-            </div>
-
-            {/* Confirmar Email */}
-            <div>
-              <Label htmlFor="emailConfirmacao">Confirmar Email *</Label>
-              <Input
-                id="emailConfirmacao"
-                type="email"
-                value={formData.emailConfirmacao}
-                onChange={(e) =>
-                  setFormData({ ...formData, emailConfirmacao: e.target.value })
-                }
-                placeholder="Confirme seu email"
-                className={errosForm.emailConfirmacao ? "border-red-500" : ""}
-              />
-              {errosForm.emailConfirmacao && (
-                <p className="text-sm text-red-500 mt-1">
-                  {errosForm.emailConfirmacao}
-                </p>
-              )}
-            </div>
-
-            {/* Documento */}
-            <div>
-              <Label htmlFor="documento">Documento (CPF, RG, etc.)</Label>
-              <Input
-                id="documento"
-                type="text"
-                value={formData.documento}
-                onChange={(e) =>
-                  setFormData({ ...formData, documento: e.target.value })
-                }
-                placeholder="000.000.000-00"
-              />
-            </div>
-
-            {/* Sexo */}
-            <div>
-              <Label htmlFor="sexo">Sexo</Label>
-              <Select
-                value={formData.sexo}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, sexo: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="masculino">Masculino</SelectItem>
-                  <SelectItem value="feminino">Feminino</SelectItem>
-                  <SelectItem value="outro">Outro</SelectItem>
-                  <SelectItem value="prefiro_nao_informar">
-                    Prefiro não informar
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Erro geral */}
-            {erro && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                {erro}
+        <Card>
+          <CardHeader>
+            <CardTitle>Cadastro do Candidato</CardTitle>
+            <CardDescription>
+              Preencha seus dados para iniciar a entrevista
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Nome */}
+              <div className="space-y-2">
+                <Label htmlFor="nome">Nome Completo *</Label>
+                <Input
+                  id="nome"
+                  type="text"
+                  value={formData.nome}
+                  onChange={(e) =>
+                    setFormData({ ...formData, nome: e.target.value })
+                  }
+                  placeholder="Seu nome completo"
+                  error={!!errosForm.nome}
+                />
+                {errosForm.nome && (
+                  <p className="text-sm text-destructive flex items-center gap-1">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    {errosForm.nome}
+                  </p>
+                )}
               </div>
-            )}
 
-            {/* Botão */}
-            <Button
-              type="submit"
-              className="w-full"
-              size="lg"
-              disabled={enviando}
-            >
-              {enviando ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processando...
-                </>
-              ) : (
-                "Iniciar Entrevista"
+              {/* Email */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  placeholder="seu@email.com"
+                  error={!!errosForm.email}
+                />
+                {errosForm.email && (
+                  <p className="text-sm text-destructive flex items-center gap-1">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    {errosForm.email}
+                  </p>
+                )}
+              </div>
+
+              {/* Confirmar Email */}
+              <div className="space-y-2">
+                <Label htmlFor="emailConfirmacao">Confirmar Email *</Label>
+                <Input
+                  id="emailConfirmacao"
+                  type="email"
+                  value={formData.emailConfirmacao}
+                  onChange={(e) =>
+                    setFormData({ ...formData, emailConfirmacao: e.target.value })
+                  }
+                  placeholder="Confirme seu email"
+                  error={!!errosForm.emailConfirmacao}
+                />
+                {errosForm.emailConfirmacao && (
+                  <p className="text-sm text-destructive flex items-center gap-1">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    {errosForm.emailConfirmacao}
+                  </p>
+                )}
+              </div>
+
+              {/* Documento */}
+              <div className="space-y-2">
+                <Label htmlFor="documento">Documento (CPF, RG, etc.)</Label>
+                <Input
+                  id="documento"
+                  type="text"
+                  value={formData.documento}
+                  onChange={(e) =>
+                    setFormData({ ...formData, documento: e.target.value })
+                  }
+                  placeholder="000.000.000-00"
+                />
+              </div>
+
+              {/* Sexo */}
+              <div className="space-y-2">
+                <Label htmlFor="sexo">Sexo</Label>
+                <Select
+                  value={formData.sexo}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, sexo: value })
+                  }
+                >
+                  <SelectTrigger className="h-11">
+                    <SelectValue placeholder="Selecione..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="masculino">Masculino</SelectItem>
+                    <SelectItem value="feminino">Feminino</SelectItem>
+                    <SelectItem value="outro">Outro</SelectItem>
+                    <SelectItem value="prefiro_nao_informar">
+                      Prefiro não informar
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Erro geral */}
+              {erro && (
+                <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                  <span>{erro}</span>
+                </div>
               )}
-            </Button>
-          </form>
 
-          {/* Aviso LGPD */}
-          <p className="text-xs text-gray-500 mt-6 text-center">
-            Ao continuar, você concorda com o tratamento de seus dados pessoais
-            para fins de processo seletivo, conforme a Lei Geral de Proteção de
-            Dados (LGPD).
-          </p>
-        </div>
+              {/* Botão */}
+              <Button
+                type="submit"
+                className="w-full"
+                size="touch"
+                disabled={enviando}
+              >
+                {enviando ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processando...
+                  </>
+                ) : (
+                  "Iniciar Entrevista"
+                )}
+              </Button>
+            </form>
+
+            {/* Aviso LGPD */}
+            <div className="mt-6 pt-6 border-t">
+              <div className="flex items-start gap-3 text-muted-foreground">
+                <Shield className="h-5 w-5 shrink-0 mt-0.5" />
+                <p className="text-xs">
+                  Ao continuar, você concorda com o tratamento de seus dados pessoais
+                  para fins de processo seletivo, conforme a Lei Geral de Proteção de
+                  Dados (LGPD).
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -5,8 +5,10 @@ import { desc, eq, or, isNull, and } from "drizzle-orm";
 import { PerguntasListagemClient } from "@/components/perguntas/perguntas-listagem-client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, FileQuestion, Star, User, Briefcase } from "lucide-react";
 import { getUserId } from "@/lib/auth/get-user";
+import { PageHeader } from "@/components/ui/page-header";
+import { SkeletonCard } from "@/components/ui/skeleton-card";
 
 async function getPerguntas(userId?: string) {
   const db = getDB();
@@ -55,47 +57,72 @@ export default async function PerguntasPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Banco de Perguntas</h1>
-          <p className="text-muted-foreground mt-2">
-            Gerencie suas perguntas e monte pacotes para cada vaga
-          </p>
-        </div>
-        <Link href="/perguntas/nova">
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
+      <PageHeader
+        title="Banco de Perguntas"
+        description="Gerencie suas perguntas e monte pacotes para cada vaga"
+      >
+        <Button asChild size="touch" className="w-full sm:w-auto">
+          <Link href="/perguntas/nova">
+            <PlusCircle className="h-4 w-4" />
             Nova Pergunta
-          </Button>
-        </Link>
-      </div>
+          </Link>
+        </Button>
+      </PageHeader>
 
-      {/* Estatísticas */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-lg border bg-card p-6">
-          <div className="text-2xl font-bold">{perguntasVisiveis.length}</div>
-          <p className="text-sm text-muted-foreground">Perguntas Visíveis</p>
-        </div>
-        <div className="rounded-lg border bg-card p-6">
-          <div className="text-2xl font-bold">
-            {perguntasVisiveis.filter(p => p.isPadrao).length}
+      {/* Estatísticas - scroll horizontal no mobile */}
+      <div className="scroll-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="inline-flex gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+          <div className="rounded-lg border bg-card p-4 sm:p-6 min-w-[130px] sm:min-w-0 shrink-0">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="rounded-lg bg-primary/10 p-2">
+                <FileQuestion className="h-4 w-4 text-primary" />
+              </div>
+            </div>
+            <div className="text-2xl font-bold">{perguntasVisiveis.length}</div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Perguntas Visíveis</p>
           </div>
-          <p className="text-sm text-muted-foreground">Perguntas Padrão</p>
-        </div>
-        <div className="rounded-lg border bg-card p-6">
-          <div className="text-2xl font-bold">
-            {perguntasVisiveis.filter(p => !p.isPadrao).length}
+          <div className="rounded-lg border bg-card p-4 sm:p-6 min-w-[130px] sm:min-w-0 shrink-0">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="rounded-lg bg-primary/10 p-2">
+                <Star className="h-4 w-4 text-primary" />
+              </div>
+            </div>
+            <div className="text-2xl font-bold">
+              {perguntasVisiveis.filter(p => p.isPadrao).length}
+            </div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Perguntas Padrão</p>
           </div>
-          <p className="text-sm text-muted-foreground">Minhas Perguntas</p>
-        </div>
-        <div className="rounded-lg border bg-card p-6">
-          <div className="text-2xl font-bold">{cargosUnicos.size}</div>
-          <p className="text-sm text-muted-foreground">Cargos Cobertos</p>
+          <div className="rounded-lg border bg-card p-4 sm:p-6 min-w-[130px] sm:min-w-0 shrink-0">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="rounded-lg bg-primary/10 p-2">
+                <User className="h-4 w-4 text-primary" />
+              </div>
+            </div>
+            <div className="text-2xl font-bold">
+              {perguntasVisiveis.filter(p => !p.isPadrao).length}
+            </div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Minhas Perguntas</p>
+          </div>
+          <div className="rounded-lg border bg-card p-4 sm:p-6 min-w-[130px] sm:min-w-0 shrink-0">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="rounded-lg bg-primary/10 p-2">
+                <Briefcase className="h-4 w-4 text-primary" />
+              </div>
+            </div>
+            <div className="text-2xl font-bold">{cargosUnicos.size}</div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Cargos Cobertos</p>
+          </div>
         </div>
       </div>
 
       {/* Listagem de Perguntas */}
-      <Suspense fallback={<div>Carregando perguntas...</div>}>
+      <Suspense fallback={
+        <div className="space-y-4">
+          <SkeletonCard lines={2} />
+          <SkeletonCard lines={2} />
+          <SkeletonCard lines={2} />
+        </div>
+      }>
         <PerguntasListagemClient
           perguntas={perguntas}
           perguntasOcultasIdsInicial={ocultasIds}

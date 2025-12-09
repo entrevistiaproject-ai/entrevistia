@@ -103,7 +103,7 @@ export function Sidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-6 px-3 py-4 overflow-y-auto">
+        <nav className="flex-1 space-y-6 px-3 py-4 overflow-y-auto scroll-smooth">
           {/* Menu Principal */}
           <div className="space-y-1">
             <p className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -118,14 +118,14 @@ export function Sidebar() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                     isActive
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
-                  <Icon className="h-5 w-5" />
-                  {item.title}
+                  <Icon className="h-5 w-5 shrink-0" />
+                  <span className="truncate">{item.title}</span>
                 </Link>
               );
             })}
@@ -145,14 +145,14 @@ export function Sidebar() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                     isActive
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
-                  <Icon className="h-5 w-5" />
-                  {item.title}
+                  <Icon className="h-5 w-5 shrink-0" />
+                  <span className="truncate">{item.title}</span>
                 </Link>
               );
             })}
@@ -163,7 +163,7 @@ export function Sidebar() {
         <div className="border-t border-border p-4">
           {userInfo ? (
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold shrink-0">
                 {getInitials(userInfo.nome, userInfo.email)}
               </div>
               <div className="flex-1 min-w-0">
@@ -177,7 +177,7 @@ export function Sidebar() {
             </div>
           ) : (
             <div className="flex items-center gap-3 animate-pulse">
-              <div className="h-10 w-10 rounded-full bg-muted" />
+              <div className="h-10 w-10 rounded-full bg-muted shrink-0" />
               <div className="flex-1 space-y-2">
                 <div className="h-4 w-24 bg-muted rounded" />
                 <div className="h-3 w-32 bg-muted rounded" />

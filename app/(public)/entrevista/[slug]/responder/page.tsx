@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { GravadorAudio } from "@/components/gravador-audio";
 import { VerificacaoMicrofone } from "@/components/verificacao-microfone";
 import { TutorialEntrevista } from "@/components/tutorial-entrevista";
-import { Loader2, CheckCircle2, Clock } from "lucide-react";
+import { Loader2, CheckCircle2, Clock, AlertCircle, PartyPopper, Sparkles, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 interface Pergunta {
   id: string;
@@ -166,19 +168,27 @@ export default function ResponderEntrevistaPage() {
 
   if (carregando) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      <div className="min-h-screen flex items-center justify-center bg-muted/30">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Carregando entrevista...</p>
+        </div>
       </div>
     );
   }
 
   if (erro || !entrevista) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center">
-          <h1 className="text-2xl font-bold text-red-500 mb-4">Erro</h1>
-          <p className="text-gray-600 mb-6">{erro || "Entrevista não encontrada"}</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
+        <Card className="max-w-md w-full">
+          <CardContent className="pt-6 text-center">
+            <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+              <AlertCircle className="h-8 w-8 text-destructive" />
+            </div>
+            <h1 className="text-2xl font-bold mb-2">Erro</h1>
+            <p className="text-muted-foreground">{erro || "Entrevista não encontrada"}</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -186,11 +196,11 @@ export default function ResponderEntrevistaPage() {
   // Etapa de verificação do microfone
   if (etapaPreparacao === "verificacao-microfone") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4">
+      <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-primary/10 py-8 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">{entrevista.titulo}</h1>
-            <p className="text-gray-600 mt-2">Preparação para a entrevista</p>
+            <h1 className="text-2xl sm:text-3xl font-bold">{entrevista.titulo}</h1>
+            <p className="text-muted-foreground mt-2">Preparação para a entrevista</p>
           </div>
           <VerificacaoMicrofone
             onMicrofoneVerificado={() => setEtapaPreparacao("tutorial")}
@@ -203,11 +213,11 @@ export default function ResponderEntrevistaPage() {
   // Etapa do tutorial
   if (etapaPreparacao === "tutorial") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4">
+      <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-primary/10 py-8 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">{entrevista.titulo}</h1>
-            <p className="text-gray-600 mt-2">Tutorial de prática</p>
+            <h1 className="text-2xl sm:text-3xl font-bold">{entrevista.titulo}</h1>
+            <p className="text-muted-foreground mt-2">Tutorial de prática</p>
           </div>
           <TutorialEntrevista
             onTutorialCompleto={() => setEtapaPreparacao("entrevista")}
@@ -219,19 +229,32 @@ export default function ResponderEntrevistaPage() {
 
   if (fase === "concluida") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center bg-white rounded-lg shadow-lg p-8">
-          <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Entrevista Concluída!
-          </h1>
-          <p className="text-gray-600 mb-6">
-            Obrigado por participar. Suas respostas foram registradas com sucesso.
-          </p>
-          <p className="text-sm text-gray-500">
-            Em breve você receberá um retorno sobre o processo seletivo.
-          </p>
-        </div>
+      <div className="min-h-screen bg-linear-to-br from-green-50 to-primary/10 dark:from-green-950/20 dark:to-primary/5 flex items-center justify-center p-4">
+        <Card className="max-w-md w-full text-center">
+          <CardContent className="pt-8 pb-8">
+            <div className="relative mx-auto w-20 h-20 mb-6">
+              <div className="absolute inset-0 rounded-full bg-green-500/20 animate-ping" />
+              <div className="relative w-full h-full rounded-full bg-green-500/10 flex items-center justify-center">
+                <CheckCircle2 className="h-10 w-10 text-green-500" />
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Sparkles className="h-5 w-5 text-yellow-500" />
+              <h1 className="text-2xl sm:text-3xl font-bold">
+                Entrevista Concluída!
+              </h1>
+              <PartyPopper className="h-5 w-5 text-yellow-500" />
+            </div>
+            <p className="text-muted-foreground mb-6">
+              Obrigado por participar. Suas respostas foram registradas com sucesso.
+            </p>
+            <div className="bg-muted/50 rounded-lg p-4">
+              <p className="text-sm text-muted-foreground">
+                Em breve você receberá um retorno sobre o processo seletivo.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -242,85 +265,119 @@ export default function ResponderEntrevistaPage() {
   const tempoMaximoResposta = perguntaAtual.tempoMaximo || entrevista.tempoResposta || 180;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-primary/10 py-6 sm:py-8 px-4">
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
         {/* Progresso */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-600">
-              Pergunta {perguntaAtualIndex + 1} de {totalPerguntas}
-            </span>
-            <span className="text-sm font-medium text-gray-600">
-              {Math.round(progresso)}%
-            </span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${progresso}%` }}
-            />
-          </div>
-        </div>
+        <Card>
+          <CardContent className="pt-4 pb-4">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-sm font-medium text-muted-foreground">
+                Pergunta {perguntaAtualIndex + 1} de {totalPerguntas}
+              </span>
+              <span className="text-sm font-bold text-primary">
+                {Math.round(progresso)}%
+              </span>
+            </div>
+            <Progress value={progresso} className="h-2" />
+          </CardContent>
+        </Card>
 
         {/* Pergunta */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            {perguntaAtual.texto}
-          </h2>
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-xl sm:text-2xl leading-relaxed">
+              {perguntaAtual.texto}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {fase === "reflexao" && (
+              <div className="text-center py-8 sm:py-12">
+                <div className="relative mx-auto w-24 h-24 sm:w-28 sm:h-28 mb-6">
+                  <svg className="w-full h-full transform -rotate-90">
+                    <circle
+                      cx="50%"
+                      cy="50%"
+                      r="45%"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      className="text-muted/30"
+                    />
+                    <circle
+                      cx="50%"
+                      cy="50%"
+                      r="45%"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      strokeDasharray={`${(tempoReflexao / 45) * 283} 283`}
+                      className="text-primary transition-all duration-1000"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-3xl sm:text-4xl font-bold">{tempoReflexao}</span>
+                  </div>
+                </div>
+                <p className="text-muted-foreground mb-8">
+                  Tempo para refletir sobre sua resposta
+                </p>
+                <Button onClick={pularReflexao} size="touch" className="w-full sm:w-auto">
+                  Começar a Responder Agora
+                </Button>
+              </div>
+            )}
 
-          {fase === "reflexao" && (
-            <div className="text-center py-12">
-              <Clock className="h-16 w-16 text-blue-500 mx-auto mb-6" />
-              <h3 className="text-3xl font-bold text-gray-900 mb-2">
-                {tempoReflexao}s
-              </h3>
-              <p className="text-gray-600 mb-8">
-                Tempo para refletir sobre sua resposta
-              </p>
-              <Button onClick={pularReflexao} size="lg">
-                Começar a Responder Agora
-              </Button>
-            </div>
-          )}
+            {fase === "resposta" && (
+              <div className="py-6 sm:py-8">
+                <GravadorAudio
+                  onTranscricaoCompleta={handleTranscricaoCompleta}
+                  tempoMaximo={tempoMaximoResposta}
+                />
+                <div className="text-center mt-6">
+                  <p className="text-sm text-muted-foreground">
+                    Tempo máximo: {Math.floor(tempoMaximoResposta / 60)}:{(tempoMaximoResposta % 60)
+                      .toString()
+                      .padStart(2, "0")} minutos
+                  </p>
+                </div>
+              </div>
+            )}
 
-          {fase === "resposta" && (
-            <div className="py-8">
-              <GravadorAudio
-                onTranscricaoCompleta={handleTranscricaoCompleta}
-                tempoMaximo={tempoMaximoResposta}
-              />
-              <div className="text-center mt-6">
-                <p className="text-sm text-gray-500">
-                  Tempo máximo: {Math.floor(tempoMaximoResposta / 60)}:{(tempoMaximoResposta % 60)
-                    .toString()
-                    .padStart(2, "0")} minutos
+            {fase === "processando" && (
+              <div className="text-center py-8 sm:py-12">
+                <div className="relative mx-auto w-20 h-20 mb-6">
+                  <Loader2 className="h-20 w-20 text-primary animate-spin" />
+                </div>
+                <p className="text-muted-foreground font-medium">
+                  Processando sua resposta...
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Isso pode levar alguns segundos
                 </p>
               </div>
-            </div>
-          )}
-
-          {fase === "processando" && (
-            <div className="text-center py-12">
-              <Loader2 className="h-16 w-16 text-blue-500 mx-auto mb-4 animate-spin" />
-              <p className="text-gray-600">
-                Processando sua resposta...
-              </p>
-            </div>
-          )}
-        </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Informações */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="font-semibold text-gray-900 mb-2">
-            Como funciona?
-          </h3>
-          <ul className="text-sm text-gray-600 space-y-2">
-            <li>• Você terá 45 segundos para refletir sobre cada pergunta</li>
-            <li>• Em seguida, terá até 3 minutos para gravar sua resposta em áudio</li>
-            <li>• Você pode começar a gravar antes dos 45 segundos</li>
-            <li>• Suas respostas serão automaticamente transcritas</li>
-          </ul>
-        </div>
+        <Card className="bg-muted/30">
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-semibold mb-2">
+                  Como funciona?
+                </h3>
+                <ul className="text-sm text-muted-foreground space-y-1.5">
+                  <li>• Você terá 45 segundos para refletir sobre cada pergunta</li>
+                  <li>• Em seguida, terá até 3 minutos para gravar sua resposta em áudio</li>
+                  <li>• Você pode começar a gravar antes dos 45 segundos</li>
+                  <li>• Suas respostas serão automaticamente transcritas</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

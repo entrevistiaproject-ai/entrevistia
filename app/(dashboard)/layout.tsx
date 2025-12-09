@@ -11,7 +11,7 @@ export default function DashboardLayout({
       <Sidebar />
       <BottomNav />
       <main className="md:ml-64">
-        <div className="container mx-auto px-4 py-6 pb-24 md:px-6 md:py-8 md:pb-8">
+        <div className="container mx-auto px-4 py-5 pb-24 sm:px-6 md:py-8 md:pb-8 animate-fade-in">
           {children}
         </div>
       </main>
