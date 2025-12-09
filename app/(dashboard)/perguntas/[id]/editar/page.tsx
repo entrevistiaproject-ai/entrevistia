@@ -130,7 +130,6 @@ export default async function EditarPerguntaPage({ params }: EditarPerguntaPageP
           categoria: pergunta.categoria,
           competencia: pergunta.competencia,
           tipo: pergunta.tipo,
-          criteriosAvaliacao: pergunta.criteriosAvaliacao,
         }}
         modoEdicao
       />

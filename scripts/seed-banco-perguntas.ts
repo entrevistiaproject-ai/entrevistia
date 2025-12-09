@@ -9,7 +9,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { eq } from 'drizzle-orm';
 import { Pool } from 'pg';
 import { perguntasTemplates } from '@/lib/db/schema';
-import { todasAsPerguntas, estatisticas } from '@/lib/db/seeds/banco-perguntas-completo-v2';
+import { todasAsPerguntas, estatisticas } from '@/lib/db/seeds/banco-perguntas-v3';
 
 async function seedPerguntas() {
   const pool = new Pool({
@@ -27,10 +27,6 @@ async function seedPerguntas() {
     console.log(`\n   Por categoria:`);
     Object.entries(estatisticas.porCategoria).forEach(([cat, count]) => {
       console.log(`   - ${cat}: ${count}`);
-    });
-    console.log(`\n   Por nível:`);
-    Object.entries(estatisticas.porNivel).forEach(([nivel, count]) => {
-      console.log(`   - ${nivel}: ${count}`);
     });
 
     console.log('\n' + '='.repeat(60));
@@ -61,7 +57,6 @@ async function seedPerguntas() {
           tipo: 'audio',
           isPadrao: true,
           userId: null,
-          criteriosAvaliacao: {},
         });
 
         inseridas++;

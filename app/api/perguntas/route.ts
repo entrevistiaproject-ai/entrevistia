@@ -15,7 +15,6 @@ export async function POST(request: Request) {
       categoria,
       competencia,
       tipo,
-      criteriosAvaliacao,
     } = body;
 
     // Validação básica
@@ -42,7 +41,6 @@ export async function POST(request: Request) {
         categoria: categoriaFinal,
         competencia: competencia || null,
         tipo: tipo || "texto",
-        criteriosAvaliacao: criteriosAvaliacao || {},
         isPadrao: false,
         userId,
       })

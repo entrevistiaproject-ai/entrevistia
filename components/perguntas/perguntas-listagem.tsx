@@ -32,19 +32,17 @@ interface PerguntasListagemProps {
 }
 
 const categoriaColors: Record<string, string> = {
-  conhecimento: "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20",
+  tecnica: "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20",
   experiencia: "bg-purple-500/10 text-purple-500 hover:bg-purple-500/20",
-  resolucao_problemas: "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20",
-  habilidades_pessoais: "bg-green-500/10 text-green-500 hover:bg-green-500/20",
-  qualificacoes: "bg-orange-500/10 text-orange-500 hover:bg-orange-500/20",
+  comportamental: "bg-green-500/10 text-green-500 hover:bg-green-500/20",
+  situacional: "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20",
 };
 
 const categoriaLabels: Record<string, string> = {
-  conhecimento: "Conhecimento",
+  tecnica: "Técnica",
   experiencia: "Experiência",
-  resolucao_problemas: "Resolução de Problemas",
-  habilidades_pessoais: "Habilidades Pessoais",
-  qualificacoes: "Qualificações",
+  comportamental: "Comportamental",
+  situacional: "Situacional",
 };
 
 export function PerguntasListagem({

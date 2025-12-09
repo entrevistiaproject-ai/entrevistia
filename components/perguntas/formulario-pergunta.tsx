@@ -22,13 +22,8 @@ import {
 } from "@/components/ui/card";
 import { AutocompleteCargo } from "@/components/entrevista/autocomplete-cargo";
 import { NIVEIS_HIERARQUICOS } from "@/lib/constants/niveis";
+import { CATEGORIAS_DISPONIVEIS } from "@/lib/utils/classificacao-perguntas";
 import { useToast } from "@/hooks/use-toast";
-
-interface CriteriosAvaliacao {
-  palavrasChave?: string[];
-  topicos?: string[];
-  aspectosAvaliar?: string[];
-}
 
 interface PerguntaInicial {
   id?: string;
@@ -38,7 +33,6 @@ interface PerguntaInicial {
   categoria?: string;
   competencia?: string | null;
   tipo?: string;
-  criteriosAvaliacao?: CriteriosAvaliacao | null;
 }
 
 interface FormularioPerguntaProps {
@@ -62,17 +56,6 @@ export function FormularioPergunta({
   const [competencia, setCompetencia] = useState(perguntaInicial?.competencia || "");
   const [tipo, setTipo] = useState(perguntaInicial?.tipo || "audio");
 
-  // Critérios de avaliação
-  const [palavrasChave, setPalavrasChave] = useState(
-    perguntaInicial?.criteriosAvaliacao?.palavrasChave?.join(", ") || ""
-  );
-  const [topicos, setTopicos] = useState(
-    perguntaInicial?.criteriosAvaliacao?.topicos?.join(", ") || ""
-  );
-  const [aspectosAvaliar, setAspectosAvaliar] = useState(
-    perguntaInicial?.criteriosAvaliacao?.aspectosAvaliar?.join(", ") || ""
-  );
-
   // Atualizar campos quando os dados iniciais mudarem
   useEffect(() => {
     if (perguntaInicial) {
@@ -82,9 +65,6 @@ export function FormularioPergunta({
       setCategoria(perguntaInicial.categoria || "");
       setCompetencia(perguntaInicial.competencia || "");
       setTipo(perguntaInicial.tipo || "audio");
-      setPalavrasChave(perguntaInicial.criteriosAvaliacao?.palavrasChave?.join(", ") || "");
-      setTopicos(perguntaInicial.criteriosAvaliacao?.topicos?.join(", ") || "");
-      setAspectosAvaliar(perguntaInicial.criteriosAvaliacao?.aspectosAvaliar?.join(", ") || "");
     }
   }, [perguntaInicial]);
 
@@ -93,12 +73,6 @@ export function FormularioPergunta({
     setLoading(true);
 
     try {
-      const criteriosAvaliacao = {
-        palavrasChave: palavrasChave.split(",").map((p) => p.trim()).filter(Boolean),
-        topicos: topicos.split(",").map((t) => t.trim()).filter(Boolean),
-        aspectosAvaliar: aspectosAvaliar.split(",").map((a) => a.trim()).filter(Boolean),
-      };
-
       const url = modoEdicao && perguntaInicial?.id
         ? `/api/perguntas/${perguntaInicial.id}`
         : "/api/perguntas";
@@ -117,7 +91,6 @@ export function FormularioPergunta({
           categoria,
           competencia,
           tipo,
-          criteriosAvaliacao,
         }),
       });
 
@@ -202,11 +175,11 @@ export function FormularioPergunta({
                   <SelectValue placeholder="Selecione a categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="conhecimento">Conhecimento</SelectItem>
-                  <SelectItem value="experiencia">Experiência</SelectItem>
-                  <SelectItem value="resolucao_problemas">Resolução de Problemas</SelectItem>
-                  <SelectItem value="habilidades_pessoais">Habilidades Pessoais</SelectItem>
-                  <SelectItem value="qualificacoes">Qualificações</SelectItem>
+                  {CATEGORIAS_DISPONIVEIS.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.icone} {cat.nome}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -215,7 +188,7 @@ export function FormularioPergunta({
               <Label htmlFor="competencia">Competência Avaliada</Label>
               <Input
                 id="competencia"
-                placeholder="Ex: Direito Contratual, Liderança"
+                placeholder="Ex: React, Direito Civil, Liderança"
                 value={competencia}
                 onChange={(e) => setCompetencia(e.target.value)}
               />
@@ -235,55 +208,6 @@ export function FormularioPergunta({
             </Select>
             <p className="text-xs text-muted-foreground">
               Atualmente trabalhamos apenas com respostas em texto e áudio
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Critérios de Avaliação</CardTitle>
-          <CardDescription>
-            Ajude a IA a avaliar melhor as respostas (opcional)
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="palavras-chave">Palavras-chave Esperadas</Label>
-            <Input
-              id="palavras-chave"
-              placeholder="Separe por vírgula: contrato, cláusula, jurídico..."
-              value={palavrasChave}
-              onChange={(e) => setPalavrasChave(e.target.value)}
-            />
-            <p className="text-sm text-muted-foreground">
-              Palavras que você espera encontrar na resposta
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="topicos">Tópicos a Abordar</Label>
-            <Input
-              id="topicos"
-              placeholder="Separe por vírgula: análise de riscos, negociação..."
-              value={topicos}
-              onChange={(e) => setTopicos(e.target.value)}
-            />
-            <p className="text-sm text-muted-foreground">
-              Tópicos que devem ser mencionados
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="aspectos">Aspectos a Avaliar</Label>
-            <Input
-              id="aspectos"
-              placeholder="Separe por vírgula: profundidade técnica, exemplos práticos..."
-              value={aspectosAvaliar}
-              onChange={(e) => setAspectosAvaliar(e.target.value)}
-            />
-            <p className="text-sm text-muted-foreground">
-              O que deve ser avaliado na resposta
             </p>
           </div>
         </CardContent>

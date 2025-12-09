@@ -1,7 +1,7 @@
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import * as schema from '../lib/db/schema';
-import { todasAsPerguntas, estatisticas } from '../lib/db/seeds/banco-perguntas-completo-v2';
+import { todasAsPerguntas, estatisticas } from '../lib/db/seeds/banco-perguntas-v3';
 
 async function seed() {
   console.log('🌱 Iniciando seed do banco de perguntas...\n');
@@ -29,7 +29,6 @@ async function seed() {
         tipo: 'audio',
         isPadrao: true,
         userId: null,
-        criteriosAvaliacao: {},
       });
       inseridas++;
 
@@ -50,11 +49,6 @@ async function seed() {
     console.log('\nDistribuição por categoria:');
     Object.entries(estatisticas.porCategoria).forEach(([categoria, count]) => {
       console.log(`  - ${categoria}: ${count} perguntas`);
-    });
-
-    console.log('\nDistribuição por nível:');
-    Object.entries(estatisticas.porNivel).forEach(([nivel, count]) => {
-      console.log(`  - ${nivel}: ${count} perguntas`);
     });
 
   } catch (error) {

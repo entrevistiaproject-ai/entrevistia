@@ -91,7 +91,6 @@ export async function PUT(request: Request, { params }: RouteParams) {
       categoria,
       competencia,
       tipo,
-      criteriosAvaliacao,
     } = body;
 
     // Se categoria não foi fornecida, sugere automaticamente
@@ -107,7 +106,6 @@ export async function PUT(request: Request, { params }: RouteParams) {
         categoria: categoriaFinal,
         competencia: competencia !== undefined ? competencia : perguntaExistente.competencia,
         tipo: tipo || perguntaExistente.tipo,
-        criteriosAvaliacao: criteriosAvaliacao !== undefined ? criteriosAvaliacao : perguntaExistente.criteriosAvaliacao,
         updatedAt: new Date(),
       })
       .where(eq(perguntasTemplates.id, id))

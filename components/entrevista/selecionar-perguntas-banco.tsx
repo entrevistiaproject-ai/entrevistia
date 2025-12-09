@@ -34,19 +34,17 @@ interface SelecionarPerguntasBancoProps {
 }
 
 const categoriaLabels: Record<string, string> = {
-  conhecimento: "Conhecimento",
+  tecnica: "Técnica",
   experiencia: "Experiência",
-  resolucao_problemas: "Resolução de Problemas",
-  habilidades_pessoais: "Habilidades Pessoais",
-  qualificacoes: "Qualificações",
+  comportamental: "Comportamental",
+  situacional: "Situacional",
 };
 
 const categoriaColors: Record<string, string> = {
-  conhecimento: "bg-blue-500/10 text-blue-500",
+  tecnica: "bg-blue-500/10 text-blue-500",
   experiencia: "bg-purple-500/10 text-purple-500",
-  resolucao_problemas: "bg-amber-500/10 text-amber-500",
-  habilidades_pessoais: "bg-green-500/10 text-green-500",
-  qualificacoes: "bg-orange-500/10 text-orange-500",
+  comportamental: "bg-green-500/10 text-green-500",
+  situacional: "bg-amber-500/10 text-amber-500",
 };
 
 export function SelecionarPerguntasBanco({
@@ -179,11 +177,10 @@ export function SelecionarPerguntasBanco({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todas">Todas Categorias</SelectItem>
-                <SelectItem value="conhecimento">Conhecimento</SelectItem>
+                <SelectItem value="tecnica">Técnica</SelectItem>
                 <SelectItem value="experiencia">Experiência</SelectItem>
-                <SelectItem value="resolucao_problemas">Resolução de Problemas</SelectItem>
-                <SelectItem value="habilidades_pessoais">Habilidades Pessoais</SelectItem>
-                <SelectItem value="qualificacoes">Qualificações</SelectItem>
+                <SelectItem value="comportamental">Comportamental</SelectItem>
+                <SelectItem value="situacional">Situacional</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -244,11 +241,10 @@ export function SelecionarPerguntasBanco({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todas">Todas Categorias</SelectItem>
-                <SelectItem value="conhecimento">Conhecimento</SelectItem>
+                <SelectItem value="tecnica">Técnica</SelectItem>
                 <SelectItem value="experiencia">Experiência</SelectItem>
-                <SelectItem value="resolucao_problemas">Resolução de Problemas</SelectItem>
-                <SelectItem value="habilidades_pessoais">Habilidades Pessoais</SelectItem>
-                <SelectItem value="qualificacoes">Qualificações</SelectItem>
+                <SelectItem value="comportamental">Comportamental</SelectItem>
+                <SelectItem value="situacional">Situacional</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, jsonb, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid, boolean } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 /**
@@ -15,25 +15,18 @@ export const perguntasTemplates = pgTable("perguntas_templates", {
   texto: text("texto").notNull(),
 
   // Cargo e nível específicos (simplificado)
-  cargo: text("cargo").notNull(), // Ex: "Desenvolvedor", "Advogado"
+  cargo: text("cargo").notNull(), // Ex: "Desenvolvedor Front-End", "Advogado Trabalhista"
   nivel: text("nivel").notNull(), // Ex: "junior", "pleno", "senior"
 
-  // Categoria da competência avaliada
-  categoria: text("categoria").notNull(), // tecnica, comportamental, soft_skill, hard_skill
-  competencia: text("competencia"), // Ex: "Direito Civil", "Comunicação"
+  // Categoria (4 tipos: tecnica, experiencia, comportamental, situacional)
+  categoria: text("categoria").notNull(),
+  competencia: text("competencia"), // Ex: "React", "Direito Civil", "Liderança"
 
   // Tipo de pergunta
   tipo: text("tipo").notNull().default("texto"), // texto, video, audio
 
   // Se é uma pergunta padrão do sistema (fornecida pela plataforma)
   isPadrao: boolean("is_padrao").default(false).notNull(),
-
-  // Critérios de avaliação esperados
-  criteriosAvaliacao: jsonb("criterios_avaliacao").$type<{
-    palavrasChave?: string[];
-    topicos?: string[];
-    aspectosAvaliar?: string[];
-  }>(),
 
   // Auditoria
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),

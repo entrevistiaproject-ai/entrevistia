@@ -44,16 +44,6 @@ export const criarPerguntaSchema = z.object({
     )
     .min(2, "Múltipla escolha deve ter no mínimo 2 opções")
     .optional(),
-
-  // Critérios para avaliação de IA
-  criteriosAvaliacao: z
-    .object({
-      palavrasChave: z.array(z.string()).optional(),
-      topicos: z.array(z.string()).optional(),
-      competencias: z.array(z.string()).optional(),
-      pesoNota: z.number().min(0).max(1).default(1).optional(),
-    })
-    .optional(),
 }).refine(
   (data) => {
     // Se for múltipla escolha, deve ter opções
