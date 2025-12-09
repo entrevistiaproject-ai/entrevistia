@@ -24,7 +24,6 @@ export function GravadorAudio({
   const [tempoDecorrido, setTempoDecorrido] = useState(0);
   const [erro, setErro] = useState<string | null>(null);
   const [nivelAudio, setNivelAudio] = useState(0);
-  const [timerIniciado, setTimerIniciado] = useState(false);
   const timerGeralRef = useRef<NodeJS.Timeout | null>(null);
 
   const recorderRef = useRef<RecordRTC | null>(null);
@@ -33,6 +32,7 @@ export function GravadorAudio({
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const gravandoRef = useRef(false); // Ref para usar dentro do interval
 
   const pararMonitoramentoAudio = useCallback(() => {
     if (animationFrameRef.current) {
@@ -48,8 +48,9 @@ export function GravadorAudio({
   }, []);
 
   const pararGravacaoETranscrever = useCallback(async () => {
-    if (recorderRef.current && gravando) {
+    if (recorderRef.current && gravandoRef.current) {
       setGravando(false);
+      gravandoRef.current = false;
 
       recorderRef.current.stopRecording(async () => {
         const blob = recorderRef.current?.getBlob();
@@ -76,29 +77,30 @@ export function GravadorAudio({
         }
       });
     }
-  }, [gravando, pararMonitoramentoAudio]);
+  }, [pararMonitoramentoAudio]);
 
   // Iniciar timer geral assim que o componente montar
   useEffect(() => {
-    if (!timerIniciado && !disabled) {
-      setTimerIniciado(true);
-      timerGeralRef.current = setInterval(() => {
-        setTempoDecorrido((prev) => {
-          const novo = prev + 1;
-          if (novo >= tempoMaximo) {
-            // Tempo esgotado - parar gravação se estiver gravando
-            if (recorderRef.current && gravando) {
-              pararGravacaoETranscrever();
-            }
-            if (timerGeralRef.current) {
-              clearInterval(timerGeralRef.current);
-            }
-            onTempoEsgotado?.();
+    if (disabled) return;
+
+    // Iniciar timer imediatamente
+    timerGeralRef.current = setInterval(() => {
+      setTempoDecorrido((prev) => {
+        const novo = prev + 1;
+        if (novo >= tempoMaximo) {
+          // Tempo esgotado
+          if (timerGeralRef.current) {
+            clearInterval(timerGeralRef.current);
           }
-          return novo;
-        });
-      }, 1000);
-    }
+          // Parar gravação se estiver gravando e enviar
+          if (recorderRef.current && gravandoRef.current) {
+            pararGravacaoETranscrever();
+          }
+          onTempoEsgotado?.();
+        }
+        return novo;
+      });
+    }, 1000);
 
     return () => {
       // Limpar timer ao desmontar
@@ -112,11 +114,11 @@ export function GravadorAudio({
         streamRef.current.getTracks().forEach(track => track.stop());
       }
       // Parar gravação se estiver ativa
-      if (recorderRef.current && gravando) {
+      if (recorderRef.current && gravandoRef.current) {
         recorderRef.current.stopRecording(() => {});
       }
     };
-  }, [gravando, pararMonitoramentoAudio, pararGravacaoETranscrever, timerIniciado, disabled, tempoMaximo, onTempoEsgotado]);
+  }, [disabled, tempoMaximo, onTempoEsgotado, pararMonitoramentoAudio, pararGravacaoETranscrever]);
 
   const iniciarGravacao = async () => {
     try {
@@ -172,6 +174,7 @@ export function GravadorAudio({
       // Iniciar gravação
       recorder.startRecording();
       setGravando(true);
+      gravandoRef.current = true;
     } catch (error) {
       console.error("Erro ao iniciar gravação:", error);
       setErro("Não foi possível acessar o microfone. Verifique as permissões.");
@@ -180,7 +183,8 @@ export function GravadorAudio({
 
   const pararGravacao = () => {
     if (recorderRef.current && gravando) {
-      setGravando(false); // Mover para antes para evitar cliques duplos
+      setGravando(false);
+      gravandoRef.current = false;
 
       recorderRef.current.stopRecording(async () => {
         const blob = recorderRef.current?.getBlob();
