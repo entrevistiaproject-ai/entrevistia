@@ -51,29 +51,34 @@ const mockResultado = {
 };
 
 const competenciasSelecionadas = [
-  // Técnicas
-  { nome: "Conhecimento Técnico", categoria: "Técnicas", nota: 88, descricao: "Domínio de ferramentas e tecnologias" },
-  { nome: "Resolução de Problemas", categoria: "Técnicas", nota: 85, descricao: "Capacidade analítica e lógica" },
-  { nome: "Qualidade e Detalhes", categoria: "Técnicas", nota: 78, descricao: "Atenção aos detalhes" },
-  { nome: "Aprendizado Técnico", categoria: "Técnicas", nota: 82, descricao: "Capacidade de aprender novas tecnologias" },
+  // Habilidades Técnicas
+  { nome: "Conhecimento Técnico", categoria: "Habilidades Técnicas", nota: 88, descricao: "Domínio de ferramentas e tecnologias da função" },
+  { nome: "Resolução de Problemas", categoria: "Habilidades Técnicas", nota: 85, descricao: "Raciocínio lógico e analítico" },
+  { nome: "Qualidade do Trabalho", categoria: "Habilidades Técnicas", nota: 78, descricao: "Atenção aos detalhes e precisão" },
+  { nome: "Capacidade de Aprendizado", categoria: "Habilidades Técnicas", nota: 82, descricao: "Velocidade e facilidade para aprender" },
 
   // Comunicação
-  { nome: "Clareza Verbal", categoria: "Comunicação", nota: 90, descricao: "Expressão clara e objetiva" },
-  { nome: "Escuta Ativa", categoria: "Comunicação", nota: 85, descricao: "Atenção e compreensão" },
-  { nome: "Capacidade de Síntese", categoria: "Comunicação", nota: 87, descricao: "Resumir ideias complexas" },
+  { nome: "Clareza na Comunicação", categoria: "Comunicação", nota: 90, descricao: "Expressão verbal e escrita clara" },
+  { nome: "Escuta Ativa", categoria: "Comunicação", nota: 85, descricao: "Compreensão e atenção ao interlocutor" },
+  { nome: "Capacidade de Síntese", categoria: "Comunicação", nota: 87, descricao: "Resumir ideias complexas objetivamente" },
 
-  // Comportamental
-  { nome: "Proatividade", categoria: "Comportamental", nota: 88, descricao: "Iniciativa e autonomia" },
-  { nome: "Adaptabilidade", categoria: "Comportamental", nota: 80, descricao: "Flexibilidade a mudanças" },
-  { nome: "Resiliência", categoria: "Comportamental", nota: 75, descricao: "Gestão de pressão" },
+  // Atitude & Iniciativa
+  { nome: "Proatividade", categoria: "Atitude & Iniciativa", nota: 88, descricao: "Iniciativa própria e antecipação" },
+  { nome: "Senso de Dono", categoria: "Atitude & Iniciativa", nota: 85, descricao: "Responsabilidade e comprometimento" },
+  { nome: "Autonomia", categoria: "Atitude & Iniciativa", nota: 83, descricao: "Capacidade de trabalhar independentemente" },
 
-  // Trabalho em Equipe
-  { nome: "Colaboração", categoria: "Trabalho em Equipe", nota: 85, descricao: "Trabalho em grupo" },
-  { nome: "Compartilhamento de Conhecimento", categoria: "Trabalho em Equipe", nota: 82, descricao: "Ensinar e aprender com o time" },
+  // Adaptabilidade
+  { nome: "Flexibilidade", categoria: "Adaptabilidade", nota: 80, descricao: "Adaptação a mudanças e novos contextos" },
+  { nome: "Gestão de Pressão", categoria: "Adaptabilidade", nota: 75, descricao: "Performance sob prazos e desafios" },
+  { nome: "Abertura a Feedback", categoria: "Adaptabilidade", nota: 82, descricao: "Receptividade e aplicação de feedback" },
 
-  // Fit Cultural
-  { nome: "Alinhamento de Valores", categoria: "Fit Cultural", nota: 88, descricao: "Compatibilidade cultural" },
-  { nome: "Motivação", categoria: "Fit Cultural", nota: 90, descricao: "Interesse genuíno pela vaga" },
+  // Colaboração
+  { nome: "Trabalho em Equipe", categoria: "Colaboração", nota: 85, descricao: "Cooperação e sinergia com colegas" },
+  { nome: "Compartilhamento", categoria: "Colaboração", nota: 82, descricao: "Troca de conhecimento e experiências" },
+
+  // Motivação & Engajamento
+  { nome: "Interesse pela Vaga", categoria: "Motivação & Engajamento", nota: 90, descricao: "Genuíno interesse e alinhamento com oportunidade" },
+  { nome: "Energia e Entusiasmo", categoria: "Motivação & Engajamento", nota: 87, descricao: "Motivação e disposição demonstradas" },
 ];
 
 const categorias = Array.from(new Set(competenciasSelecionadas.map(c => c.categoria)));
