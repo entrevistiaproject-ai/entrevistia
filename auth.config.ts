@@ -9,7 +9,7 @@ export const authConfig = {
   pages: {
     signIn: "/login",
     signOut: "/login",
-    error: "/login",
+    error: "/auth-error",
   },
   callbacks: {
     authorized() {

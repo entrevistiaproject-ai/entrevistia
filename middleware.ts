@@ -12,6 +12,7 @@ export function middleware(request: NextRequest) {
     "/termos",
     "/privacidade",
     "/verificar-email",
+    "/auth-error",
   ];
 
   const isPublicRoute =
