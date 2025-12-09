@@ -17,8 +17,6 @@ import {
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 
@@ -56,35 +54,29 @@ export default function LandingPage() {
 
           {/* Mobile menu */}
           <div className="sm:hidden flex items-center gap-2">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/login">Entrar</Link>
-            </Button>
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="touch-icon">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-72">
-                <SheetHeader>
-                  <SheetTitle className="flex items-center gap-2">
-                    <Building2 className="h-6 w-6 text-primary" />
-                    EntrevistIA
-                  </SheetTitle>
-                </SheetHeader>
-                <nav className="mt-8 flex flex-col gap-4">
-                  <a href="#beneficios" className="text-lg font-medium hover:text-primary transition-colors py-2">
+              <SheetContent side="top" className="h-auto pt-12">
+                <nav className="flex flex-col items-center gap-1">
+                  <a href="#beneficios" className="w-full text-center text-base font-medium hover:bg-muted transition-colors py-3 rounded-lg">
                     Benefícios
                   </a>
-                  <a href="#como-funciona" className="text-lg font-medium hover:text-primary transition-colors py-2">
+                  <a href="#como-funciona" className="w-full text-center text-base font-medium hover:bg-muted transition-colors py-3 rounded-lg">
                     Como Funciona
                   </a>
-                  <a href="#casos-de-uso" className="text-lg font-medium hover:text-primary transition-colors py-2">
+                  <a href="#casos-de-uso" className="w-full text-center text-base font-medium hover:bg-muted transition-colors py-3 rounded-lg">
                     Casos de Uso
                   </a>
-                  <div className="mt-4 pt-4 border-t space-y-3">
+                  <div className="w-full mt-4 pt-4 border-t space-y-3">
                     <Button asChild className="w-full" size="touch">
                       <Link href="/cadastro">Começar Grátis</Link>
+                    </Button>
+                    <Button variant="outline" asChild className="w-full" size="touch">
+                      <Link href="/login">Entrar</Link>
                     </Button>
                   </div>
                 </nav>

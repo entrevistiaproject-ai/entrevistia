@@ -18,6 +18,8 @@ import {
   CheckCircle,
   Play,
   AlertTriangle,
+  ChevronDown,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { AdicionarCandidatoDialog } from "@/components/entrevistas/adicionar-candidato-dialog";
@@ -85,6 +87,7 @@ export default function EntrevistaDetalhesPage() {
   const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [descricaoAberta, setDescricaoAberta] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -221,7 +224,19 @@ export default function EntrevistaDetalhesPage() {
             <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
           </div>
           {entrevista.descricao && (
-            <p className="text-sm sm:text-base text-muted-foreground mt-2 whitespace-pre-line line-clamp-3 sm:line-clamp-none">{entrevista.descricao}</p>
+            <button
+              onClick={() => setDescricaoAberta(!descricaoAberta)}
+              className="flex items-center gap-2 mt-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <FileText className="h-4 w-4" />
+              <span>Ver descrição da vaga</span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${descricaoAberta ? 'rotate-180' : ''}`} />
+            </button>
+          )}
+          {descricaoAberta && entrevista.descricao && (
+            <div className="mt-3 p-4 bg-muted/50 rounded-lg border">
+              <p className="text-sm text-muted-foreground whitespace-pre-line">{entrevista.descricao}</p>
+            </div>
           )}
         </div>
       </div>
