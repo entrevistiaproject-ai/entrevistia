@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "")}-${Date.now().toString(36)}`;
 
-    // Cria a entrevista
+    // Cria a entrevista diretamente como ativa
     const [novaEntrevista] = await db
       .insert(entrevistas)
       .values({
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
         empresa: body.empresa || null,
         duracao: body.duracao || 30,
         slug,
-        status: "rascunho",
+        status: "active", // Entrevista criada já ativa
         configuracoes: {
           compartilharResultados: body.compartilharResultados || false,
         },

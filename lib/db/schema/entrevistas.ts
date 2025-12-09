@@ -20,7 +20,7 @@ export const entrevistas = pgTable("entrevistas", {
   empresa: text("empresa"),
 
   // Status
-  status: text("status").notNull().default("rascunho"), // rascunho, publicada, em_andamento, concluida, cancelada
+  status: text("status").notNull().default("active"), // active (ativa), completed (concluída), archived (arquivada)
 
   // Configurações
   duracao: integer("duracao"), // minutos

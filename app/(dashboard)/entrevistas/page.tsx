@@ -67,10 +67,9 @@ export default function EntrevistasPage() {
     // Filtro por status
     if (statusFilter !== "todas") {
       const statusMap: Record<string, string[]> = {
-        ativas: ["publicada", "em_andamento"],
-        encerradas: ["concluida"],
-        rascunhos: ["rascunho"],
-        canceladas: ["cancelada"],
+        ativas: ["active", "publicada", "em_andamento"],
+        encerradas: ["completed", "concluida"],
+        arquivadas: ["archived", "cancelada"],
       };
 
       const statusValues = statusMap[statusFilter] || [];
@@ -94,9 +93,9 @@ export default function EntrevistasPage() {
   // Contadores para as tabs
   const counts = {
     todas: entrevistas.length,
-    ativas: entrevistas.filter((e) => ["publicada", "em_andamento"].includes(e.status)).length,
-    encerradas: entrevistas.filter((e) => e.status === "concluida").length,
-    rascunhos: entrevistas.filter((e) => e.status === "rascunho").length,
+    ativas: entrevistas.filter((e) => ["active", "publicada", "em_andamento"].includes(e.status)).length,
+    encerradas: entrevistas.filter((e) => ["completed", "concluida"].includes(e.status)).length,
+    arquivadas: entrevistas.filter((e) => ["archived", "cancelada"].includes(e.status)).length,
   };
 
   if (loading) {
@@ -182,10 +181,10 @@ export default function EntrevistasPage() {
                 {counts.encerradas}
               </span>
             </TabsTrigger>
-            <TabsTrigger value="rascunhos" className="text-xs sm:text-sm">
-              Rascunhos
+            <TabsTrigger value="arquivadas" className="text-xs sm:text-sm">
+              Arquivadas
               <span className="ml-1.5 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
-                {counts.rascunhos}
+                {counts.arquivadas}
               </span>
             </TabsTrigger>
           </TabsList>
