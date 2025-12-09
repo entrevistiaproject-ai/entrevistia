@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, Square, Loader2, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import RecordRTC, { StereoAudioRecorder } from "recordrtc";
 
 interface GravadorAudioProps {
   onTranscricaoCompleta: (transcricao: string, duracao: number) => void;
@@ -26,8 +27,7 @@ export function GravadorAudio({
   const [timerIniciado, setTimerIniciado] = useState(false);
   const timerGeralRef = useRef<NodeJS.Timeout | null>(null);
 
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
+  const recorderRef = useRef<RecordRTC | null>(null);
   const inicioGravacaoRef = useRef<number>(0);
   const streamRef = useRef<MediaStream | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -47,6 +47,30 @@ export function GravadorAudio({
     setNivelAudio(0);
   }, []);
 
+  const pararGravacaoETranscrever = useCallback(async () => {
+    if (recorderRef.current && gravando) {
+      recorderRef.current.stopRecording(async () => {
+        const blob = recorderRef.current?.getBlob();
+        const duracaoReal = Math.floor((Date.now() - inicioGravacaoRef.current) / 1000);
+
+        // Parar monitoramento de áudio
+        pararMonitoramentoAudio();
+
+        // Parar todas as tracks do stream
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((track) => track.stop());
+          streamRef.current = null;
+        }
+
+        // Transcrever áudio se tiver blob
+        if (blob && blob.size > 0) {
+          await transcreverAudio(blob, duracaoReal);
+        }
+      });
+      setGravando(false);
+    }
+  }, [gravando, pararMonitoramentoAudio]);
+
   // Iniciar timer geral assim que o componente montar
   useEffect(() => {
     if (!timerIniciado && !disabled) {
@@ -56,9 +80,8 @@ export function GravadorAudio({
           const novo = prev + 1;
           if (novo >= tempoMaximo) {
             // Tempo esgotado - parar gravação se estiver gravando
-            if (mediaRecorderRef.current && gravando) {
-              mediaRecorderRef.current.stop();
-              setGravando(false);
+            if (recorderRef.current && gravando) {
+              pararGravacaoETranscrever();
             }
             if (timerGeralRef.current) {
               clearInterval(timerGeralRef.current);
@@ -82,11 +105,11 @@ export function GravadorAudio({
         streamRef.current.getTracks().forEach(track => track.stop());
       }
       // Parar gravação se estiver ativa
-      if (mediaRecorderRef.current && gravando) {
-        mediaRecorderRef.current.stop();
+      if (recorderRef.current && gravando) {
+        recorderRef.current.stopRecording(() => {});
       }
     };
-  }, [gravando, pararMonitoramentoAudio, timerIniciado, disabled, tempoMaximo, onTempoEsgotado]);
+  }, [gravando, pararMonitoramentoAudio, pararGravacaoETranscrever, timerIniciado, disabled, tempoMaximo, onTempoEsgotado]);
 
   const iniciarGravacao = async () => {
     try {
@@ -127,42 +150,20 @@ export function GravadorAudio({
       };
       atualizarNivel();
 
-      // Configurar MediaRecorder com formato suportado
-      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-        ? "audio/webm;codecs=opus"
-        : "audio/webm";
+      // Configurar RecordRTC para gravar em WAV (formato mais compatível com Whisper)
+      const recorder = new RecordRTC(stream, {
+        type: "audio",
+        mimeType: "audio/wav",
+        recorderType: StereoAudioRecorder,
+        numberOfAudioChannels: 1, // Mono para menor tamanho
+        desiredSampRate: 16000, // 16kHz é suficiente para voz
+      });
 
-      const mediaRecorder = new MediaRecorder(stream, { mimeType });
-
-      mediaRecorderRef.current = mediaRecorder;
-      chunksRef.current = [];
+      recorderRef.current = recorder;
       inicioGravacaoRef.current = Date.now();
 
-      // Coletar chunks de áudio
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          chunksRef.current.push(event.data);
-        }
-      };
-
-      // Quando a gravação terminar
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(chunksRef.current, { type: mimeType });
-        const duracaoReal = Math.floor((Date.now() - inicioGravacaoRef.current) / 1000);
-
-        // Parar monitoramento de áudio
-        pararMonitoramentoAudio();
-
-        // Parar todas as tracks do stream
-        stream.getTracks().forEach((track) => track.stop());
-        streamRef.current = null;
-
-        // Transcrever áudio
-        await transcreverAudio(audioBlob, duracaoReal);
-      };
-
       // Iniciar gravação
-      mediaRecorder.start();
+      recorder.startRecording();
       setGravando(true);
     } catch (error) {
       console.error("Erro ao iniciar gravação:", error);
@@ -171,8 +172,25 @@ export function GravadorAudio({
   };
 
   const pararGravacao = () => {
-    if (mediaRecorderRef.current && gravando) {
-      mediaRecorderRef.current.stop();
+    if (recorderRef.current && gravando) {
+      recorderRef.current.stopRecording(async () => {
+        const blob = recorderRef.current?.getBlob();
+        const duracaoReal = Math.floor((Date.now() - inicioGravacaoRef.current) / 1000);
+
+        // Parar monitoramento de áudio
+        pararMonitoramentoAudio();
+
+        // Parar todas as tracks do stream
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((track) => track.stop());
+          streamRef.current = null;
+        }
+
+        // Transcrever áudio se tiver blob
+        if (blob && blob.size > 0) {
+          await transcreverAudio(blob, duracaoReal);
+        }
+      });
       setGravando(false);
     }
   };
@@ -182,9 +200,9 @@ export function GravadorAudio({
       setTranscrevendo(true);
       setErro(null);
 
-      // Preparar FormData - enviar webm diretamente
+      // Preparar FormData - enviar WAV
       const formData = new FormData();
-      formData.append("audio", audioBlob, "gravacao.webm");
+      formData.append("audio", audioBlob, "gravacao.wav");
 
       // Enviar para API de transcrição
       const response = await fetch("/api/transcricao", {
