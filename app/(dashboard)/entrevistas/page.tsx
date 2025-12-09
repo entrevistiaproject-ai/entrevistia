@@ -45,7 +45,9 @@ export default function EntrevistasPage() {
         }
 
         const data = await response.json();
+        console.log("API Response:", data);
         const entrevistasList = data.entrevistas || data;
+        console.log("Entrevistas List:", entrevistasList);
         setEntrevistas(entrevistasList);
         setFilteredEntrevistas(entrevistasList);
       } catch (error) {

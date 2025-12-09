@@ -59,6 +59,13 @@ export async function GET(request: Request) {
           FROM ${respostas} r
           WHERE r.entrevista_id = ${entrevistas.id}
         )`,
+        // Contagem de perguntas
+        totalPerguntas: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM ${perguntas} p
+          WHERE p.entrevista_id = ${entrevistas.id}
+            AND p.deleted_at IS NULL
+        )`,
       })
       .from(entrevistas)
       .where(baseWhere)
