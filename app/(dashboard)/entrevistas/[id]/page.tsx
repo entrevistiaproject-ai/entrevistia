@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft,
-  Briefcase,
   Calendar,
   Clock,
   Users,
@@ -20,6 +19,11 @@ import {
   AlertTriangle,
   ChevronDown,
   FileText,
+  ChevronRight,
+  Star,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { AdicionarCandidatoDialog } from "@/components/entrevistas/adicionar-candidato-dialog";
@@ -52,6 +56,10 @@ interface Candidato {
   status: string;
   iniciadaEm: Date | null;
   concluidaEm: Date | null;
+  // Dados da avaliação da IA
+  notaGeral: number | null;
+  recomendacao: string | null;
+  avaliadoEm: Date | null;
 }
 
 interface Pergunta {
@@ -72,16 +80,49 @@ const statusConfig: Record<string, { label: string; variant: any; color: string 
   archived: { label: "Arquivada", variant: "secondary", color: "bg-gray-500" },
 };
 
-const candidatoStatusConfig: Record<string, { label: string; variant: any }> = {
+const candidatoStatusConfig: Record<string, { label: string; variant: "outline" | "default" | "secondary" | "destructive" }> = {
   pendente: { label: "Pendente", variant: "outline" },
   em_andamento: { label: "Em andamento", variant: "default" },
   concluida: { label: "Concluída", variant: "secondary" },
   cancelada: { label: "Cancelada", variant: "destructive" },
 };
 
+const getRecomendacaoConfig = (recomendacao: string | null) => {
+  switch (recomendacao) {
+    case "recomendado":
+      return {
+        label: "Aprovado",
+        icon: CheckCircle2,
+        bgColor: "bg-green-100",
+        textColor: "text-green-700",
+      };
+    case "nao_recomendado":
+      return {
+        label: "Reprovado",
+        icon: XCircle,
+        bgColor: "bg-red-100",
+        textColor: "text-red-700",
+      };
+    case "recomendado_com_ressalvas":
+      return {
+        label: "Com ressalvas",
+        icon: AlertCircle,
+        bgColor: "bg-yellow-100",
+        textColor: "text-yellow-700",
+      };
+    default:
+      return null;
+  }
+};
+
+const getScoreColor = (score: number) => {
+  if (score >= 8.5) return "text-green-600";
+  if (score >= 7.0) return "text-yellow-600";
+  return "text-red-600";
+};
+
 export default function EntrevistaDetalhesPage() {
   const params = useParams();
-  const router = useRouter();
   const [entrevista, setEntrevista] = useState<Entrevista | null>(null);
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
@@ -345,25 +386,50 @@ export default function EntrevistaDetalhesPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {candidatos.map((candidato) => (
-                    <div
-                      key={candidato.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex-1">
-                        <p className="font-medium">{candidato.nome}</p>
-                        <p className="text-sm text-muted-foreground">{candidato.email}</p>
-                      </div>
-                      {candidato.telefone && (
-                        <p className="text-sm text-muted-foreground hidden sm:block">
-                          {candidato.telefone}
-                        </p>
-                      )}
-                      <Badge variant={candidatoStatusConfig[candidato.status]?.variant || "outline"}>
-                        {candidatoStatusConfig[candidato.status]?.label || "Pendente"}
-                      </Badge>
-                    </div>
-                  ))}
+                  {candidatos.map((candidato) => {
+                    const recomendacaoConfig = getRecomendacaoConfig(candidato.recomendacao);
+                    const RecomendacaoIcon = recomendacaoConfig?.icon;
+
+                    return (
+                      <Link
+                        key={candidato.id}
+                        href={`/candidatos/${candidato.id}/resultado`}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{candidato.nome}</p>
+                          <p className="text-sm text-muted-foreground truncate">{candidato.email}</p>
+                        </div>
+
+                        {/* Score e Recomendação */}
+                        <div className="flex items-center gap-3 ml-4">
+                          {candidato.notaGeral !== null && (
+                            <div className="flex items-center gap-1.5">
+                              <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                              <span className={`font-bold ${getScoreColor(candidato.notaGeral)}`}>
+                                {candidato.notaGeral.toFixed(1)}
+                              </span>
+                            </div>
+                          )}
+
+                          {recomendacaoConfig && RecomendacaoIcon && (
+                            <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full ${recomendacaoConfig.bgColor}`}>
+                              <RecomendacaoIcon className={`h-4 w-4 ${recomendacaoConfig.textColor}`} />
+                              <span className={`text-xs font-medium ${recomendacaoConfig.textColor}`}>
+                                {recomendacaoConfig.label}
+                              </span>
+                            </div>
+                          )}
+
+                          <Badge variant={candidatoStatusConfig[candidato.status]?.variant || "outline"}>
+                            {candidatoStatusConfig[candidato.status]?.label || "Pendente"}
+                          </Badge>
+
+                          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </CardContent>

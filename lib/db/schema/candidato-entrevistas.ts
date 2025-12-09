@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp, text, boolean, primaryKey } from "drizzle-orm/pg-core";
+import { pgTable, uuid, timestamp, text, boolean, real } from "drizzle-orm/pg-core";
 import { candidatos } from "./candidatos";
 import { entrevistas } from "./entrevistas";
 
@@ -26,6 +26,12 @@ export const candidatoEntrevistas = pgTable("candidato_entrevistas", {
 
   // Permite reenvio de convite mesmo se já participou
   podeRefazer: boolean("pode_refazer").default(false).notNull(),
+
+  // Avaliação da IA
+  notaGeral: real("nota_geral"), // Nota de 0 a 10
+  recomendacao: text("recomendacao"), // 'recomendado', 'recomendado_com_ressalvas', 'nao_recomendado'
+  resumoGeral: text("resumo_geral"), // Resumo executivo da avaliação
+  avaliadoEm: timestamp("avaliado_em", { mode: "date" }),
 
   // Auditoria
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
