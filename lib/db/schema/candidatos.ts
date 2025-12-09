@@ -17,6 +17,8 @@ export const candidatos = pgTable("candidatos", {
   nome: text("nome").notNull(),
   email: text("email").notNull(),
   telefone: text("telefone"),
+  documento: text("documento"), // CPF ou outro documento
+  sexo: text("sexo"), // masculino, feminino, outro, prefiro_nao_informar
 
   // Dados adicionais (opcionais)
   linkedin: text("linkedin"),

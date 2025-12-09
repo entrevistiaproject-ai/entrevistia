@@ -1,6 +1,5 @@
 import { pgTable, text, timestamp, uuid, jsonb, integer } from "drizzle-orm/pg-core";
 import { users } from "./users";
-import { candidatos } from "./candidatos";
 
 /**
  * Tabela de entrevistas
@@ -12,8 +11,6 @@ export const entrevistas = pgTable("entrevistas", {
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  candidatoId: uuid("candidato_id")
-    .references(() => candidatos.id, { onDelete: "set null" }),
 
   // Dados da entrevista
   titulo: text("titulo").notNull(),
