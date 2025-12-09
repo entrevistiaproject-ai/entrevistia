@@ -33,10 +33,41 @@ export async function POST(request: Request) {
       );
     }
 
+    // Log para debug
+    console.log("Arquivo recebido:", {
+      name: audioFile.name,
+      type: audioFile.type,
+      size: audioFile.size,
+    });
+
+    // Determinar extensão baseada no tipo MIME
+    let extension = "webm";
+    const mimeType = audioFile.type || "audio/webm";
+
+    if (mimeType.includes("wav")) {
+      extension = "wav";
+    } else if (mimeType.includes("mp3") || mimeType.includes("mpeg")) {
+      extension = "mp3";
+    } else if (mimeType.includes("mp4")) {
+      extension = "mp4";
+    } else if (mimeType.includes("ogg")) {
+      extension = "ogg";
+    } else if (mimeType.includes("flac")) {
+      extension = "flac";
+    } else if (mimeType.includes("webm")) {
+      extension = "webm";
+    }
+
     // Garantir que o arquivo tenha extensão correta para o Whisper
-    const fileName = audioFile.name || "audio.wav";
+    const fileName = `audio.${extension}`;
     const fileWithName = new File([audioFile], fileName, {
-      type: audioFile.type || "audio/wav",
+      type: mimeType,
+    });
+
+    console.log("Enviando para Whisper:", {
+      fileName,
+      mimeType,
+      size: fileWithName.size,
     });
 
     // Transcrever com OpenAI Whisper
