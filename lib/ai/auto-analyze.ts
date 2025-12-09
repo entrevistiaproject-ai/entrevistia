@@ -25,9 +25,6 @@ export async function onCandidatoFinalizouEntrevista(
           console.log(`[Auto-Analyze] ✅ Análise do candidato ${candidatoNome} concluída com sucesso. ID: ${result.avaliacaoId}`);
         } else {
           console.error(`[Auto-Analyze] ❌ Falha na análise do candidato ${candidatoNome}:`, result.error);
-          if (result.executionLog) {
-            console.error('[Auto-Analyze] Log de execução:', result.executionLog.slice(-5).join('\n'));
-          }
         }
       })
       .catch((error) => {
