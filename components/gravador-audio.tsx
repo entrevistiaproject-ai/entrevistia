@@ -7,85 +7,14 @@ import { cn } from "@/lib/utils";
 
 interface GravadorAudioProps {
   onTranscricaoCompleta: (transcricao: string, duracao: number) => void;
+  onTempoEsgotado?: () => void;
   tempoMaximo?: number; // segundos
   disabled?: boolean;
 }
 
-// Função para converter Blob de áudio para WAV
-async function convertToWav(audioBlob: Blob): Promise<Blob> {
-  const audioContext = new AudioContext();
-  const arrayBuffer = await audioBlob.arrayBuffer();
-  const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-  // Configurações do WAV
-  const numChannels = 1; // Mono
-  const sampleRate = 16000; // 16kHz é suficiente para fala
-  const bitsPerSample = 16;
-
-  // Resample para 16kHz
-  const offlineContext = new OfflineAudioContext(
-    numChannels,
-    Math.ceil(audioBuffer.duration * sampleRate),
-    sampleRate
-  );
-
-  const source = offlineContext.createBufferSource();
-  source.buffer = audioBuffer;
-  source.connect(offlineContext.destination);
-  source.start(0);
-
-  const renderedBuffer = await offlineContext.startRendering();
-  const samples = renderedBuffer.getChannelData(0);
-
-  // Converter para 16-bit PCM
-  const pcmData = new Int16Array(samples.length);
-  for (let i = 0; i < samples.length; i++) {
-    const s = Math.max(-1, Math.min(1, samples[i]));
-    pcmData[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
-  }
-
-  // Criar header WAV
-  const wavBuffer = new ArrayBuffer(44 + pcmData.length * 2);
-  const view = new DataView(wavBuffer);
-
-  // RIFF header
-  writeString(view, 0, "RIFF");
-  view.setUint32(4, 36 + pcmData.length * 2, true);
-  writeString(view, 8, "WAVE");
-
-  // fmt chunk
-  writeString(view, 12, "fmt ");
-  view.setUint32(16, 16, true); // chunk size
-  view.setUint16(20, 1, true); // PCM format
-  view.setUint16(22, numChannels, true);
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate * numChannels * (bitsPerSample / 8), true);
-  view.setUint16(32, numChannels * (bitsPerSample / 8), true);
-  view.setUint16(34, bitsPerSample, true);
-
-  // data chunk
-  writeString(view, 36, "data");
-  view.setUint32(40, pcmData.length * 2, true);
-
-  // Write PCM data
-  const pcmOffset = 44;
-  for (let i = 0; i < pcmData.length; i++) {
-    view.setInt16(pcmOffset + i * 2, pcmData[i], true);
-  }
-
-  await audioContext.close();
-
-  return new Blob([wavBuffer], { type: "audio/wav" });
-}
-
-function writeString(view: DataView, offset: number, str: string) {
-  for (let i = 0; i < str.length; i++) {
-    view.setUint8(offset + i, str.charCodeAt(i));
-  }
-}
-
 export function GravadorAudio({
   onTranscricaoCompleta,
+  onTempoEsgotado,
   tempoMaximo = 180, // 3 minutos padrão
   disabled = false,
 }: GravadorAudioProps) {
@@ -94,10 +23,11 @@ export function GravadorAudio({
   const [tempoDecorrido, setTempoDecorrido] = useState(0);
   const [erro, setErro] = useState<string | null>(null);
   const [nivelAudio, setNivelAudio] = useState(0);
+  const [timerIniciado, setTimerIniciado] = useState(false);
+  const timerGeralRef = useRef<NodeJS.Timeout | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const inicioGravacaoRef = useRef<number>(0);
   const streamRef = useRef<MediaStream | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -117,11 +47,33 @@ export function GravadorAudio({
     setNivelAudio(0);
   }, []);
 
+  // Iniciar timer geral assim que o componente montar
   useEffect(() => {
+    if (!timerIniciado && !disabled) {
+      setTimerIniciado(true);
+      timerGeralRef.current = setInterval(() => {
+        setTempoDecorrido((prev) => {
+          const novo = prev + 1;
+          if (novo >= tempoMaximo) {
+            // Tempo esgotado - parar gravação se estiver gravando
+            if (mediaRecorderRef.current && gravando) {
+              mediaRecorderRef.current.stop();
+              setGravando(false);
+            }
+            if (timerGeralRef.current) {
+              clearInterval(timerGeralRef.current);
+            }
+            onTempoEsgotado?.();
+          }
+          return novo;
+        });
+      }, 1000);
+    }
+
     return () => {
       // Limpar timer ao desmontar
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
+      if (timerGeralRef.current) {
+        clearInterval(timerGeralRef.current);
       }
       // Parar monitoramento de áudio
       pararMonitoramentoAudio();
@@ -134,7 +86,7 @@ export function GravadorAudio({
         mediaRecorderRef.current.stop();
       }
     };
-  }, [gravando, pararMonitoramentoAudio]);
+  }, [gravando, pararMonitoramentoAudio, timerIniciado, disabled, tempoMaximo, onTempoEsgotado]);
 
   const iniciarGravacao = async () => {
     try {
@@ -175,8 +127,12 @@ export function GravadorAudio({
       };
       atualizarNivel();
 
-      // Configurar MediaRecorder
-      const mediaRecorder = new MediaRecorder(stream);
+      // Configurar MediaRecorder com formato suportado
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : "audio/webm";
+
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
 
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
@@ -191,7 +147,7 @@ export function GravadorAudio({
 
       // Quando a gravação terminar
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(chunksRef.current);
+        const audioBlob = new Blob(chunksRef.current, { type: mimeType });
         const duracaoReal = Math.floor((Date.now() - inicioGravacaoRef.current) / 1000);
 
         // Parar monitoramento de áudio
@@ -208,21 +164,6 @@ export function GravadorAudio({
       // Iniciar gravação
       mediaRecorder.start();
       setGravando(true);
-      setTempoDecorrido(0);
-
-      // Iniciar timer
-      timerRef.current = setInterval(() => {
-        setTempoDecorrido((prev) => {
-          const novo = prev + 1;
-
-          // Parar automaticamente ao atingir o tempo máximo
-          if (novo >= tempoMaximo) {
-            pararGravacao();
-          }
-
-          return novo;
-        });
-      }, 1000);
     } catch (error) {
       console.error("Erro ao iniciar gravação:", error);
       setErro("Não foi possível acessar o microfone. Verifique as permissões.");
@@ -233,11 +174,6 @@ export function GravadorAudio({
     if (mediaRecorderRef.current && gravando) {
       mediaRecorderRef.current.stop();
       setGravando(false);
-
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
     }
   };
 
@@ -246,12 +182,9 @@ export function GravadorAudio({
       setTranscrevendo(true);
       setErro(null);
 
-      // Converter para WAV (formato mais compatível com OpenAI Whisper)
-      const wavBlob = await convertToWav(audioBlob);
-
-      // Preparar FormData
+      // Preparar FormData - enviar webm diretamente
       const formData = new FormData();
-      formData.append("audio", wavBlob, "gravacao.wav");
+      formData.append("audio", audioBlob, "gravacao.webm");
 
       // Enviar para API de transcrição
       const response = await fetch("/api/transcricao", {
@@ -277,7 +210,10 @@ export function GravadorAudio({
       );
     } finally {
       setTranscrevendo(false);
-      setTempoDecorrido(0);
+      // Parar timer geral ao finalizar
+      if (timerGeralRef.current) {
+        clearInterval(timerGeralRef.current);
+      }
     }
   };
 
@@ -325,7 +261,7 @@ export function GravadorAudio({
 
   return (
     <div className="flex flex-col items-center gap-4">
-      {/* Timer - sempre visível */}
+      {/* Timer - sempre visível, mostrando tempo restante */}
       <div className="flex flex-col items-center gap-2">
         <div className={cn(
           "text-4xl font-mono font-bold",
