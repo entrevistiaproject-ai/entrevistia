@@ -49,9 +49,17 @@ export function GravadorAudio({
 
   const pararGravacaoETranscrever = useCallback(async () => {
     if (recorderRef.current && gravando) {
+      setGravando(false);
+
       recorderRef.current.stopRecording(async () => {
         const blob = recorderRef.current?.getBlob();
         const duracaoReal = Math.floor((Date.now() - inicioGravacaoRef.current) / 1000);
+
+        console.log("Gravação finalizada (tempo esgotado):", {
+          blobSize: blob?.size,
+          blobType: blob?.type,
+          duracao: duracaoReal,
+        });
 
         // Parar monitoramento de áudio
         pararMonitoramentoAudio();
@@ -62,12 +70,11 @@ export function GravadorAudio({
           streamRef.current = null;
         }
 
-        // Transcrever áudio se tiver blob
-        if (blob && blob.size > 0) {
+        // Transcrever áudio se tiver blob com tamanho mínimo
+        if (blob && blob.size > 1000) {
           await transcreverAudio(blob, duracaoReal);
         }
       });
-      setGravando(false);
     }
   }, [gravando, pararMonitoramentoAudio]);
 
@@ -173,9 +180,17 @@ export function GravadorAudio({
 
   const pararGravacao = () => {
     if (recorderRef.current && gravando) {
+      setGravando(false); // Mover para antes para evitar cliques duplos
+
       recorderRef.current.stopRecording(async () => {
         const blob = recorderRef.current?.getBlob();
         const duracaoReal = Math.floor((Date.now() - inicioGravacaoRef.current) / 1000);
+
+        console.log("Gravação finalizada:", {
+          blobSize: blob?.size,
+          blobType: blob?.type,
+          duracao: duracaoReal,
+        });
 
         // Parar monitoramento de áudio
         pararMonitoramentoAudio();
@@ -186,12 +201,13 @@ export function GravadorAudio({
           streamRef.current = null;
         }
 
-        // Transcrever áudio se tiver blob
-        if (blob && blob.size > 0) {
+        // Transcrever áudio se tiver blob com tamanho mínimo (pelo menos 1KB)
+        if (blob && blob.size > 1000) {
           await transcreverAudio(blob, duracaoReal);
+        } else {
+          setErro("Gravação muito curta. Por favor, grave por pelo menos 1 segundo.");
         }
       });
-      setGravando(false);
     }
   };
 
@@ -199,6 +215,12 @@ export function GravadorAudio({
     try {
       setTranscrevendo(true);
       setErro(null);
+
+      console.log("Enviando para transcrição:", {
+        blobSize: audioBlob.size,
+        blobType: audioBlob.type,
+        duracao,
+      });
 
       // Preparar FormData - enviar WAV
       const formData = new FormData();
