@@ -131,15 +131,22 @@ Maria Santos,maria@example.com`;
             }
 
             let mensagem = `✅ Importação concluída!\n\n`;
-            mensagem += `Total processado: ${resultado.total}\n`;
-            mensagem += `Inseridos com sucesso: ${resultado.inseridos}\n`;
+            mensagem += `📊 Total processado: ${resultado.total}\n\n`;
 
-            if (resultado.duplicados > 0) {
-              mensagem += `Duplicados (já existiam): ${resultado.duplicados}\n`;
+            mensagem += `✨ Candidatos novos: ${resultado.candidatosNovos}\n`;
+
+            if (resultado.candidatosExistentes > 0) {
+              mensagem += `👤 Candidatos existentes: ${resultado.candidatosExistentes}\n`;
+            }
+
+            mensagem += `\n📧 Vinculados à entrevista: ${resultado.vinculadosEntrevista}\n`;
+
+            if (resultado.jaVinculadosEntrevista > 0) {
+              mensagem += `⚠️ Já vinculados previamente: ${resultado.jaVinculadosEntrevista}\n`;
             }
 
             if (resultado.invalidos > 0) {
-              mensagem += `Inválidos (dados incompletos): ${resultado.invalidos}\n`;
+              mensagem += `\n❌ Inválidos (dados incompletos): ${resultado.invalidos}\n`;
             }
 
             alert(mensagem);

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getUserId } from "@/lib/auth/get-user";
 import { getDB } from "@/lib/db";
-import { candidatos } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
+import { candidatos, candidatoEntrevistas } from "@/lib/db/schema";
+import { eq, and, inArray } from "drizzle-orm";
 
 // Validador de email simples
 function isValidEmail(email: string): boolean {
@@ -51,10 +51,13 @@ export async function POST(request: Request) {
       nome: c.nome.trim(),
     }));
 
-    // Buscar candidatos existentes para evitar duplicatas
+    // Buscar candidatos existentes (por email e userId)
     const emailsImportar = candidatosNormalizados.map((c) => c.email);
     const candidatosExistentes = await db
-      .select({ email: candidatos.email })
+      .select({
+        id: candidatos.id,
+        email: candidatos.email
+      })
       .from(candidatos)
       .where(
         and(
@@ -62,17 +65,25 @@ export async function POST(request: Request) {
         )
       );
 
-    const emailsExistentes = new Set(candidatosExistentes.map((c) => c.email));
+    const emailParaCandidatoId = new Map(
+      candidatosExistentes.map((c) => [c.email, c.id])
+    );
 
-    // Filtrar apenas candidatos novos
+    // Separar candidatos novos dos existentes
     const candidatosNovos = candidatosNormalizados.filter(
-      (c) => !emailsExistentes.has(c.email)
+      (c) => !emailParaCandidatoId.has(c.email)
+    );
+
+    const candidatosExistentesLista = candidatosNormalizados.filter(
+      (c) => emailParaCandidatoId.has(c.email)
     );
 
     let candidatosInseridos: any[] = [];
+    let vinculosEntrevistaInseridos = 0;
+    let jaVinculados = 0;
 
+    // 1. Inserir candidatos novos
     if (candidatosNovos.length > 0) {
-      // Inserir apenas candidatos novos
       candidatosInseridos = await db
         .insert(candidatos)
         .values(
@@ -89,19 +100,73 @@ export async function POST(request: Request) {
           }))
         )
         .returning();
+
+      // Adicionar novos candidatos ao mapa
+      candidatosInseridos.forEach((c) => {
+        emailParaCandidatoId.set(c.email, c.id);
+      });
     }
 
-    const duplicados = candidatosNormalizados.length - candidatosNovos.length;
+    // 2. Se foi fornecido um entrevistaId, vincular candidatos à entrevista
+    if (entrevistaId) {
+      // Obter todos os candidatos que serão vinculados (novos + existentes)
+      const todosCandidatosIds = Array.from(emailParaCandidatoId.values());
+
+      // Buscar vínculos existentes para esta entrevista
+      const vinculosExistentes = await db
+        .select({
+          candidatoId: candidatoEntrevistas.candidatoId,
+        })
+        .from(candidatoEntrevistas)
+        .where(
+          and(
+            eq(candidatoEntrevistas.entrevistaId, entrevistaId),
+            inArray(candidatoEntrevistas.candidatoId, todosCandidatosIds)
+          )
+        );
+
+      const candidatosJaVinculados = new Set(
+        vinculosExistentes.map((v) => v.candidatoId)
+      );
+
+      jaVinculados = candidatosJaVinculados.size;
+
+      // Filtrar apenas candidatos que ainda não foram vinculados a esta entrevista
+      const candidatosParaVincular = candidatosNormalizados
+        .map((c) => emailParaCandidatoId.get(c.email))
+        .filter((id): id is string =>
+          id !== undefined && !candidatosJaVinculados.has(id)
+        );
+
+      // Criar vínculos com a entrevista
+      if (candidatosParaVincular.length > 0) {
+        const vinculosCriados = await db
+          .insert(candidatoEntrevistas)
+          .values(
+            candidatosParaVincular.map((candidatoId) => ({
+              candidatoId,
+              entrevistaId,
+              status: "pending", // Aguardando convite/início
+              podeRefazer: false,
+            }))
+          )
+          .returning();
+
+        vinculosEntrevistaInseridos = vinculosCriados.length;
+      }
+    }
+
     const invalidos = candidatosData.length - candidatosValidos.length;
 
     return NextResponse.json(
       {
         success: true,
         total: candidatosData.length,
-        inseridos: candidatosInseridos.length,
-        duplicados,
+        candidatosNovos: candidatosInseridos.length,
+        candidatosExistentes: candidatosExistentesLista.length,
+        vinculadosEntrevista: vinculosEntrevistaInseridos,
+        jaVinculadosEntrevista: jaVinculados,
         invalidos,
-        rejeitados: duplicados + invalidos,
         candidatos: candidatosInseridos,
       },
       { status: 201 }
