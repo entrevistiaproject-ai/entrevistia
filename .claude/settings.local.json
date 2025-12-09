@@ -32,7 +32,10 @@
       "Bash(git stash:*)",
       "Bash(vercel whoami:*)",
       "Bash(vercel env:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(node scripts/debug-entrevistas.js:*)",
+      "Bash(node scripts/check-entrevistas.js:*)",
+      "Bash(node scripts/check-user.js:*)"
     ],
     "deny": [],
     "ask": []

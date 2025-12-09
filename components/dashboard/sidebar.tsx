@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
 import {
   Briefcase,
   PlusCircle,
@@ -54,8 +55,44 @@ const secondaryMenuItems = [
   },
 ];
 
+interface UserInfo {
+  nome: string | null;
+  email: string;
+}
+
 export function Sidebar() {
   const pathname = usePathname();
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+
+  useEffect(() => {
+    // Buscar informações do usuário
+    fetch("/api/user")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.user) {
+          setUserInfo({
+            nome: data.user.nome,
+            email: data.user.email,
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Erro ao buscar usuário:", error);
+      });
+  }, []);
+
+  // Função para pegar as iniciais do nome
+  const getInitials = (nome: string | null, email: string) => {
+    if (nome) {
+      return nome
+        .split(" ")
+        .slice(0, 2)
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase();
+    }
+    return email[0].toUpperCase();
+  };
 
   return (
     <aside className="fixed left-0 top-0 z-40 hidden h-screen w-64 border-r border-border bg-card md:block">
@@ -124,15 +161,29 @@ export function Sidebar() {
 
         {/* User Info */}
         <div className="border-t border-border p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <User className="h-5 w-5" />
+          {userInfo ? (
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+                {getInitials(userInfo.nome, userInfo.email)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">
+                  {userInfo.nome || "Usuário"}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {userInfo.email}
+                </p>
+              </div>
             </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium">Avaliador Principal</p>
-              <p className="text-xs text-muted-foreground">avaliador@email.com</p>
+          ) : (
+            <div className="flex items-center gap-3 animate-pulse">
+              <div className="h-10 w-10 rounded-full bg-muted" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-24 bg-muted rounded" />
+                <div className="h-3 w-32 bg-muted rounded" />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </aside>

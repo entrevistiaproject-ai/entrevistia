@@ -1,8 +1,8 @@
-import { config } from "dotenv";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-import { entrevistas } from "../lib/db/schema/index.js";
-import { isNull } from "drizzle-orm";
+const { config } = require("dotenv");
+const { drizzle } = require("drizzle-orm/postgres-js");
+const postgres = require("postgres");
+const { entrevistas } = require("../lib/db/schema/index.ts");
+const { isNull } = require("drizzle-orm");
 
 // Carregar variáveis de ambiente
 config({ path: ".env.local" });
