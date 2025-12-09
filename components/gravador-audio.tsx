@@ -4,7 +4,6 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, Square, Loader2, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import RecordRTC, { StereoAudioRecorder } from "recordrtc";
 
 interface GravadorAudioProps {
   onTranscricaoCompleta: (transcricao: string, duracao: number) => void;
@@ -21,108 +20,86 @@ export function GravadorAudio({
 }: GravadorAudioProps) {
   const [gravando, setGravando] = useState(false);
   const [transcrevendo, setTranscrevendo] = useState(false);
-  const [tempoDecorrido, setTempoDecorrido] = useState(0);
+  const [tempoRestante, setTempoRestante] = useState(tempoMaximo);
   const [erro, setErro] = useState<string | null>(null);
   const [nivelAudio, setNivelAudio] = useState(0);
-  const timerGeralRef = useRef<NodeJS.Timeout | null>(null);
 
-  const recorderRef = useRef<RecordRTC | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
   const inicioGravacaoRef = useRef<number>(0);
   const streamRef = useRef<MediaStream | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const animationFrameRef = useRef<number | null>(null);
-  const gravandoRef = useRef(false); // Ref para usar dentro do interval
+  const componentMontadoRef = useRef(true);
+
+  // Timer global que começa assim que o componente monta
+  useEffect(() => {
+    if (disabled) return;
+
+    componentMontadoRef.current = true;
+
+    // Iniciar timer imediatamente
+    timerRef.current = setInterval(() => {
+      if (!componentMontadoRef.current) return;
+
+      setTempoRestante((prev) => {
+        if (prev <= 1) {
+          // Tempo esgotado - parar gravação se estiver ativa
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+          }
+          // Parar gravação automaticamente
+          if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+            mediaRecorderRef.current.stop();
+          }
+          onTempoEsgotado?.();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      componentMontadoRef.current = false;
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      pararMonitoramentoAudio();
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+        mediaRecorderRef.current.stop();
+      }
+    };
+  }, [disabled, onTempoEsgotado, tempoMaximo]);
 
   const pararMonitoramentoAudio = useCallback(() => {
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
+    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+      audioContextRef.current.close().catch(() => {});
       audioContextRef.current = null;
     }
     analyserRef.current = null;
     setNivelAudio(0);
   }, []);
 
-  const pararGravacaoETranscrever = useCallback(async () => {
-    if (recorderRef.current && gravandoRef.current) {
-      setGravando(false);
-      gravandoRef.current = false;
-
-      recorderRef.current.stopRecording(async () => {
-        const blob = recorderRef.current?.getBlob();
-        const duracaoReal = Math.floor((Date.now() - inicioGravacaoRef.current) / 1000);
-
-        console.log("Gravação finalizada (tempo esgotado):", {
-          blobSize: blob?.size,
-          blobType: blob?.type,
-          duracao: duracaoReal,
-        });
-
-        // Parar monitoramento de áudio
-        pararMonitoramentoAudio();
-
-        // Parar todas as tracks do stream
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach((track) => track.stop());
-          streamRef.current = null;
-        }
-
-        // Transcrever áudio se tiver blob com tamanho mínimo
-        if (blob && blob.size > 1000) {
-          await transcreverAudio(blob, duracaoReal);
-        }
-      });
-    }
-  }, [pararMonitoramentoAudio]);
-
-  // Iniciar timer geral assim que o componente montar
-  useEffect(() => {
-    if (disabled) return;
-
-    // Iniciar timer imediatamente
-    timerGeralRef.current = setInterval(() => {
-      setTempoDecorrido((prev) => {
-        const novo = prev + 1;
-        if (novo >= tempoMaximo) {
-          // Tempo esgotado
-          if (timerGeralRef.current) {
-            clearInterval(timerGeralRef.current);
-          }
-          // Parar gravação se estiver gravando e enviar
-          if (recorderRef.current && gravandoRef.current) {
-            pararGravacaoETranscrever();
-          }
-          onTempoEsgotado?.();
-        }
-        return novo;
-      });
-    }, 1000);
-
-    return () => {
-      // Limpar timer ao desmontar
-      if (timerGeralRef.current) {
-        clearInterval(timerGeralRef.current);
-      }
-      // Parar monitoramento de áudio
-      pararMonitoramentoAudio();
-      // Parar stream
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
-      // Parar gravação se estiver ativa
-      if (recorderRef.current && gravandoRef.current) {
-        recorderRef.current.stopRecording(() => {});
-      }
-    };
-  }, [disabled, tempoMaximo, onTempoEsgotado, pararMonitoramentoAudio, pararGravacaoETranscrever]);
-
   const iniciarGravacao = async () => {
+    if (tempoRestante <= 0) {
+      setErro("Tempo esgotado. Não é possível iniciar gravação.");
+      return;
+    }
+
     try {
       setErro(null);
+      chunksRef.current = [];
 
       // Solicitar permissão para usar o microfone
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -130,6 +107,7 @@ export function GravadorAudio({
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true,
+          sampleRate: 44100,
         }
       });
 
@@ -150,7 +128,7 @@ export function GravadorAudio({
       // Monitorar níveis de áudio
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
       const atualizarNivel = () => {
-        if (!analyserRef.current) return;
+        if (!analyserRef.current || !componentMontadoRef.current) return;
         analyserRef.current.getByteFrequencyData(dataArray);
         const soma = dataArray.reduce((acc, val) => acc + val, 0);
         const media = soma / dataArray.length;
@@ -159,42 +137,26 @@ export function GravadorAudio({
       };
       atualizarNivel();
 
-      // Configurar RecordRTC para gravar em WAV (formato mais compatível com Whisper)
-      const recorder = new RecordRTC(stream, {
-        type: "audio",
-        mimeType: "audio/wav",
-        recorderType: StereoAudioRecorder,
-        numberOfAudioChannels: 1, // Mono para menor tamanho
-        desiredSampRate: 16000, // 16kHz é suficiente para voz
+      // Usar MediaRecorder nativo com formato webm (mais confiável)
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : 'audio/mp4';
+
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType,
+        audioBitsPerSecond: 128000
       });
 
-      recorderRef.current = recorder;
-      inicioGravacaoRef.current = Date.now();
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+        }
+      };
 
-      // Iniciar gravação
-      recorder.startRecording();
-      setGravando(true);
-      gravandoRef.current = true;
-    } catch (error) {
-      console.error("Erro ao iniciar gravação:", error);
-      setErro("Não foi possível acessar o microfone. Verifique as permissões.");
-    }
-  };
-
-  const pararGravacao = () => {
-    if (recorderRef.current && gravando) {
-      setGravando(false);
-      gravandoRef.current = false;
-
-      recorderRef.current.stopRecording(async () => {
-        const blob = recorderRef.current?.getBlob();
+      mediaRecorder.onstop = async () => {
         const duracaoReal = Math.floor((Date.now() - inicioGravacaoRef.current) / 1000);
-
-        console.log("Gravação finalizada:", {
-          blobSize: blob?.size,
-          blobType: blob?.type,
-          duracao: duracaoReal,
-        });
 
         // Parar monitoramento de áudio
         pararMonitoramentoAudio();
@@ -205,30 +167,76 @@ export function GravadorAudio({
           streamRef.current = null;
         }
 
-        // Transcrever áudio se tiver blob com tamanho mínimo (pelo menos 1KB)
-        if (blob && blob.size > 1000) {
-          await transcreverAudio(blob, duracaoReal);
+        // Criar blob com todos os chunks
+        if (chunksRef.current.length > 0) {
+          const blob = new Blob(chunksRef.current, { type: mimeType });
+
+          console.log("Gravação finalizada:", {
+            blobSize: blob.size,
+            blobType: blob.type,
+            duracao: duracaoReal,
+            chunks: chunksRef.current.length,
+          });
+
+          // Verificar tamanho mínimo (pelo menos 1KB para garantir áudio válido)
+          if (blob.size > 1000 && duracaoReal >= 1) {
+            await transcreverAudio(blob, duracaoReal);
+          } else {
+            setErro("Gravação muito curta. Por favor, grave por pelo menos 1 segundo.");
+          }
         } else {
-          setErro("Gravação muito curta. Por favor, grave por pelo menos 1 segundo.");
+          setErro("Nenhum áudio foi capturado. Tente novamente.");
         }
-      });
+
+        if (componentMontadoRef.current) {
+          setGravando(false);
+        }
+      };
+
+      mediaRecorderRef.current = mediaRecorder;
+      inicioGravacaoRef.current = Date.now();
+
+      // Iniciar gravação com timeslice para capturar dados periodicamente
+      mediaRecorder.start(1000); // Captura dados a cada 1 segundo
+      setGravando(true);
+
+    } catch (error) {
+      console.error("Erro ao iniciar gravação:", error);
+      setErro("Não foi possível acessar o microfone. Verifique as permissões.");
+    }
+  };
+
+  const pararGravacao = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.stop();
     }
   };
 
   const transcreverAudio = async (audioBlob: Blob, duracao: number) => {
+    if (!componentMontadoRef.current) return;
+
     try {
       setTranscrevendo(true);
       setErro(null);
+
+      // Determinar extensão baseada no tipo do blob
+      let filename = "gravacao.webm";
+      if (audioBlob.type.includes("mp4")) {
+        filename = "gravacao.mp4";
+      } else if (audioBlob.type.includes("ogg")) {
+        filename = "gravacao.ogg";
+      }
 
       console.log("Enviando para transcrição:", {
         blobSize: audioBlob.size,
         blobType: audioBlob.type,
         duracao,
+        filename,
       });
 
-      // Preparar FormData - enviar WAV
+      // Preparar FormData
       const formData = new FormData();
-      formData.append("audio", audioBlob, "gravacao.wav");
+      formData.append("audio", audioBlob, filename);
 
       // Enviar para API de transcrição
       const response = await fetch("/api/transcricao", {
@@ -247,14 +255,17 @@ export function GravadorAudio({
       onTranscricaoCompleta(transcricao, duracao);
     } catch (error) {
       console.error("Erro ao transcrever:", error);
-      setErro(
-        error instanceof Error
-          ? error.message
-          : "Erro ao processar transcrição. Tente novamente."
-      );
+      if (componentMontadoRef.current) {
+        setErro(
+          error instanceof Error
+            ? error.message
+            : "Erro ao processar transcrição. Tente novamente."
+        );
+      }
     } finally {
-      setTranscrevendo(false);
-      // Timer continua correndo - não para após transcrição
+      if (componentMontadoRef.current) {
+        setTranscrevendo(false);
+      }
     }
   };
 
@@ -264,8 +275,7 @@ export function GravadorAudio({
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const tempoRestante = tempoMaximo - tempoDecorrido;
-  const porcentagemTempo = (tempoDecorrido / tempoMaximo) * 100;
+  const porcentagemTempo = ((tempoMaximo - tempoRestante) / tempoMaximo) * 100;
 
   // Gerar barras do indicador de nível (estilo da página de teste)
   const getNivelBarras = () => {
@@ -368,12 +378,12 @@ export function GravadorAudio({
         {!gravando && !transcrevendo && (
           <Button
             onClick={iniciarGravacao}
-            disabled={disabled}
+            disabled={disabled || tempoRestante <= 0}
             size="lg"
             className="gap-2 px-8 py-6 text-lg"
           >
             <Mic className="h-6 w-6" />
-            Iniciar Gravação
+            {tempoRestante <= 0 ? "Tempo Esgotado" : "Iniciar Gravação"}
           </Button>
         )}
 
