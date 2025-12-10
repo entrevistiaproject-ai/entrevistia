@@ -508,7 +508,7 @@ export default function ResultadoCandidatoPage() {
       {participacao?.status === 'concluida' && candidato.entrevistaId && (
         <Card className="border-2 border-slate-200">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="space-y-4">
               <div>
                 <h3 className="text-lg font-semibold">Sua Decisão</h3>
                 <p className="text-sm text-muted-foreground">
@@ -524,6 +524,7 @@ export default function ResultadoCandidatoPage() {
                 observacaoAtual={participacao.decisaoRecrutadorObservacao}
                 emailEncerramentoEnviado={!!participacao.emailEncerramentoEnviadoEm}
                 onDecisaoAtualizada={fetchData}
+                showActionButtons
               />
             </div>
             {participacao.decisaoRecrutadorObservacao && (

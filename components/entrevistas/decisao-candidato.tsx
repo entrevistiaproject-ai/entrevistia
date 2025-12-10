@@ -40,6 +40,8 @@ interface DecisaoCandidatoProps {
   emailEncerramentoEnviado?: boolean;
   onDecisaoAtualizada?: () => void;
   compact?: boolean;
+  /** Se true, mostra botões de ação direta ao invés do trigger dropdown */
+  showActionButtons?: boolean;
 }
 
 const decisaoConfig = {
@@ -102,14 +104,15 @@ export function DecisaoCandidato({
   candidatoId,
   entrevistaId,
   candidatoNome,
-  candidatoEmail,
-  cargo,
+  candidatoEmail: _candidatoEmail,
+  cargo: _cargo,
   decisaoAtual,
   recomendacaoIA,
   observacaoAtual,
   emailEncerramentoEnviado = false,
   onDecisaoAtualizada,
   compact = false,
+  showActionButtons = false,
 }: DecisaoCandidatoProps) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -283,25 +286,92 @@ export function DecisaoCandidato({
     }
   };
 
+  // Handler para abrir modal com decisão pré-selecionada
+  const handleOpenWithDecision = (decisao: "aprovado" | "reprovado") => {
+    setDecisaoSelecionada(decisao);
+    setOpen(true);
+  };
+
+  // Renderiza botões de ação direta
+  const renderActionButtons = () => (
+    <div className="flex flex-col gap-3">
+      {/* Se já tem decisão, mostrar status atual com opção de alterar */}
+      {decisaoAtual ? (
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "flex items-center gap-2 px-3 py-2 rounded-lg border",
+            decisaoAtual === "aprovado"
+              ? "bg-emerald-50 border-emerald-200"
+              : "bg-red-50 border-red-200"
+          )}>
+            {decisaoAtual === "aprovado" ? (
+              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+            ) : (
+              <XCircle className="h-5 w-5 text-red-600" />
+            )}
+            <span className={cn(
+              "font-medium",
+              decisaoAtual === "aprovado" ? "text-emerald-700" : "text-red-700"
+            )}>
+              {decisaoAtual === "aprovado" ? "Aprovado" : "Dispensado"}
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setOpen(true)}
+            className="text-slate-500 hover:text-slate-700"
+          >
+            Alterar
+          </Button>
+        </div>
+      ) : (
+        /* Botões de ação rápida */
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={() => handleOpenWithDecision("aprovado")}
+            className="flex-1 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300 text-emerald-700"
+          >
+            <CheckCircle2 className="h-4 w-4 mr-2" />
+            Aprovar
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => handleOpenWithDecision("reprovado")}
+            className="flex-1 border-red-200 hover:bg-red-50 hover:border-red-300 text-red-700"
+          >
+            <XCircle className="h-4 w-4 mr-2" />
+            Dispensar
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button
-          className={cn(
-            "flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all",
-            config.bgColor,
-            config.borderColor,
-            "focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500"
-          )}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Icon className={cn("h-3.5 w-3.5", config.iconColor)} />
-          <span className={cn("text-xs font-medium", config.textColor)}>
-            {compact ? config.label : config.labelLongo}
-          </span>
-          <ChevronDown className={cn("h-3 w-3", config.textColor)} />
-        </button>
-      </DialogTrigger>
+      {showActionButtons ? (
+        renderActionButtons()
+      ) : (
+        <DialogTrigger asChild>
+          <button
+            className={cn(
+              "flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all",
+              config.bgColor,
+              config.borderColor,
+              "focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500"
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Icon className={cn("h-3.5 w-3.5", config.iconColor)} />
+            <span className={cn("text-xs font-medium", config.textColor)}>
+              {compact ? config.label : config.labelLongo}
+            </span>
+            <ChevronDown className={cn("h-3 w-3", config.textColor)} />
+          </button>
+        </DialogTrigger>
+      )}
 
       <DialogContent className="sm:max-w-xl lg:max-w-2xl" onClick={(e) => e.stopPropagation()}>
         <DialogHeader className="pb-4">
