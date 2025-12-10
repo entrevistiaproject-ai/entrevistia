@@ -303,7 +303,7 @@ export function DecisaoCandidato({
         </button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-lg" onClick={(e) => e.stopPropagation()}>
+      <DialogContent className="sm:max-w-xl lg:max-w-2xl" onClick={(e) => e.stopPropagation()}>
         <DialogHeader className="pb-4">
           <DialogTitle>Avaliar candidato</DialogTitle>
           <DialogDescription className="mt-1.5">
@@ -398,30 +398,31 @@ export function DecisaoCandidato({
 
           {/* Opção de enviar email de encerramento (só aparece quando reprova) */}
           {decisaoSelecionada === "reprovado" && !emailJaEnviado && (
-            <div className="space-y-4 p-5 bg-slate-50 rounded-xl border">
+            <div className="space-y-4 p-5 lg:p-6 bg-slate-50 rounded-xl border">
               <div className="flex items-start gap-3">
                 <Checkbox
                   id="enviar-email"
                   checked={enviarEmail}
                   onCheckedChange={(checked) => setEnviarEmail(checked as boolean)}
+                  className="mt-0.5"
                 />
-                <div className="space-y-1.5">
-                  <Label htmlFor="enviar-email" className="cursor-pointer flex items-center gap-2">
+                <div className="space-y-1.5 flex-1">
+                  <Label htmlFor="enviar-email" className="cursor-pointer flex items-center gap-2 text-base">
                     <Mail className="h-4 w-4" />
                     Avisar o candidato por email
                   </Label>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     Envia uma mensagem cordial informando que o processo foi encerrado
                   </p>
                 </div>
               </div>
 
               {enviarEmail && (
-                <div className="space-y-3 ml-6">
+                <div className="space-y-3 pt-2 border-t">
                   <button
                     type="button"
                     onClick={() => setMostrarEdicaoEmail(!mostrarEdicaoEmail)}
-                    className="text-xs text-blue-600 hover:text-blue-800 underline"
+                    className="text-sm text-blue-600 hover:text-blue-800 underline"
                   >
                     {mostrarEdicaoEmail ? "Ocultar edição" : "Personalizar mensagem"}
                   </button>
@@ -430,8 +431,8 @@ export function DecisaoCandidato({
                     <Textarea
                       value={textoEmail}
                       onChange={(e) => setTextoEmail(e.target.value)}
-                      rows={6}
-                      className="text-sm"
+                      rows={8}
+                      className="text-sm min-h-[180px]"
                       placeholder="Digite a mensagem personalizada..."
                     />
                   )}
@@ -452,47 +453,48 @@ export function DecisaoCandidato({
 
           {/* Opção de enviar email se já reprovou mas não enviou */}
           {decisaoAtual === "reprovado" && !emailJaEnviado && (
-            <div className="space-y-4 p-5 bg-amber-50 rounded-xl border border-amber-200">
+            <div className="space-y-4 p-5 lg:p-6 bg-amber-50 rounded-xl border border-amber-200">
               <div className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-amber-600 shrink-0" />
-                <span className="text-sm font-medium text-amber-800">
+                <span className="text-base font-medium text-amber-800">
                   Email de encerramento não enviado
                 </span>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setMostrarEdicaoEmail(!mostrarEdicaoEmail)}
-                className="text-xs text-amber-700 hover:text-amber-900 underline"
-              >
-                {mostrarEdicaoEmail ? "Ocultar edição" : "Personalizar mensagem antes de enviar"}
-              </button>
+              <div className="space-y-3 pt-2 border-t border-amber-200">
+                <button
+                  type="button"
+                  onClick={() => setMostrarEdicaoEmail(!mostrarEdicaoEmail)}
+                  className="text-sm text-amber-700 hover:text-amber-900 underline"
+                >
+                  {mostrarEdicaoEmail ? "Ocultar edição" : "Personalizar mensagem antes de enviar"}
+                </button>
 
-              {mostrarEdicaoEmail && (
-                <Textarea
-                  value={textoEmail}
-                  onChange={(e) => setTextoEmail(e.target.value)}
-                  rows={6}
-                  className="text-sm"
-                  placeholder="Digite a mensagem personalizada..."
-                />
-              )}
-
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleEnviarEmailSeparado}
-                disabled={sendingEmail}
-                className="w-full"
-              >
-                {sendingEmail ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Send className="h-4 w-4 mr-2" />
+                {mostrarEdicaoEmail && (
+                  <Textarea
+                    value={textoEmail}
+                    onChange={(e) => setTextoEmail(e.target.value)}
+                    rows={8}
+                    className="text-sm min-h-[180px] bg-white"
+                    placeholder="Digite a mensagem personalizada..."
+                  />
                 )}
-                Enviar email de encerramento agora
-              </Button>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleEnviarEmailSeparado}
+                  disabled={sendingEmail}
+                  className="w-full bg-white hover:bg-amber-100"
+                >
+                  {sendingEmail ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Send className="h-4 w-4 mr-2" />
+                  )}
+                  Enviar email de encerramento agora
+                </Button>
+              </div>
             </div>
           )}
         </div>
