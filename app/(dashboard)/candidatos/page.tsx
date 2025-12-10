@@ -232,13 +232,13 @@ export default function CandidatosPage() {
                         )}
                         {melhorNota !== null && (
                           <div className="text-right">
-                            <div className="text-xs text-muted-foreground">Melhor nota</div>
+                            <div className="text-xs text-muted-foreground">Melhor score</div>
                             <div className="flex items-center gap-2">
                               <span className="text-xl sm:text-2xl font-bold text-primary">
-                                {melhorNota.toFixed(1)}
+                                {Math.round(melhorNota)}
                               </span>
                             </div>
-                            <Progress value={melhorNota * 10} className="h-1.5 w-16 mt-1" />
+                            <Progress value={melhorNota} className="h-1.5 w-16 mt-1" />
                           </div>
                         )}
                         <ChevronRight className="h-5 w-5 text-muted-foreground" />

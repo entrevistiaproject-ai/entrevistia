@@ -124,8 +124,8 @@ export default function CandidatoPage() {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 8.5) return "text-green-600";
-    if (score >= 7.0) return "text-yellow-600";
+    if (score >= 85) return "text-green-600";
+    if (score >= 70) return "text-yellow-600";
     return "text-red-600";
   };
 
@@ -290,11 +290,11 @@ export default function CandidatoPage() {
                     <div className="flex items-center gap-4">
                       {entrevista.notaGeral !== null && (
                         <div className="text-right">
-                          <div className="text-xs text-muted-foreground">Nota</div>
+                          <div className="text-xs text-muted-foreground">Score</div>
                           <div className={`text-2xl font-bold ${getScoreColor(entrevista.notaGeral)}`}>
-                            {entrevista.notaGeral.toFixed(1)}
+                            {Math.round(entrevista.notaGeral)}
                           </div>
-                          <Progress value={entrevista.notaGeral * 10} className="h-1.5 w-16 mt-1" />
+                          <Progress value={entrevista.notaGeral} className="h-1.5 w-16 mt-1" />
                         </div>
                       )}
                       <ChevronRight className="h-5 w-5 text-muted-foreground" />

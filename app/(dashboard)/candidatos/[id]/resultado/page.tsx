@@ -92,17 +92,17 @@ const getScoreLabel = (score: number) => {
   return "Insuficiente";
 };
 
-// Funções para nota geral de 0-10
-const getScoreColor10 = (score: number) => {
-  if (score >= 8.5) return "text-green-600";
-  if (score >= 7.0) return "text-yellow-600";
+// Funções para nota geral de 0-100
+const getScoreColor100 = (score: number) => {
+  if (score >= 85) return "text-green-600";
+  if (score >= 70) return "text-yellow-600";
   return "text-red-600";
 };
 
-const getScoreLabel10 = (score: number) => {
-  if (score >= 8.5) return "Excelente";
-  if (score >= 7.0) return "Bom";
-  if (score >= 5.0) return "Regular";
+const getScoreLabel100 = (score: number) => {
+  if (score >= 85) return "Excelente";
+  if (score >= 70) return "Bom";
+  if (score >= 50) return "Regular";
   return "Insuficiente";
 };
 
@@ -412,17 +412,17 @@ export default function ResultadoCandidatoPage() {
                         strokeWidth="10"
                         fill="none"
                         strokeDasharray={`${2 * Math.PI * 72}`}
-                        strokeDashoffset={`${2 * Math.PI * 72 * (1 - (participacao?.notaGeral || 0) / 10)}`}
-                        className={getScoreColor10(participacao?.notaGeral || 0)}
+                        strokeDashoffset={`${2 * Math.PI * 72 * (1 - (participacao?.notaGeral || 0) / 100)}`}
+                        className={getScoreColor100(participacao?.notaGeral || 0)}
                         strokeLinecap="round"
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className={`text-4xl font-bold ${getScoreColor10(participacao?.notaGeral || 0)}`}>
-                        {(participacao?.notaGeral || 0).toFixed(1)}
+                      <span className={`text-4xl font-bold ${getScoreColor100(participacao?.notaGeral || 0)}`}>
+                        {Math.round(participacao?.notaGeral || 0)}
                       </span>
                       <span className="text-xs text-muted-foreground mt-1">
-                        {getScoreLabel10(participacao?.notaGeral || 0)}
+                        {getScoreLabel100(participacao?.notaGeral || 0)}
                       </span>
                     </div>
                   </div>

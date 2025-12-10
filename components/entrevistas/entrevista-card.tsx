@@ -9,11 +9,10 @@ import {
   CheckCircle2,
   FileQuestion,
   Calendar,
-  ExternalLink,
-  MoreVertical,
   Copy,
+  UserCheck,
+  Star,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -27,7 +26,9 @@ interface EntrevistaCardProps {
     status: string;
     createdAt: Date;
     totalCandidatos: number;
-    totalRespostas: number;
+    totalConcluiram: number;
+    totalAprovados: number;
+    mediaScore: number | null;
     totalPerguntas: number;
     slug: string | null;
   };
@@ -55,14 +56,9 @@ export function EntrevistaCard({ entrevista }: EntrevistaCardProps) {
   const router = useRouter();
   const statusInfo = statusConfig[entrevista.status as keyof typeof statusConfig] || statusConfig.active;
 
-  // Calcula taxa de conclusão
-  // totalRespostas = total de perguntas respondidas por todos os candidatos
-  // totalCandidatos = candidatos que participaram
-  // totalPerguntas = perguntas da entrevista
-  // Taxa = (respostas recebidas) / (candidatos * perguntas esperadas) * 100
-  const respostasEsperadas = entrevista.totalCandidatos * entrevista.totalPerguntas;
-  const taxaConclusao = respostasEsperadas > 0
-    ? Math.min(100, Math.round((entrevista.totalRespostas / respostasEsperadas) * 100))
+  // Calcula taxa de conclusão baseada em candidatos que concluíram
+  const taxaConclusao = entrevista.totalCandidatos > 0
+    ? Math.round((entrevista.totalConcluiram / entrevista.totalCandidatos) * 100)
     : 0;
 
   const handleCardClick = (e: React.MouseEvent) => {
@@ -123,7 +119,7 @@ export function EntrevistaCard({ entrevista }: EntrevistaCardProps) {
         </div>
 
         {/* Indicadores - estilo chip do cartão */}
-        <div className="grid grid-cols-3 gap-2 pt-3 border-t border-border group-hover:border-white/20 transition-colors">
+        <div className="grid grid-cols-5 gap-2 pt-3 border-t border-border group-hover:border-white/20 transition-colors">
           {/* Total de candidatos */}
           <div className="space-y-0.5">
             <div className="flex items-center gap-1 text-muted-foreground group-hover:text-white/70 transition-colors">
@@ -135,14 +131,36 @@ export function EntrevistaCard({ entrevista }: EntrevistaCardProps) {
             </p>
           </div>
 
-          {/* Respostas recebidas */}
+          {/* Candidatos que realizaram */}
           <div className="space-y-0.5">
             <div className="flex items-center gap-1 text-muted-foreground group-hover:text-white/70 transition-colors">
               <CheckCircle2 className="h-3 w-3" />
               <span className="text-xs font-medium">Realizaram</span>
             </div>
             <p className="text-xl font-bold group-hover:text-white transition-colors">
-              {entrevista.totalRespostas}
+              {entrevista.totalConcluiram}
+            </p>
+          </div>
+
+          {/* Candidatos aprovados */}
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-1 text-muted-foreground group-hover:text-white/70 transition-colors">
+              <UserCheck className="h-3 w-3" />
+              <span className="text-xs font-medium">Aprovados</span>
+            </div>
+            <p className="text-xl font-bold text-green-600 group-hover:text-green-300 transition-colors">
+              {entrevista.totalAprovados}
+            </p>
+          </div>
+
+          {/* Média de score */}
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-1 text-muted-foreground group-hover:text-white/70 transition-colors">
+              <Star className="h-3 w-3" />
+              <span className="text-xs font-medium">Score</span>
+            </div>
+            <p className="text-xl font-bold text-amber-600 group-hover:text-amber-300 transition-colors">
+              {entrevista.mediaScore !== null ? entrevista.mediaScore : "-"}
             </p>
           </div>
 

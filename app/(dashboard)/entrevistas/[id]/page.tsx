@@ -96,8 +96,8 @@ const candidatoStatusConfig: Record<string, { label: string; variant: "outline" 
 
 
 const getScoreColor = (score: number) => {
-  if (score >= 8.5) return "text-green-600";
-  if (score >= 7.0) return "text-yellow-600";
+  if (score >= 85) return "text-green-600";
+  if (score >= 70) return "text-yellow-600";
   return "text-red-600";
 };
 
@@ -498,7 +498,7 @@ export default function EntrevistaDetalhesPage() {
                             <div className="flex items-center gap-1.5">
                               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
                               <span className={`font-bold ${getScoreColor(candidato.notaGeral)}`}>
-                                {candidato.notaGeral.toFixed(1)}
+                                {Math.round(candidato.notaGeral)}
                               </span>
                             </div>
                           )}

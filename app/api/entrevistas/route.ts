@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDB } from "@/lib/db";
-import { entrevistas, candidatos, perguntas, respostas } from "@/lib/db/schema";
-import { desc, eq, and, isNull, count, sql } from "drizzle-orm";
+import { entrevistas, perguntas, candidatoEntrevistas } from "@/lib/db/schema";
+import { desc, eq, and, isNull, sql } from "drizzle-orm";
 import { getUserId } from "@/lib/auth/get-user";
 
 export async function GET(request: Request) {
@@ -51,19 +51,32 @@ export async function GET(request: Request) {
         slug: entrevistas.slug,
         createdAt: entrevistas.createdAt,
         updatedAt: entrevistas.updatedAt,
-        // Contagem de candidatos usando sql agregado
+        // Contagem de candidatos (todos que participaram)
         totalCandidatos: sql<number>`(
-          SELECT COUNT(DISTINCT c.id)::int
-          FROM ${candidatos} c
-          INNER JOIN ${respostas} r ON r.candidato_id = c.id
-          WHERE r.entrevista_id = ${entrevistas}.id
-            AND c.user_id = ${userId}
-        )`,
-        // Contagem de respostas
-        totalRespostas: sql<number>`(
           SELECT COUNT(*)::int
-          FROM ${respostas} r
-          WHERE r.entrevista_id = ${entrevistas}.id
+          FROM ${candidatoEntrevistas} ce
+          WHERE ce.entrevista_id = ${entrevistas}.id
+        )`,
+        // Contagem de candidatos que concluíram a entrevista
+        totalConcluiram: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM ${candidatoEntrevistas} ce
+          WHERE ce.entrevista_id = ${entrevistas}.id
+            AND ce.status = 'concluida'
+        )`,
+        // Contagem de candidatos aprovados
+        totalAprovados: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM ${candidatoEntrevistas} ce
+          WHERE ce.entrevista_id = ${entrevistas}.id
+            AND ce.decisao_recrutador = 'aprovado'
+        )`,
+        // Média de compatibilidade com a vaga (escala 0-100)
+        mediaScore: sql<number>`(
+          SELECT ROUND(AVG(ce.compatibilidade_vaga)::numeric, 0)::int
+          FROM ${candidatoEntrevistas} ce
+          WHERE ce.entrevista_id = ${entrevistas}.id
+            AND ce.compatibilidade_vaga IS NOT NULL
         )`,
         // Contagem de perguntas
         totalPerguntas: sql<number>`(

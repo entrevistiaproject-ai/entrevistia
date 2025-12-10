@@ -124,13 +124,86 @@ export const getCompetenciasTool = tool(
 );
 
 /**
+ * Pesos das competências por nível de senioridade
+ * Junior: foco maior em potencial, comunicação e motivação
+ * Pleno: equilíbrio entre todas as competências
+ * Senior: foco maior em experiência e resolução de problemas
+ */
+const PESOS_POR_NIVEL: Record<string, Record<string, number>> = {
+  junior: {
+    'Experiência': 0.10,           // Menos peso - espera-se pouca experiência
+    'Comunicação': 0.25,           // Alto peso - fundamental para crescer
+    'Resolução de Problemas': 0.20, // Médio - avalia potencial
+    'Motivação': 0.25,             // Alto - energia e vontade de aprender
+    'Fit com a Vaga': 0.20,        // Médio - alinhamento básico
+  },
+  pleno: {
+    'Experiência': 0.25,           // Peso equilibrado
+    'Comunicação': 0.20,
+    'Resolução de Problemas': 0.25,
+    'Motivação': 0.15,
+    'Fit com a Vaga': 0.15,
+  },
+  senior: {
+    'Experiência': 0.30,           // Alto peso - essencial para senior
+    'Comunicação': 0.15,           // Espera-se já consolidado
+    'Resolução de Problemas': 0.30, // Alto - liderança técnica
+    'Motivação': 0.10,             // Menor peso
+    'Fit com a Vaga': 0.15,
+  },
+  especialista: {
+    'Experiência': 0.35,           // Muito alto - expertise
+    'Comunicação': 0.15,
+    'Resolução de Problemas': 0.25,
+    'Motivação': 0.10,
+    'Fit com a Vaga': 0.15,
+  },
+};
+
+// Pesos padrão caso o nível não seja especificado
+const PESOS_PADRAO = PESOS_POR_NIVEL.pleno;
+
+/**
+ * Calcula o score geral ponderado com base nas competências e nível
+ */
+function calcularScorePonderado(
+  competencias: Array<{ categoria: string; nota: number }>,
+  nivel: string | null
+): number {
+  const pesos = nivel && PESOS_POR_NIVEL[nivel.toLowerCase()]
+    ? PESOS_POR_NIVEL[nivel.toLowerCase()]
+    : PESOS_PADRAO;
+
+  let somaNotas = 0;
+  let somaPesos = 0;
+
+  for (const comp of competencias) {
+    const peso = pesos[comp.categoria] || 0.2; // peso default se categoria desconhecida
+    somaNotas += comp.nota * peso;
+    somaPesos += peso;
+  }
+
+  // Normaliza caso não tenham todas as categorias
+  if (somaPesos > 0) {
+    return Math.round(somaNotas / somaPesos);
+  }
+
+  // Fallback: média simples
+  if (competencias.length > 0) {
+    return Math.round(competencias.reduce((acc, c) => acc + c.nota, 0) / competencias.length);
+  }
+
+  return 0;
+}
+
+/**
  * Tool para salvar a análise completa do candidato
  */
 export const saveAnalysisTool = tool(
   async ({
     candidatoId,
     entrevistaId,
-    notaGeral,
+    competencias,
     resumoGeral,
     pontosFortes,
     pontosMelhoria,
@@ -138,7 +211,12 @@ export const saveAnalysisTool = tool(
   }: {
     candidatoId: string;
     entrevistaId: string;
-    notaGeral: number;
+    competencias: Array<{
+      nome: string;
+      categoria: 'Experiência' | 'Comunicação' | 'Resolução de Problemas' | 'Motivação' | 'Fit com a Vaga';
+      nota: number;
+      descricao: string;
+    }>;
     resumoGeral: string;
     pontosFortes: string[];
     pontosMelhoria: string[];
@@ -146,10 +224,29 @@ export const saveAnalysisTool = tool(
   }) => {
     try {
       const { getDB } = await import('@/lib/db');
-      const { candidatoEntrevistas } = await import('@/lib/db/schema');
+      const { candidatoEntrevistas, entrevistas } = await import('@/lib/db/schema');
       const { eq, and } = await import('drizzle-orm');
 
       const db = getDB();
+
+      // Busca o nível da vaga para calcular os pesos
+      const [entrevista] = await db
+        .select({ nivel: entrevistas.nivel })
+        .from(entrevistas)
+        .where(eq(entrevistas.id, entrevistaId))
+        .limit(1);
+
+      const nivel = entrevista?.nivel || null;
+
+      // Calcula o score ponderado baseado nas competências e nível
+      const notaGeral = calcularScorePonderado(competencias, nivel);
+
+      // Calcula compatibilidade com a vaga (média da categoria "Fit com a Vaga" + outras relevantes)
+      const fitVaga = competencias.find(c => c.categoria === 'Fit com a Vaga');
+      const experiencia = competencias.find(c => c.categoria === 'Experiência');
+      const compatibilidadeVaga = fitVaga
+        ? Math.round((fitVaga.nota * 0.6 + (experiencia?.nota || fitVaga.nota) * 0.4))
+        : notaGeral;
 
       // Formata o resumo incluindo pontos fortes e de melhoria
       const resumoCompleto = `${resumoGeral}\n\n**Pontos Fortes:**\n${pontosFortes.map(p => `- ${p}`).join('\n')}\n\n**Pontos de Melhoria:**\n${pontosMelhoria.map(p => `- ${p}`).join('\n')}`;
@@ -159,6 +256,8 @@ export const saveAnalysisTool = tool(
         .update(candidatoEntrevistas)
         .set({
           notaGeral,
+          compatibilidadeVaga,
+          competencias,
           resumoGeral: resumoCompleto,
           recomendacao,
           avaliadoEm: new Date(),
@@ -182,6 +281,9 @@ export const saveAnalysisTool = tool(
       return {
         success: true,
         avaliacaoId: updated.id,
+        notaGeral,
+        compatibilidadeVaga,
+        nivel: nivel || 'não especificado',
         message: 'Avaliação salva com sucesso',
       };
     } catch (error) {
@@ -194,11 +296,16 @@ export const saveAnalysisTool = tool(
   },
   {
     name: 'saveAnalysis',
-    description: 'Salva a análise completa do candidato no banco de dados',
+    description: 'Salva a análise completa do candidato com competências avaliadas individualmente. O score geral é calculado automaticamente com pesos baseados no nível da vaga (junior, pleno, senior, especialista).',
     schema: z.object({
       candidatoId: z.string().describe('ID do candidato'),
       entrevistaId: z.string().describe('ID da entrevista'),
-      notaGeral: z.number().min(0).max(10).describe('Nota geral do candidato (0-10)'),
+      competencias: z.array(z.object({
+        nome: z.string().describe('Nome específico da competência avaliada'),
+        categoria: z.enum(['Experiência', 'Comunicação', 'Resolução de Problemas', 'Motivação', 'Fit com a Vaga']).describe('Categoria da competência'),
+        nota: z.number().min(0).max(100).describe('Nota da competência (0-100)'),
+        descricao: z.string().describe('Justificativa detalhada da nota'),
+      })).min(1).describe('Lista de competências avaliadas - OBRIGATÓRIO incluir pelo menos uma competência de cada categoria'),
       resumoGeral: z.string().describe('Resumo geral da performance do candidato'),
       pontosFortes: z.array(z.string()).describe('Lista de pontos fortes identificados'),
       pontosMelhoria: z.array(z.string()).describe('Lista de pontos de melhoria identificados'),
