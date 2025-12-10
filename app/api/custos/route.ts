@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDB } from "@/lib/db";
-import { transacoes, faturas, entrevistas } from "@/lib/db/schema";
+import { transacoes, faturas, entrevistas, candidatoEntrevistas } from "@/lib/db/schema";
 import { eq, and, gte, desc, sql } from "drizzle-orm";
 import { getUserId } from "@/lib/auth/get-user";
 
@@ -176,6 +176,120 @@ export async function GET(request: Request) {
     // 6. Top 5 entrevistas mais caras
     const top5Entrevistas = custosPorEntrevista.slice(0, 5);
 
+    // 7. Métricas de análises - Total de perguntas analisadas no período
+    const perguntasAnalisadas = await db
+      .select({
+        total: sql<number>`COUNT(*)::int`,
+      })
+      .from(transacoes)
+      .where(
+        and(
+          eq(transacoes.userId, userId),
+          eq(transacoes.tipo, "analise_pergunta"),
+          gte(transacoes.createdAt, dataInicio)
+        )
+      );
+
+    // 8. Total de entrevistas analisadas (candidatos que tiveram análise completa)
+    const entrevistasAnalisadas = await db
+      .select({
+        total: sql<number>`COUNT(DISTINCT ${candidatoEntrevistas.id})::int`,
+      })
+      .from(candidatoEntrevistas)
+      .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
+      .where(
+        and(
+          eq(entrevistas.userId, userId),
+          sql`${candidatoEntrevistas.avaliadoEm} IS NOT NULL`,
+          gte(candidatoEntrevistas.createdAt, dataInicio)
+        )
+      );
+
+    // 9. Dados para gráfico de entrevistas por período (dia, semana, mês, ano)
+    // Gráfico diário (últimos 30 dias)
+    const trintaDiasAtras = new Date();
+    trintaDiasAtras.setDate(hoje.getDate() - 30);
+
+    const entrevistasPorDia = await db
+      .select({
+        data: sql<string>`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY-MM-DD')`,
+        total: sql<number>`COUNT(DISTINCT ${candidatoEntrevistas.id})::int`,
+        analisadas: sql<number>`COUNT(DISTINCT CASE WHEN ${candidatoEntrevistas.avaliadoEm} IS NOT NULL THEN ${candidatoEntrevistas.id} END)::int`,
+      })
+      .from(candidatoEntrevistas)
+      .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
+      .where(
+        and(
+          eq(entrevistas.userId, userId),
+          gte(candidatoEntrevistas.createdAt, trintaDiasAtras)
+        )
+      )
+      .groupBy(sql`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY-MM-DD')`)
+      .orderBy(sql`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY-MM-DD')`);
+
+    // Gráfico semanal (últimas 12 semanas)
+    const dozeSemanas = new Date();
+    dozeSemanas.setDate(hoje.getDate() - 84);
+
+    const entrevistasPorSemana = await db
+      .select({
+        semana: sql<string>`TO_CHAR(${candidatoEntrevistas.createdAt}, 'IYYY-IW')`,
+        total: sql<number>`COUNT(DISTINCT ${candidatoEntrevistas.id})::int`,
+        analisadas: sql<number>`COUNT(DISTINCT CASE WHEN ${candidatoEntrevistas.avaliadoEm} IS NOT NULL THEN ${candidatoEntrevistas.id} END)::int`,
+      })
+      .from(candidatoEntrevistas)
+      .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
+      .where(
+        and(
+          eq(entrevistas.userId, userId),
+          gte(candidatoEntrevistas.createdAt, dozeSemanas)
+        )
+      )
+      .groupBy(sql`TO_CHAR(${candidatoEntrevistas.createdAt}, 'IYYY-IW')`)
+      .orderBy(sql`TO_CHAR(${candidatoEntrevistas.createdAt}, 'IYYY-IW')`);
+
+    // Gráfico mensal (últimos 12 meses)
+    const dozeMesesAtras = new Date();
+    dozeMesesAtras.setMonth(hoje.getMonth() - 12);
+
+    const entrevistasPorMes = await db
+      .select({
+        mes: sql<string>`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY-MM')`,
+        total: sql<number>`COUNT(DISTINCT ${candidatoEntrevistas.id})::int`,
+        analisadas: sql<number>`COUNT(DISTINCT CASE WHEN ${candidatoEntrevistas.avaliadoEm} IS NOT NULL THEN ${candidatoEntrevistas.id} END)::int`,
+      })
+      .from(candidatoEntrevistas)
+      .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
+      .where(
+        and(
+          eq(entrevistas.userId, userId),
+          gte(candidatoEntrevistas.createdAt, dozeMesesAtras)
+        )
+      )
+      .groupBy(sql`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY-MM')`)
+      .orderBy(sql`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY-MM')`);
+
+    // Gráfico anual (últimos 5 anos)
+    const cincoAnosAtras = new Date();
+    cincoAnosAtras.setFullYear(hoje.getFullYear() - 5);
+
+    const entrevistasPorAno = await db
+      .select({
+        ano: sql<string>`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY')`,
+        total: sql<number>`COUNT(DISTINCT ${candidatoEntrevistas.id})::int`,
+        analisadas: sql<number>`COUNT(DISTINCT CASE WHEN ${candidatoEntrevistas.avaliadoEm} IS NOT NULL THEN ${candidatoEntrevistas.id} END)::int`,
+      })
+      .from(candidatoEntrevistas)
+      .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
+      .where(
+        and(
+          eq(entrevistas.userId, userId),
+          gte(candidatoEntrevistas.createdAt, cincoAnosAtras)
+        )
+      )
+      .groupBy(sql`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY')`)
+      .orderBy(sql`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY')`);
+
     return NextResponse.json({
       faturaAtual: {
         id: faturaAtual.id,
@@ -214,6 +328,34 @@ export async function GET(request: Request) {
         custo: Number(e.custo),
         transacoes: e.transacoes,
       })),
+      // Novas métricas de análises
+      metricas: {
+        perguntasAnalisadas: perguntasAnalisadas[0]?.total || 0,
+        entrevistasAnalisadas: entrevistasAnalisadas[0]?.total || 0,
+      },
+      // Dados para gráficos de entrevistas por período
+      graficos: {
+        porDia: entrevistasPorDia.map((e) => ({
+          data: e.data,
+          total: e.total,
+          analisadas: e.analisadas,
+        })),
+        porSemana: entrevistasPorSemana.map((e) => ({
+          semana: e.semana,
+          total: e.total,
+          analisadas: e.analisadas,
+        })),
+        porMes: entrevistasPorMes.map((e) => ({
+          mes: e.mes,
+          total: e.total,
+          analisadas: e.analisadas,
+        })),
+        porAno: entrevistasPorAno.map((e) => ({
+          ano: e.ano,
+          total: e.total,
+          analisadas: e.analisadas,
+        })),
+      },
     });
   } catch (error) {
     console.error("Erro ao buscar custos:", error);

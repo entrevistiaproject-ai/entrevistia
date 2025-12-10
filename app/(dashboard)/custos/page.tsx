@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -11,12 +11,24 @@ import {
   Briefcase,
   CreditCard,
   AlertCircle,
-  Loader2,
+  MessageSquareText,
+  ClipboardCheck,
+  BarChart3,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { PageHeader } from "@/components/ui/page-header";
 import { SkeletonStats, SkeletonCard } from "@/components/ui/skeleton-card";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 interface DadosCustos {
   faturaAtual: {
@@ -56,12 +68,25 @@ interface DadosCustos {
     custo: number;
     transacoes: number;
   }>;
+  metricas: {
+    perguntasAnalisadas: number;
+    entrevistasAnalisadas: number;
+  };
+  graficos: {
+    porDia: Array<{ data: string; total: number; analisadas: number }>;
+    porSemana: Array<{ semana: string; total: number; analisadas: number }>;
+    porMes: Array<{ mes: string; total: number; analisadas: number }>;
+    porAno: Array<{ ano: string; total: number; analisadas: number }>;
+  };
 }
+
+type GraficoTipo = "dia" | "semana" | "mes" | "ano";
 
 export default function CustosPage() {
   const [loading, setLoading] = useState(true);
   const [periodo, setPeriodo] = useState("mes");
   const [dados, setDados] = useState<DadosCustos | null>(null);
+  const [graficoTipo, setGraficoTipo] = useState<GraficoTipo>("mes");
 
   const fetchDados = async () => {
     try {
@@ -111,7 +136,7 @@ export default function CustosPage() {
     );
   }
 
-  const { faturaAtual, totais, periodo: periodoData, medias, entrevistas, evolucao } = dados;
+  const { faturaAtual, periodo: periodoData, medias, entrevistas, evolucao, metricas, graficos } = dados;
   const saldoAPagar = faturaAtual.valorTotal - faturaAtual.valorPago;
   const mesNome = new Date(faturaAtual.anoReferencia, faturaAtual.mesReferencia - 1).toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
   const alertaFatura = faturaAtual.status === "fechada" || faturaAtual.status === "vencida";
@@ -164,7 +189,7 @@ export default function CustosPage() {
 
       {/* Cards de Resumo - scroll horizontal no mobile */}
       <div className="scroll-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
-        <div className="inline-flex gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+        <div className="inline-flex gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
           {/* Fatura Atual */}
           <Card className="border-2 border-blue-200 dark:border-blue-800 min-w-40 sm:min-w-0 shrink-0">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -215,6 +240,43 @@ export default function CustosPage() {
               </p>
             </CardContent>
           </Card>
+        </div>
+      </div>
+
+      {/* Cards de Métricas de Análise */}
+      <div className="scroll-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="inline-flex gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+          {/* Perguntas Analisadas */}
+          <Card className="border-2 border-green-200 dark:border-green-800 min-w-40 sm:min-w-0 shrink-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Perguntas Analisadas</CardTitle>
+              <MessageSquareText className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl sm:text-3xl font-bold text-green-600">
+                {metricas?.perguntasAnalisadas || 0}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                no período selecionado
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Entrevistas Analisadas */}
+          <Card className="border-2 border-purple-200 dark:border-purple-800 min-w-40 sm:min-w-0 shrink-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Entrevistas Analisadas</CardTitle>
+              <ClipboardCheck className="h-4 w-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl sm:text-3xl font-bold text-purple-600">
+                {metricas?.entrevistasAnalisadas || 0}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                candidatos avaliados com IA
+              </p>
+            </CardContent>
+          </Card>
 
           {/* Média de Custo por Vaga */}
           <Card className="min-w-40 sm:min-w-0 shrink-0">
@@ -231,8 +293,143 @@ export default function CustosPage() {
               </p>
             </CardContent>
           </Card>
+
+          {/* Custo por Análise */}
+          <Card className="min-w-40 sm:min-w-0 shrink-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Custo/Análise</CardTitle>
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl sm:text-3xl font-bold">
+                R$ {(metricas?.entrevistasAnalisadas || 0) > 0
+                  ? (periodoData.custoTotal / metricas.entrevistasAnalisadas).toFixed(2)
+                  : "0.00"}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                média por entrevista analisada
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </div>
+
+      {/* Gráfico de Entrevistas por Período */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Entrevistas por Período
+              </CardTitle>
+              <CardDescription>
+                Visualize o volume de entrevistas realizadas e analisadas
+              </CardDescription>
+            </div>
+            <Tabs value={graficoTipo} onValueChange={(v) => setGraficoTipo(v as GraficoTipo)}>
+              <TabsList className="h-9">
+                <TabsTrigger value="dia" className="text-xs px-3">Dia</TabsTrigger>
+                <TabsTrigger value="semana" className="text-xs px-3">Semana</TabsTrigger>
+                <TabsTrigger value="mes" className="text-xs px-3">Mês</TabsTrigger>
+                <TabsTrigger value="ano" className="text-xs px-3">Ano</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {(() => {
+            const dadosGrafico = (() => {
+              switch (graficoTipo) {
+                case "dia":
+                  return (graficos?.porDia || []).map((item) => ({
+                    label: new Date(item.data + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }),
+                    total: item.total,
+                    analisadas: item.analisadas,
+                  }));
+                case "semana":
+                  return (graficos?.porSemana || []).map((item) => {
+                    const [ano, semana] = item.semana.split("-");
+                    return {
+                      label: `S${semana}/${ano.slice(2)}`,
+                      total: item.total,
+                      analisadas: item.analisadas,
+                    };
+                  });
+                case "mes":
+                  return (graficos?.porMes || []).map((item) => {
+                    const [ano, mes] = item.mes.split("-");
+                    return {
+                      label: new Date(parseInt(ano), parseInt(mes) - 1).toLocaleDateString("pt-BR", { month: "short", year: "2-digit" }),
+                      total: item.total,
+                      analisadas: item.analisadas,
+                    };
+                  });
+                case "ano":
+                  return (graficos?.porAno || []).map((item) => ({
+                    label: item.ano,
+                    total: item.total,
+                    analisadas: item.analisadas,
+                  }));
+                default:
+                  return [];
+              }
+            })();
+
+            if (dadosGrafico.length === 0) {
+              return (
+                <div className="text-center py-12 text-muted-foreground">
+                  <BarChart3 className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p>Sem dados para o período selecionado</p>
+                </div>
+              );
+            }
+
+            return (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={dadosGrafico} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fontSize: 12 }}
+                    tickLine={false}
+                    axisLine={false}
+                    className="text-muted-foreground"
+                  />
+                  <YAxis
+                    tick={{ fontSize: 12 }}
+                    tickLine={false}
+                    axisLine={false}
+                    className="text-muted-foreground"
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "8px",
+                    }}
+                    labelStyle={{ color: "hsl(var(--foreground))" }}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="total"
+                    name="Total de Entrevistas"
+                    fill="hsl(var(--primary))"
+                    radius={[4, 4, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="analisadas"
+                    name="Analisadas com IA"
+                    fill="hsl(142, 76%, 36%)"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            );
+          })()}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Top 5 Entrevistas Mais Caras */}
@@ -342,7 +539,7 @@ export default function CustosPage() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {Object.entries(periodoData.custoPorTipo || {}).map(([tipo, valor]) => {
-              const tipoLabels: Record<string, { label: string; icon: any }> = {
+              const tipoLabels: Record<string, { label: string; icon: React.ElementType }> = {
                 transcricao_audio: { label: "Transcrição de Áudio", icon: Users },
                 analise_ia: { label: "Análise com IA", icon: TrendingUp },
                 analise_pergunta: { label: "Análise por Pergunta", icon: TrendingUp },
