@@ -62,6 +62,8 @@ interface Candidato {
   decisaoRecrutador: "aprovado" | "reprovado" | null;
   decisaoRecrutadorEm: Date | null;
   decisaoRecrutadorObservacao: string | null;
+  // Email de encerramento
+  emailEncerramentoEnviadoEm: Date | null;
 }
 
 interface Pergunta {
@@ -395,6 +397,7 @@ export default function EntrevistaDetalhesPage() {
                               decisaoAtual={candidato.decisaoRecrutador}
                               recomendacaoIA={candidato.recomendacao}
                               observacaoAtual={candidato.decisaoRecrutadorObservacao}
+                              emailEncerramentoEnviado={!!candidato.emailEncerramentoEnviadoEm}
                               onDecisaoAtualizada={fetchData}
                               compact
                             />

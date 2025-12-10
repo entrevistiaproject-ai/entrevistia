@@ -68,6 +68,8 @@ interface Participacao {
   decisaoRecrutador: "aprovado" | "reprovado" | null;
   decisaoRecrutadorEm: Date | null;
   decisaoRecrutadorObservacao: string | null;
+  // Email de encerramento
+  emailEncerramentoEnviadoEm: Date | null;
 }
 
 // Funções para notas de 0-100 (competências e compatibilidade)
@@ -520,6 +522,7 @@ export default function ResultadoCandidatoPage() {
                 decisaoAtual={participacao.decisaoRecrutador}
                 recomendacaoIA={participacao.recomendacao}
                 observacaoAtual={participacao.decisaoRecrutadorObservacao}
+                emailEncerramentoEnviado={!!participacao.emailEncerramentoEnviadoEm}
                 onDecisaoAtualizada={fetchData}
               />
             </div>

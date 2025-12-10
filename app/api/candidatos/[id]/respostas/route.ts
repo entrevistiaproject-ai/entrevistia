@@ -41,6 +41,8 @@ export async function GET(
         decisaoRecrutador: candidatoEntrevistas.decisaoRecrutador,
         decisaoRecrutadorEm: candidatoEntrevistas.decisaoRecrutadorEm,
         decisaoRecrutadorObservacao: candidatoEntrevistas.decisaoRecrutadorObservacao,
+        // Email de encerramento
+        emailEncerramentoEnviadoEm: candidatoEntrevistas.emailEncerramentoEnviadoEm,
       })
       .from(candidatoEntrevistas)
       .where(

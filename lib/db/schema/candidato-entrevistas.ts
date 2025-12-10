@@ -50,6 +50,9 @@ export const candidatoEntrevistas = pgTable("candidato_entrevistas", {
   decisaoRecrutadorEm: timestamp("decisao_recrutador_em", { mode: "date" }),
   decisaoRecrutadorObservacao: text("decisao_recrutador_observacao"), // Observação opcional do recrutador
 
+  // Email de encerramento (quando não aprovado)
+  emailEncerramentoEnviadoEm: timestamp("email_encerramento_enviado_em", { mode: "date" }),
+
   // Auditoria
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),

@@ -49,6 +49,11 @@ export const entrevistas = pgTable("entrevistas", {
       nota?: number;
       tempoMaximo?: number;
     };
+    // Configurações de email de encerramento
+    emailEncerramento?: {
+      enviarAutomaticamente?: boolean; // Se true, pergunta ao reprovar se quer enviar
+      mensagemPersonalizada?: string; // Texto customizado para o email
+    };
   }>(),
 
   // Auditoria

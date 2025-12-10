@@ -61,6 +61,8 @@ export async function GET(
         decisaoRecrutador: candidatoEntrevistas.decisaoRecrutador,
         decisaoRecrutadorEm: candidatoEntrevistas.decisaoRecrutadorEm,
         decisaoRecrutadorObservacao: candidatoEntrevistas.decisaoRecrutadorObservacao,
+        // Email de encerramento
+        emailEncerramentoEnviadoEm: candidatoEntrevistas.emailEncerramentoEnviadoEm,
       })
       .from(candidatoEntrevistas)
       .innerJoin(candidatos, eq(candidatoEntrevistas.candidatoId, candidatos.id))

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   CheckCircle2,
   XCircle,
@@ -20,16 +21,23 @@ import {
   Loader2,
   ChevronDown,
   Sparkles,
+  Mail,
+  Send,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface DecisaoCandidatoProps {
   candidatoId: string;
   entrevistaId: string;
   candidatoNome: string;
+  candidatoEmail?: string;
+  cargo?: string;
   decisaoAtual: "aprovado" | "reprovado" | null;
   recomendacaoIA: "recomendado" | "recomendado_com_ressalvas" | "nao_recomendado" | null;
   observacaoAtual?: string | null;
+  emailEncerramentoEnviado?: boolean;
   onDecisaoAtualizada?: () => void;
   compact?: boolean;
 }
@@ -82,23 +90,53 @@ const recomendacaoIAConfig = {
   },
 };
 
+const TEXTO_EMAIL_PADRAO = `Agradecemos imensamente seu interesse na vaga e o tempo dedicado ao nosso processo seletivo.
+
+Após uma análise cuidadosa, informamos que seu perfil não foi selecionado para avançar neste momento. Essa decisão não diminui suas qualidades profissionais - sabemos que você possui habilidades valiosas que certamente serão reconhecidas.
+
+Ficamos impressionados com sua participação e gostaríamos de manter seu currículo em nosso banco de talentos para futuras oportunidades que estejam mais alinhadas ao seu perfil.
+
+Desejamos muito sucesso em sua jornada profissional!`;
+
 export function DecisaoCandidato({
   candidatoId,
   entrevistaId,
   candidatoNome,
+  candidatoEmail,
+  cargo,
   decisaoAtual,
   recomendacaoIA,
   observacaoAtual,
+  emailEncerramentoEnviado = false,
   onDecisaoAtualizada,
   compact = false,
 }: DecisaoCandidatoProps) {
+  const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
   const [decisaoSelecionada, setDecisaoSelecionada] = useState<"aprovado" | "reprovado" | null>(decisaoAtual);
   const [observacao, setObservacao] = useState(observacaoAtual || "");
 
+  // Estado para email de encerramento
+  const [enviarEmail, setEnviarEmail] = useState(false);
+  const [mostrarEdicaoEmail, setMostrarEdicaoEmail] = useState(false);
+  const [textoEmail, setTextoEmail] = useState(TEXTO_EMAIL_PADRAO);
+  const [emailJaEnviado, setEmailJaEnviado] = useState(emailEncerramentoEnviado);
+
   const config = decisaoAtual ? decisaoConfig[decisaoAtual] : decisaoConfig.pendente;
   const Icon = config.icon;
+
+  // Reset estados quando o dialog abre
+  useEffect(() => {
+    if (open) {
+      setDecisaoSelecionada(decisaoAtual);
+      setObservacao(observacaoAtual || "");
+      setEnviarEmail(false);
+      setMostrarEdicaoEmail(false);
+      setTextoEmail(TEXTO_EMAIL_PADRAO);
+    }
+  }, [open, decisaoAtual, observacaoAtual]);
 
   const handleSalvar = async () => {
     setLoading(true);
@@ -116,13 +154,66 @@ export function DecisaoCandidato({
       );
 
       if (response.ok) {
+        // Se for reprovado e quiser enviar email
+        if (decisaoSelecionada === "reprovado" && enviarEmail && !emailJaEnviado) {
+          await handleEnviarEmail();
+        }
+
         setOpen(false);
         onDecisaoAtualizada?.();
+
+        toast({
+          title: "Decisão salva",
+          description: decisaoSelecionada === "aprovado"
+            ? "Candidato aprovado para próxima fase"
+            : "Participação do candidato encerrada",
+        });
       }
     } catch (error) {
       console.error("Erro ao salvar decisão:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar a decisão",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEnviarEmail = async () => {
+    setSendingEmail(true);
+    try {
+      const response = await fetch(
+        `/api/entrevistas/${entrevistaId}/candidatos/${candidatoId}/email-encerramento`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mensagem: textoEmail !== TEXTO_EMAIL_PADRAO ? textoEmail : undefined,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        setEmailJaEnviado(true);
+        toast({
+          title: "Email enviado",
+          description: `Email de encerramento enviado para ${candidatoNome}`,
+        });
+      } else {
+        const data = await response.json();
+        throw new Error(data.error || "Erro ao enviar email");
+      }
+    } catch (error) {
+      console.error("Erro ao enviar email:", error);
+      toast({
+        title: "Erro ao enviar email",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingEmail(false);
     }
   };
 
@@ -154,6 +245,44 @@ export function DecisaoCandidato({
     }
   };
 
+  // Botão para enviar email quando já está reprovado mas não enviou email
+  const handleEnviarEmailSeparado = async () => {
+    setSendingEmail(true);
+    try {
+      const response = await fetch(
+        `/api/entrevistas/${entrevistaId}/candidatos/${candidatoId}/email-encerramento`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mensagem: textoEmail !== TEXTO_EMAIL_PADRAO ? textoEmail : undefined,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        setEmailJaEnviado(true);
+        onDecisaoAtualizada?.();
+        toast({
+          title: "Email enviado",
+          description: `Email de encerramento enviado para ${candidatoNome}`,
+        });
+      } else {
+        const data = await response.json();
+        throw new Error(data.error || "Erro ao enviar email");
+      }
+    } catch (error) {
+      console.error("Erro ao enviar email:", error);
+      toast({
+        title: "Erro ao enviar email",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -174,7 +303,7 @@ export function DecisaoCandidato({
         </button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-md" onClick={(e) => e.stopPropagation()}>
+      <DialogContent className="sm:max-w-lg" onClick={(e) => e.stopPropagation()}>
         <DialogHeader>
           <DialogTitle>Decisão sobre candidato</DialogTitle>
           <DialogDescription>
@@ -262,9 +391,109 @@ export function DecisaoCandidato({
             placeholder="Adicione uma nota sobre sua decisão..."
             value={observacao}
             onChange={(e) => setObservacao(e.target.value)}
-            rows={3}
+            rows={2}
           />
         </div>
+
+        {/* Opção de enviar email de encerramento (só aparece quando reprova) */}
+        {decisaoSelecionada === "reprovado" && !emailJaEnviado && (
+          <div className="space-y-3 p-4 bg-slate-50 rounded-lg border">
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="enviar-email"
+                checked={enviarEmail}
+                onCheckedChange={(checked) => setEnviarEmail(checked as boolean)}
+              />
+              <div className="space-y-1">
+                <Label htmlFor="enviar-email" className="cursor-pointer flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Enviar email de encerramento
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Notificar o candidato sobre o encerramento da participação de forma cordial
+                </p>
+              </div>
+            </div>
+
+            {enviarEmail && (
+              <div className="space-y-2 ml-6">
+                <button
+                  type="button"
+                  onClick={() => setMostrarEdicaoEmail(!mostrarEdicaoEmail)}
+                  className="text-xs text-blue-600 hover:text-blue-800 underline"
+                >
+                  {mostrarEdicaoEmail ? "Ocultar edição" : "Personalizar mensagem"}
+                </button>
+
+                {mostrarEdicaoEmail && (
+                  <Textarea
+                    value={textoEmail}
+                    onChange={(e) => setTextoEmail(e.target.value)}
+                    rows={6}
+                    className="text-sm"
+                    placeholder="Digite a mensagem personalizada..."
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Mostrar se email já foi enviado */}
+        {decisaoAtual === "reprovado" && emailJaEnviado && (
+          <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-200">
+            <Check className="h-4 w-4 text-green-600" />
+            <span className="text-sm text-green-700">
+              Email de encerramento já enviado
+            </span>
+          </div>
+        )}
+
+        {/* Opção de enviar email se já reprovou mas não enviou */}
+        {decisaoAtual === "reprovado" && !emailJaEnviado && (
+          <div className="space-y-3 p-4 bg-amber-50 rounded-lg border border-amber-200">
+            <div className="flex items-center gap-2">
+              <Mail className="h-4 w-4 text-amber-600" />
+              <span className="text-sm font-medium text-amber-800">
+                Email de encerramento não enviado
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setMostrarEdicaoEmail(!mostrarEdicaoEmail)}
+              className="text-xs text-amber-700 hover:text-amber-900 underline"
+            >
+              {mostrarEdicaoEmail ? "Ocultar edição" : "Personalizar mensagem antes de enviar"}
+            </button>
+
+            {mostrarEdicaoEmail && (
+              <Textarea
+                value={textoEmail}
+                onChange={(e) => setTextoEmail(e.target.value)}
+                rows={6}
+                className="text-sm"
+                placeholder="Digite a mensagem personalizada..."
+              />
+            )}
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleEnviarEmailSeparado}
+              disabled={sendingEmail}
+              className="w-full"
+            >
+              {sendingEmail ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Send className="h-4 w-4 mr-2" />
+              )}
+              Enviar email de encerramento agora
+            </Button>
+          </div>
+        )}
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
           {decisaoAtual && (
