@@ -26,7 +26,6 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-  XCircle,
   Download,
   RefreshCw,
   FileText,
@@ -719,30 +718,30 @@ export default function FaturasPage() {
 
       {/* Modal de Detalhes */}
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="bg-slate-900 border-slate-700 max-w-3xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
+        <DialogContent className="bg-slate-900 border-slate-700 max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
           {detailsLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : selectedFatura ? (
             <>
-              <DialogHeader>
+              <DialogHeader className="shrink-0">
                 <DialogTitle className="text-white flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-slate-800">
+                  <div className="p-2 rounded-lg bg-slate-800 shrink-0">
                     <Receipt className="h-5 w-5 text-primary" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p>Fatura {selectedFatura.periodo}</p>
-                    <p className="text-sm font-normal text-slate-400">
+                    <p className="text-sm font-normal text-slate-400 truncate">
                       {selectedFatura.usuario.nome} - {selectedFatura.usuario.email}
                     </p>
                   </div>
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="space-y-6 mt-4">
+              <div className="space-y-6 mt-4 overflow-y-auto flex-1 pr-2">
                 {/* Status e Valores */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div className="p-3 rounded-lg bg-slate-800/50">
                     <p className="text-xs text-slate-400">Status</p>
                     <div className="mt-1">{getStatusBadge(selectedFatura.status)}</div>
@@ -771,38 +770,38 @@ export default function FaturasPage() {
                 </div>
 
                 {/* Estatísticas */}
-                <div className="grid grid-cols-4 gap-4">
-                  <div className="p-3 rounded-lg bg-slate-800/50 text-center">
-                    <p className="text-2xl font-semibold text-white">
+                <div className="grid grid-cols-4 gap-2">
+                  <div className="p-2 rounded-lg bg-slate-800/50 text-center">
+                    <p className="text-xl font-semibold text-white">
                       {selectedFatura.estatisticas.entrevistas}
                     </p>
                     <p className="text-xs text-slate-400">Entrevistas</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-slate-800/50 text-center">
-                    <p className="text-2xl font-semibold text-white">
+                  <div className="p-2 rounded-lg bg-slate-800/50 text-center">
+                    <p className="text-xl font-semibold text-white">
                       {selectedFatura.estatisticas.candidatos}
                     </p>
                     <p className="text-xs text-slate-400">Candidatos</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-slate-800/50 text-center">
-                    <p className="text-2xl font-semibold text-white">
+                  <div className="p-2 rounded-lg bg-slate-800/50 text-center">
+                    <p className="text-xl font-semibold text-white">
                       {selectedFatura.estatisticas.respostas}
                     </p>
                     <p className="text-xs text-slate-400">Respostas</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-slate-800/50 text-center">
-                    <p className="text-2xl font-semibold text-white">
+                  <div className="p-2 rounded-lg bg-slate-800/50 text-center">
+                    <p className="text-xl font-semibold text-white">
                       {selectedFatura.estatisticas.transacoes}
                     </p>
                     <p className="text-xs text-slate-400">Transações</p>
                   </div>
                 </div>
 
-                {/* Datas */}
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="space-y-3">
+                {/* Datas e Pagamento lado a lado */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
                     <h4 className="text-sm font-medium text-white">Datas</h4>
-                    <div className="space-y-2 text-sm">
+                    <div className="space-y-1.5 text-sm">
                       <div className="flex justify-between">
                         <span className="text-slate-400">Abertura</span>
                         <span className="text-white">
@@ -837,18 +836,18 @@ export default function FaturasPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     <h4 className="text-sm font-medium text-white">Pagamento</h4>
-                    <div className="space-y-2 text-sm">
+                    <div className="space-y-1.5 text-sm">
                       <div className="flex justify-between">
                         <span className="text-slate-400">Método</span>
                         <span className="text-white">
                           {selectedFatura.metodoPagamento || "-"}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">ID Transação</span>
-                        <span className="text-white font-mono text-xs">
+                      <div className="flex justify-between gap-2">
+                        <span className="text-slate-400 shrink-0">ID Transação</span>
+                        <span className="text-white font-mono text-xs truncate">
                           {selectedFatura.paymentId || "-"}
                         </span>
                       </div>
@@ -862,7 +861,7 @@ export default function FaturasPage() {
                     <h4 className="text-sm font-medium text-white">
                       Transações ({selectedFatura.transacoes.length})
                     </h4>
-                    <div className="max-h-60 overflow-y-auto space-y-2">
+                    <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
                       {selectedFatura.transacoes.map((transacao) => (
                         <div
                           key={transacao.id}
@@ -876,7 +875,7 @@ export default function FaturasPage() {
                               {new Date(transacao.createdAt).toLocaleString("pt-BR")}
                             </p>
                           </div>
-                          <div className="text-right ml-4">
+                          <div className="text-right ml-4 shrink-0">
                             <p className="text-sm font-medium text-white">
                               {formatCurrency(transacao.valorCobrado)}
                             </p>
