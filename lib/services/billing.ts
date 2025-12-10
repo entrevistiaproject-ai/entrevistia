@@ -1,5 +1,6 @@
 import { getDB } from "@/lib/db";
 import { transacoes, faturas, NewTransacao } from "@/lib/db/schema/transacoes";
+import { users } from "@/lib/db/schema/users";
 import { eq, sql, and } from "drizzle-orm";
 import { FREE_TRIAL_LIMITS } from "@/lib/config/free-trial";
 import { PRECOS_USUARIO, calcularCustoAnalise, USAGE_ESTIMATES_ANALISE_PERGUNTA } from "@/lib/config/pricing";
@@ -39,6 +40,7 @@ export interface UsageFinanceiro {
 /**
  * Busca o uso financeiro do usuário
  * Calcula quanto já foi gasto e quanto ainda resta do free trial
+ * Considera crédito extra concedido pelo admin
  */
 export async function getUsageFinanceiro(userId: string): Promise<UsageFinanceiro> {
   const db = getDB();
@@ -52,9 +54,18 @@ export async function getUsageFinanceiro(userId: string): Promise<UsageFinanceir
     .from(transacoes)
     .where(eq(transacoes.userId, userId));
 
+  // Busca o crédito extra do usuário
+  const [usuario] = await db
+    .select({ creditoExtra: users.creditoExtra })
+    .from(users)
+    .where(eq(users.id, userId));
+
   const totalGasto = parseFloat(resultado?.totalGasto || "0");
   const totalTransacoes = resultado?.totalTransacoes || 0;
-  const limiteFinanceiro = FREE_TRIAL_LIMITS.LIMITE_FINANCEIRO;
+  const creditoExtra = parseFloat(usuario?.creditoExtra || "0");
+
+  // Limite financeiro = limite base + crédito extra concedido pelo admin
+  const limiteFinanceiro = FREE_TRIAL_LIMITS.LIMITE_FINANCEIRO + creditoExtra;
   const saldoRestante = Math.max(0, limiteFinanceiro - totalGasto);
   const percentualUsado = limiteFinanceiro > 0
     ? Math.min(100, (totalGasto / limiteFinanceiro) * 100)

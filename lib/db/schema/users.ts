@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid, boolean, integer, decimal } from "drizzle-orm/pg-core";
 
 /**
  * Tabela de usuários (recrutadores/empresas)
@@ -32,6 +32,10 @@ export const users = pgTable("users", {
   // Contadores de uso (para validação de limites)
   usageEntrevistas: integer("usage_entrevistas").default(0).notNull(),
   usageCandidatos: integer("usage_candidatos").default(0).notNull(), // Candidatos únicos totais
+
+  // Crédito extra concedido pelo admin (em reais)
+  // Este valor é ADICIONADO ao limite padrão do free trial (R$ 50)
+  creditoExtra: decimal("credito_extra", { precision: 10, scale: 2 }).default("0.00"),
 
   // Consentimentos LGPD
   aceitouTermos: boolean("aceitou_termos").default(false).notNull(),

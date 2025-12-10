@@ -21,16 +21,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Users,
   Search,
-  Filter,
-  MoreHorizontal,
   ChevronLeft,
   ChevronRight,
-  Mail,
   Building2,
-  Calendar,
-  DollarSign,
   Clock,
   CheckCircle,
   XCircle,
@@ -39,11 +33,10 @@ import {
   RefreshCw,
   Eye,
   Edit,
-  Trash2,
-  UserCog,
   Loader2,
-  ArrowUpDown,
   ChevronsUpDown,
+  Plus,
+  Coins,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -61,8 +54,14 @@ interface Usuario {
   createdAt: string;
   ultimoLogin: string | null;
   gastoTotal: number;
+  totalDevido: number;
+  totalRecebido: number;
   gastoMesAtual: number;
   mediaGastoMensal: number;
+  creditoExtra: number;
+  limiteFreeTrial: number;
+  limiteTotal: number;
+  saldoRestante: number;
   ultimaFatura: {
     valor: number;
     status: string;
@@ -106,6 +105,12 @@ export default function UsuariosPage() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
 
+  // Modal de créditos
+  const [creditosModalOpen, setCreditosModalOpen] = useState(false);
+  const [creditosUser, setCreditosUser] = useState<Usuario | null>(null);
+  const [creditoValor, setCreditoValor] = useState("");
+  const [creditoLoading, setCreditoLoading] = useState(false);
+
   const itensPorPagina = 15;
 
   useEffect(() => {
@@ -140,6 +145,50 @@ export default function UsuariosPage() {
       console.error("Erro ao carregar detalhes:", error);
     } finally {
       setDetailsLoading(false);
+    }
+  };
+
+  const openCreditosModal = (usuario: Usuario) => {
+    setCreditosUser(usuario);
+    setCreditoValor(usuario.creditoExtra?.toString() || "0");
+    setCreditosModalOpen(true);
+  };
+
+  const saveCreditoExtra = async () => {
+    if (!creditosUser) return;
+
+    setCreditoLoading(true);
+    try {
+      const response = await fetch(`/api/admin/usuarios/${creditosUser.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ creditoExtra: parseFloat(creditoValor) || 0 }),
+      });
+
+      if (response.ok) {
+        // Atualiza a lista localmente
+        setUsuarios((prev) =>
+          prev.map((u) =>
+            u.id === creditosUser.id
+              ? {
+                  ...u,
+                  creditoExtra: parseFloat(creditoValor) || 0,
+                  limiteTotal: u.limiteFreeTrial + (parseFloat(creditoValor) || 0),
+                  saldoRestante: Math.max(0, u.limiteFreeTrial + (parseFloat(creditoValor) || 0) - u.gastoTotal),
+                }
+              : u
+          )
+        );
+        setCreditosModalOpen(false);
+      } else {
+        const data = await response.json();
+        alert(data.error || "Erro ao atualizar créditos");
+      }
+    } catch (error) {
+      console.error("Erro ao salvar créditos:", error);
+      alert("Erro ao salvar créditos");
+    } finally {
+      setCreditoLoading(false);
     }
   };
 
@@ -460,12 +509,17 @@ export default function UsuariosPage() {
                     Média Mensal
                   </span>
                 </th>
+                <th className="px-4 py-3 text-right hidden xl:table-cell">
+                  <span className="text-xs font-semibold uppercase text-slate-400">
+                    Total Devido
+                  </span>
+                </th>
                 <th className="px-4 py-3 text-right">
                   <button
                     onClick={() => handleSort("gastoTotal")}
                     className="flex items-center gap-1 text-xs font-semibold uppercase text-slate-400 hover:text-white ml-auto"
                   >
-                    Total Pago
+                    Recebido
                     <ChevronsUpDown className="h-3 w-3" />
                   </button>
                 </th>
@@ -569,10 +623,17 @@ export default function UsuariosPage() {
                     </p>
                   </td>
 
-                  {/* Total Pago */}
+                  {/* Total Devido */}
+                  <td className="px-4 py-4 text-right hidden xl:table-cell">
+                    <p className="text-sm text-amber-400">
+                      R$ {(usuario.totalDevido || 0).toFixed(2)}
+                    </p>
+                  </td>
+
+                  {/* Total Recebido */}
                   <td className="px-4 py-4 text-right">
                     <p className="text-sm font-semibold text-emerald-400">
-                      R$ {usuario.gastoTotal.toFixed(2)}
+                      R$ {(usuario.totalRecebido || 0).toFixed(2)}
                     </p>
                   </td>
 
@@ -586,6 +647,15 @@ export default function UsuariosPage() {
                       >
                         <Eye className="h-4 w-4" />
                       </button>
+                      {usuario.planType === "free_trial" && (
+                        <button
+                          onClick={() => openCreditosModal(usuario)}
+                          className="p-2 rounded-lg text-slate-400 hover:bg-emerald-700 hover:text-white transition-colors"
+                          title="Adicionar créditos"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </button>
+                      )}
                       <button
                         className="p-2 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"
                         title="Editar"
@@ -797,6 +867,102 @@ export default function UsuariosPage() {
               </div>
             </>
           ) : null}
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Créditos */}
+      <Dialog open={creditosModalOpen} onOpenChange={setCreditosModalOpen}>
+        <DialogContent className="bg-slate-900 border-slate-700 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Coins className="h-5 w-5 text-emerald-400" />
+              Adicionar Créditos
+            </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Conceda créditos extras para o usuário do free trial
+            </DialogDescription>
+          </DialogHeader>
+
+          {creditosUser && (
+            <div className="space-y-4 mt-4">
+              {/* Info do usuário */}
+              <div className="p-3 rounded-lg bg-slate-800/50">
+                <p className="text-sm font-medium text-white">{creditosUser.nome}</p>
+                <p className="text-xs text-slate-400">{creditosUser.email}</p>
+              </div>
+
+              {/* Resumo atual */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-lg bg-slate-800/50">
+                  <p className="text-xs text-slate-400">Limite Base</p>
+                  <p className="text-sm font-medium text-white">
+                    R$ {creditosUser.limiteFreeTrial.toFixed(2)}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-slate-800/50">
+                  <p className="text-xs text-slate-400">Já Utilizado</p>
+                  <p className="text-sm font-medium text-amber-400">
+                    R$ {creditosUser.gastoTotal.toFixed(2)}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-slate-800/50">
+                  <p className="text-xs text-slate-400">Crédito Extra Atual</p>
+                  <p className="text-sm font-medium text-emerald-400">
+                    R$ {(creditosUser.creditoExtra || 0).toFixed(2)}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-slate-800/50">
+                  <p className="text-xs text-slate-400">Saldo Restante</p>
+                  <p className="text-sm font-medium text-white">
+                    R$ {creditosUser.saldoRestante.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Input de crédito */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white">
+                  Novo valor de crédito extra (R$)
+                </label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={creditoValor}
+                  onChange={(e) => setCreditoValor(e.target.value)}
+                  placeholder="0.00"
+                  className="bg-slate-800/50 border-slate-700 text-white"
+                />
+                <p className="text-xs text-slate-500">
+                  Este valor substitui o crédito extra anterior. O limite total será: R$ {" "}
+                  {(creditosUser.limiteFreeTrial + (parseFloat(creditoValor) || 0)).toFixed(2)}
+                </p>
+              </div>
+
+              {/* Botões */}
+              <div className="flex gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-700"
+                  onClick={() => setCreditosModalOpen(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                  onClick={saveCreditoExtra}
+                  disabled={creditoLoading}
+                >
+                  {creditoLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Plus className="h-4 w-4 mr-2" />
+                  )}
+                  Salvar
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

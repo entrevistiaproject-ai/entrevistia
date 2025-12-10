@@ -3,6 +3,7 @@ import { verifyAdminSession } from "@/lib/auth/admin-auth";
 import { getDB } from "@/lib/db";
 import { users, faturas, transacoes, entrevistas, candidatoEntrevistas } from "@/lib/db/schema";
 import { sql, desc, isNull, eq, and, count, sum } from "drizzle-orm";
+import { FREE_TRIAL_LIMITS } from "@/lib/config/free-trial";
 
 export async function GET() {
   try {
@@ -32,6 +33,7 @@ export async function GET() {
         createdAt: users.createdAt,
         usageEntrevistas: users.usageEntrevistas,
         usageCandidatos: users.usageCandidatos,
+        creditoExtra: users.creditoExtra,
       })
       .from(users)
       .where(isNull(users.deletedAt))
@@ -112,12 +114,32 @@ export async function GET() {
       }
     }
 
+    // Buscar total devido e total pago por usuário
+    const totaisFaturasQuery = await db
+      .select({
+        userId: faturas.userId,
+        totalDevido: sql<string>`coalesce(sum(cast(${faturas.valorTotal} as decimal)), 0)`,
+        totalPago: sql<string>`coalesce(sum(cast(${faturas.valorPago} as decimal)), 0)`,
+      })
+      .from(faturas)
+      .groupBy(faturas.userId);
+
+    const totaisFaturasMap = new Map(
+      totaisFaturasQuery.map((t) => [t.userId, {
+        totalDevido: Number(t.totalDevido) || 0,
+        totalPago: Number(t.totalPago) || 0,
+      }])
+    );
+
     // Montar resposta final
     const usuariosComDados = usuariosBasicos.map((usuario) => {
       const gastoTotal = gastosMap.get(usuario.id) || 0;
       const gastoMesAtual = gastosMesMap.get(usuario.id) || 0;
       const totalEntrevistas = entrevistasMap.get(usuario.id) || usuario.usageEntrevistas || 0;
       const ultimaFatura = faturasMap.get(usuario.id) || null;
+      const totaisFaturas = totaisFaturasMap.get(usuario.id) || { totalDevido: 0, totalPago: 0 };
+      const creditoExtra = Number(usuario.creditoExtra) || 0;
+      const limiteTotal = FREE_TRIAL_LIMITS.LIMITE_FINANCEIRO + creditoExtra;
 
       const mesesAtivo = Math.max(
         1,
@@ -140,9 +162,16 @@ export async function GET() {
         emailVerified: usuario.emailVerified ? usuario.emailVerified.toISOString() : null,
         createdAt: usuario.createdAt.toISOString(),
         ultimoLogin: null,
-        gastoTotal,
+        gastoTotal, // Total de transações (uso real)
+        totalDevido: totaisFaturas.totalDevido, // Total das faturas emitidas
+        totalRecebido: totaisFaturas.totalPago, // Total efetivamente pago/recebido
         gastoMesAtual,
         mediaGastoMensal: gastoTotal / mesesAtivo,
+        // Créditos do free trial
+        creditoExtra,
+        limiteFreeTrial: FREE_TRIAL_LIMITS.LIMITE_FINANCEIRO,
+        limiteTotal, // Limite base + crédito extra
+        saldoRestante: Math.max(0, limiteTotal - gastoTotal),
         ultimaFatura: ultimaFatura ? {
           valor: ultimaFatura.valor,
           status: ultimaFatura.status,
