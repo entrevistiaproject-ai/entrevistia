@@ -50,7 +50,9 @@
       "Bash(find:*)",
       "Bash(npm uninstall:*)",
       "Bash(node scripts/migrate-billing-data.js:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node scripts/apply-migrations.js:*)"
     ],
     "deny": [],
     "ask": []

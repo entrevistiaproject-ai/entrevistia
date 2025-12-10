@@ -279,7 +279,7 @@ export default function ConfiguracoesPage() {
           <CardContent className="p-4 flex items-center gap-3">
             <AlertCircle className="h-5 w-5 text-amber-400" />
             <p className="text-amber-400 text-sm">
-              Você tem alterações não salvas. Clique em "Salvar Alterações" para aplicá-las.
+              Você tem alterações não salvas. Clique em &quot;Salvar Alterações&quot; para aplicá-las.
             </p>
           </CardContent>
         </Card>
