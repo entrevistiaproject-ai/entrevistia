@@ -20,6 +20,7 @@ import {
   Clock,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { DecisaoCandidato } from "@/components/entrevistas/decisao-candidato";
 
 interface Candidato {
   id: string;
@@ -58,11 +59,15 @@ interface Participacao {
   status: string;
   notaGeral: number | null;
   compatibilidadeVaga: number | null;
-  recomendacao: string | null;
+  recomendacao: "recomendado" | "recomendado_com_ressalvas" | "nao_recomendado" | null;
   resumoGeral: string | null;
   competencias: Competencia[] | null;
   avaliadoEm: Date | null;
   concluidaEm: Date | null;
+  // Decisão do recrutador
+  decisaoRecrutador: "aprovado" | "reprovado" | null;
+  decisaoRecrutadorEm: Date | null;
+  decisaoRecrutadorObservacao: string | null;
 }
 
 // Funções para notas de 0-100 (competências e compatibilidade)
@@ -469,7 +474,7 @@ export default function ResultadoCandidatoPage() {
             </Card>
           </div>
 
-          {/* Recomendação */}
+          {/* Recomendação da IA */}
           {recomendacaoConfig && RecomendacaoIcon && (
             <Card className={`border-2 ${recomendacaoConfig.borderColor} ${recomendacaoConfig.bgColor}`}>
               <CardContent className="pt-6">
@@ -495,6 +500,37 @@ export default function ResultadoCandidatoPage() {
             </Card>
           )}
         </>
+      )}
+
+      {/* Decisão do Recrutador - Card de ação principal */}
+      {participacao?.status === 'concluida' && candidato.entrevistaId && (
+        <Card className="border-2 border-slate-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold">Sua Decisão</h3>
+                <p className="text-sm text-muted-foreground">
+                  Decida se o candidato deve avançar para a próxima fase
+                </p>
+              </div>
+              <DecisaoCandidato
+                candidatoId={candidato.id}
+                entrevistaId={candidato.entrevistaId}
+                candidatoNome={candidato.nome}
+                decisaoAtual={participacao.decisaoRecrutador}
+                recomendacaoIA={participacao.recomendacao}
+                observacaoAtual={participacao.decisaoRecrutadorObservacao}
+                onDecisaoAtualizada={fetchData}
+              />
+            </div>
+            {participacao.decisaoRecrutadorObservacao && (
+              <div className="mt-4 p-3 bg-slate-50 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Observação:</p>
+                <p className="text-sm">{participacao.decisaoRecrutadorObservacao}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       {/* Resumo Executivo (se tiver) */}

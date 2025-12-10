@@ -37,6 +37,10 @@ export async function GET(
         competencias: candidatoEntrevistas.competencias,
         avaliadoEm: candidatoEntrevistas.avaliadoEm,
         concluidaEm: candidatoEntrevistas.concluidaEm,
+        // Decisão manual do recrutador
+        decisaoRecrutador: candidatoEntrevistas.decisaoRecrutador,
+        decisaoRecrutadorEm: candidatoEntrevistas.decisaoRecrutadorEm,
+        decisaoRecrutadorObservacao: candidatoEntrevistas.decisaoRecrutadorObservacao,
       })
       .from(candidatoEntrevistas)
       .where(
