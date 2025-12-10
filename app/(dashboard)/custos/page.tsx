@@ -324,7 +324,7 @@ export default function CustosPage() {
                 Entrevistas por Período
               </CardTitle>
               <CardDescription>
-                Visualize o volume de entrevistas realizadas e analisadas
+                Total de entrevistas e quantas foram analisadas com IA
               </CardDescription>
             </div>
             <Tabs value={graficoTipo} onValueChange={(v) => setGraficoTipo(v as GraficoTipo)}>
@@ -346,23 +346,27 @@ export default function CustosPage() {
                     label: new Date(item.data + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }),
                     total: item.total,
                     analisadas: item.analisadas,
+                    pendentes: item.total - item.analisadas,
                   }));
                 case "semana":
                   return (graficos?.porSemana || []).map((item) => {
                     const [ano, semana] = item.semana.split("-");
                     return {
-                      label: `S${semana}/${ano.slice(2)}`,
+                      label: `Semana ${semana}`,
                       total: item.total,
                       analisadas: item.analisadas,
+                      pendentes: item.total - item.analisadas,
                     };
                   });
                 case "mes":
                   return (graficos?.porMes || []).map((item) => {
                     const [ano, mes] = item.mes.split("-");
+                    const data = new Date(parseInt(ano), parseInt(mes) - 1);
                     return {
-                      label: new Date(parseInt(ano), parseInt(mes) - 1).toLocaleDateString("pt-BR", { month: "short", year: "2-digit" }),
+                      label: data.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""),
                       total: item.total,
                       analisadas: item.analisadas,
+                      pendentes: item.total - item.analisadas,
                     };
                   });
                 case "ano":
@@ -370,6 +374,7 @@ export default function CustosPage() {
                     label: item.ano,
                     total: item.total,
                     analisadas: item.analisadas,
+                    pendentes: item.total - item.analisadas,
                   }));
                 default:
                   return [];
@@ -385,47 +390,86 @@ export default function CustosPage() {
               );
             }
 
+            // Calcula totais para exibir resumo
+            const totalEntrevistas = dadosGrafico.reduce((acc, d) => acc + d.total, 0);
+            const totalAnalisadas = dadosGrafico.reduce((acc, d) => acc + d.analisadas, 0);
+            const percentualAnalisado = totalEntrevistas > 0 ? Math.round((totalAnalisadas / totalEntrevistas) * 100) : 0;
+
             return (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={dadosGrafico} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis
-                    dataKey="label"
-                    tick={{ fontSize: 12 }}
-                    tickLine={false}
-                    axisLine={false}
-                    className="text-muted-foreground"
-                  />
-                  <YAxis
-                    tick={{ fontSize: 12 }}
-                    tickLine={false}
-                    axisLine={false}
-                    className="text-muted-foreground"
-                    allowDecimals={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                    }}
-                    labelStyle={{ color: "hsl(var(--foreground))" }}
-                  />
-                  <Legend />
-                  <Bar
-                    dataKey="total"
-                    name="Total de Entrevistas"
-                    fill="hsl(var(--primary))"
-                    radius={[4, 4, 0, 0]}
-                  />
-                  <Bar
-                    dataKey="analisadas"
-                    name="Analisadas com IA"
-                    fill="hsl(142, 76%, 36%)"
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="space-y-4">
+                {/* Resumo do período */}
+                <div className="flex flex-wrap gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-sm bg-emerald-500" />
+                    <span className="text-muted-foreground">Analisadas: <span className="font-semibold text-foreground">{totalAnalisadas}</span></span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-sm bg-slate-300" />
+                    <span className="text-muted-foreground">Pendentes: <span className="font-semibold text-foreground">{totalEntrevistas - totalAnalisadas}</span></span>
+                  </div>
+                  <div className="flex items-center gap-2 ml-auto">
+                    <span className="text-muted-foreground">Taxa de análise: <span className="font-semibold text-emerald-600">{percentualAnalisado}%</span></span>
+                  </div>
+                </div>
+
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={dadosGrafico} margin={{ top: 10, right: 10, left: -10, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-muted/50" />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 12 }}
+                      tickLine={false}
+                      axisLine={false}
+                      className="text-muted-foreground"
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12 }}
+                      tickLine={false}
+                      axisLine={false}
+                      className="text-muted-foreground"
+                      allowDecimals={false}
+                    />
+                    <Tooltip
+                      cursor={{ fill: 'hsl(var(--muted)/0.3)' }}
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                      }}
+                      labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600, marginBottom: 4 }}
+                      formatter={(value: number, name: string, props) => {
+                        const total = props.payload.total;
+                        if (name === "Analisadas") {
+                          const percent = total > 0 ? Math.round((value / total) * 100) : 0;
+                          return [`${value} (${percent}%)`, name];
+                        }
+                        return [value, name];
+                      }}
+                    />
+                    <Legend
+                      verticalAlign="top"
+                      height={36}
+                      iconType="square"
+                      iconSize={10}
+                    />
+                    <Bar
+                      dataKey="analisadas"
+                      name="Analisadas"
+                      stackId="a"
+                      fill="#10b981"
+                      radius={[0, 0, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="pendentes"
+                      name="Pendentes"
+                      stackId="a"
+                      fill="#cbd5e1"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             );
           })()}
         </CardContent>
