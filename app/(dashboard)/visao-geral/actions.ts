@@ -1,0 +1,370 @@
+"use server";
+
+import { auth } from "@/auth";
+import { getDB } from "@/lib/db";
+import {
+  entrevistas,
+  candidatos,
+  candidatoEntrevistas,
+} from "@/lib/db/schema";
+import { eq, and, isNull, sql, desc, gte } from "drizzle-orm";
+
+export interface DashboardMetrics {
+  // KPIs principais
+  totalCandidatos: number;
+  totalEntrevistas: number;
+  entrevistasAtivas: number;
+  candidatosAvaliados: number;
+  candidatosAprovados: number;
+  candidatosReprovados: number;
+  candidatosPendentes: number;
+  taxaConclusao: number;
+  taxaAprovacao: number;
+  scoreMediaGeral: number;
+
+  // Dados para gráficos
+  candidatosPorStatus: {
+    status: string;
+    count: number;
+    label: string;
+  }[];
+
+  entrevistasPorMes: {
+    mes: string;
+    total: number;
+    concluidas: number;
+  }[];
+
+  scoresPorEntrevista: {
+    titulo: string;
+    mediaScore: number;
+    totalCandidatos: number;
+  }[];
+
+  funil: {
+    etapa: string;
+    valor: number;
+    percentual: number;
+  }[];
+
+  // Listas para ação rápida
+  candidatosPendentesAvaliacao: {
+    id: string;
+    nome: string;
+    email: string;
+    entrevistaTitulo: string;
+    entrevistaId: string;
+    concluidaEm: Date;
+    notaGeral: number | null;
+  }[];
+
+  entrevistasRecentes: {
+    id: string;
+    titulo: string;
+    cargo: string | null;
+    status: string;
+    totalCandidatos: number;
+    totalConcluidos: number;
+    createdAt: Date;
+  }[];
+
+  atividadeRecente: {
+    tipo: 'entrevista_criada' | 'candidato_concluiu' | 'candidato_aprovado' | 'candidato_reprovado';
+    descricao: string;
+    data: Date;
+    link?: string;
+  }[];
+}
+
+export async function getDashboardMetrics(): Promise<{
+  success: boolean;
+  data?: DashboardMetrics;
+  error?: string;
+}> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Usuário não autenticado" };
+  }
+
+  const userId = session.user.id;
+
+  try {
+    const db = getDB();
+
+    // 1. KPIs Principais
+    const [kpis] = await db
+      .select({
+        totalCandidatos: sql<number>`COUNT(DISTINCT ${candidatos.id})::int`,
+      })
+      .from(candidatos)
+      .where(and(eq(candidatos.userId, userId), isNull(candidatos.deletedAt)));
+
+    const [entrevistasStats] = await db
+      .select({
+        total: sql<number>`COUNT(*)::int`,
+        ativas: sql<number>`SUM(CASE WHEN ${entrevistas.status} IN ('active', 'publicada', 'em_andamento') THEN 1 ELSE 0 END)::int`,
+      })
+      .from(entrevistas)
+      .where(and(eq(entrevistas.userId, userId), isNull(entrevistas.deletedAt)));
+
+    // Estatísticas de candidato-entrevistas
+    const [candidatoEntrevistasStats] = await db
+      .select({
+        total: sql<number>`COUNT(*)::int`,
+        concluidos: sql<number>`SUM(CASE WHEN ${candidatoEntrevistas.status} = 'concluida' THEN 1 ELSE 0 END)::int`,
+        aprovados: sql<number>`SUM(CASE WHEN ${candidatoEntrevistas.decisaoRecrutador} = 'aprovado' THEN 1 ELSE 0 END)::int`,
+        reprovados: sql<number>`SUM(CASE WHEN ${candidatoEntrevistas.decisaoRecrutador} = 'reprovado' THEN 1 ELSE 0 END)::int`,
+        pendentes: sql<number>`SUM(CASE WHEN ${candidatoEntrevistas.status} = 'concluida' AND ${candidatoEntrevistas.decisaoRecrutador} IS NULL THEN 1 ELSE 0 END)::int`,
+        mediaScore: sql<number>`ROUND(AVG(${candidatoEntrevistas.notaGeral})::numeric, 0)::int`,
+      })
+      .from(candidatoEntrevistas)
+      .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
+      .where(and(eq(entrevistas.userId, userId), isNull(entrevistas.deletedAt)));
+
+    // 2. Candidatos por Status (para gráfico de pizza)
+    const candidatosPorStatus = [
+      { status: "pendentes", count: candidatoEntrevistasStats?.pendentes || 0, label: "Pendentes" },
+      { status: "aprovados", count: candidatoEntrevistasStats?.aprovados || 0, label: "Aprovados" },
+      { status: "reprovados", count: candidatoEntrevistasStats?.reprovados || 0, label: "Reprovados" },
+      { status: "em_andamento", count: (candidatoEntrevistasStats?.total || 0) - (candidatoEntrevistasStats?.concluidos || 0), label: "Em Andamento" },
+    ].filter(item => item.count > 0);
+
+    // 3. Entrevistas por mês (últimos 6 meses)
+    const seisAMeses = new Date();
+    seisAMeses.setMonth(seisAMeses.getMonth() - 6);
+
+    const entrevistasPorMesRaw = await db
+      .select({
+        mes: sql<string>`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY-MM')`,
+        total: sql<number>`COUNT(*)::int`,
+        concluidas: sql<number>`SUM(CASE WHEN ${candidatoEntrevistas.status} = 'concluida' THEN 1 ELSE 0 END)::int`,
+      })
+      .from(candidatoEntrevistas)
+      .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
+      .where(
+        and(
+          eq(entrevistas.userId, userId),
+          isNull(entrevistas.deletedAt),
+          gte(candidatoEntrevistas.createdAt, seisAMeses)
+        )
+      )
+      .groupBy(sql`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY-MM')`)
+      .orderBy(sql`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY-MM')`);
+
+    // Formatar nomes dos meses
+    const mesesNomes: Record<string, string> = {
+      "01": "Jan", "02": "Fev", "03": "Mar", "04": "Abr",
+      "05": "Mai", "06": "Jun", "07": "Jul", "08": "Ago",
+      "09": "Set", "10": "Out", "11": "Nov", "12": "Dez"
+    };
+
+    const entrevistasPorMes = entrevistasPorMesRaw.map(item => ({
+      mes: item.mes ? `${mesesNomes[item.mes.split('-')[1]]}/${item.mes.split('-')[0].slice(2)}` : 'N/A',
+      total: item.total,
+      concluidas: item.concluidas,
+    }));
+
+    // 4. Score médio por entrevista (top 5)
+    const scoresPorEntrevista = await db
+      .select({
+        titulo: entrevistas.titulo,
+        mediaScore: sql<number>`ROUND(AVG(${candidatoEntrevistas.notaGeral})::numeric, 0)::int`,
+        totalCandidatos: sql<number>`COUNT(*)::int`,
+      })
+      .from(candidatoEntrevistas)
+      .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
+      .where(
+        and(
+          eq(entrevistas.userId, userId),
+          isNull(entrevistas.deletedAt),
+          sql`${candidatoEntrevistas.notaGeral} IS NOT NULL`
+        )
+      )
+      .groupBy(entrevistas.id, entrevistas.titulo)
+      .orderBy(desc(sql`AVG(${candidatoEntrevistas.notaGeral})`))
+      .limit(5);
+
+    // 5. Funil de conversão
+    const totalConvites = candidatoEntrevistasStats?.total || 0;
+    const totalConcluidos = candidatoEntrevistasStats?.concluidos || 0;
+    const totalAvaliados = (candidatoEntrevistasStats?.aprovados || 0) + (candidatoEntrevistasStats?.reprovados || 0);
+    const totalAprovados = candidatoEntrevistasStats?.aprovados || 0;
+
+    const funil = [
+      { etapa: "Convidados", valor: totalConvites, percentual: 100 },
+      { etapa: "Concluíram", valor: totalConcluidos, percentual: totalConvites > 0 ? Math.round((totalConcluidos / totalConvites) * 100) : 0 },
+      { etapa: "Avaliados", valor: totalAvaliados, percentual: totalConvites > 0 ? Math.round((totalAvaliados / totalConvites) * 100) : 0 },
+      { etapa: "Aprovados", valor: totalAprovados, percentual: totalConvites > 0 ? Math.round((totalAprovados / totalConvites) * 100) : 0 },
+    ];
+
+    // 6. Candidatos pendentes de avaliação (concluíram mas não foram avaliados)
+    const candidatosPendentesAvaliacao = await db
+      .select({
+        id: candidatos.id,
+        nome: candidatos.nome,
+        email: candidatos.email,
+        entrevistaTitulo: entrevistas.titulo,
+        entrevistaId: entrevistas.id,
+        concluidaEm: candidatoEntrevistas.concluidaEm,
+        notaGeral: candidatoEntrevistas.notaGeral,
+      })
+      .from(candidatoEntrevistas)
+      .innerJoin(candidatos, eq(candidatoEntrevistas.candidatoId, candidatos.id))
+      .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
+      .where(
+        and(
+          eq(entrevistas.userId, userId),
+          isNull(entrevistas.deletedAt),
+          eq(candidatoEntrevistas.status, "concluida"),
+          isNull(candidatoEntrevistas.decisaoRecrutador)
+        )
+      )
+      .orderBy(desc(candidatoEntrevistas.concluidaEm))
+      .limit(5);
+
+    // 7. Entrevistas recentes
+    const entrevistasRecentes = await db
+      .select({
+        id: entrevistas.id,
+        titulo: entrevistas.titulo,
+        cargo: entrevistas.cargo,
+        status: entrevistas.status,
+        createdAt: entrevistas.createdAt,
+        totalCandidatos: sql<number>`(
+          SELECT COUNT(*)::int FROM ${candidatoEntrevistas} ce WHERE ce.entrevista_id = ${entrevistas.id}
+        )`,
+        totalConcluidos: sql<number>`(
+          SELECT COUNT(*)::int FROM ${candidatoEntrevistas} ce WHERE ce.entrevista_id = ${entrevistas.id} AND ce.status = 'concluida'
+        )`,
+      })
+      .from(entrevistas)
+      .where(and(eq(entrevistas.userId, userId), isNull(entrevistas.deletedAt)))
+      .orderBy(desc(entrevistas.createdAt))
+      .limit(5);
+
+    // 8. Atividade recente (últimas ações)
+    const atividadeRecente: DashboardMetrics['atividadeRecente'] = [];
+
+    // Entrevistas criadas recentemente
+    const entrevistasCriadas = await db
+      .select({
+        id: entrevistas.id,
+        titulo: entrevistas.titulo,
+        createdAt: entrevistas.createdAt,
+      })
+      .from(entrevistas)
+      .where(and(eq(entrevistas.userId, userId), isNull(entrevistas.deletedAt)))
+      .orderBy(desc(entrevistas.createdAt))
+      .limit(3);
+
+    entrevistasCriadas.forEach(e => {
+      atividadeRecente.push({
+        tipo: 'entrevista_criada',
+        descricao: `Entrevista "${e.titulo}" criada`,
+        data: e.createdAt,
+        link: `/entrevistas/${e.id}`,
+      });
+    });
+
+    // Candidatos que concluíram recentemente
+    const candidatosConcluiram = await db
+      .select({
+        candidatoNome: candidatos.nome,
+        entrevistaTitulo: entrevistas.titulo,
+        entrevistaId: entrevistas.id,
+        concluidaEm: candidatoEntrevistas.concluidaEm,
+        decisao: candidatoEntrevistas.decisaoRecrutador,
+      })
+      .from(candidatoEntrevistas)
+      .innerJoin(candidatos, eq(candidatoEntrevistas.candidatoId, candidatos.id))
+      .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
+      .where(
+        and(
+          eq(entrevistas.userId, userId),
+          isNull(entrevistas.deletedAt),
+          eq(candidatoEntrevistas.status, "concluida")
+        )
+      )
+      .orderBy(desc(candidatoEntrevistas.concluidaEm))
+      .limit(5);
+
+    candidatosConcluiram.forEach(c => {
+      if (c.decisao === 'aprovado') {
+        atividadeRecente.push({
+          tipo: 'candidato_aprovado',
+          descricao: `${c.candidatoNome} foi aprovado em "${c.entrevistaTitulo}"`,
+          data: c.concluidaEm || new Date(),
+          link: `/entrevistas/${c.entrevistaId}`,
+        });
+      } else if (c.decisao === 'reprovado') {
+        atividadeRecente.push({
+          tipo: 'candidato_reprovado',
+          descricao: `${c.candidatoNome} foi reprovado em "${c.entrevistaTitulo}"`,
+          data: c.concluidaEm || new Date(),
+          link: `/entrevistas/${c.entrevistaId}`,
+        });
+      } else {
+        atividadeRecente.push({
+          tipo: 'candidato_concluiu',
+          descricao: `${c.candidatoNome} concluiu "${c.entrevistaTitulo}"`,
+          data: c.concluidaEm || new Date(),
+          link: `/entrevistas/${c.entrevistaId}`,
+        });
+      }
+    });
+
+    // Ordenar atividade por data
+    atividadeRecente.sort((a, b) => b.data.getTime() - a.data.getTime());
+
+    // Calcular taxas
+    const taxaConclusao = totalConvites > 0 ? Math.round((totalConcluidos / totalConvites) * 100) : 0;
+    const taxaAprovacao = totalAvaliados > 0 ? Math.round((totalAprovados / totalAvaliados) * 100) : 0;
+
+    return {
+      success: true,
+      data: {
+        totalCandidatos: kpis?.totalCandidatos || 0,
+        totalEntrevistas: entrevistasStats?.total || 0,
+        entrevistasAtivas: entrevistasStats?.ativas || 0,
+        candidatosAvaliados: totalAvaliados,
+        candidatosAprovados: totalAprovados,
+        candidatosReprovados: candidatoEntrevistasStats?.reprovados || 0,
+        candidatosPendentes: candidatoEntrevistasStats?.pendentes || 0,
+        taxaConclusao,
+        taxaAprovacao,
+        scoreMediaGeral: candidatoEntrevistasStats?.mediaScore || 0,
+        candidatosPorStatus,
+        entrevistasPorMes,
+        scoresPorEntrevista: scoresPorEntrevista.map(s => ({
+          titulo: s.titulo,
+          mediaScore: s.mediaScore || 0,
+          totalCandidatos: s.totalCandidatos,
+        })),
+        funil,
+        candidatosPendentesAvaliacao: candidatosPendentesAvaliacao.map(c => ({
+          id: c.id,
+          nome: c.nome,
+          email: c.email,
+          entrevistaTitulo: c.entrevistaTitulo,
+          entrevistaId: c.entrevistaId,
+          concluidaEm: c.concluidaEm || new Date(),
+          notaGeral: c.notaGeral,
+        })),
+        entrevistasRecentes: entrevistasRecentes.map(e => ({
+          id: e.id,
+          titulo: e.titulo,
+          cargo: e.cargo,
+          status: e.status,
+          totalCandidatos: e.totalCandidatos,
+          totalConcluidos: e.totalConcluidos,
+          createdAt: e.createdAt,
+        })),
+        atividadeRecente: atividadeRecente.slice(0, 8),
+      },
+    };
+  } catch (error) {
+    console.error("Erro ao buscar métricas do dashboard:", error);
+    return { success: false, error: "Erro ao buscar métricas" };
+  }
+}

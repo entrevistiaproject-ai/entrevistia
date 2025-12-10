@@ -26,9 +26,9 @@ import { SupportWidget } from "@/components/support/support-widget";
 
 const navItems = [
   {
-    href: "/dashboard",
+    href: "/visao-geral",
     icon: BarChart3,
-    label: "Dashboard",
+    label: "Visão Geral",
   },
   {
     href: "/entrevistas",

@@ -22,7 +22,7 @@ import { SupportWidget } from "@/components/support/support-widget";
 const mainMenuItems = [
   {
     title: "Visão geral",
-    href: "/dashboard",
+    href: "/visao-geral",
     icon: BarChart3,
   },
   {
