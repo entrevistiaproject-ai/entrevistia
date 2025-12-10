@@ -56,8 +56,13 @@ export function EntrevistaCard({ entrevista }: EntrevistaCardProps) {
   const statusInfo = statusConfig[entrevista.status as keyof typeof statusConfig] || statusConfig.active;
 
   // Calcula taxa de conclusão
-  const taxaConclusao = entrevista.totalCandidatos > 0
-    ? Math.round((entrevista.totalRespostas / entrevista.totalCandidatos) * 100)
+  // totalRespostas = total de perguntas respondidas por todos os candidatos
+  // totalCandidatos = candidatos que participaram
+  // totalPerguntas = perguntas da entrevista
+  // Taxa = (respostas recebidas) / (candidatos * perguntas esperadas) * 100
+  const respostasEsperadas = entrevista.totalCandidatos * entrevista.totalPerguntas;
+  const taxaConclusao = respostasEsperadas > 0
+    ? Math.min(100, Math.round((entrevista.totalRespostas / respostasEsperadas) * 100))
     : 0;
 
   const handleCardClick = (e: React.MouseEvent) => {

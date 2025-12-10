@@ -23,13 +23,9 @@ import {
   MessageSquare,
   Users,
   ClipboardList,
-  Hash,
   DollarSign,
-  TrendingUp,
-  Briefcase,
   ChevronRight,
   History,
-  Eye,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -81,23 +77,17 @@ interface Totais {
   faturasVencidas: number;
 }
 
-const tipoTransacaoLabels: Record<string, string> = {
-  transcricao_audio: "Transcrição de Áudio",
-  analise_ia: "Análise de IA",
-  analise_pergunta: "Análise por Pergunta",
-  taxa_base_candidato: "Taxa Base por Candidato",
-  pergunta_criada: "Criação de Pergunta",
-  entrevista_criada: "Criação de Entrevista",
-};
-
-const tipoTransacaoIcons: Record<string, React.ReactNode> = {
-  transcricao_audio: <MessageSquare className="h-4 w-4" />,
-  analise_ia: <TrendingUp className="h-4 w-4" />,
-  analise_pergunta: <ClipboardList className="h-4 w-4" />,
-  taxa_base_candidato: <Users className="h-4 w-4" />,
-  pergunta_criada: <FileText className="h-4 w-4" />,
-  entrevista_criada: <Briefcase className="h-4 w-4" />,
-};
+// Interface para avaliações agrupadas
+interface AvaliacaoAgrupada {
+  id: string;
+  descricao: string;
+  totalPerguntas: number;
+  taxaBase: number;
+  valorPerguntas: number;
+  valorTotal: number;
+  createdAt: string;
+  status: string;
+}
 
 export default function FaturaPage() {
   const [loading, setLoading] = useState(true);
@@ -257,19 +247,107 @@ export default function FaturaPage() {
     }
   };
 
-  // Agrupar transações por tipo
-  const transacoesPorTipo = selectedFatura?.transacoes.reduce(
-    (acc, t) => {
-      const tipo = t.tipo;
-      if (!acc[tipo]) {
-        acc[tipo] = { count: 0, total: 0 };
+  // Agrupar transações por avaliação de candidato
+  // Cada avaliação consiste em: taxa_base_candidato + N * analise_pergunta
+  const avaliacoesAgrupadas: AvaliacaoAgrupada[] = (() => {
+    if (!selectedFatura?.transacoes) return [];
+
+    const avaliacoes: AvaliacaoAgrupada[] = [];
+    const transacoesOrdenadas = [...selectedFatura.transacoes].sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+
+    // Agrupar por metadados.respostaId ou por proximidade temporal
+    const grupos: Map<string, typeof transacoesOrdenadas> = new Map();
+
+    transacoesOrdenadas.forEach((t) => {
+      // Usa respostaId dos metadados como chave de agrupamento
+      const respostaId = (t.metadados as Record<string, unknown>)?.respostaId as string | undefined;
+      const candidatoId = (t.metadados as Record<string, unknown>)?.candidatoId as string | undefined;
+
+      // Chave de agrupamento: prefere respostaId, depois candidatoId+data
+      let chave = respostaId || candidatoId;
+
+      if (!chave) {
+        // Agrupa por data (mesmo minuto)
+        const data = new Date(t.createdAt);
+        chave = `${data.toISOString().slice(0, 16)}`;
       }
-      acc[tipo].count++;
-      acc[tipo].total += t.valorCobrado;
-      return acc;
-    },
-    {} as Record<string, { count: number; total: number }>
-  );
+
+      if (!grupos.has(chave)) {
+        grupos.set(chave, []);
+      }
+      grupos.get(chave)!.push(t);
+    });
+
+    // Converter grupos em avaliações
+    grupos.forEach((transacoes, chave) => {
+      const taxaBaseTransacao = transacoes.find(t => t.tipo === "taxa_base_candidato");
+      const perguntasTransacoes = transacoes.filter(t => t.tipo === "analise_pergunta");
+
+      // Se tem taxa base ou perguntas, é uma avaliação de candidato
+      if (taxaBaseTransacao || perguntasTransacoes.length > 0) {
+        const taxaBase = taxaBaseTransacao?.valorCobrado || 0;
+        const valorPerguntas = perguntasTransacoes.reduce((sum, t) => sum + t.valorCobrado, 0);
+        const totalPerguntas = perguntasTransacoes.length;
+
+        // Pegar descrição do metadado ou gerar uma
+        const metadados = taxaBaseTransacao?.metadados as Record<string, unknown> | null;
+        const descricao = (metadados?.candidatoNome as string) ||
+                          taxaBaseTransacao?.descricao ||
+                          "Candidato avaliado";
+
+        avaliacoes.push({
+          id: chave,
+          descricao,
+          totalPerguntas,
+          taxaBase,
+          valorPerguntas,
+          valorTotal: taxaBase + valorPerguntas,
+          createdAt: taxaBaseTransacao?.createdAt || perguntasTransacoes[0]?.createdAt || "",
+          status: taxaBaseTransacao?.status || perguntasTransacoes[0]?.status || "concluida",
+        });
+      } else {
+        // Outras transações (criação de entrevista, etc.)
+        transacoes.forEach((t) => {
+          avaliacoes.push({
+            id: t.id,
+            descricao: t.descricao || getTipoLabel(t.tipo),
+            totalPerguntas: 0,
+            taxaBase: t.valorCobrado,
+            valorPerguntas: 0,
+            valorTotal: t.valorCobrado,
+            createdAt: t.createdAt,
+            status: t.status,
+          });
+        });
+      }
+    });
+
+    // Ordenar por data (mais recentes primeiro)
+    return avaliacoes.sort((a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  })();
+
+  // Helper para labels de tipo
+  const getTipoLabel = (tipo: string): string => {
+    const labels: Record<string, string> = {
+      taxa_base_candidato: "Taxa Base por Candidato",
+      analise_pergunta: "Análise por Pergunta",
+      transcricao_audio: "Transcrição de Áudio",
+      analise_ia: "Análise de IA",
+      pergunta_criada: "Criação de Pergunta",
+      entrevista_criada: "Criação de Entrevista",
+    };
+    return labels[tipo] || tipo;
+  };
+
+  // Totais para o resumo
+  const totalAvaliacoes = avaliacoesAgrupadas.filter(a => a.totalPerguntas > 0).length;
+  const totalTaxaBase = avaliacoesAgrupadas.reduce((sum, a) => sum + (a.totalPerguntas > 0 ? a.taxaBase : 0), 0);
+  const totalPerguntas = avaliacoesAgrupadas.reduce((sum, a) => sum + a.totalPerguntas, 0);
+  const totalValorPerguntas = avaliacoesAgrupadas.reduce((sum, a) => sum + a.valorPerguntas, 0);
 
   if (loading) {
     return (
@@ -511,82 +589,126 @@ export default function FaturaPage() {
                 </CardContent>
               </Card>
 
-              {/* Resumo por Tipo */}
-              {transacoesPorTipo && Object.keys(transacoesPorTipo).length > 0 && (
+              {/* Resumo de Cobranças */}
+              {totalAvaliacoes > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Resumo por Tipo de Cobrança</CardTitle>
+                    <CardTitle className="text-lg">Resumo de Cobranças</CardTitle>
+                    <CardDescription>
+                      Detalhamento dos custos por avaliação de candidatos
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {Object.entries(transacoesPorTipo).map(([tipo, data]) => (
-                        <div
-                          key={tipo}
-                          className="flex items-center justify-between p-3 rounded-lg bg-muted/30"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                              {tipoTransacaoIcons[tipo] || <Hash className="h-4 w-4" />}
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">
-                                {tipoTransacaoLabels[tipo] || tipo}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {data.count} {data.count === 1 ? "item" : "itens"}
-                              </p>
-                            </div>
+                    <div className="space-y-4">
+                      {/* Cards de resumo */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Users className="h-4 w-4 text-blue-600" />
+                            <p className="text-sm font-medium text-blue-700 dark:text-blue-400">Candidatos Avaliados</p>
                           </div>
-                          <span className="font-semibold">{formatCurrency(data.total)}</span>
+                          <p className="text-2xl font-bold text-blue-600">{totalAvaliacoes}</p>
+                          <p className="text-xs text-blue-600/70 mt-1">
+                            {formatCurrency(totalTaxaBase)} em taxas base
+                          </p>
                         </div>
-                      ))}
+                        <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
+                          <div className="flex items-center gap-2 mb-1">
+                            <ClipboardList className="h-4 w-4 text-purple-600" />
+                            <p className="text-sm font-medium text-purple-700 dark:text-purple-400">Perguntas Analisadas</p>
+                          </div>
+                          <p className="text-2xl font-bold text-purple-600">{totalPerguntas}</p>
+                          <p className="text-xs text-purple-600/70 mt-1">
+                            {formatCurrency(totalValorPerguntas)} em análises
+                          </p>
+                        </div>
+                        <div className="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800">
+                          <div className="flex items-center gap-2 mb-1">
+                            <DollarSign className="h-4 w-4 text-emerald-600" />
+                            <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">Custo Médio</p>
+                          </div>
+                          <p className="text-2xl font-bold text-emerald-600">
+                            {totalAvaliacoes > 0 ? formatCurrency((totalTaxaBase + totalValorPerguntas) / totalAvaliacoes) : formatCurrency(0)}
+                          </p>
+                          <p className="text-xs text-emerald-600/70 mt-1">
+                            por candidato
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Explicação de preços */}
+                      <div className="p-3 rounded-lg bg-muted/30 border">
+                        <p className="text-xs text-muted-foreground">
+                          <span className="font-medium">Como funciona:</span> Cada avaliação custa R$ 1,00 (taxa base) + R$ 0,25 por pergunta analisada.
+                        </p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
               )}
 
-              {/* Lista de Transações */}
+              {/* Lista de Avaliações */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Transações ({selectedFatura.transacoes.length})</CardTitle>
-                  <CardDescription>Detalhamento de todas as cobranças</CardDescription>
+                  <CardTitle className="text-lg">Detalhamento ({avaliacoesAgrupadas.length})</CardTitle>
+                  <CardDescription>Histórico de cobranças por avaliação</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {selectedFatura.transacoes.length === 0 ? (
+                  {avaliacoesAgrupadas.length === 0 ? (
                     <div className="text-center py-8">
                       <Receipt className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
-                      <p className="text-muted-foreground">Nenhuma transação registrada</p>
+                      <p className="text-muted-foreground">Nenhuma cobrança registrada</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {selectedFatura.transacoes.map((transacao) => (
+                      {avaliacoesAgrupadas.map((avaliacao) => (
                         <div
-                          key={transacao.id}
+                          key={avaliacao.id}
                           className="flex items-start justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
                         >
                           <div className="flex items-start gap-3 flex-1 min-w-0">
-                            <div className="p-2 rounded-lg bg-background text-muted-foreground mt-0.5">
-                              {tipoTransacaoIcons[transacao.tipo] || <Hash className="h-4 w-4" />}
+                            <div className={cn(
+                              "p-2 rounded-lg mt-0.5",
+                              avaliacao.totalPerguntas > 0
+                                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600"
+                                : "bg-muted text-muted-foreground"
+                            )}>
+                              {avaliacao.totalPerguntas > 0 ? (
+                                <Users className="h-4 w-4" />
+                              ) : (
+                                <Receipt className="h-4 w-4" />
+                              )}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <p className="text-sm font-medium">
-                                  {tipoTransacaoLabels[transacao.tipo] || transacao.tipo}
+                                  {avaliacao.totalPerguntas > 0 ? "Candidato avaliado" : avaliacao.descricao}
                                 </p>
-                                {getTransacaoStatusBadge(transacao.status)}
+                                {getTransacaoStatusBadge(avaliacao.status)}
                               </div>
-                              {transacao.descricao && (
-                                <p className="text-sm text-muted-foreground mt-1 truncate">
-                                  {transacao.descricao}
+
+                              {avaliacao.totalPerguntas > 0 ? (
+                                <div className="mt-2 space-y-1">
+                                  <p className="text-sm text-muted-foreground">
+                                    {avaliacao.totalPerguntas} {avaliacao.totalPerguntas === 1 ? "pergunta" : "perguntas"}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground font-mono">
+                                    {formatCurrency(avaliacao.taxaBase)} + {formatCurrency(avaliacao.valorPerguntas)} = {formatCurrency(avaliacao.valorTotal)}
+                                  </p>
+                                </div>
+                              ) : (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {avaliacao.descricao}
                                 </p>
                               )}
+
                               <p className="text-xs text-muted-foreground mt-2">
-                                {formatDateTime(transacao.createdAt)}
+                                {formatDateTime(avaliacao.createdAt)}
                               </p>
                             </div>
                           </div>
                           <div className="text-right ml-4 shrink-0">
-                            <p className="text-lg font-semibold">{formatCurrency(transacao.valorCobrado)}</p>
+                            <p className="text-lg font-semibold">{formatCurrency(avaliacao.valorTotal)}</p>
                           </div>
                         </div>
                       ))}
