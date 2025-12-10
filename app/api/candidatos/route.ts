@@ -70,38 +70,91 @@ export async function POST(request: Request) {
       entrevista = entrevistaResult;
     }
 
-    // Criar candidato
-    const [novoCandidato] = await db
-      .insert(candidatos)
-      .values({
-        userId,
-        nome,
-        email,
-        telefone: telefone || null,
-        linkedin: linkedin || null,
-        aceitouTermosEntrevista: false,
-        consentimentoTratamentoDados: false,
-        finalidadeTratamento: entrevistaId
-          ? `Processo seletivo - Entrevista ${entrevistaId}`
-          : "Processo seletivo",
-        origemCadastro: "cadastro_manual_recrutador",
-      })
-      .returning();
+    // Verificar se já existe candidato com este email para este recrutador
+    const [candidatoExistente] = await db
+      .select()
+      .from(candidatos)
+      .where(
+        and(
+          eq(candidatos.email, email),
+          eq(candidatos.userId, userId),
+          isNull(candidatos.deletedAt)
+        )
+      )
+      .limit(1);
+
+    let novoCandidato;
+
+    if (candidatoExistente) {
+      // Atualizar candidato existente com dados mais recentes
+      [novoCandidato] = await db
+        .update(candidatos)
+        .set({
+          nome,
+          telefone: telefone || candidatoExistente.telefone,
+          linkedin: linkedin || candidatoExistente.linkedin,
+          updatedAt: new Date(),
+        })
+        .where(eq(candidatos.id, candidatoExistente.id))
+        .returning();
+    } else {
+      // Criar novo candidato
+      [novoCandidato] = await db
+        .insert(candidatos)
+        .values({
+          userId,
+          nome,
+          email,
+          telefone: telefone || null,
+          linkedin: linkedin || null,
+          aceitouTermosEntrevista: false,
+          consentimentoTratamentoDados: false,
+          finalidadeTratamento: entrevistaId
+            ? `Processo seletivo - Entrevista ${entrevistaId}`
+            : "Processo seletivo",
+          origemCadastro: "cadastro_manual_recrutador",
+        })
+        .returning();
+    }
 
     // Se tem entrevistaId, vincular candidato à entrevista e enviar email
     if (entrevistaId && entrevista) {
+      // Verificar se já existe vínculo com esta entrevista
+      const [vinculoExistente] = await db
+        .select()
+        .from(candidatoEntrevistas)
+        .where(
+          and(
+            eq(candidatoEntrevistas.candidatoId, novoCandidato.id),
+            eq(candidatoEntrevistas.entrevistaId, entrevistaId)
+          )
+        )
+        .limit(1);
+
       // Calcular prazo de resposta (padrão: 48 horas)
       const prazoHoras = (entrevista.configuracoes as { prazoRespostaHoras?: number })?.prazoRespostaHoras || 48;
       const prazoResposta = new Date(Date.now() + prazoHoras * 60 * 60 * 1000);
 
-      // Criar vínculo candidato-entrevista
-      await db.insert(candidatoEntrevistas).values({
-        candidatoId: novoCandidato.id,
-        entrevistaId,
-        status: "pendente",
-        conviteEnviadoEm: new Date(),
-        prazoResposta,
-      });
+      if (!vinculoExistente) {
+        // Criar vínculo candidato-entrevista apenas se não existir
+        await db.insert(candidatoEntrevistas).values({
+          candidatoId: novoCandidato.id,
+          entrevistaId,
+          status: "pendente",
+          conviteEnviadoEm: new Date(),
+          prazoResposta,
+        });
+      } else {
+        // Atualizar convite existente (reenvio)
+        await db
+          .update(candidatoEntrevistas)
+          .set({
+            conviteEnviadoEm: new Date(),
+            prazoResposta,
+            updatedAt: new Date(),
+          })
+          .where(eq(candidatoEntrevistas.id, vinculoExistente.id));
+      }
 
       // Gerar link da entrevista
       const linkEntrevista = `${getBaseUrl()}/convite/${entrevista.slug}?candidatoId=${novoCandidato.id}`;
@@ -128,12 +181,26 @@ export async function POST(request: Request) {
         // Não falha a criação do candidato se o email falhar
       }
     } else if (entrevistaId) {
-      // Apenas vincular sem enviar email (sem dados da entrevista)
-      await db.insert(candidatoEntrevistas).values({
-        candidatoId: novoCandidato.id,
-        entrevistaId,
-        status: "pendente",
-      });
+      // Verificar se já existe vínculo com esta entrevista
+      const [vinculoExistente] = await db
+        .select()
+        .from(candidatoEntrevistas)
+        .where(
+          and(
+            eq(candidatoEntrevistas.candidatoId, novoCandidato.id),
+            eq(candidatoEntrevistas.entrevistaId, entrevistaId)
+          )
+        )
+        .limit(1);
+
+      if (!vinculoExistente) {
+        // Apenas vincular sem enviar email (sem dados da entrevista)
+        await db.insert(candidatoEntrevistas).values({
+          candidatoId: novoCandidato.id,
+          entrevistaId,
+          status: "pendente",
+        });
+      }
     }
 
     return NextResponse.json(novoCandidato, { status: 201 });
