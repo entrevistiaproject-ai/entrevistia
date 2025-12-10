@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { verifyAdminSession } from "@/lib/auth/admin-auth";
 import { getDB } from "@/lib/db";
-import { users, faturas, transacoes, entrevistas, candidatoEntrevistas } from "@/lib/db/schema";
-import { sql, eq, gte, desc, count, sum, and, isNull } from "drizzle-orm";
+import { users, faturas, transacoes, entrevistas, candidatoEntrevistas, auditLogs } from "@/lib/db/schema";
+import { sql, eq, gte, desc, count, and, isNull } from "drizzle-orm";
 
 export async function GET(request: Request) {
   try {
@@ -203,37 +203,88 @@ export async function GET(request: Request) {
     const margem = receita > 0 ? (lucro / receita) * 100 : 0;
     const ticketMedio = usuariosStats.ativos > 0 ? receita / usuariosStats.ativos : 0;
 
-    // Atividade Recente (simulada por enquanto - pode ser expandida com audit logs)
-    const atividadeRecente = [
-      {
-        id: "1",
-        tipo: "cadastro",
-        descricao: "Novo usuário cadastrado",
-        usuario: "Sistema",
-        data: "Há 5 min",
-      },
-      {
-        id: "2",
-        tipo: "pagamento",
-        descricao: "Pagamento de fatura processado",
-        usuario: "Sistema",
-        data: "Há 15 min",
-      },
-      {
-        id: "3",
-        tipo: "entrevista",
-        descricao: "Nova entrevista criada",
-        usuario: "Sistema",
-        data: "Há 30 min",
-      },
-      {
-        id: "4",
-        tipo: "analise",
-        descricao: "Análise de candidato concluída",
-        usuario: "Sistema",
-        data: "Há 1 hora",
-      },
-    ];
+    // Calcular churn rate real (usuários que cancelaram/expiraram no período)
+    const inicioMesPassado = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const fimMesPassado = new Date(now.getFullYear(), now.getMonth(), 0);
+
+    const [usuariosMesPassado] = await db
+      .select({ count: count() })
+      .from(users)
+      .where(
+        and(
+          sql`${users.createdAt} < ${fimMesPassado}`,
+          isNull(users.deletedAt)
+        )
+      );
+
+    const [usuariosCancelados] = await db
+      .select({ count: count() })
+      .from(users)
+      .where(
+        and(
+          gte(users.deletedAt, inicioMesPassado),
+          sql`${users.deletedAt} <= ${fimMesPassado}`
+        )
+      );
+
+    const [usuariosExpirados] = await db
+      .select({ count: count() })
+      .from(users)
+      .where(
+        and(
+          eq(users.planStatus, "expired"),
+          gte(users.planExpiresAt, inicioMesPassado),
+          sql`${users.planExpiresAt} <= ${fimMesPassado}`
+        )
+      );
+
+    const totalChurn = usuariosCancelados.count + usuariosExpirados.count;
+    const churnRate = usuariosMesPassado.count > 0 ? (totalChurn / usuariosMesPassado.count) * 100 : 0;
+
+    // Atividade Recente (dados reais do audit logs)
+    const logsRecentes = await db
+      .select({
+        id: auditLogs.id,
+        acao: auditLogs.acao,
+        entidade: auditLogs.entidade,
+        descricao: auditLogs.descricao,
+        userEmail: auditLogs.userEmail,
+        timestamp: auditLogs.timestamp,
+      })
+      .from(auditLogs)
+      .orderBy(desc(auditLogs.timestamp))
+      .limit(10);
+
+    const formatarTempoRelativo = (data: Date) => {
+      const agora = new Date();
+      const diffMs = agora.getTime() - data.getTime();
+      const diffMin = Math.floor(diffMs / 60000);
+      const diffHoras = Math.floor(diffMin / 60);
+      const diffDias = Math.floor(diffHoras / 24);
+
+      if (diffMin < 1) return "Agora";
+      if (diffMin < 60) return `Há ${diffMin} min`;
+      if (diffHoras < 24) return `Há ${diffHoras} hora${diffHoras > 1 ? "s" : ""}`;
+      return `Há ${diffDias} dia${diffDias > 1 ? "s" : ""}`;
+    };
+
+    const mapearTipoAtividade = (acao: string, entidade: string): string => {
+      if (entidade === "users" && acao === "create") return "cadastro";
+      if (entidade === "faturas" && acao === "update") return "pagamento";
+      if (entidade === "entrevistas" && acao === "create") return "entrevista";
+      if (entidade === "respostas" && acao === "create") return "analise";
+      if (acao === "delete") return "exclusao";
+      if (acao === "export") return "exportacao";
+      return "acao";
+    };
+
+    const atividadeRecente = logsRecentes.map((log) => ({
+      id: log.id,
+      tipo: mapearTipoAtividade(log.acao, log.entidade),
+      descricao: log.descricao || `${log.acao} em ${log.entidade}`,
+      usuario: log.userEmail || "Sistema",
+      data: formatarTempoRelativo(log.timestamp),
+    }));
 
     return NextResponse.json({
       kpis: {
@@ -248,7 +299,7 @@ export async function GET(request: Request) {
         totalEntrevistas: entrevistasStats.total,
         totalCandidatos: candidatosStats.total,
         ticketMedio,
-        churnRate: 0, // TODO: Calcular churn real
+        churnRate: Math.round(churnRate * 10) / 10
       },
       usuariosPorPlano: usuariosPorPlano.map((u) => ({
         plano: u.plano,

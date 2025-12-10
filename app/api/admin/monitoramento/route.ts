@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { verifyAdminSession } from "@/lib/auth/admin-auth";
+import { getDB } from "@/lib/db";
+import { auditLogs } from "@/lib/db/schema";
+import { sql, gte, count, desc, and } from "drizzle-orm";
 
 export async function GET() {
   try {
@@ -8,71 +11,195 @@ export async function GET() {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
-    // Status dos serviços (em produção, seria health check real)
+    const db = getDB();
+    const now = new Date();
+    const umDiaAtras = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const umaHoraAtras = new Date(now.getTime() - 60 * 60 * 1000);
+    const umMinutoAtras = new Date(now.getTime() - 60 * 1000);
+
+    // Status dos serviços (health check real)
+    let dbStatus: "online" | "offline" | "degraded" = "online";
+    try {
+      await db.execute(sql`SELECT 1`);
+    } catch {
+      dbStatus = "offline";
+    }
+
     const status = {
-      api: "online" as const,
-      database: "online" as const,
-      auth: "online" as const,
-      ai: "online" as const,
+      api: "online" as const, // Se chegou aqui, API está online
+      database: dbStatus,
+      auth: "online" as const, // Se passou pela verificação de sessão, auth está online
+      ai: "online" as const, // Assumir online - verificar em caso de erro específico
     };
 
-    // Métricas de performance (simuladas - em produção, viria de métricas reais)
+    // Métricas de performance baseadas em audit logs (requisições reais)
+    const [requestsLastMinute] = await db
+      .select({ count: count() })
+      .from(auditLogs)
+      .where(gte(auditLogs.timestamp, umMinutoAtras));
+
+    const [requestsLastHour] = await db
+      .select({ count: count() })
+      .from(auditLogs)
+      .where(gte(auditLogs.timestamp, umaHoraAtras));
+
+    const [totalRequests24h] = await db
+      .select({ count: count() })
+      .from(auditLogs)
+      .where(gte(auditLogs.timestamp, umDiaAtras));
+
+    // Calcular taxa de erro baseada em logs com status de erro
+    const [errosLastHour] = await db
+      .select({ count: count() })
+      .from(auditLogs)
+      .where(
+        and(
+          gte(auditLogs.timestamp, umaHoraAtras),
+          sql`${auditLogs.acao} like '%error%' or ${auditLogs.acao} like '%fail%'`
+        )
+      );
+
+    const errorRate = requestsLastHour.count > 0
+      ? (errosLastHour.count / requestsLastHour.count) * 100
+      : 0;
+
+    // Calcular uptime baseado na primeira atividade registrada
+    const [primeiroLog] = await db
+      .select({ timestamp: auditLogs.timestamp })
+      .from(auditLogs)
+      .orderBy(auditLogs.timestamp)
+      .limit(1);
+
+    let uptimePercent = 100;
+    if (primeiroLog?.timestamp) {
+      const tempoTotal = now.getTime() - new Date(primeiroLog.timestamp).getTime();
+      const tempoEmDias = tempoTotal / (24 * 60 * 60 * 1000);
+      // Assumir 99.9% se sistema está funcionando há mais de 1 dia
+      uptimePercent = tempoEmDias > 1 ? 99.9 : 100;
+    }
+
     const metrics = {
-      requestsPerMinute: Math.floor(Math.random() * 100) + 50,
-      averageResponseTime: Math.floor(Math.random() * 150) + 50,
-      errorRate: Math.random() * 2,
-      uptime: 99.95,
+      requestsPerMinute: requestsLastMinute.count,
+      averageResponseTime: 0, // Precisa de instrumentação específica para medir
+      errorRate: Math.round(errorRate * 100) / 100,
+      uptime: uptimePercent,
     };
 
-    // Uso de recursos (simulados)
+    // Uso de recursos (não disponível diretamente - retornar 0)
     const resources = {
-      cpu: Math.floor(Math.random() * 40) + 20,
-      memory: Math.floor(Math.random() * 30) + 40,
-      storage: Math.floor(Math.random() * 20) + 30,
-      bandwidth: Math.floor(Math.random() * 30) + 15,
+      cpu: 0, // Precisa de integração com métricas de infraestrutura
+      memory: 0,
+      storage: 0,
+      bandwidth: 0,
     };
 
-    // Performance histórica (últimas 24 horas)
-    const performance = Array.from({ length: 24 }, (_, i) => ({
-      time: `${String(i).padStart(2, "0")}:00`,
-      responseTime: Math.floor(Math.random() * 100) + 50,
-      requests: Math.floor(Math.random() * 500) + 100,
-      errors: Math.floor(Math.random() * 5),
+    // Performance histórica (últimas 24 horas) - dados reais dos audit logs
+    const performanceData = [];
+    for (let i = 0; i < 24; i++) {
+      const horaInicio = new Date(now.getTime() - (24 - i) * 60 * 60 * 1000);
+      const horaFim = new Date(horaInicio.getTime() + 60 * 60 * 1000);
+
+      const [requestsHora] = await db
+        .select({ count: count() })
+        .from(auditLogs)
+        .where(
+          and(
+            gte(auditLogs.timestamp, horaInicio),
+            sql`${auditLogs.timestamp} < ${horaFim}`
+          )
+        );
+
+      const [errosHora] = await db
+        .select({ count: count() })
+        .from(auditLogs)
+        .where(
+          and(
+            gte(auditLogs.timestamp, horaInicio),
+            sql`${auditLogs.timestamp} < ${horaFim}`,
+            sql`${auditLogs.acao} like '%error%' or ${auditLogs.acao} like '%fail%'`
+          )
+        );
+
+      performanceData.push({
+        time: `${String(horaInicio.getHours()).padStart(2, "0")}:00`,
+        responseTime: 0, // Precisa de instrumentação
+        requests: requestsHora.count,
+        errors: errosHora.count,
+      });
+    }
+
+    // Erros recentes (dados reais dos audit logs)
+    const errosRecentes = await db
+      .select({
+        id: auditLogs.id,
+        acao: auditLogs.acao,
+        entidade: auditLogs.entidade,
+        descricao: auditLogs.descricao,
+        timestamp: auditLogs.timestamp,
+      })
+      .from(auditLogs)
+      .where(
+        and(
+          gte(auditLogs.timestamp, umDiaAtras),
+          sql`${auditLogs.acao} like '%error%' or ${auditLogs.acao} like '%fail%'`
+        )
+      )
+      .orderBy(desc(auditLogs.timestamp))
+      .limit(10);
+
+    const formatarTempoRelativo = (data: Date) => {
+      const diffMs = now.getTime() - new Date(data).getTime();
+      const diffMin = Math.floor(diffMs / 60000);
+      const diffHoras = Math.floor(diffMin / 60);
+
+      if (diffMin < 1) return "Agora";
+      if (diffMin < 60) return `Há ${diffMin} min`;
+      return `Há ${diffHoras} hora${diffHoras > 1 ? "s" : ""}`;
+    };
+
+    const recentErrors = errosRecentes.map((erro) => ({
+      id: erro.id,
+      message: erro.descricao || `${erro.acao} em ${erro.entidade}`,
+      timestamp: formatarTempoRelativo(erro.timestamp),
+      count: 1,
+      endpoint: erro.entidade,
     }));
 
-    // Erros recentes (simulados)
-    const recentErrors = [
-      {
-        id: "1",
-        message: "Connection timeout to Claude API",
-        timestamp: "Há 15 min",
-        count: 3,
-        endpoint: "POST /api/analise-entrevista",
-      },
-      {
-        id: "2",
-        message: "Rate limit exceeded",
-        timestamp: "Há 1 hora",
-        count: 1,
-        endpoint: "POST /api/perguntas/sugerir",
-      },
-    ];
+    // Alertas ativos (baseados em métricas reais)
+    const alerts: Array<{ id: string; type: "warning" | "error" | "info"; message: string; timestamp: string }> = [];
 
-    // Alertas ativos
-    const alerts = [
-      {
-        id: "1",
-        type: "warning" as const,
-        message: "Uso de memória acima de 80% nos últimos 30 minutos",
-        timestamp: "Há 30 min",
-      },
-    ];
+    if (errorRate > 5) {
+      alerts.push({
+        id: "error-rate-high",
+        type: "error",
+        message: `Taxa de erro elevada: ${errorRate.toFixed(1)}% na última hora`,
+        timestamp: "Agora",
+      });
+    }
+
+    if (dbStatus !== "online") {
+      alerts.push({
+        id: "db-status",
+        type: "error",
+        message: "Banco de dados com problemas de conectividade",
+        timestamp: "Agora",
+      });
+    }
+
+    if (requestsLastMinute.count === 0 && totalRequests24h.count > 0) {
+      alerts.push({
+        id: "no-traffic",
+        type: "warning",
+        message: "Nenhuma requisição no último minuto",
+        timestamp: "Agora",
+      });
+    }
 
     return NextResponse.json({
       status,
       metrics,
       resources,
-      performance,
+      performance: performanceData,
       recentErrors,
       alerts,
     });
