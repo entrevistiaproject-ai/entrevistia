@@ -10,7 +10,6 @@ import {
   DollarSign,
   FileText,
   Settings,
-  Shield,
   TrendingUp,
   Activity,
   LogOut,
@@ -19,6 +18,7 @@ import {
   Bell,
   Database,
 } from "lucide-react";
+import { Logo } from "@/components/logo";
 
 interface AdminInfo {
   id: string;
@@ -181,14 +181,9 @@ export function AdminSidebar() {
     <aside className="fixed left-0 top-0 z-40 hidden h-screen w-72 border-r border-slate-700 bg-slate-900 lg:block">
       <div className="flex h-full flex-col">
         {/* Logo/Header */}
-        <div className="flex h-16 items-center gap-3 border-b border-slate-700 px-6">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <Shield className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-white">EntrevistIA</h1>
-            <p className="text-xs text-slate-400">Painel Admin</p>
-          </div>
+        <div className="flex h-16 items-center gap-3 border-b border-slate-700 px-4">
+          <Logo size="md" textClassName="text-white" />
+          <span className="text-xs text-slate-400 ml-auto">Admin</span>
         </div>
 
         {/* Navigation */}

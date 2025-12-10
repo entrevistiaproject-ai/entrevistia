@@ -5,6 +5,11 @@ import { BarChart3, Briefcase, Users, PlusCircle, ArrowRight } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { getUsageData } from "./actions";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+};
 
 export default async function DashboardPage() {
   // Busca dados de uso do servidor

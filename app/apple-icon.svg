@@ -1,0 +1,13 @@
+<svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="appleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+  </defs>
+  <rect width="180" height="180" rx="40" fill="url(#appleGradient)" />
+  <path d="M50 65C50 61.6863 52.6863 59 56 59H124C127.314 59 130 61.6863 130 65V105C130 108.314 127.314 111 124 111H104L90 125V111H56C52.6863 111 50 108.314 50 105V65Z" fill="white" />
+  <circle cx="70" cy="82" r="7" fill="#3b82f6" />
+  <circle cx="90" cy="82" r="7" fill="#3b82f6" />
+  <circle cx="110" cy="82" r="7" fill="#3b82f6" />
+</svg>

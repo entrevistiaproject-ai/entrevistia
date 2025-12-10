@@ -9,7 +9,6 @@ import {
   Search,
   Bell,
   LogOut,
-  Shield,
   X,
   ChevronRight,
   LayoutDashboard,
@@ -23,6 +22,7 @@ import {
   FileText,
   TrendingUp,
 } from "lucide-react";
+import { LogoIcon } from "@/components/logo";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -105,7 +105,7 @@ export function AdminHeader() {
 
         {/* Mobile Logo */}
         <div className="flex items-center gap-2 lg:hidden">
-          <Shield className="h-5 w-5 text-primary" />
+          <LogoIcon className="h-6 w-6" />
           <span className="font-bold text-white">Admin</span>
         </div>
 
@@ -188,8 +188,8 @@ export function AdminHeader() {
             {/* Mobile Menu Header */}
             <div className="flex items-center justify-between p-4 border-b border-slate-700">
               <div className="flex items-center gap-3">
-                <Shield className="h-6 w-6 text-primary" />
-                <span className="font-bold text-white">Admin Panel</span>
+                <LogoIcon className="h-6 w-6" />
+                <span className="font-bold text-white">Admin</span>
               </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}

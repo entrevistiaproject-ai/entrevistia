@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import {
-  Building2,
   Mail,
   ArrowLeft,
   Home,
@@ -16,6 +15,7 @@ import {
   CheckCircle2,
   AlertCircle
 } from "lucide-react";
+import { Logo } from "@/components/logo";
 
 function VerificarEmailContent() {
   const router = useRouter();
@@ -125,9 +125,8 @@ function VerificarEmailContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 text-xl font-bold text-blue-600">
-              <Building2 className="w-6 h-6" />
-              EntrevistIA
+            <Link href="/">
+              <Logo size="md" />
             </Link>
 
             {/* Links de navegação */}

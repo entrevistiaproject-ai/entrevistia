@@ -25,6 +25,7 @@ import {
   AlertCircle,
   Sparkles
 } from "lucide-react";
+import { Logo, LogoIcon } from "@/components/logo";
 
 export default function CadastroPage() {
   const router = useRouter();
@@ -167,9 +168,8 @@ export default function CadastroPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 text-xl font-bold text-primary">
-              <Building2 className="w-6 h-6" />
-              EntrevistIA
+            <Link href="/">
+              <Logo size="md" />
             </Link>
 
             {/* Links de navegação */}
@@ -209,7 +209,7 @@ export default function CadastroPage() {
         <Card className="shadow-lg">
           <CardHeader className="text-center pb-2">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 mx-auto">
-              <Building2 className="w-8 h-8 text-primary" />
+              <LogoIcon className="w-10 h-10" />
             </div>
             <CardTitle className="text-2xl sm:text-3xl">Criar conta</CardTitle>
             <CardDescription>

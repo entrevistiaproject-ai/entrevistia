@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Building2,
   Mail,
   Lock,
   Home,
@@ -19,6 +18,7 @@ import {
   Eye,
   EyeOff
 } from "lucide-react";
+import { Logo, LogoIcon } from "@/components/logo";
 import { signIn } from "next-auth/react";
 
 function LoginForm() {
@@ -92,9 +92,8 @@ function LoginForm() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 text-xl font-bold text-primary">
-              <Building2 className="w-6 h-6" />
-              EntrevistIA
+            <Link href="/">
+              <Logo size="md" />
             </Link>
 
             {/* Links de navegação */}
@@ -147,7 +146,7 @@ function LoginForm() {
         <Card className="shadow-lg">
           <CardHeader className="text-center pb-2">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 mx-auto">
-              <Building2 className="w-8 h-8 text-primary" />
+              <LogoIcon className="w-10 h-10" />
             </div>
             <CardTitle className="text-2xl sm:text-3xl">Bem-vindo de volta</CardTitle>
             <CardDescription>

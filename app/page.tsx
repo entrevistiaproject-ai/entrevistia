@@ -12,8 +12,8 @@ import {
   Shield,
   BarChart3,
   Menu,
-  Building2
 } from "lucide-react";
+import { Logo } from "@/components/logo";
 import {
   Sheet,
   SheetContent,
@@ -26,9 +26,8 @@ export default function LandingPage() {
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2">
-            <Building2 className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold text-primary">EntrevistIA</span>
+          <Link href="/">
+            <Logo size="md" />
           </Link>
           <nav className="hidden md:flex gap-6">
             <a href="#beneficios" className="text-sm font-medium hover:text-primary transition-colors">
@@ -490,9 +489,8 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
             <div className="sm:col-span-2 md:col-span-1">
-              <Link href="/" className="flex items-center gap-2 mb-4">
-                <Building2 className="h-8 w-8 text-primary" />
-                <span className="text-lg font-bold">EntrevistIA</span>
+              <Link href="/" className="inline-block mb-4">
+                <Logo size="md" />
               </Link>
               <p className="text-sm text-muted-foreground">
                 Inteligência artificial a serviço do seu talento humano.

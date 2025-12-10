@@ -14,6 +14,7 @@ import {
   HelpCircle,
   LogOut,
 } from "lucide-react";
+import { Logo } from "@/components/logo";
 import { signOut } from "next-auth/react";
 
 const mainMenuItems = [
@@ -100,8 +101,8 @@ export function Sidebar() {
     <aside className="fixed left-0 top-0 z-40 hidden h-screen w-64 border-r border-border bg-card md:block">
       <div className="flex h-full flex-col">
         {/* Logo/Header */}
-        <div className="flex h-16 items-center border-b border-border px-6">
-          <h1 className="text-xl font-bold text-primary">EntrevistIA</h1>
+        <div className="flex h-16 items-center border-b border-border px-4">
+          <Logo size="md" />
         </div>
 
         {/* Navigation */}
