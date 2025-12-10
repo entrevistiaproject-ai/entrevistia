@@ -262,16 +262,16 @@ export default function FinanceiroPage() {
         <div className="flex items-center gap-3">
           <Tabs value={periodo} onValueChange={setPeriodo}>
             <TabsList className="bg-slate-800/50 border border-slate-700">
-              <TabsTrigger value="1m" className="data-[state=active]:bg-primary text-xs sm:text-sm">
+              <TabsTrigger value="1m" className="text-slate-400 data-[state=active]:bg-primary data-[state=active]:text-white text-xs sm:text-sm">
                 1 mês
               </TabsTrigger>
-              <TabsTrigger value="3m" className="data-[state=active]:bg-primary text-xs sm:text-sm">
+              <TabsTrigger value="3m" className="text-slate-400 data-[state=active]:bg-primary data-[state=active]:text-white text-xs sm:text-sm">
                 3 meses
               </TabsTrigger>
-              <TabsTrigger value="6m" className="data-[state=active]:bg-primary text-xs sm:text-sm">
+              <TabsTrigger value="6m" className="text-slate-400 data-[state=active]:bg-primary data-[state=active]:text-white text-xs sm:text-sm">
                 6 meses
               </TabsTrigger>
-              <TabsTrigger value="1y" className="data-[state=active]:bg-primary text-xs sm:text-sm">
+              <TabsTrigger value="1y" className="text-slate-400 data-[state=active]:bg-primary data-[state=active]:text-white text-xs sm:text-sm">
                 1 ano
               </TabsTrigger>
             </TabsList>
