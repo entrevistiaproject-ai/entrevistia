@@ -261,7 +261,7 @@ export default function ErrosPage() {
         <CardContent className="p-4">
           <div className="flex gap-4">
             <Select value={resolvedFilter} onValueChange={setResolvedFilter}>
-              <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
+              <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700 text-white">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -272,7 +272,7 @@ export default function ErrosPage() {
             </Select>
 
             <Select value={componentFilter} onValueChange={setComponentFilter}>
-              <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
+              <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700 text-white">
                 <SelectValue placeholder="Componente" />
               </SelectTrigger>
               <SelectContent>

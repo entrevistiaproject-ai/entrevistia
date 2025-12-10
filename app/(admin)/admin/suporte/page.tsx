@@ -293,7 +293,7 @@ export default function SuportePage() {
                   placeholder="Buscar por título ou descrição..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10 bg-slate-800 border-slate-700"
+                  className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-400"
                 />
               </div>
               <Button type="submit" variant="outline" className="border-slate-700">
@@ -303,7 +303,7 @@ export default function SuportePage() {
 
             <div className="flex gap-2">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[150px] bg-slate-800 border-slate-700">
+                <SelectTrigger className="w-[150px] bg-slate-800 border-slate-700 text-white">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -317,7 +317,7 @@ export default function SuportePage() {
               </Select>
 
               <Select value={prioridadeFilter} onValueChange={setPrioridadeFilter}>
-                <SelectTrigger className="w-[140px] bg-slate-800 border-slate-700">
+                <SelectTrigger className="w-[140px] bg-slate-800 border-slate-700 text-white">
                   <SelectValue placeholder="Prioridade" />
                 </SelectTrigger>
                 <SelectContent>
@@ -330,7 +330,7 @@ export default function SuportePage() {
               </Select>
 
               <Select value={categoriaFilter} onValueChange={setCategoriaFilter}>
-                <SelectTrigger className="w-[140px] bg-slate-800 border-slate-700">
+                <SelectTrigger className="w-[140px] bg-slate-800 border-slate-700 text-white">
                   <SelectValue placeholder="Categoria" />
                 </SelectTrigger>
                 <SelectContent>

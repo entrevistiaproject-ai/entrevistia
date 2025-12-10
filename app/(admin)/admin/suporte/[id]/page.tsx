@@ -461,7 +461,7 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
               <div>
                 <label className="text-sm font-medium text-slate-200 mb-2 block">Status</label>
                 <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700 h-11">
+                  <SelectTrigger className="bg-slate-800 border-slate-700 h-11 text-white">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -477,7 +477,7 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
               <div>
                 <label className="text-sm font-medium text-slate-200 mb-2 block">Prioridade</label>
                 <Select value={selectedPriority} onValueChange={setSelectedPriority}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700 h-11">
+                  <SelectTrigger className="bg-slate-800 border-slate-700 h-11 text-white">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
