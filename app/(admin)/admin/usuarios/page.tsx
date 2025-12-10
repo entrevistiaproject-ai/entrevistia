@@ -525,9 +525,93 @@ export default function UsuariosPage() {
         </CardContent>
       </Card>
 
-      {/* Tabela */}
+      {/* Lista de Usuários - Cards para mobile, Tabela para desktop */}
       <Card className="bg-slate-900/50 border-slate-700 overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Versão Mobile - Cards */}
+        <div className="md:hidden divide-y divide-slate-700/50">
+          {usuariosPaginados.map((usuario) => (
+            <div
+              key={usuario.id}
+              className="p-4 hover:bg-slate-800/30 transition-colors cursor-pointer"
+              onClick={() => fetchUserDetails(usuario.id)}
+            >
+              <div className="flex items-start gap-3">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white text-sm font-medium shrink-0">
+                  {usuario.nome
+                    .split(" ")
+                    .slice(0, 2)
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-white truncate">
+                        {usuario.nome}
+                      </p>
+                      <p className="text-xs text-slate-400 truncate">
+                        {usuario.email}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {usuario.planType === "free_trial" && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openCreditosModal(usuario);
+                          }}
+                          className="p-1.5 rounded-lg bg-emerald-600/20 text-emerald-400"
+                        >
+                          <Coins className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditModal(usuario);
+                        }}
+                        className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-700"
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    {getPlanBadge(usuario.planType)}
+                    {usuario.isActive ? (
+                      <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                        Ativo
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">
+                        Inativo
+                      </Badge>
+                    )}
+                    {usuario.isTeste && (
+                      <Badge variant="outline" className="text-amber-400 border-amber-500/30 text-xs">
+                        Teste
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-700/50">
+                    <div className="text-xs text-slate-400">
+                      Recebido: <span className="text-emerald-400 font-medium">R$ {(usuario.totalRecebido || 0).toFixed(2)}</span>
+                    </div>
+                    {usuario.totalDevido > 0 && (
+                      <div className="text-xs text-slate-400">
+                        Devido: <span className="text-amber-400 font-medium">R$ {(usuario.totalDevido || 0).toFixed(2)}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Versão Desktop - Tabela */}
+        <div className="hidden md:block">
           <table className="w-full">
             <thead className="bg-slate-800/50 border-b border-slate-700">
               <tr>
@@ -540,7 +624,7 @@ export default function UsuariosPage() {
                     <ChevronsUpDown className="h-3 w-3" />
                   </button>
                 </th>
-                <th className="px-4 py-3 text-left hidden md:table-cell">
+                <th className="px-4 py-3 text-left">
                   <span className="text-xs font-semibold uppercase text-slate-400">
                     Status
                   </span>
@@ -556,27 +640,12 @@ export default function UsuariosPage() {
                 </th>
                 <th className="px-4 py-3 text-left hidden xl:table-cell">
                   <span className="text-xs font-semibold uppercase text-slate-400">
-                    Tipo Conta
-                  </span>
-                </th>
-                <th className="px-4 py-3 text-left hidden lg:table-cell">
-                  <span className="text-xs font-semibold uppercase text-slate-400">
                     Pagamento
                   </span>
                 </th>
-                <th className="px-4 py-3 text-right hidden md:table-cell">
+                <th className="px-4 py-3 text-right hidden lg:table-cell">
                   <span className="text-xs font-semibold uppercase text-slate-400">
-                    Última Fatura
-                  </span>
-                </th>
-                <th className="px-4 py-3 text-right hidden xl:table-cell">
-                  <span className="text-xs font-semibold uppercase text-slate-400">
-                    Média Mensal
-                  </span>
-                </th>
-                <th className="px-4 py-3 text-right hidden xl:table-cell">
-                  <span className="text-xs font-semibold uppercase text-slate-400">
-                    Total Devido
+                    Devido
                   </span>
                 </th>
                 <th className="px-4 py-3 text-right">
@@ -588,7 +657,7 @@ export default function UsuariosPage() {
                     <ChevronsUpDown className="h-3 w-3" />
                   </button>
                 </th>
-                <th className="px-4 py-3 text-center w-24">
+                <th className="px-4 py-3 text-center w-28">
                   <span className="text-xs font-semibold uppercase text-slate-400">
                     Ações
                   </span>
@@ -599,7 +668,8 @@ export default function UsuariosPage() {
               {usuariosPaginados.map((usuario) => (
                 <tr
                   key={usuario.id}
-                  className="hover:bg-slate-800/30 transition-colors"
+                  className="hover:bg-slate-800/30 transition-colors cursor-pointer"
+                  onClick={() => fetchUserDetails(usuario.id)}
                 >
                   {/* Usuário */}
                   <td className="px-4 py-4">
@@ -613,15 +683,15 @@ export default function UsuariosPage() {
                           .toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-white truncate">
+                        <p className="text-sm font-medium text-white truncate max-w-[200px]">
                           {usuario.nome}
                         </p>
-                        <p className="text-xs text-slate-400 truncate">
+                        <p className="text-xs text-slate-400 truncate max-w-[200px]">
                           {usuario.email}
                         </p>
                         {usuario.empresa && (
-                          <p className="text-xs text-slate-500 truncate flex items-center gap-1 mt-0.5">
-                            <Building2 className="h-3 w-3" />
+                          <p className="text-xs text-slate-500 truncate flex items-center gap-1 mt-0.5 max-w-[200px]">
+                            <Building2 className="h-3 w-3 shrink-0" />
                             {usuario.empresa}
                           </p>
                         )}
@@ -630,7 +700,7 @@ export default function UsuariosPage() {
                   </td>
 
                   {/* Status */}
-                  <td className="px-4 py-4 hidden md:table-cell">
+                  <td className="px-4 py-4">
                     <div className="flex flex-col gap-1">
                       {usuario.isActive ? (
                         <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 w-fit">
@@ -643,6 +713,11 @@ export default function UsuariosPage() {
                           Inativo
                         </Badge>
                       )}
+                      {usuario.isTeste && (
+                        <Badge variant="outline" className="text-amber-400 border-amber-500/30 w-fit text-xs">
+                          Teste
+                        </Badge>
+                      )}
                     </div>
                   </td>
 
@@ -651,45 +726,13 @@ export default function UsuariosPage() {
                     {getPlanBadge(usuario.planType)}
                   </td>
 
-                  {/* Tipo Conta */}
-                  <td className="px-4 py-4 hidden xl:table-cell">
-                    {usuario.isTeste ? (
-                      <Badge variant="outline" className="text-amber-400 border-amber-500/30">
-                        Teste
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-slate-400 border-slate-600">
-                        Normal
-                      </Badge>
-                    )}
-                  </td>
-
                   {/* Pagamento */}
-                  <td className="px-4 py-4 hidden lg:table-cell">
+                  <td className="px-4 py-4 hidden xl:table-cell">
                     {getPaymentStatus(usuario)}
                   </td>
 
-                  {/* Última Fatura */}
-                  <td className="px-4 py-4 text-right hidden md:table-cell">
-                    <p className="text-sm text-white font-medium">
-                      R$ {usuario.ultimaFatura?.valor.toFixed(2) || "0.00"}
-                    </p>
-                    {usuario.ultimaFatura?.dataVencimento && (
-                      <p className="text-xs text-slate-500">
-                        {new Date(usuario.ultimaFatura.dataVencimento).toLocaleDateString("pt-BR")}
-                      </p>
-                    )}
-                  </td>
-
-                  {/* Média Mensal */}
-                  <td className="px-4 py-4 text-right hidden xl:table-cell">
-                    <p className="text-sm text-white">
-                      R$ {usuario.mediaGastoMensal.toFixed(2)}
-                    </p>
-                  </td>
-
                   {/* Total Devido */}
-                  <td className="px-4 py-4 text-right hidden xl:table-cell">
+                  <td className="px-4 py-4 text-right hidden lg:table-cell">
                     <p className="text-sm text-amber-400">
                       R$ {(usuario.totalDevido || 0).toFixed(2)}
                     </p>
@@ -706,7 +749,10 @@ export default function UsuariosPage() {
                   <td className="px-4 py-4">
                     <div className="flex items-center justify-center gap-1">
                       <button
-                        onClick={() => fetchUserDetails(usuario.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          fetchUserDetails(usuario.id);
+                        }}
                         className="p-2 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"
                         title="Ver detalhes"
                       >
@@ -743,8 +789,8 @@ export default function UsuariosPage() {
         </div>
 
         {/* Paginação */}
-        <div className="flex items-center justify-between px-4 py-4 border-t border-slate-700">
-          <p className="text-sm text-slate-400">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-4 border-t border-slate-700">
+          <p className="text-sm text-slate-400 text-center sm:text-left">
             Mostrando {(paginaAtual - 1) * itensPorPagina + 1} a{" "}
             {Math.min(paginaAtual * itensPorPagina, usuariosFiltrados.length)} de{" "}
             {usuariosFiltrados.length}

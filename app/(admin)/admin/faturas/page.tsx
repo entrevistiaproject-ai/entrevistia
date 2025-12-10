@@ -29,7 +29,6 @@ import {
   Download,
   RefreshCw,
   FileText,
-  Building2,
   Loader2,
   ChevronsUpDown,
   TrendingUp,
@@ -525,9 +524,66 @@ export default function FaturasPage() {
         </CardContent>
       </Card>
 
-      {/* Tabela */}
+      {/* Lista de Faturas - Cards para mobile, Tabela para desktop */}
       <Card className="bg-slate-900/50 border-slate-700 overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Versão Mobile - Cards */}
+        <div className="md:hidden divide-y divide-slate-700/50">
+          {faturasFiltradas.map((fatura) => (
+            <div
+              key={fatura.id}
+              className="p-4 hover:bg-slate-800/30 transition-colors cursor-pointer"
+              onClick={() => fetchFaturaDetails(fatura.id)}
+            >
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-slate-800 shrink-0">
+                  <Receipt className="h-4 w-4 text-slate-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-white">
+                        {fatura.periodo}
+                      </p>
+                      <p className="text-xs text-slate-400 truncate">
+                        {fatura.usuario.nome || "Usuário"}
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-semibold text-white">
+                        {formatCurrency(fatura.valorTotal)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    {getStatusBadge(fatura.status)}
+                    {fatura.dataVencimento && (
+                      <span className="text-xs text-slate-400 flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {new Date(fatura.dataVencimento).toLocaleDateString("pt-BR")}
+                      </span>
+                    )}
+                  </div>
+                  {fatura.valorPendente > 0 && fatura.status !== "paga" && (
+                    <p className="text-xs text-amber-400 mt-2">
+                      Pendente: {formatCurrency(fatura.valorPendente)}
+                    </p>
+                  )}
+                </div>
+                <ChevronRight className="h-4 w-4 text-slate-400 shrink-0 self-center" />
+              </div>
+            </div>
+          ))}
+
+          {faturasFiltradas.length === 0 && (
+            <div className="px-4 py-12 text-center">
+              <FileText className="h-12 w-12 text-slate-600 mx-auto mb-3" />
+              <p className="text-slate-400">Nenhuma fatura encontrada</p>
+            </div>
+          )}
+        </div>
+
+        {/* Versão Desktop - Tabela */}
+        <div className="hidden md:block">
           <table className="w-full">
             <thead className="bg-slate-800/50 border-b border-slate-700">
               <tr>
@@ -545,7 +601,7 @@ export default function FaturasPage() {
                     Cliente
                   </span>
                 </th>
-                <th className="px-4 py-3 text-left hidden md:table-cell">
+                <th className="px-4 py-3 text-left">
                   <button
                     onClick={() => handleSort("status")}
                     className="flex items-center gap-1 text-xs font-semibold uppercase text-slate-400 hover:text-white"
@@ -563,11 +619,6 @@ export default function FaturasPage() {
                     <ChevronsUpDown className="h-3 w-3" />
                   </button>
                 </th>
-                <th className="px-4 py-3 text-right hidden xl:table-cell">
-                  <span className="text-xs font-semibold uppercase text-slate-400">
-                    Transações
-                  </span>
-                </th>
                 <th className="px-4 py-3 text-right">
                   <button
                     onClick={() => handleSort("valorTotal")}
@@ -577,10 +628,8 @@ export default function FaturasPage() {
                     <ChevronsUpDown className="h-3 w-3" />
                   </button>
                 </th>
-                <th className="px-4 py-3 text-center w-24">
-                  <span className="text-xs font-semibold uppercase text-slate-400">
-                    Ações
-                  </span>
+                <th className="px-4 py-3 text-center w-16">
+                  <span className="sr-only">Ações</span>
                 </th>
               </tr>
             </thead>
@@ -594,7 +643,7 @@ export default function FaturasPage() {
                   {/* Período */}
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-2">
-                      <div className="p-2 rounded-lg bg-slate-800">
+                      <div className="p-2 rounded-lg bg-slate-800 shrink-0">
                         <Receipt className="h-4 w-4 text-slate-400" />
                       </div>
                       <div>
@@ -613,23 +662,17 @@ export default function FaturasPage() {
                   {/* Cliente */}
                   <td className="px-4 py-4">
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-white truncate">
+                      <p className="text-sm font-medium text-white truncate max-w-[180px]">
                         {fatura.usuario.nome || "Usuário"}
                       </p>
-                      <p className="text-xs text-slate-400 truncate">
+                      <p className="text-xs text-slate-400 truncate max-w-[180px]">
                         {fatura.usuario.email || "-"}
                       </p>
-                      {fatura.usuario.empresa && (
-                        <p className="text-xs text-slate-500 truncate flex items-center gap-1 mt-0.5">
-                          <Building2 className="h-3 w-3" />
-                          {fatura.usuario.empresa}
-                        </p>
-                      )}
                     </div>
                   </td>
 
                   {/* Status */}
-                  <td className="px-4 py-4 hidden md:table-cell">
+                  <td className="px-4 py-4">
                     {getStatusBadge(fatura.status)}
                   </td>
 
@@ -643,13 +686,6 @@ export default function FaturasPage() {
                           : "-"}
                       </span>
                     </div>
-                  </td>
-
-                  {/* Transações */}
-                  <td className="px-4 py-4 text-right hidden xl:table-cell">
-                    <p className="text-sm text-white">
-                      {fatura.estatisticas.transacoes}
-                    </p>
                   </td>
 
                   {/* Valor */}
@@ -675,7 +711,7 @@ export default function FaturasPage() {
 
               {faturasFiltradas.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center">
+                  <td colSpan={6} className="px-4 py-12 text-center">
                     <FileText className="h-12 w-12 text-slate-600 mx-auto mb-3" />
                     <p className="text-slate-400">Nenhuma fatura encontrada</p>
                   </td>
@@ -686,8 +722,8 @@ export default function FaturasPage() {
         </div>
 
         {/* Paginação */}
-        <div className="flex items-center justify-between px-4 py-4 border-t border-slate-700">
-          <p className="text-sm text-slate-400">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-4 border-t border-slate-700">
+          <p className="text-sm text-slate-400 text-center sm:text-left">
             Página {paginaAtual} de {totalPaginas}
           </p>
           <div className="flex items-center gap-2">
