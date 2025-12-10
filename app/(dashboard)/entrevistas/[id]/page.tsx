@@ -21,14 +21,12 @@ import {
   FileText,
   ChevronRight,
   Star,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { AdicionarCandidatoDialog } from "@/components/entrevistas/adicionar-candidato-dialog";
 import { UploadCandidatosDialog } from "@/components/entrevistas/upload-candidatos-dialog";
 import { CompartilharLinkDialog } from "@/components/entrevistas/compartilhar-link-dialog";
+import { DecisaoCandidato } from "@/components/entrevistas/decisao-candidato";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -58,8 +56,12 @@ interface Candidato {
   concluidaEm: Date | null;
   // Dados da avaliação da IA
   notaGeral: number | null;
-  recomendacao: string | null;
+  recomendacao: "recomendado" | "recomendado_com_ressalvas" | "nao_recomendado" | null;
   avaliadoEm: Date | null;
+  // Decisão do recrutador
+  decisaoRecrutador: "aprovado" | "reprovado" | null;
+  decisaoRecrutadorEm: Date | null;
+  decisaoRecrutadorObservacao: string | null;
 }
 
 interface Pergunta {
@@ -87,33 +89,6 @@ const candidatoStatusConfig: Record<string, { label: string; variant: "outline" 
   cancelada: { label: "Cancelada", variant: "destructive" },
 };
 
-const getRecomendacaoConfig = (recomendacao: string | null) => {
-  switch (recomendacao) {
-    case "recomendado":
-      return {
-        label: "Aprovado",
-        icon: CheckCircle2,
-        bgColor: "bg-green-100",
-        textColor: "text-green-700",
-      };
-    case "nao_recomendado":
-      return {
-        label: "Reprovado",
-        icon: XCircle,
-        bgColor: "bg-red-100",
-        textColor: "text-red-700",
-      };
-    case "recomendado_com_ressalvas":
-      return {
-        label: "Com ressalvas",
-        icon: AlertCircle,
-        bgColor: "bg-yellow-100",
-        textColor: "text-yellow-700",
-      };
-    default:
-      return null;
-  }
-};
 
 const getScoreColor = (score: number) => {
   if (score >= 8.5) return "text-green-600";
@@ -387,21 +362,20 @@ export default function EntrevistaDetalhesPage() {
               ) : (
                 <div className="space-y-3">
                   {candidatos.map((candidato) => {
-                    const recomendacaoConfig = getRecomendacaoConfig(candidato.recomendacao);
-                    const RecomendacaoIcon = recomendacaoConfig?.icon;
-
                     return (
-                      <Link
+                      <div
                         key={candidato.id}
-                        href={`/candidatos/${candidato.id}/resultado`}
-                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group"
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors group"
                       >
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{candidato.nome}</p>
+                        <Link
+                          href={`/candidatos/${candidato.id}/resultado`}
+                          className="flex-1 min-w-0"
+                        >
+                          <p className="font-medium truncate hover:text-primary transition-colors">{candidato.nome}</p>
                           <p className="text-sm text-muted-foreground truncate">{candidato.email}</p>
-                        </div>
+                        </Link>
 
-                        {/* Score e Recomendação */}
+                        {/* Score, Decisão e Status */}
                         <div className="flex items-center gap-3 ml-4">
                           {candidato.notaGeral !== null && (
                             <div className="flex items-center gap-1.5">
@@ -412,22 +386,29 @@ export default function EntrevistaDetalhesPage() {
                             </div>
                           )}
 
-                          {recomendacaoConfig && RecomendacaoIcon && (
-                            <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full ${recomendacaoConfig.bgColor}`}>
-                              <RecomendacaoIcon className={`h-4 w-4 ${recomendacaoConfig.textColor}`} />
-                              <span className={`text-xs font-medium ${recomendacaoConfig.textColor}`}>
-                                {recomendacaoConfig.label}
-                              </span>
-                            </div>
+                          {/* Decisão do recrutador - só mostra para entrevistas concluídas */}
+                          {candidato.status === "concluida" && (
+                            <DecisaoCandidato
+                              candidatoId={candidato.id}
+                              entrevistaId={entrevista.id}
+                              candidatoNome={candidato.nome}
+                              decisaoAtual={candidato.decisaoRecrutador}
+                              recomendacaoIA={candidato.recomendacao}
+                              observacaoAtual={candidato.decisaoRecrutadorObservacao}
+                              onDecisaoAtualizada={fetchData}
+                              compact
+                            />
                           )}
 
                           <Badge variant={candidatoStatusConfig[candidato.status]?.variant || "outline"}>
                             {candidatoStatusConfig[candidato.status]?.label || "Pendente"}
                           </Badge>
 
-                          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                          <Link href={`/candidatos/${candidato.id}/resultado`}>
+                            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                          </Link>
                         </div>
-                      </Link>
+                      </div>
                     );
                   })}
                 </div>

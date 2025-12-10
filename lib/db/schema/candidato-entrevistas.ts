@@ -45,6 +45,11 @@ export const candidatoEntrevistas = pgTable("candidato_entrevistas", {
   competencias: jsonb("competencias").$type<CompetenciaAvaliada[]>(), // Avaliação detalhada por competência
   avaliadoEm: timestamp("avaliado_em", { mode: "date" }),
 
+  // Decisão manual do recrutador (separada da recomendação da IA)
+  decisaoRecrutador: text("decisao_recrutador"), // 'aprovado', 'reprovado', null (pendente)
+  decisaoRecrutadorEm: timestamp("decisao_recrutador_em", { mode: "date" }),
+  decisaoRecrutadorObservacao: text("decisao_recrutador_observacao"), // Observação opcional do recrutador
+
   // Auditoria
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),

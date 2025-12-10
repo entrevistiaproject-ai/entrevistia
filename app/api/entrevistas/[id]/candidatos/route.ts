@@ -57,6 +57,10 @@ export async function GET(
         notaGeral: candidatoEntrevistas.notaGeral,
         recomendacao: candidatoEntrevistas.recomendacao,
         avaliadoEm: candidatoEntrevistas.avaliadoEm,
+        // Decisão manual do recrutador
+        decisaoRecrutador: candidatoEntrevistas.decisaoRecrutador,
+        decisaoRecrutadorEm: candidatoEntrevistas.decisaoRecrutadorEm,
+        decisaoRecrutadorObservacao: candidatoEntrevistas.decisaoRecrutadorObservacao,
       })
       .from(candidatoEntrevistas)
       .innerJoin(candidatos, eq(candidatoEntrevistas.candidatoId, candidatos.id))
