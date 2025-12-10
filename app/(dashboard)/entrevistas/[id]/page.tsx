@@ -28,6 +28,7 @@ import { UploadCandidatosDialog } from "@/components/entrevistas/upload-candidat
 import { CompartilharLinkDialog } from "@/components/entrevistas/compartilhar-link-dialog";
 import { DecisaoCandidato } from "@/components/entrevistas/decisao-candidato";
 import { EditarEntrevistaDialog } from "@/components/entrevistas/editar-entrevista-dialog";
+import { EditarPerguntasDialog } from "@/components/entrevistas/editar-perguntas-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -264,11 +265,13 @@ export default function EntrevistaDetalhesPage() {
 
       {/* Cards de Resumo - scroll horizontal no mobile */}
       <div className="scroll-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
-        <div className="inline-flex gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+        <div className="inline-flex gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-5 sm:gap-4">
           <Card className="min-w-[140px] sm:min-w-0 shrink-0">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Candidatos</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Users className="h-5 w-5 text-blue-600" />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{candidatos.length}</div>
@@ -279,7 +282,9 @@ export default function EntrevistaDetalhesPage() {
           <Card className="min-w-[140px] sm:min-w-0 shrink-0">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Perguntas</CardTitle>
-              <FileQuestion className="h-4 w-4 text-muted-foreground" />
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <FileQuestion className="h-5 w-5 text-purple-600" />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{perguntas.length}</div>
@@ -289,8 +294,10 @@ export default function EntrevistaDetalhesPage() {
 
           <Card className="min-w-40 sm:min-w-0 shrink-0">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Duração</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Duração Média</CardTitle>
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Clock className="h-5 w-5 text-green-600" />
+              </div>
             </CardHeader>
             <CardContent>
               {(() => {
@@ -309,36 +316,58 @@ export default function EntrevistaDetalhesPage() {
                   duracaoMedia = Math.round(totalMinutos / entrevistasComDuracao.length);
                 }
 
-                const tempoEsperado = perguntas.length > 0 ? perguntas.length * 4 : null;
-                const tempoMaximo = entrevista.duracao;
-
                 return (
                   <div className="space-y-1">
                     {duracaoMedia !== null ? (
-                      <div className="text-2xl font-bold">{duracaoMedia}m</div>
-                    ) : tempoEsperado ? (
-                      <div className="text-2xl font-bold">{tempoEsperado}m</div>
-                    ) : (
-                      <div className="text-2xl font-bold">-</div>
-                    )}
-                    <div className="space-y-0.5">
-                      {duracaoMedia !== null && (
+                      <>
+                        <div className="text-2xl font-bold">{duracaoMedia}m</div>
                         <p className="text-xs text-muted-foreground">Média realizada</p>
-                      )}
-                      {duracaoMedia === null && tempoEsperado && (
-                        <p className="text-xs text-muted-foreground">Tempo esperado</p>
-                      )}
-                      {duracaoMedia !== null && tempoEsperado && (
-                        <p className="text-xs text-muted-foreground">
-                          Esperado: {tempoEsperado}m
-                        </p>
-                      )}
-                      {tempoMaximo && (
-                        <p className="text-xs text-muted-foreground">
-                          Máximo: {tempoMaximo}m
-                        </p>
-                      )}
-                    </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-2xl font-bold">-</div>
+                        <p className="text-xs text-muted-foreground">Sem dados ainda</p>
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
+            </CardContent>
+          </Card>
+
+          <Card className="min-w-40 sm:min-w-0 shrink-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Tempo Máximo</CardTitle>
+              <div className="p-2 bg-amber-100 rounded-lg">
+                <Clock className="h-5 w-5 text-amber-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {(() => {
+                // Tempo máximo = 45s por pergunta + 3min por resposta = 3.75min por pergunta
+                const tempoMaximoCalculado = perguntas.length > 0
+                  ? Math.ceil(perguntas.length * 3.75)
+                  : null;
+                const tempoMaximoDefinido = entrevista.duracao;
+
+                return (
+                  <div className="space-y-1">
+                    {tempoMaximoDefinido ? (
+                      <>
+                        <div className="text-2xl font-bold">{tempoMaximoDefinido}m</div>
+                        <p className="text-xs text-muted-foreground">Definido</p>
+                      </>
+                    ) : tempoMaximoCalculado ? (
+                      <>
+                        <div className="text-2xl font-bold">{tempoMaximoCalculado}m</div>
+                        <p className="text-xs text-muted-foreground">Calculado</p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-2xl font-bold">-</div>
+                        <p className="text-xs text-muted-foreground">Não definido</p>
+                      </>
+                    )}
                   </div>
                 );
               })()}
@@ -348,7 +377,9 @@ export default function EntrevistaDetalhesPage() {
           <Card className="min-w-[140px] sm:min-w-0 shrink-0">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Criada</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <div className="p-2 bg-gray-100 rounded-lg">
+                <Calendar className="h-5 w-5 text-gray-600" />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-sm font-bold">
@@ -508,10 +539,20 @@ export default function EntrevistaDetalhesPage() {
         <TabsContent value="perguntas" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Perguntas da Entrevista</CardTitle>
-              <CardDescription>
-                Gerencie as perguntas que serão apresentadas aos candidatos
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Perguntas da Entrevista</CardTitle>
+                  <CardDescription>
+                    Gerencie as perguntas que serão apresentadas aos candidatos
+                  </CardDescription>
+                </div>
+                <EditarPerguntasDialog
+                  entrevistaId={entrevista.id}
+                  perguntas={perguntas}
+                  temCandidatos={candidatos.length > 0}
+                  onSuccess={fetchData}
+                />
+              </div>
             </CardHeader>
             <CardContent>
               {perguntas.length === 0 ? (
