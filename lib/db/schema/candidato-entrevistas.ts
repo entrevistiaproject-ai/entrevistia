@@ -34,6 +34,10 @@ export const candidatoEntrevistas = pgTable("candidato_entrevistas", {
   iniciadaEm: timestamp("iniciada_em", { mode: "date" }),
   concluidaEm: timestamp("concluida_em", { mode: "date" }),
 
+  // Convite e prazo
+  conviteEnviadoEm: timestamp("convite_enviado_em", { mode: "date" }),
+  prazoResposta: timestamp("prazo_resposta", { mode: "date" }), // Prazo para o candidato responder
+
   // Permite reenvio de convite mesmo se já participou
   podeRefazer: boolean("pode_refazer").default(false).notNull(),
 

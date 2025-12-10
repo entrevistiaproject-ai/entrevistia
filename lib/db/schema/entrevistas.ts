@@ -54,6 +54,8 @@ export const entrevistas = pgTable("entrevistas", {
       enviarAutomaticamente?: boolean; // Se true, pergunta ao reprovar se quer enviar
       mensagemPersonalizada?: string; // Texto customizado para o email
     };
+    // Prazo para resposta do candidato (em horas)
+    prazoRespostaHoras?: number; // Padrão: 48 horas
   }>(),
 
   // Auditoria

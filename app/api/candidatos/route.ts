@@ -1,8 +1,17 @@
 import { NextResponse } from "next/server";
 import { getUserId } from "@/lib/auth/get-user";
 import { getDB } from "@/lib/db";
-import { candidatos, candidatoEntrevistas, entrevistas } from "@/lib/db/schema";
+import { candidatos, candidatoEntrevistas, entrevistas, users } from "@/lib/db/schema";
 import { eq, and, isNull, desc } from "drizzle-orm";
+import { enviarEmail } from "@/lib/email/resend";
+import { emailConviteEntrevistaTemplate } from "@/lib/email/templates";
+
+// URL base do app
+const getBaseUrl = () => {
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
+  return "https://entrevistia.com.br";
+};
 
 export async function POST(request: Request) {
   try {
@@ -26,9 +35,21 @@ export async function POST(request: Request) {
 
     const db = getDB();
 
+    // Buscar dados do recrutador
+    const [recrutador] = await db
+      .select({
+        nome: users.nome,
+        empresa: users.empresa,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    let entrevista = null;
+
     // Se tem entrevistaId, verificar se pertence ao usuário
     if (entrevistaId) {
-      const [entrevista] = await db
+      const [entrevistaResult] = await db
         .select()
         .from(entrevistas)
         .where(
@@ -39,12 +60,14 @@ export async function POST(request: Request) {
         )
         .limit(1);
 
-      if (!entrevista) {
+      if (!entrevistaResult) {
         return NextResponse.json(
           { error: "Entrevista não encontrada" },
           { status: 404 }
         );
       }
+
+      entrevista = entrevistaResult;
     }
 
     // Criar candidato
@@ -65,8 +88,47 @@ export async function POST(request: Request) {
       })
       .returning();
 
-    // Se tem entrevistaId, vincular candidato à entrevista
-    if (entrevistaId) {
+    // Se tem entrevistaId, vincular candidato à entrevista e enviar email
+    if (entrevistaId && entrevista) {
+      // Calcular prazo de resposta (padrão: 48 horas)
+      const prazoHoras = (entrevista.configuracoes as { prazoRespostaHoras?: number })?.prazoRespostaHoras || 48;
+      const prazoResposta = new Date(Date.now() + prazoHoras * 60 * 60 * 1000);
+
+      // Criar vínculo candidato-entrevista
+      await db.insert(candidatoEntrevistas).values({
+        candidatoId: novoCandidato.id,
+        entrevistaId,
+        status: "pendente",
+        conviteEnviadoEm: new Date(),
+        prazoResposta,
+      });
+
+      // Gerar link da entrevista
+      const linkEntrevista = `${getBaseUrl()}/convite/${entrevista.slug}?candidatoId=${novoCandidato.id}`;
+
+      // Enviar email de convite
+      try {
+        await enviarEmail({
+          to: email,
+          subject: `Convite para Entrevista - ${entrevista.cargo || entrevista.titulo} | ${recrutador?.empresa || "EntrevistIA"}`,
+          html: emailConviteEntrevistaTemplate({
+            nomeCandidato: nome,
+            cargo: entrevista.cargo || entrevista.titulo,
+            empresa: recrutador?.empresa || entrevista.empresa || "Empresa",
+            nomeRecrutador: recrutador?.nome,
+            linkEntrevista,
+            prazoResposta,
+            descricaoVaga: entrevista.descricao || undefined,
+          }),
+        });
+
+        console.log(`✅ Email de convite enviado para ${email}`);
+      } catch (emailError) {
+        console.error("❌ Erro ao enviar email de convite:", emailError);
+        // Não falha a criação do candidato se o email falhar
+      }
+    } else if (entrevistaId) {
+      // Apenas vincular sem enviar email (sem dados da entrevista)
       await db.insert(candidatoEntrevistas).values({
         candidatoId: novoCandidato.id,
         entrevistaId,

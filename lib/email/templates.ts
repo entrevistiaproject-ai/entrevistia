@@ -245,3 +245,282 @@ Vamos manter seu perfil em nosso banco para futuras oportunidades.
 
 Desejamos sucesso na sua busca!`;
 }
+
+/**
+ * Formata prazo de forma amigável
+ */
+function formatarPrazo(prazo: Date): string {
+  const agora = new Date();
+  const diff = prazo.getTime() - agora.getTime();
+  const horas = Math.ceil(diff / (1000 * 60 * 60));
+  const dias = Math.ceil(horas / 24);
+
+  if (dias === 1) return "24 horas";
+  if (dias === 2) return "48 horas";
+  if (dias <= 7) return `${dias} dias`;
+
+  return prazo.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+/**
+ * Template de email de convite para entrevista
+ * Design moderno, responsivo e com foco em conversão
+ */
+export function emailConviteEntrevistaTemplate(params: {
+  nomeCandidato: string;
+  cargo: string;
+  empresa: string;
+  nomeRecrutador?: string;
+  linkEntrevista: string;
+  prazoResposta: Date;
+  descricaoVaga?: string;
+}) {
+  const {
+    nomeCandidato,
+    cargo,
+    empresa,
+    nomeRecrutador,
+    linkEntrevista,
+    prazoResposta,
+    descricaoVaga
+  } = params;
+
+  const prazoFormatado = formatarPrazo(prazoResposta);
+  const dataLimite = prazoResposta.toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Convite para Entrevista - ${empresa}</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <!-- Container Principal -->
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);">
+
+          <!-- Header com gradiente vibrante -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); padding: 48px 40px; text-align: center;">
+              <div style="margin-bottom: 16px;">
+                <span style="display: inline-block; background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; color: #ffffff; font-size: 13px; font-weight: 600; letter-spacing: 0.5px;">
+                  CONVITE ESPECIAL
+                </span>
+              </div>
+              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; line-height: 1.3;">
+                Você foi selecionado(a) para uma entrevista!
+              </h1>
+              <p style="margin: 12px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">
+                ${empresa} quer conhecer você melhor
+              </p>
+            </td>
+          </tr>
+
+          <!-- Conteúdo Principal -->
+          <tr>
+            <td style="padding: 40px;">
+              <h2 style="margin: 0 0 20px 0; color: #1e293b; font-size: 22px; font-weight: 600;">
+                Olá, ${nomeCandidato}! 👋
+              </h2>
+
+              <p style="margin: 0 0 24px 0; color: #475569; font-size: 16px; line-height: 1.7;">
+                ${nomeRecrutador ? `<strong>${nomeRecrutador}</strong> da` : "A equipe da"} <strong>${empresa}</strong> analisou seu perfil e ficou interessada em conhecê-lo(a) melhor para a vaga de:
+              </p>
+
+              <!-- Card da Vaga -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 28px 0;">
+                <tr>
+                  <td style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; padding: 24px; border-left: 4px solid #0ea5e9;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <span style="font-size: 32px;">💼</span>
+                      <div>
+                        <p style="margin: 0 0 4px 0; color: #0369a1; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                          Vaga
+                        </p>
+                        <p style="margin: 0; color: #0c4a6e; font-size: 20px; font-weight: 700;">
+                          ${cargo}
+                        </p>
+                      </div>
+                    </div>
+                    ${descricaoVaga ? `
+                    <p style="margin: 16px 0 0 0; color: #475569; font-size: 14px; line-height: 1.6; border-top: 1px solid #bae6fd; padding-top: 16px;">
+                      ${descricaoVaga}
+                    </p>
+                    ` : ""}
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Como Funciona -->
+              <div style="margin: 0 0 28px 0;">
+                <p style="margin: 0 0 16px 0; color: #1e293b; font-size: 16px; font-weight: 600;">
+                  Como funciona a entrevista:
+                </p>
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9;">
+                      <table cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td style="width: 36px; vertical-align: top;">
+                            <div style="width: 28px; height: 28px; background: #ddd6fe; border-radius: 8px; text-align: center; line-height: 28px; font-size: 14px;">
+                              1
+                            </div>
+                          </td>
+                          <td style="padding-left: 12px;">
+                            <p style="margin: 0; color: #334155; font-size: 14px; line-height: 1.5;">
+                              <strong>Confirme seus dados</strong> — já temos suas informações, só precisa verificar
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9;">
+                      <table cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td style="width: 36px; vertical-align: top;">
+                            <div style="width: 28px; height: 28px; background: #ddd6fe; border-radius: 8px; text-align: center; line-height: 28px; font-size: 14px;">
+                              2
+                            </div>
+                          </td>
+                          <td style="padding-left: 12px;">
+                            <p style="margin: 0; color: #334155; font-size: 14px; line-height: 1.5;">
+                              <strong>Responda às perguntas</strong> — em texto ou vídeo, no seu ritmo
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 0;">
+                      <table cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td style="width: 36px; vertical-align: top;">
+                            <div style="width: 28px; height: 28px; background: #ddd6fe; border-radius: 8px; text-align: center; line-height: 28px; font-size: 14px;">
+                              3
+                            </div>
+                          </td>
+                          <td style="padding-left: 12px;">
+                            <p style="margin: 0; color: #334155; font-size: 14px; line-height: 1.5;">
+                              <strong>Aguarde o retorno</strong> — avaliaremos suas respostas com carinho
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Prazo com destaque -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 32px 0;">
+                <tr>
+                  <td style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; text-align: center;">
+                    <div style="margin-bottom: 8px;">
+                      <span style="font-size: 28px;">⏰</span>
+                    </div>
+                    <p style="margin: 0 0 4px 0; color: #92400e; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                      Prazo para responder
+                    </p>
+                    <p style="margin: 0; color: #78350f; font-size: 18px; font-weight: 700;">
+                      ${prazoFormatado}
+                    </p>
+                    <p style="margin: 8px 0 0 0; color: #a16207; font-size: 13px;">
+                      até ${dataLimite}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA Button -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 32px 0;">
+                <tr>
+                  <td align="center">
+                    <a href="${linkEntrevista}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #ffffff; text-decoration: none; padding: 18px 48px; border-radius: 12px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);">
+                      Iniciar Minha Entrevista →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Link alternativo -->
+              <div style="background-color: #f8fafc; border-radius: 8px; padding: 16px; margin: 0 0 24px 0;">
+                <p style="margin: 0 0 8px 0; color: #64748b; font-size: 12px; text-align: center;">
+                  Se o botão não funcionar, copie e cole este link no navegador:
+                </p>
+                <p style="margin: 0; color: #6366f1; font-size: 12px; word-break: break-all; text-align: center;">
+                  ${linkEntrevista}
+                </p>
+              </div>
+
+              <!-- Dicas -->
+              <div style="background-color: #f0fdf4; border-radius: 12px; padding: 20px; border-left: 4px solid #22c55e;">
+                <p style="margin: 0 0 12px 0; color: #166534; font-size: 14px; font-weight: 600;">
+                  💡 Dicas para arrasar na entrevista:
+                </p>
+                <ul style="margin: 0; padding-left: 20px; color: #15803d; font-size: 13px; line-height: 1.8;">
+                  <li>Escolha um ambiente tranquilo e bem iluminado</li>
+                  <li>Tenha por perto informações sobre suas experiências</li>
+                  <li>Seja você mesmo(a) — queremos conhecer a pessoa real!</li>
+                  <li>Não se preocupe em ser perfeito(a), seja autêntico(a)</li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f8fafc; padding: 32px 40px; text-align: center; border-top: 1px solid #e2e8f0;">
+              <p style="margin: 0 0 8px 0; color: #475569; font-size: 14px;">
+                Boa sorte! Estamos torcendo por você! 🍀
+              </p>
+              <p style="margin: 0 0 16px 0; color: #64748b; font-size: 13px;">
+                Equipe ${empresa}
+              </p>
+              <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; margin-top: 16px;">
+                <p style="margin: 0; color: #94a3b8; font-size: 11px;">
+                  Este convite foi enviado via <strong>EntrevistIA</strong> • Plataforma de entrevistas com IA
+                </p>
+              </div>
+            </td>
+          </tr>
+
+        </table>
+
+        <!-- Texto de segurança -->
+        <table width="600" cellpadding="0" cellspacing="0" style="margin-top: 24px;">
+          <tr>
+            <td style="text-align: center; padding: 0 40px;">
+              <p style="margin: 0; color: #94a3b8; font-size: 11px; line-height: 1.6;">
+                Se você não se candidatou para esta vaga ou não reconhece este email, por favor ignore-o.<br>
+                Seus dados estão seguros e protegidos conforme a LGPD.
+              </p>
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+}
