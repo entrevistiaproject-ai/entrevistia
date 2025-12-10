@@ -111,6 +111,15 @@ export default function UsuariosPage() {
   const [creditoValor, setCreditoValor] = useState("");
   const [creditoLoading, setCreditoLoading] = useState(false);
 
+  // Modal de edição
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editUser, setEditUser] = useState<Usuario | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
+  const [editForm, setEditForm] = useState({
+    planType: "",
+    isActive: true,
+  });
+
   const itensPorPagina = 15;
 
   useEffect(() => {
@@ -134,15 +143,22 @@ export default function UsuariosPage() {
 
   const fetchUserDetails = async (userId: string) => {
     setDetailsLoading(true);
+    setDetailsOpen(true); // Abre o modal imediatamente para mostrar loading
     try {
       const response = await fetch(`/api/admin/usuarios/${userId}`);
       if (response.ok) {
         const data = await response.json();
         setSelectedUser(data);
-        setDetailsOpen(true);
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Erro na API:", response.status, errorData);
+        alert(`Erro ao carregar detalhes: ${errorData.error || response.statusText}`);
+        setDetailsOpen(false);
       }
     } catch (error) {
       console.error("Erro ao carregar detalhes:", error);
+      alert("Erro de conexão ao carregar detalhes");
+      setDetailsOpen(false);
     } finally {
       setDetailsLoading(false);
     }
@@ -189,6 +205,55 @@ export default function UsuariosPage() {
       alert("Erro ao salvar créditos");
     } finally {
       setCreditoLoading(false);
+    }
+  };
+
+  const openEditModal = (usuario: Usuario) => {
+    setEditUser(usuario);
+    setEditForm({
+      planType: usuario.planType,
+      isActive: usuario.isActive,
+    });
+    setEditModalOpen(true);
+  };
+
+  const saveUserEdit = async () => {
+    if (!editUser) return;
+
+    setEditLoading(true);
+    try {
+      const response = await fetch(`/api/admin/usuarios/${editUser.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planType: editForm.planType,
+          isActive: editForm.isActive,
+        }),
+      });
+
+      if (response.ok) {
+        // Atualiza a lista localmente
+        setUsuarios((prev) =>
+          prev.map((u) =>
+            u.id === editUser.id
+              ? {
+                  ...u,
+                  planType: editForm.planType,
+                  isActive: editForm.isActive,
+                }
+              : u
+          )
+        );
+        setEditModalOpen(false);
+      } else {
+        const data = await response.json();
+        alert(data.error || "Erro ao atualizar usuário");
+      }
+    } catch (error) {
+      console.error("Erro ao salvar usuário:", error);
+      alert("Erro ao salvar usuário");
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -649,14 +714,21 @@ export default function UsuariosPage() {
                       </button>
                       {usuario.planType === "free_trial" && (
                         <button
-                          onClick={() => openCreditosModal(usuario)}
-                          className="p-2 rounded-lg text-slate-400 hover:bg-emerald-700 hover:text-white transition-colors"
-                          title="Adicionar créditos"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openCreditosModal(usuario);
+                          }}
+                          className="p-2 rounded-lg bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white transition-colors"
+                          title="Adicionar créditos extras"
                         >
-                          <Plus className="h-4 w-4" />
+                          <Coins className="h-4 w-4" />
                         </button>
                       )}
                       <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditModal(usuario);
+                        }}
                         className="p-2 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"
                         title="Editar"
                       >
@@ -957,6 +1029,95 @@ export default function UsuariosPage() {
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : (
                     <Plus className="h-4 w-4 mr-2" />
+                  )}
+                  Salvar
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Edição */}
+      <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
+        <DialogContent className="bg-slate-900 border-slate-700 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Edit className="h-5 w-5 text-blue-400" />
+              Editar Usuário
+            </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Altere as configurações do usuário
+            </DialogDescription>
+          </DialogHeader>
+
+          {editUser && (
+            <div className="space-y-4 mt-4">
+              {/* Info do usuário */}
+              <div className="p-3 rounded-lg bg-slate-800/50">
+                <p className="text-sm font-medium text-white">{editUser.nome}</p>
+                <p className="text-xs text-slate-400">{editUser.email}</p>
+              </div>
+
+              {/* Plano */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white">Plano</label>
+                <Select
+                  value={editForm.planType}
+                  onValueChange={(value) => setEditForm({ ...editForm, planType: value })}
+                >
+                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                    <SelectValue placeholder="Selecione o plano" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="free_trial">Free Trial</SelectItem>
+                    <SelectItem value="basic">Basic</SelectItem>
+                    <SelectItem value="professional">Professional</SelectItem>
+                    <SelectItem value="enterprise">Enterprise</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Status Ativo */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50">
+                <div>
+                  <p className="text-sm font-medium text-white">Conta Ativa</p>
+                  <p className="text-xs text-slate-400">Permitir acesso à plataforma</p>
+                </div>
+                <button
+                  onClick={() => setEditForm({ ...editForm, isActive: !editForm.isActive })}
+                  className={cn(
+                    "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
+                    editForm.isActive ? "bg-emerald-600" : "bg-slate-600"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+                      editForm.isActive ? "translate-x-6" : "translate-x-1"
+                    )}
+                  />
+                </button>
+              </div>
+
+              {/* Botões */}
+              <div className="flex gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-700"
+                  onClick={() => setEditModalOpen(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  onClick={saveUserEdit}
+                  disabled={editLoading}
+                >
+                  {editLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <CheckCircle className="h-4 w-4 mr-2" />
                   )}
                   Salvar
                 </Button>
