@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Share2, Copy, Check, ExternalLink, Loader2 } from "lucide-react";
+import { Share2, Copy, Check, ExternalLink, Loader2, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface CompartilharLinkDialogProps {
@@ -147,11 +147,21 @@ export function CompartilharLinkDialog({
                 </Button>
               </div>
 
-              <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <p className="text-sm text-blue-900 dark:text-blue-100">
-                  <strong>Dica:</strong> Você também pode adicionar candidatos
-                  manualmente. Eles receberão este link por email automaticamente.
-                </p>
+              <div className="p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <div className="flex gap-3">
+                  <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
+                      Recomendação
+                    </p>
+                    <p className="text-sm text-amber-800 dark:text-amber-200">
+                      Para melhor controle de quem faz a entrevista, quantas vezes cada
+                      pessoa realiza e melhor gestão de prazos, não compartilhe o link
+                      diretamente. Utilize o <strong>cadastro individual de participantes</strong> ou
+                      a <strong>importação em lote</strong>.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           )}
