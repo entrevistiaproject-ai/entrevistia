@@ -27,6 +27,7 @@ import { AdicionarCandidatoDialog } from "@/components/entrevistas/adicionar-can
 import { UploadCandidatosDialog } from "@/components/entrevistas/upload-candidatos-dialog";
 import { CompartilharLinkDialog } from "@/components/entrevistas/compartilhar-link-dialog";
 import { DecisaoCandidato } from "@/components/entrevistas/decisao-candidato";
+import { EditarEntrevistaDialog } from "@/components/entrevistas/editar-entrevista-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -545,13 +546,28 @@ export default function EntrevistaDetalhesPage() {
         <TabsContent value="configuracoes" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Informações da Vaga</CardTitle>
-              <CardDescription>
-                Detalhes e configurações da entrevista
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Informações da Vaga</CardTitle>
+                  <CardDescription>
+                    Detalhes e configurações da entrevista
+                  </CardDescription>
+                </div>
+                <EditarEntrevistaDialog
+                  entrevista={entrevista}
+                  temCandidatos={candidatos.length > 0}
+                  onSuccess={fetchData}
+                />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                <div className="grid gap-2">
+                  <p className="text-sm font-medium">Título</p>
+                  <p className="text-sm text-muted-foreground">
+                    {entrevista.titulo}
+                  </p>
+                </div>
                 <div className="grid gap-2">
                   <p className="text-sm font-medium">Cargo</p>
                   <p className="text-sm text-muted-foreground">
@@ -564,6 +580,22 @@ export default function EntrevistaDetalhesPage() {
                     {entrevista.empresa || "Não especificada"}
                   </p>
                 </div>
+                {entrevista.duracao && (
+                  <div className="grid gap-2">
+                    <p className="text-sm font-medium">Duração máxima</p>
+                    <p className="text-sm text-muted-foreground">
+                      {entrevista.duracao} minutos
+                    </p>
+                  </div>
+                )}
+                {entrevista.descricao && (
+                  <div className="grid gap-2">
+                    <p className="text-sm font-medium">Descrição</p>
+                    <p className="text-sm text-muted-foreground whitespace-pre-line">
+                      {entrevista.descricao}
+                    </p>
+                  </div>
+                )}
                 <div className="grid gap-2">
                   <p className="text-sm font-medium">Status</p>
                   <Badge variant={statusInfo.variant} className="w-fit">
