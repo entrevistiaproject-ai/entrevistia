@@ -286,16 +286,61 @@ export default function EntrevistaDetalhesPage() {
             </CardContent>
           </Card>
 
-          <Card className="min-w-[140px] sm:min-w-0 shrink-0">
+          <Card className="min-w-40 sm:min-w-0 shrink-0">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Duração</CardTitle>
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {perguntas.length > 0 ? `${perguntas.length * 4}m` : "-"}
-              </div>
-              <p className="text-xs text-muted-foreground">Tempo estimado</p>
+              {(() => {
+                // Calcular duração média das entrevistas concluídas
+                const entrevistasComDuracao = candidatos.filter(
+                  (c) => c.status === "concluida" && c.iniciadaEm && c.concluidaEm
+                );
+
+                let duracaoMedia: number | null = null;
+                if (entrevistasComDuracao.length > 0) {
+                  const totalMinutos = entrevistasComDuracao.reduce((acc, c) => {
+                    const inicio = new Date(c.iniciadaEm!).getTime();
+                    const fim = new Date(c.concluidaEm!).getTime();
+                    return acc + (fim - inicio) / 1000 / 60;
+                  }, 0);
+                  duracaoMedia = Math.round(totalMinutos / entrevistasComDuracao.length);
+                }
+
+                const tempoEsperado = perguntas.length > 0 ? perguntas.length * 4 : null;
+                const tempoMaximo = entrevista.duracao;
+
+                return (
+                  <div className="space-y-1">
+                    {duracaoMedia !== null ? (
+                      <div className="text-2xl font-bold">{duracaoMedia}m</div>
+                    ) : tempoEsperado ? (
+                      <div className="text-2xl font-bold">{tempoEsperado}m</div>
+                    ) : (
+                      <div className="text-2xl font-bold">-</div>
+                    )}
+                    <div className="space-y-0.5">
+                      {duracaoMedia !== null && (
+                        <p className="text-xs text-muted-foreground">Média realizada</p>
+                      )}
+                      {duracaoMedia === null && tempoEsperado && (
+                        <p className="text-xs text-muted-foreground">Tempo esperado</p>
+                      )}
+                      {duracaoMedia !== null && tempoEsperado && (
+                        <p className="text-xs text-muted-foreground">
+                          Esperado: {tempoEsperado}m
+                        </p>
+                      )}
+                      {tempoMaximo && (
+                        <p className="text-xs text-muted-foreground">
+                          Máximo: {tempoMaximo}m
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
             </CardContent>
           </Card>
 
