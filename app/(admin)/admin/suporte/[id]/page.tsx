@@ -257,8 +257,8 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link href="/admin/suporte">
-          <Button variant="outline" size="sm" className="border-slate-700">
-            <ArrowLeft className="h-4 w-4" />
+          <Button variant="outline" size="icon" className="border-slate-700 h-10 w-10 hover:bg-slate-800">
+            <ArrowLeft className="h-5 w-5" />
           </Button>
         </Link>
         <div className="flex-1">
@@ -394,17 +394,19 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
                   className="bg-slate-800 border-slate-700 min-h-[100px]"
                 />
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="internal"
+                    className="flex items-center gap-3 text-sm text-slate-300 cursor-pointer hover:text-white transition-colors py-2 px-1 -ml-1 rounded"
+                  >
                     <Checkbox
                       id="internal"
                       checked={isInternal}
                       onCheckedChange={(checked) => setIsInternal(checked as boolean)}
+                      className="h-5 w-5"
                     />
-                    <label htmlFor="internal" className="text-sm text-slate-400">
-                      Nota interna (não visível ao usuário)
-                    </label>
-                  </div>
-                  <Button onClick={handleSendMessage} disabled={!newMessage.trim() || saving}>
+                    Nota interna (não visível ao usuário)
+                  </label>
+                  <Button onClick={handleSendMessage} disabled={!newMessage.trim() || saving} className="h-10 px-5">
                     {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
                     Enviar
                   </Button>
@@ -457,14 +459,14 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm text-slate-400 mb-2 block">Status</label>
+                <label className="text-sm font-medium text-slate-200 mb-2 block">Status</label>
                 <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700">
+                  <SelectTrigger className="bg-slate-800 border-slate-700 h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {STATUS_OPTIONS.map((status) => (
-                      <SelectItem key={status.value} value={status.value}>
+                      <SelectItem key={status.value} value={status.value} className="py-3">
                         {status.label}
                       </SelectItem>
                     ))}
@@ -473,14 +475,14 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
               </div>
 
               <div>
-                <label className="text-sm text-slate-400 mb-2 block">Prioridade</label>
+                <label className="text-sm font-medium text-slate-200 mb-2 block">Prioridade</label>
                 <Select value={selectedPriority} onValueChange={setSelectedPriority}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700">
+                  <SelectTrigger className="bg-slate-800 border-slate-700 h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {PRIORITY_OPTIONS.map((priority) => (
-                      <SelectItem key={priority.value} value={priority.value}>
+                      <SelectItem key={priority.value} value={priority.value} className="py-3">
                         {priority.label}
                       </SelectItem>
                     ))}
@@ -490,7 +492,7 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
 
               {selectedStatus === "resolvido" && (
                 <div>
-                  <label className="text-sm text-slate-400 mb-2 block">Resolução</label>
+                  <label className="text-sm font-medium text-slate-200 mb-2 block">Resolução</label>
                   <Textarea
                     placeholder="Descreva a resolução..."
                     value={resolucao}
@@ -503,7 +505,7 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
               <Button
                 onClick={handleUpdateTicket}
                 disabled={saving}
-                className="w-full"
+                className="w-full h-11"
               >
                 {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle className="h-4 w-4 mr-2" />}
                 Salvar Alterações
@@ -518,65 +520,65 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Risco */}
-              <div className="p-3 rounded-lg bg-slate-800">
+              <div className="p-4 rounded-lg bg-slate-800/80 border border-slate-700/50">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-400 flex items-center gap-2">
-                    <Shield className="h-4 w-4" />
+                  <span className="text-sm font-medium text-slate-200 flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-slate-400" />
                     Score de Risco
                   </span>
-                  <span className={cn("font-bold text-lg px-2 py-1 rounded", getRiscoColor(ticket.riscoScore))}>
+                  <span className={cn("font-bold text-lg px-3 py-1 rounded", getRiscoColor(ticket.riscoScore))}>
                     {ticket.riscoScore}%
                   </span>
                 </div>
                 {ticket.riscoMotivo && (
-                  <p className="text-xs text-slate-500">{ticket.riscoMotivo}</p>
+                  <p className="text-xs text-slate-400 mt-1">{ticket.riscoMotivo}</p>
                 )}
               </div>
 
               {/* Usuário */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <User className="h-4 w-4 text-slate-500" />
-                  <span className="text-slate-400">Usuário:</span>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 text-sm py-1">
+                  <User className="h-4 w-4 text-slate-400 shrink-0" />
+                  <span className="text-slate-300 font-medium min-w-[60px]">Usuário:</span>
                   <span className="text-white">{ticket.userName || "N/A"}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Mail className="h-4 w-4 text-slate-500" />
-                  <span className="text-slate-400">Email:</span>
-                  <span className="text-white text-xs">{ticket.userEmail}</span>
+                <div className="flex items-center gap-3 text-sm py-1">
+                  <Mail className="h-4 w-4 text-slate-400 shrink-0" />
+                  <span className="text-slate-300 font-medium min-w-[60px]">Email:</span>
+                  <span className="text-white text-xs break-all">{ticket.userEmail}</span>
                 </div>
               </div>
 
               {/* Contexto */}
-              <div className="space-y-2 pt-2 border-t border-slate-700">
-                <div className="flex items-center gap-2 text-sm">
-                  <Globe className="h-4 w-4 text-slate-500" />
-                  <span className="text-slate-400">Página:</span>
-                  <span className="text-white text-xs truncate">{ticket.pageUrl || "N/A"}</span>
+              <div className="space-y-3 pt-3 border-t border-slate-700/50">
+                <div className="flex items-start gap-3 text-sm py-1">
+                  <Globe className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
+                  <span className="text-slate-300 font-medium min-w-[60px]">Página:</span>
+                  <span className="text-white text-xs break-all">{ticket.pageUrl || "N/A"}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Monitor className="h-4 w-4 text-slate-500" />
-                  <span className="text-slate-400">IP:</span>
+                <div className="flex items-center gap-3 text-sm py-1">
+                  <Monitor className="h-4 w-4 text-slate-400 shrink-0" />
+                  <span className="text-slate-300 font-medium min-w-[60px]">IP:</span>
                   <span className="text-white">{ticket.ipAddress || "N/A"}</span>
                 </div>
               </div>
 
               {/* Datas */}
-              <div className="space-y-2 pt-2 border-t border-slate-700">
-                <div className="flex items-center gap-2 text-sm">
-                  <Calendar className="h-4 w-4 text-slate-500" />
-                  <span className="text-slate-400">Criado:</span>
+              <div className="space-y-3 pt-3 border-t border-slate-700/50">
+                <div className="flex items-center gap-3 text-sm py-1">
+                  <Calendar className="h-4 w-4 text-slate-400 shrink-0" />
+                  <span className="text-slate-300 font-medium min-w-[60px]">Criado:</span>
                   <span className="text-white">{formatDate(ticket.createdAt)}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Clock className="h-4 w-4 text-slate-500" />
-                  <span className="text-slate-400">Atualizado:</span>
+                <div className="flex items-center gap-3 text-sm py-1">
+                  <Clock className="h-4 w-4 text-slate-400 shrink-0" />
+                  <span className="text-slate-300 font-medium min-w-[60px]">Atualizado:</span>
                   <span className="text-white">{formatDate(ticket.updatedAt)}</span>
                 </div>
                 {ticket.firstResponseAt && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <MessageSquare className="h-4 w-4 text-slate-500" />
-                    <span className="text-slate-400">1ª Resposta:</span>
+                  <div className="flex items-center gap-3 text-sm py-1">
+                    <MessageSquare className="h-4 w-4 text-slate-400 shrink-0" />
+                    <span className="text-slate-300 font-medium min-w-[60px]">1ª Resposta:</span>
                     <span className="text-white">{formatDate(ticket.firstResponseAt)}</span>
                   </div>
                 )}

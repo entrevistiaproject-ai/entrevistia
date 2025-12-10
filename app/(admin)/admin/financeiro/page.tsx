@@ -175,11 +175,11 @@ const COLORS = {
   tokens: ["#8b5cf6", "#06b6d4", "#f59e0b", "#ec4899"],
 };
 
-const tipoLabels: Record<string, { label: string; icon: React.ElementType }> = {
-  taxa_base_candidato: { label: "Taxa Base Candidato", icon: Users },
-  analise_pergunta: { label: "Análise por Pergunta", icon: MessageSquare },
-  transcricao_audio: { label: "Transcrição Áudio", icon: FileText },
-  analise_ia: { label: "Análise IA", icon: Cpu },
+const tipoLabels: Record<string, { label: string; legendLabel: string; icon: React.ElementType }> = {
+  taxa_base_candidato: { label: "Taxa Base Candidato", legendLabel: "Total Taxas Base", icon: Users },
+  analise_pergunta: { label: "Análise por Pergunta", legendLabel: "Total Análises de Perguntas", icon: MessageSquare },
+  transcricao_audio: { label: "Transcrição Áudio", legendLabel: "Total Transcrições", icon: FileText },
+  analise_ia: { label: "Análise IA", legendLabel: "Total Análises IA", icon: Cpu },
 };
 
 export default function FinanceiroPage() {
@@ -524,21 +524,24 @@ export default function FinanceiroPage() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="mt-4 space-y-2">
+            <div className="mt-4 space-y-2.5">
               {custosPorTipo.map((item, index) => {
-                const info = tipoLabels[item.tipo] || { label: item.tipo, icon: Activity };
+                const info = tipoLabels[item.tipo] || { label: item.tipo, legendLabel: item.tipo, icon: Activity };
                 const Icon = info.icon;
                 return (
-                  <div key={item.tipo} className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
+                  <div key={item.tipo} className="flex items-center justify-between text-sm py-1 px-2 rounded hover:bg-slate-800/50 transition-colors cursor-default">
+                    <div className="flex items-center gap-2.5">
                       <div
-                        className="w-3 h-3 rounded-full"
+                        className="w-3 h-3 rounded-full shrink-0"
                         style={{ backgroundColor: COLORS.tokens[index % COLORS.tokens.length] }}
                       />
-                      <Icon className="h-3 w-3 text-slate-500" />
-                      <span className="text-slate-300 text-xs">{info.label}</span>
+                      <Icon className="h-4 w-4 text-slate-400 shrink-0" />
+                      <div className="flex flex-col">
+                        <span className="text-slate-100 text-xs font-medium">{info.legendLabel}</span>
+                        <span className="text-slate-500 text-[10px]">{item.quantidade} operações</span>
+                      </div>
                     </div>
-                    <span className="text-white font-medium">
+                    <span className="text-white font-semibold">
                       R$ {item.custoBase.toFixed(2)}
                     </span>
                   </div>
