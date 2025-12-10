@@ -28,6 +28,7 @@ import {
   History,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SupportWidget } from "@/components/support/support-widget";
 
 interface Fatura {
   id: string;
@@ -788,10 +789,13 @@ export default function FaturaPage() {
               <p className="text-sm text-muted-foreground">
                 Se tiver dúvidas sobre sua fatura ou precisar de suporte, entre em contato conosco.
               </p>
-              <Button variant="outline" className="w-full">
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Falar com Suporte
-              </Button>
+              <SupportWidget
+                origem="pagina_fatura"
+                categoriaInicial="faturamento"
+                tituloInicial={selectedFatura ? `Dúvida sobre fatura de ${getMesNome(selectedFatura.mesReferencia, selectedFatura.anoReferencia)}` : "Dúvida sobre faturamento"}
+                descricaoInicial={selectedFatura ? `Tenho uma dúvida sobre minha fatura de ${getMesNome(selectedFatura.mesReferencia, selectedFatura.anoReferencia)}.\n\nValor: ${formatCurrency(selectedFatura.valorTotal)}\nStatus: ${selectedFatura.status}\n\nMinha dúvida: ` : "Tenho uma dúvida sobre minha fatura.\n\nMinha dúvida: "}
+                variant="outline"
+              />
             </CardContent>
           </Card>
         </div>

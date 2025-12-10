@@ -17,6 +17,8 @@ import {
   UserCog,
   Bell,
   Database,
+  Ticket,
+  Bug,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 
@@ -77,6 +79,23 @@ const menuGroups = [
         href: "/admin/faturas",
         icon: FileText,
         permission: "canManageFinances" as const,
+      },
+    ],
+  },
+  {
+    title: "Suporte",
+    items: [
+      {
+        title: "Chamados",
+        href: "/admin/suporte",
+        icon: Ticket,
+        permission: "canAccessLogs" as const,
+      },
+      {
+        title: "Erros",
+        href: "/admin/erros",
+        icon: Bug,
+        permission: "canAccessLogs" as const,
       },
     ],
   },
