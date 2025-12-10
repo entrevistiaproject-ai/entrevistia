@@ -23,14 +23,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Calendar,
-  DollarSign,
   CheckCircle,
   Clock,
   AlertCircle,
   XCircle,
   Download,
   RefreshCw,
-  Eye,
   FileText,
   Building2,
   Loader2,
@@ -591,7 +589,8 @@ export default function FaturasPage() {
               {faturasFiltradas.map((fatura) => (
                 <tr
                   key={fatura.id}
-                  className="hover:bg-slate-800/30 transition-colors"
+                  className="hover:bg-slate-800/30 transition-colors cursor-pointer"
+                  onClick={() => fetchFaturaDetails(fatura.id)}
                 >
                   {/* Período */}
                   <td className="px-4 py-4">
@@ -668,14 +667,8 @@ export default function FaturasPage() {
 
                   {/* Ações */}
                   <td className="px-4 py-4">
-                    <div className="flex items-center justify-center gap-1">
-                      <button
-                        onClick={() => fetchFaturaDetails(fatura.id)}
-                        className="p-2 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"
-                        title="Ver detalhes"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
+                    <div className="flex items-center justify-center">
+                      <ChevronRight className="h-4 w-4 text-slate-400" />
                     </div>
                   </td>
                 </tr>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -97,6 +97,7 @@ const CATEGORY_CONFIG = {
 };
 
 export default function SuportePage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [tickets, setTickets] = useState<TicketData[]>([]);
   const [stats, setStats] = useState<TicketStats | null>(null);
@@ -388,7 +389,11 @@ export default function SuportePage() {
                     const StatusIcon = statusConfig.icon;
 
                     return (
-                      <TableRow key={ticket.id} className="border-slate-700 hover:bg-slate-800/50">
+                      <TableRow
+                        key={ticket.id}
+                        className="border-slate-700 hover:bg-slate-800/50 cursor-pointer transition-colors"
+                        onClick={() => router.push(`/admin/suporte/${ticket.id}`)}
+                      >
                         <TableCell>
                           <div className="space-y-1">
                             <p className="font-medium text-white truncate max-w-[250px]">
@@ -437,11 +442,7 @@ export default function SuportePage() {
                           </span>
                         </TableCell>
                         <TableCell>
-                          <Link href={`/admin/suporte/${ticket.id}`}>
-                            <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
-                              <ChevronRight className="h-4 w-4" />
-                            </Button>
-                          </Link>
+                          <ChevronRight className="h-4 w-4 text-slate-400" />
                         </TableCell>
                       </TableRow>
                     );
