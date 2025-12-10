@@ -18,6 +18,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { PageHeader } from "@/components/ui/page-header";
+import Link from "next/link";
 import { SkeletonStats, SkeletonCard } from "@/components/ui/skeleton-card";
 import {
   BarChart,
@@ -148,10 +149,12 @@ export default function CustosPage() {
         title="Gerenciamento de Custos"
         description="Acompanhe seus gastos e otimize seus investimentos"
       >
-        <Button size="touch" className="w-full sm:w-auto">
-          <CreditCard className="h-4 w-4" />
-          Ver Fatura Completa
-        </Button>
+        <Link href="/fatura">
+          <Button size="touch" className="w-full sm:w-auto">
+            <CreditCard className="h-4 w-4" />
+            Ver Fatura Completa
+          </Button>
+        </Link>
       </PageHeader>
 
       {/* Alerta de Fatura */}
