@@ -124,25 +124,19 @@ interface FinanceiroData {
       taxaCambio: number;
     };
   };
-  // Custos de infraestrutura
-  custosInfraestrutura: {
-    periodo: number;
-    custoTotalPeriodo: number;
-    servicos: Array<{
-      id: string;
-      nome: string;
-      descricao: string;
-      custoMensal: number;
-      custoPeriodo: number;
-    }>;
+  // Infraestrutura absorvida (percentual sobre APIs)
+  infraestruturaAbsorvida: {
+    percentual: number;
+    valorAbsorvido: number;
+    descricao: string;
   };
   // Custos por categoria
   custosPorCategoria: {
     claude: number;
     whisper: number;
-    infraestrutura: number;
-    total: number;
-    totalSemInfraestrutura: number;
+    infraestruturaAbsorvida: number;
+    totalAPIs: number;
+    totalComInfra: number;
   };
   margemPorOperacao: Array<{
     operacao: string;
@@ -163,14 +157,14 @@ interface FinanceiroData {
     custoProjetado: number;
     lucroProjetado: number;
   };
-  // Margem teórica
+  // Margem teórica (com infra absorvida)
   margemTeorica: {
     receitaTotal: number;
     custoAPIs: number;
-    custoInfraestrutura: number;
-    custoTotalReal: number;
-    lucroReal: number;
-    margemReal: number;
+    custoInfraAbsorvida: number;
+    custoTotalTeorico: number;
+    lucroTeorico: number;
+    margemTeorica: number;
   };
 }
 
@@ -251,7 +245,7 @@ export default function FinanceiroPage() {
     projecao,
     custosClaudeDetalhado,
     custosWhisperDetalhado,
-    custosInfraestrutura,
+    infraestruturaAbsorvida,
     custosPorCategoria,
     margemTeorica,
   } = data;
@@ -718,52 +712,62 @@ export default function FinanceiroPage() {
         </Card>
       </div>
 
-      {/* Custos de Infraestrutura e Resumo */}
+      {/* Custos de Infraestrutura Absorvida e Resumo */}
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Infraestrutura */}
+        {/* Infraestrutura Absorvida */}
         <Card className="bg-slate-900/50 border-slate-700">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Server className="h-5 w-5 text-blue-400" />
-              Infraestrutura
-            </CardTitle>
-            <CardDescription className="text-slate-400">
-              Custos fixos mensais de hospedagem
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Server className="h-5 w-5 text-blue-400" />
+                  Infraestrutura
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Custo absorvido no preco de cada analise
+                </CardDescription>
+              </div>
+              <Badge className="bg-blue-500/20 text-blue-400 border-0">
+                {infraestruturaAbsorvida?.percentual || 15}% sobre APIs
+              </Badge>
+            </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            {custosInfraestrutura?.servicos?.map((servico) => {
-              const icons: Record<string, React.ElementType> = {
-                vercel: Cloud,
-                neon: Database,
-                resend: Mail,
-              };
-              const IconComp = icons[servico.id] || Server;
-              return (
-                <div key={servico.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 border border-slate-700">
-                  <div className="flex items-center gap-3">
-                    <IconComp className="h-5 w-5 text-blue-400" />
-                    <div>
-                      <p className="text-sm font-medium text-white">{servico.nome}</p>
-                      <p className="text-xs text-slate-500">{servico.descricao}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-white">
-                      R$ {servico.custoMensal.toFixed(2)}/mes
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      R$ {servico.custoPeriodo.toFixed(2)} ({custosInfraestrutura?.periodo}m)
-                    </p>
-                  </div>
+            {/* Servicos inclusos */}
+            {[
+              { id: "vercel", nome: "Vercel (Hosting)", descricao: "Hospedagem e deploy do Next.js", Icon: Cloud },
+              { id: "neon", nome: "Neon (Database)", descricao: "Banco de dados PostgreSQL serverless", Icon: Database },
+              { id: "resend", nome: "Resend (Email)", descricao: "Envio de emails transacionais", Icon: Mail },
+            ].map((servico) => (
+              <div key={servico.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700">
+                <servico.Icon className="h-5 w-5 text-blue-400" />
+                <div>
+                  <p className="text-sm font-medium text-white">{servico.nome}</p>
+                  <p className="text-xs text-slate-500">{servico.descricao}</p>
                 </div>
-              );
-            })}
-            <div className="flex justify-between pt-3 border-t border-slate-700">
-              <span className="text-slate-400">Total Periodo ({custosInfraestrutura?.periodo} meses)</span>
-              <span className="text-emerald-400 font-bold">
-                R$ {(custosInfraestrutura?.custoTotalPeriodo || 0).toFixed(2)}
-              </span>
+              </div>
+            ))}
+
+            {/* Custo absorvido */}
+            <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-400">Percentual sobre APIs</span>
+                <span className="text-blue-400 font-medium">
+                  {infraestruturaAbsorvida?.percentual || 15}%
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-white font-medium">Valor Absorvido</span>
+                <span className="text-emerald-400 font-bold">
+                  R$ {(infraestruturaAbsorvida?.valorAbsorvido || 0).toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            {/* Info */}
+            <div className="flex items-start gap-2 p-2 rounded bg-slate-800/30 text-xs text-slate-400">
+              <Info className="h-4 w-4 mt-0.5 shrink-0" />
+              <span>Este custo nao e cobrado separadamente - ja esta incluido no custo teorico de cada analise</span>
             </div>
           </CardContent>
         </Card>
@@ -776,7 +780,7 @@ export default function FinanceiroPage() {
               Custos por Categoria
             </CardTitle>
             <CardDescription className="text-slate-400">
-              Distribuicao de custos por servico
+              Distribuicao de custos teoricos por servico
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -802,44 +806,44 @@ export default function FinanceiroPage() {
               </span>
             </div>
 
-            {/* Infraestrutura */}
+            {/* Infraestrutura Absorvida */}
             <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
               <div className="flex items-center gap-2">
                 <Server className="h-4 w-4 text-blue-400" />
-                <span className="text-sm text-white">Infraestrutura</span>
+                <span className="text-sm text-white">Infra ({infraestruturaAbsorvida?.percentual || 15}%)</span>
               </div>
               <span className="text-sm font-medium text-blue-400">
-                R$ {(custosPorCategoria?.infraestrutura || 0).toFixed(2)}
+                R$ {(custosPorCategoria?.infraestruturaAbsorvida || 0).toFixed(2)}
               </span>
             </div>
 
             {/* Separador */}
             <div className="border-t border-slate-700 pt-3 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-slate-400">APIs (sem infra)</span>
+                <span className="text-slate-400">Total APIs</span>
                 <span className="text-white">
-                  R$ {(custosPorCategoria?.totalSemInfraestrutura || 0).toFixed(2)}
+                  R$ {(custosPorCategoria?.totalAPIs || 0).toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-white font-medium">Total Geral</span>
+                <span className="text-white font-medium">Total c/ Infra</span>
                 <span className="text-emerald-400 font-bold">
-                  R$ {(custosPorCategoria?.total || 0).toFixed(2)}
+                  R$ {(custosPorCategoria?.totalComInfra || 0).toFixed(2)}
                 </span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Margem Teórica Real */}
+        {/* Margem Teórica */}
         <Card className="bg-slate-900/50 border-slate-700">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Calculator className="h-5 w-5 text-emerald-400" />
-              Margem Teorica Real
+              Margem Teorica
             </CardTitle>
             <CardDescription className="text-slate-400">
-              Considerando todos os custos
+              Considerando todos os custos (APIs + Infra absorvida)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -857,15 +861,15 @@ export default function FinanceiroPage() {
                 </span>
               </div>
               <div className="flex justify-between py-2 border-b border-slate-700">
-                <span className="text-slate-400">(-) Infraestrutura</span>
+                <span className="text-slate-400">(-) Infra Absorvida ({infraestruturaAbsorvida?.percentual || 15}%)</span>
                 <span className="text-red-400">
-                  -R$ {(margemTeorica?.custoInfraestrutura || 0).toFixed(2)}
+                  -R$ {(margemTeorica?.custoInfraAbsorvida || 0).toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between py-2 border-b border-slate-700">
-                <span className="text-slate-400">(=) Custo Total Real</span>
+                <span className="text-slate-400">(=) Custo Total Teorico</span>
                 <span className="text-amber-400 font-medium">
-                  R$ {(margemTeorica?.custoTotalReal || 0).toFixed(2)}
+                  R$ {(margemTeorica?.custoTotalTeorico || 0).toFixed(2)}
                 </span>
               </div>
             </div>
@@ -873,31 +877,31 @@ export default function FinanceiroPage() {
             {/* Lucro e Margem */}
             <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 space-y-3">
               <div className="flex justify-between">
-                <span className="text-emerald-300">Lucro Real</span>
+                <span className="text-emerald-300">Lucro Teorico</span>
                 <span className="text-2xl font-bold text-emerald-400">
-                  R$ {(margemTeorica?.lucroReal || 0).toFixed(2)}
+                  R$ {(margemTeorica?.lucroTeorico || 0).toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-emerald-300">Margem Real</span>
+                <span className="text-emerald-300">Margem Teorica</span>
                 <Badge
                   className={`text-lg px-3 py-1 ${
-                    (margemTeorica?.margemReal || 0) >= 60
+                    (margemTeorica?.margemTeorica || 0) >= 60
                       ? "bg-emerald-500/20 text-emerald-400"
-                      : (margemTeorica?.margemReal || 0) >= 40
+                      : (margemTeorica?.margemTeorica || 0) >= 40
                       ? "bg-amber-500/20 text-amber-400"
                       : "bg-red-500/20 text-red-400"
                   } border-0`}
                 >
-                  {(margemTeorica?.margemReal || 0).toFixed(1)}%
+                  {(margemTeorica?.margemTeorica || 0).toFixed(1)}%
                 </Badge>
               </div>
             </div>
 
             {/* Info */}
             <div className="flex items-start gap-2 p-2 rounded bg-slate-800/30 text-xs text-slate-400">
-              <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
-              <span>Esta margem considera todos os custos reais incluindo infraestrutura fixa</span>
+              <Info className="h-4 w-4 mt-0.5 shrink-0" />
+              <span>Custo teorico = Whisper + Claude + {infraestruturaAbsorvida?.percentual || 15}% de infraestrutura</span>
             </div>
           </CardContent>
         </Card>

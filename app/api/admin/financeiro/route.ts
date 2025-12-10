@@ -3,29 +3,7 @@ import { verifyAdminSession } from "@/lib/auth/admin-auth";
 import { getDB } from "@/lib/db";
 import { users, faturas, transacoes } from "@/lib/db/schema";
 import { sql, desc, gte, and, eq } from "drizzle-orm";
-import { API_COSTS, TAXA_CAMBIO_USD_BRL } from "@/lib/config/pricing";
-
-/**
- * Custos fixos mensais de infraestrutura (estimativas)
- * Estes valores devem ser atualizados conforme os custos reais
- */
-const CUSTOS_INFRAESTRUTURA = {
-  vercel: {
-    nome: "Vercel (Hosting)",
-    custoMensal: 0, // Plano gratuito ou Pro ($20/mês)
-    descricao: "Hospedagem e deploy do Next.js",
-  },
-  neon: {
-    nome: "Neon (Database)",
-    custoMensal: 0, // Plano gratuito ou Pro ($19/mês)
-    descricao: "Banco de dados PostgreSQL serverless",
-  },
-  resend: {
-    nome: "Resend (Email)",
-    custoMensal: 0, // Plano gratuito (100 emails/dia) ou Pro ($20/mês)
-    descricao: "Envio de emails transacionais",
-  },
-};
+import { API_COSTS, TAXA_CAMBIO_USD_BRL, PERCENTUAL_INFRAESTRUTURA } from "@/lib/config/pricing";
 
 export async function GET(request: Request) {
   try {
@@ -217,11 +195,13 @@ export async function GET(request: Request) {
     const custoWhisperUSD = totalMinutosAudio * API_COSTS.whisper.perMinute;
     const custoWhisperBRL = custoWhisperUSD * TAXA_CAMBIO_USD_BRL;
 
-    // Custos de infraestrutura (proporcional ao período)
-    const mesesNoPeriodo = mesesAtras;
-    const custoInfraestruturaTotal = Object.values(CUSTOS_INFRAESTRUTURA).reduce(
-      (acc, infra) => acc + (infra.custoMensal * mesesNoPeriodo), 0
-    );
+    // Custo total de APIs (Claude + Whisper) - calculado aqui para usar abaixo
+    const custoTotalAPIs = custoClaudeTotalBRL + custoWhisperBRL;
+
+    // Custo de infraestrutura absorvido (percentual sobre as APIs)
+    // Fórmula: custoInfra = (custoAPIs) * PERCENTUAL_INFRAESTRUTURA
+    // Este custo já está incluído no custoBase de cada transação
+    const custoInfraAbsorvido = custoTotalAPIs * PERCENTUAL_INFRAESTRUTURA;
 
     // Por modelo (detalhado)
     const porModelo = [
@@ -277,11 +257,8 @@ export async function GET(request: Request) {
     const mediaReceita = ultimosMeses.reduce((acc, m) => acc + m.receita, 0) / (ultimosMeses.length || 1);
     const mediaCusto = ultimosMeses.reduce((acc, m) => acc + m.custo, 0) / (ultimosMeses.length || 1);
 
-    // Custo total de APIs (Claude + Whisper)
-    const custoTotalAPIs = custoClaudeTotalBRL + custoWhisperBRL;
-
-    // Custo total incluindo infraestrutura
-    const custoTotalComInfraestrutura = custoTotalNum + custoInfraestruturaTotal;
+    // Custo total teórico (APIs + infraestrutura absorvida)
+    const custoTotalTeorico = custoTotalAPIs + custoInfraAbsorvido;
 
     return NextResponse.json({
       resumo: {
@@ -342,26 +319,21 @@ export async function GET(request: Request) {
         },
       },
 
-      // Custos de infraestrutura
-      custosInfraestrutura: {
-        periodo: mesesNoPeriodo,
-        custoTotalPeriodo: custoInfraestruturaTotal,
-        servicos: Object.entries(CUSTOS_INFRAESTRUTURA).map(([key, value]) => ({
-          id: key,
-          nome: value.nome,
-          descricao: value.descricao,
-          custoMensal: value.custoMensal,
-          custoPeriodo: value.custoMensal * mesesNoPeriodo,
-        })),
+      // Infraestrutura absorvida no custo de cada análise
+      // Não é mais cobrada separadamente - está embutida no custo teórico
+      infraestruturaAbsorvida: {
+        percentual: PERCENTUAL_INFRAESTRUTURA * 100, // ex: 15%
+        valorAbsorvido: custoInfraAbsorvido,
+        descricao: "Custo de infraestrutura absorvido no custo de cada análise (Vercel, Neon, Resend, etc.)",
       },
 
       // Resumo de custos por categoria
       custosPorCategoria: {
         claude: custoClaudeTotalBRL,
         whisper: custoWhisperBRL,
-        infraestrutura: custoInfraestruturaTotal,
-        total: custoTotalAPIs + custoInfraestruturaTotal,
-        totalSemInfraestrutura: custoTotalAPIs,
+        infraestruturaAbsorvida: custoInfraAbsorvido,
+        totalAPIs: custoTotalAPIs,
+        totalComInfra: custoTotalTeorico,
       },
 
       // Legado (mantido para compatibilidade)
@@ -390,15 +362,15 @@ export async function GET(request: Request) {
         lucroProjetado: mediaReceita * 1.1 - mediaCusto * 1.05,
       },
 
-      // Margem teórica (considerando todos os custos)
+      // Margem teórica (considerando todos os custos incluindo infra absorvida)
       margemTeorica: {
         receitaTotal: receitaTotalNum,
         custoAPIs: custoTotalAPIs,
-        custoInfraestrutura: custoInfraestruturaTotal,
-        custoTotalReal: custoTotalComInfraestrutura,
-        lucroReal: receitaTotalNum - custoTotalComInfraestrutura,
-        margemReal: receitaTotalNum > 0
-          ? ((receitaTotalNum - custoTotalComInfraestrutura) / receitaTotalNum) * 100
+        custoInfraAbsorvida: custoInfraAbsorvido,
+        custoTotalTeorico: custoTotalTeorico,
+        lucroTeorico: receitaTotalNum - custoTotalTeorico,
+        margemTeorica: receitaTotalNum > 0
+          ? ((receitaTotalNum - custoTotalTeorico) / receitaTotalNum) * 100
           : 0,
       },
     });

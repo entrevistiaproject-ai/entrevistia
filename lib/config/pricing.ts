@@ -30,6 +30,20 @@ export const API_COSTS = {
   },
 };
 
+/**
+ * Percentual de infraestrutura a ser adicionado no custo teórico
+ * Este valor é absorvido no custo de cada análise (não cobrado separadamente)
+ *
+ * Cálculo: custo_pergunta = whisper + claude + (custo_apis * PERCENTUAL_INFRA)
+ *
+ * O percentual cobre:
+ * - Vercel (hosting/deploy)
+ * - Neon (banco de dados)
+ * - Resend (emails)
+ * - Outros custos operacionais
+ */
+export const PERCENTUAL_INFRAESTRUTURA = 0.15; // 15% de overhead de infraestrutura
+
 // Estimativas de uso (para referência interna)
 export const USAGE_ESTIMATES = {
   // Tokens médios por análise de resposta em texto
@@ -46,22 +60,36 @@ export const USAGE_ESTIMATES = {
 };
 
 /**
- * Calcula custo de transcrição de áudio (custo real da API)
+ * Calcula custo de transcrição de áudio (custo real da API + infraestrutura ponderada)
+ *
+ * O custo inclui:
+ * - Custo do Whisper (por minuto de áudio)
+ * - Overhead de infraestrutura (% ponderado)
  */
 export function calcularCustoTranscricao(duracaoSegundos: number): number {
   const minutos = duracaoSegundos / 60;
-  const custoUSD = minutos * API_COSTS.whisper.perMinute;
-  const custoBRL = custoUSD * TAXA_CAMBIO_USD_BRL;
+  const custoWhisperUSD = minutos * API_COSTS.whisper.perMinute;
+
+  // Adiciona overhead de infraestrutura proporcional
+  const custoTotalUSD = custoWhisperUSD * (1 + PERCENTUAL_INFRAESTRUTURA);
+  const custoBRL = custoTotalUSD * TAXA_CAMBIO_USD_BRL;
   return Number(custoBRL.toFixed(6));
 }
 
 /**
- * Calcula custo de análise com Claude (custo real da API)
+ * Calcula custo de análise com Claude (custo real da API + infraestrutura ponderada)
+ *
+ * O custo inclui:
+ * - Custo do Claude (input + output tokens)
+ * - Overhead de infraestrutura (% ponderado)
  */
 export function calcularCustoAnalise(tokensInput: number, tokensOutput: number): number {
   const custoInputUSD = (tokensInput / 1_000_000) * API_COSTS.claude.inputPerMillion;
   const custoOutputUSD = (tokensOutput / 1_000_000) * API_COSTS.claude.outputPerMillion;
-  const custoTotalUSD = custoInputUSD + custoOutputUSD;
+  const custoClaudeUSD = custoInputUSD + custoOutputUSD;
+
+  // Adiciona overhead de infraestrutura proporcional
+  const custoTotalUSD = custoClaudeUSD * (1 + PERCENTUAL_INFRAESTRUTURA);
   const custoBRL = custoTotalUSD * TAXA_CAMBIO_USD_BRL;
   return Number(custoBRL.toFixed(6));
 }
