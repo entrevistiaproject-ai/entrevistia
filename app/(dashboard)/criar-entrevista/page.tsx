@@ -294,7 +294,7 @@ Breve contexto sobre a posição e equipe...
                 onChange={(e) => setDescricao(e.target.value)}
                 rows={10}
                 required
-                className="font-mono text-sm min-h-[200px] resize-y"
+                className="font-mono text-sm min-h-[280px] resize-y"
                 maxLength={1000}
               />
               <div className="space-y-2">
@@ -321,9 +321,9 @@ Breve contexto sobre a posição e equipe...
                   />
                 </div>
               </div>
-              <Alert className="mt-2">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-xs sm:text-sm">
+              <Alert className="mt-6 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/50">
+                <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <AlertDescription className="text-sm text-blue-700 dark:text-blue-300">
                   <strong>Dica importante:</strong> A IA usa esta descrição para calcular o score de cada candidato.
                   Quanto mais detalhes você incluir, mais precisa será a análise.
                 </AlertDescription>

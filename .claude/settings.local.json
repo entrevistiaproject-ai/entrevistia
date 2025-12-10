@@ -55,7 +55,11 @@
       "Bash(node scripts/apply-migrations.js:*)",
       "Bash(mv:*)",
       "Bash(git rm:*)",
-      "Bash(xargs ls:*)"
+      "Bash(xargs ls:*)",
+      "Bash(rm:*)",
+      "Bash(python3:*)",
+      "Bash(vercel:*)",
+      "Bash(node scripts/merge-duplicate-candidatos.js:*)"
     ],
     "deny": [],
     "ask": []
