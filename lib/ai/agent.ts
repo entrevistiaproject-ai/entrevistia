@@ -3,6 +3,7 @@ import { getDB } from '@/lib/db';
 import { entrevistas, respostas, perguntas, candidatoEntrevistas, CompetenciaAvaliada } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { z } from 'zod';
+import { registrarAnalisePerguntas } from '@/lib/services/billing';
 
 /**
  * Schema para competência individual
@@ -49,11 +50,13 @@ async function fetchInterviewData(candidatoId: string, entrevistaId: string) {
     .where(eq(entrevistas.id, entrevistaId))
     .limit(1);
 
-  // Busca respostas do candidato
+  // Busca respostas do candidato com IDs para cobrança
   const candidateAnswers = await db
     .select({
+      perguntaId: perguntas.id,
       perguntaTexto: perguntas.texto,
       perguntaTipo: perguntas.tipo,
+      respostaId: respostas.id,
       textoResposta: respostas.textoResposta,
       transcricao: respostas.transcricao,
     })
@@ -210,6 +213,19 @@ Retorne APENAS o JSON, sem texto adicional, sem markdown, sem explicações.`;
 
     if (!updated) {
       return { success: false, error: 'Candidato não encontrado na entrevista' };
+    }
+
+    // Registra transações de cobrança por pergunta analisada
+    if (data.entrevista.userId) {
+      await registrarAnalisePerguntas({
+        userId: data.entrevista.userId,
+        entrevistaId: entrevistaId,
+        perguntas: data.respostas.map(r => ({
+          perguntaId: r.perguntaId,
+          perguntaTexto: r.perguntaTexto,
+          respostaId: r.respostaId,
+        })),
+      });
     }
 
     return { success: true, avaliacaoId: updated.id };

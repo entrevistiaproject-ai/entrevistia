@@ -70,6 +70,13 @@ export function aplicarMarkup(custoBase: number, markup: number = 2.5): number {
   return Number((custoBase * markup).toFixed(2));
 }
 
+// Estimativas de uso para análise por pergunta
+export const USAGE_ESTIMATES_ANALISE_PERGUNTA = {
+  // Tokens médios por análise de UMA pergunta/resposta
+  input: 300, // tokens (pergunta + resposta + contexto mínimo)
+  output: 150, // tokens (avaliação da resposta)
+};
+
 /**
  * TABELA DE PREÇOS PARA O USUÁRIO
  * (Já com markup aplicado)
@@ -101,10 +108,14 @@ export const PRECOS_USUARIO = {
 
   // Taxa fixa por entrevista criada
   entrevistaCriada: 0.05, // R$ 0.05
+
+  // Taxa por análise de pergunta individual (quando a IA avalia a resposta de uma pergunta)
+  analisePorPergunta: 0.70, // R$ 0,70 por pergunta analisada
 };
 
 /**
  * Calcula custo estimado de uma entrevista completa
+ * Inclui: criação da entrevista, criação das perguntas, respostas e análise por pergunta
  */
 export function estimarCustoEntrevista(
   numPerguntas: number,
@@ -118,6 +129,7 @@ export function estimarCustoEntrevista(
     criacaoEntrevista: number;
     criacaoPerguntas: number;
     respostas: number;
+    analisePorPergunta: number;
   };
 } {
   const custoEntrevista = PRECOS_USUARIO.entrevistaCriada;
@@ -126,8 +138,11 @@ export function estimarCustoEntrevista(
     tipoResposta === "audio" ? PRECOS_USUARIO.respostaAudio : PRECOS_USUARIO.respostaTexto;
   const custoRespostas = custoResposta * numPerguntas * numCandidatos;
 
-  const custoTotal = custoEntrevista + custoPerguntas + custoRespostas;
-  const custoPorCandidato = custoRespostas / numCandidatos;
+  // Custo de análise: cobra por cada pergunta analisada por candidato
+  const custoAnalise = PRECOS_USUARIO.analisePorPergunta * numPerguntas * numCandidatos;
+
+  const custoTotal = custoEntrevista + custoPerguntas + custoRespostas + custoAnalise;
+  const custoPorCandidato = (custoRespostas + custoAnalise) / numCandidatos;
 
   return {
     custoBase: custoEntrevista + custoPerguntas,
@@ -137,6 +152,7 @@ export function estimarCustoEntrevista(
       criacaoEntrevista: custoEntrevista,
       criacaoPerguntas: Number(custoPerguntas.toFixed(2)),
       respostas: Number(custoRespostas.toFixed(2)),
+      analisePorPergunta: Number(custoAnalise.toFixed(2)),
     },
   };
 }
@@ -219,6 +235,7 @@ console.log("🚀 Tabela de Preços Calculada:");
 console.log("=".repeat(50));
 console.log(`Resposta Texto: R$ ${PRECOS_USUARIO.respostaTexto.toFixed(2)}`);
 console.log(`Resposta Áudio: R$ ${PRECOS_USUARIO.respostaAudio.toFixed(2)}`);
+console.log(`Análise por Pergunta: R$ ${PRECOS_USUARIO.analisePorPergunta.toFixed(2)}`);
 console.log(`Pergunta Criada: R$ ${PRECOS_USUARIO.perguntaCriada.toFixed(2)}`);
 console.log(`Entrevista Criada: R$ ${PRECOS_USUARIO.entrevistaCriada.toFixed(2)}`);
 console.log("=".repeat(50));

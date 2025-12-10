@@ -345,6 +345,7 @@ export default function CustosPage() {
               const tipoLabels: Record<string, { label: string; icon: any }> = {
                 transcricao_audio: { label: "Transcrição de Áudio", icon: Users },
                 analise_ia: { label: "Análise com IA", icon: TrendingUp },
+                analise_pergunta: { label: "Análise por Pergunta", icon: TrendingUp },
                 pergunta_criada: { label: "Perguntas Criadas", icon: Briefcase },
                 entrevista_criada: { label: "Entrevistas Criadas", icon: Briefcase },
               };

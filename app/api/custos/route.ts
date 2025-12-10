@@ -135,7 +135,7 @@ export async function GET(request: Request) {
       .select({
         totalRespostas: sql<number>`COUNT(DISTINCT ${transacoes.respostaId})::int`,
         custoRespostas: sql<number>`SUM(CASE
-          WHEN ${transacoes.tipo} IN ('transcricao_audio', 'analise_ia')
+          WHEN ${transacoes.tipo} IN ('transcricao_audio', 'analise_ia', 'analise_pergunta')
           THEN ${transacoes.valorCobrado}
           ELSE 0
         END)::numeric`,
