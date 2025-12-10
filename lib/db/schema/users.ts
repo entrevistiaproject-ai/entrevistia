@@ -23,6 +23,12 @@ export const users = pgTable("users", {
   // Status da conta
   isActive: boolean("is_active").default(true).notNull(),
 
+  // Conta de teste (QA)
+  // Contas teste têm acesso livre à plataforma para testes em produção
+  // Geram faturas normais mas não são integradas ao meio de pagamento
+  // Os valores não contam como receita, mas os custos abtem da margem
+  isTestAccount: boolean("is_test_account").default(false).notNull(),
+
   // Plano e limites
   planType: text("plan_type").default("free_trial").notNull(), // 'free_trial', 'basic', 'professional', 'enterprise'
   planStatus: text("plan_status").default("active").notNull(), // 'active', 'expired', 'cancelled', 'suspended'

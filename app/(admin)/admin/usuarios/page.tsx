@@ -37,6 +37,7 @@ import {
   ChevronsUpDown,
   Plus,
   Coins,
+  FlaskConical,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -118,6 +119,7 @@ export default function UsuariosPage() {
   const [editForm, setEditForm] = useState({
     planType: "",
     isActive: true,
+    isTestAccount: false,
   });
 
   const itensPorPagina = 15;
@@ -213,6 +215,7 @@ export default function UsuariosPage() {
     setEditForm({
       planType: usuario.planType,
       isActive: usuario.isActive,
+      isTestAccount: usuario.isTeste || false,
     });
     setEditModalOpen(true);
   };
@@ -228,6 +231,7 @@ export default function UsuariosPage() {
         body: JSON.stringify({
           planType: editForm.planType,
           isActive: editForm.isActive,
+          isTestAccount: editForm.isTestAccount,
         }),
       });
 
@@ -240,6 +244,7 @@ export default function UsuariosPage() {
                   ...u,
                   planType: editForm.planType,
                   isActive: editForm.isActive,
+                  isTeste: editForm.isTestAccount,
                 }
               : u
           )
@@ -579,6 +584,12 @@ export default function UsuariosPage() {
                   </div>
                   <div className="flex flex-wrap items-center gap-2 mt-2">
                     {getPlanBadge(usuario.planType)}
+                    {usuario.isTeste && (
+                      <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">
+                        <FlaskConical className="h-3 w-3 mr-1" />
+                        Teste
+                      </Badge>
+                    )}
                     {usuario.isActive ? (
                       <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
                         Ativo
@@ -722,7 +733,15 @@ export default function UsuariosPage() {
 
                   {/* Plano */}
                   <td className="px-4 py-4 hidden lg:table-cell">
-                    {getPlanBadge(usuario.planType)}
+                    <div className="flex items-center gap-2">
+                      {getPlanBadge(usuario.planType)}
+                      {usuario.isTeste && (
+                        <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">
+                          <FlaskConical className="h-3 w-3 mr-1" />
+                          QA
+                        </Badge>
+                      )}
+                    </div>
                   </td>
 
                   {/* Saldo/Financeiro - muda baseado no tipo de plano */}
@@ -1157,6 +1176,33 @@ export default function UsuariosPage() {
                     className={cn(
                       "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
                       editForm.isActive ? "translate-x-6" : "translate-x-1"
+                    )}
+                  />
+                </button>
+              </div>
+
+              {/* Conta de Teste (QA) */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <div className="flex items-center gap-2">
+                  <FlaskConical className="h-4 w-4 text-amber-400" />
+                  <div>
+                    <p className="text-sm font-medium text-white">Conta de Teste</p>
+                    <p className="text-xs text-slate-400">
+                      Acesso livre para QA - custos não geram receita
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setEditForm({ ...editForm, isTestAccount: !editForm.isTestAccount })}
+                  className={cn(
+                    "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
+                    editForm.isTestAccount ? "bg-amber-600" : "bg-slate-600"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+                      editForm.isTestAccount ? "translate-x-6" : "translate-x-1"
                     )}
                   />
                 </button>

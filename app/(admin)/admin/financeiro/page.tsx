@@ -32,6 +32,8 @@ import {
   Cloud,
   Calculator,
   Info,
+  FlaskConical,
+  AlertTriangle,
 } from "lucide-react";
 import {
   AreaChart,
@@ -166,6 +168,44 @@ interface FinanceiroData {
     lucroTeorico: number;
     margemTeorica: number;
   };
+  // Métricas de contas de teste (QA)
+  contasTeste: {
+    totalContas: number;
+    custoTotalPeriodo: number;
+    faturaHipoteticaPeriodo: number;
+    totalTransacoesPeriodo: number;
+    custoMesAtual: number;
+    faturaHipoteticaMesAtual: number;
+    custoAPIs: {
+      claude: {
+        tokensEntrada: number;
+        tokensSaida: number;
+        custoUSD: number;
+        custoBRL: number;
+      };
+      whisper: {
+        totalMinutos: number;
+        custoUSD: number;
+        custoBRL: number;
+      };
+      infraestruturaAbsorvida: number;
+      totalAPIs: number;
+      totalComInfra: number;
+    };
+    contas: Array<{
+      id: string;
+      nome: string;
+      email: string;
+      custoGerado: number;
+      faturaHipotetica: number;
+      totalTransacoes: number;
+    }>;
+    impactoMargem: {
+      custoAdicionado: number;
+      receitaPerdida: number;
+      margemAjustada: number;
+    };
+  };
 }
 
 const COLORS = {
@@ -248,6 +288,7 @@ export default function FinanceiroPage() {
     infraestruturaAbsorvida,
     custosPorCategoria,
     margemTeorica,
+    contasTeste,
   } = data;
 
   return (
@@ -1017,6 +1058,244 @@ export default function FinanceiroPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Contas de Teste (QA) */}
+      {contasTeste && contasTeste.totalContas > 0 && (
+        <div className="space-y-6">
+          {/* Header da seção */}
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-amber-500/20">
+              <FlaskConical className="h-5 w-5 text-amber-400" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-white">Contas de Teste (QA)</h2>
+              <p className="text-sm text-slate-400">
+                Custos gerados por contas de teste - não contabilizados como receita
+              </p>
+            </div>
+          </div>
+
+          {/* Cards de KPI de Contas Teste */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Total de Contas Teste */}
+            <Card className="bg-gradient-to-br from-amber-900/30 to-slate-900 border-amber-500/20">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-2 rounded-lg bg-amber-500/20">
+                    <Users className="h-4 w-4 text-amber-400" />
+                  </div>
+                  <Badge className="bg-amber-500/20 text-amber-400 border-0 text-xs">
+                    QA
+                  </Badge>
+                </div>
+                <p className="text-2xl font-bold text-white">
+                  {contasTeste.totalContas}
+                </p>
+                <p className="text-xs text-slate-400 mt-1">Contas de Teste Ativas</p>
+              </CardContent>
+            </Card>
+
+            {/* Custo Real Gerado */}
+            <Card className="bg-gradient-to-br from-red-900/30 to-slate-900 border-red-500/20">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-2 rounded-lg bg-red-500/20">
+                    <Receipt className="h-4 w-4 text-red-400" />
+                  </div>
+                  <Badge className="bg-red-500/20 text-red-400 border-0 text-xs">
+                    Real
+                  </Badge>
+                </div>
+                <p className="text-2xl font-bold text-white">
+                  R$ {contasTeste.custoMesAtual.toFixed(2)}
+                </p>
+                <p className="text-xs text-slate-400 mt-1">Custo Mês Atual</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  Período: R$ {contasTeste.custoTotalPeriodo.toFixed(2)}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Fatura Hipotética */}
+            <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900 border-slate-600/30">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-2 rounded-lg bg-slate-600/20">
+                    <FileText className="h-4 w-4 text-slate-400" />
+                  </div>
+                  <Badge className="bg-slate-600/20 text-slate-400 border-0 text-xs">
+                    Hipotético
+                  </Badge>
+                </div>
+                <p className="text-2xl font-bold text-slate-300">
+                  R$ {contasTeste.faturaHipoteticaMesAtual.toFixed(2)}
+                </p>
+                <p className="text-xs text-slate-400 mt-1">Fatura Hipotética Mês</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  Período: R$ {contasTeste.faturaHipoteticaPeriodo.toFixed(2)}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Impacto na Margem */}
+            <Card className="bg-gradient-to-br from-orange-900/30 to-slate-900 border-orange-500/20">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-2 rounded-lg bg-orange-500/20">
+                    <AlertTriangle className="h-4 w-4 text-orange-400" />
+                  </div>
+                  <Badge className="bg-orange-500/20 text-orange-400 border-0 text-xs">
+                    Impacto
+                  </Badge>
+                </div>
+                <p className="text-2xl font-bold text-white">
+                  {contasTeste.impactoMargem.margemAjustada.toFixed(1)}%
+                </p>
+                <p className="text-xs text-slate-400 mt-1">Margem Ajustada</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  (com custos de teste)
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Detalhamento e Lista de Contas */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Custos de APIs das Contas Teste */}
+            <Card className="bg-slate-900/50 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Cpu className="h-5 w-5 text-amber-400" />
+                  Custos de APIs (Contas Teste)
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Detalhamento de custos gerados por contas de teste
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {/* Claude */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                  <div className="flex items-center gap-2">
+                    <Cpu className="h-4 w-4 text-purple-400" />
+                    <div>
+                      <span className="text-sm text-white">Claude AI</span>
+                      <p className="text-xs text-slate-500">
+                        {((contasTeste.custoAPIs.claude.tokensEntrada + contasTeste.custoAPIs.claude.tokensSaida) / 1000).toFixed(1)}K tokens
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-medium text-purple-400">
+                    R$ {contasTeste.custoAPIs.claude.custoBRL.toFixed(2)}
+                  </span>
+                </div>
+
+                {/* Whisper */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                  <div className="flex items-center gap-2">
+                    <Mic className="h-4 w-4 text-orange-400" />
+                    <div>
+                      <span className="text-sm text-white">Whisper</span>
+                      <p className="text-xs text-slate-500">
+                        {contasTeste.custoAPIs.whisper.totalMinutos.toFixed(1)} minutos
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-medium text-orange-400">
+                    R$ {contasTeste.custoAPIs.whisper.custoBRL.toFixed(2)}
+                  </span>
+                </div>
+
+                {/* Infraestrutura */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                  <div className="flex items-center gap-2">
+                    <Server className="h-4 w-4 text-blue-400" />
+                    <span className="text-sm text-white">Infra Absorvida</span>
+                  </div>
+                  <span className="text-sm font-medium text-blue-400">
+                    R$ {contasTeste.custoAPIs.infraestruturaAbsorvida.toFixed(2)}
+                  </span>
+                </div>
+
+                {/* Total */}
+                <div className="border-t border-slate-700 pt-3">
+                  <div className="flex justify-between p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                    <span className="text-white font-medium">Custo Total de Teste</span>
+                    <span className="text-lg font-bold text-red-400">
+                      R$ {contasTeste.custoAPIs.totalComInfra.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Info */}
+                <div className="flex items-start gap-2 p-2 rounded bg-amber-500/10 text-xs text-amber-300">
+                  <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                  <span>
+                    Este custo reduz a margem real da plataforma mas não é cobrado das contas de teste
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Lista de Contas de Teste */}
+            <Card className="bg-slate-900/50 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <FlaskConical className="h-5 w-5 text-amber-400" />
+                  Contas de Teste
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Detalhamento por conta de teste
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {contasTeste.contas.length === 0 ? (
+                    <p className="text-sm text-slate-500 text-center py-4">
+                      Nenhuma conta de teste ativa
+                    </p>
+                  ) : (
+                    contasTeste.contas.map((conta, index) => (
+                      <div
+                        key={conta.id}
+                        className="flex items-center gap-4 p-3 rounded-lg bg-slate-800/50 border border-amber-500/10"
+                      >
+                        <div
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-amber-500/20 text-amber-400"
+                        >
+                          {index + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-white truncate flex items-center gap-2">
+                            {conta.nome}
+                            <Badge className="bg-amber-500/20 text-amber-400 border-0 text-[10px]">
+                              QA
+                            </Badge>
+                          </p>
+                          <p className="text-xs text-slate-500 truncate">{conta.email}</p>
+                          <div className="flex items-center gap-2 text-xs text-slate-400 mt-1">
+                            <span>{conta.totalTransacoes} transações</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-red-400">
+                            R$ {conta.custoGerado.toFixed(2)}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            custo real
+                          </p>
+                          <p className="text-xs text-slate-400 mt-1">
+                            (R$ {conta.faturaHipotetica.toFixed(2)} hipotético)
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
 
       {/* Projeção */}
       <Card className="bg-gradient-to-r from-blue-900/30 via-slate-900 to-purple-900/30 border-blue-500/20">

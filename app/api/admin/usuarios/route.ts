@@ -29,6 +29,7 @@ export async function GET() {
         planType: users.planType,
         planStatus: users.planStatus,
         isActive: users.isActive,
+        isTestAccount: users.isTestAccount,
         emailVerified: users.emailVerified,
         createdAt: users.createdAt,
         usageEntrevistas: users.usageEntrevistas,
@@ -179,7 +180,7 @@ export async function GET() {
         } : null,
         totalEntrevistas,
         totalCandidatos: usuario.usageCandidatos || 0,
-        isTeste: usuario.planType === "free_trial" && gastoTotal < 10,
+        isTeste: usuario.isTestAccount || false,
       };
     });
 

@@ -42,7 +42,121 @@ export async function GET(request: Request) {
     const mesAnterior = mesAtual === 1 ? 12 : mesAtual - 1;
     const anoMesAnterior = mesAtual === 1 ? anoAtual - 1 : anoAtual;
 
-    // Resumo Financeiro
+    // ========== MÉTRICAS DE CONTAS DE TESTE (QA) ==========
+    // Contas de teste geram custos reais mas não geram receita contabilizável
+    // Os custos das contas teste abtem da margem da plataforma
+
+    // Total de contas de teste ativas
+    const [contasTesteStats] = await db
+      .select({
+        totalContas: sql<number>`count(*)::int`,
+      })
+      .from(users)
+      .where(eq(users.isTestAccount, true));
+
+    // Custos gerados por contas de teste (período)
+    const [custosContasTeste] = await db
+      .select({
+        custoTotal: sql<number>`coalesce(sum(cast(${transacoes.custoBase} as decimal)), 0)`,
+        valorHipotetico: sql<number>`coalesce(sum(cast(${transacoes.valorCobrado} as decimal)), 0)`,
+        totalTransacoes: sql<number>`count(*)::int`,
+      })
+      .from(transacoes)
+      .innerJoin(users, eq(transacoes.userId, users.id))
+      .where(
+        and(
+          eq(users.isTestAccount, true),
+          gte(transacoes.createdAt, dataInicio)
+        )
+      );
+
+    // Custos de contas de teste no mês atual
+    const [custosTestesMesAtual] = await db
+      .select({
+        custo: sql<number>`coalesce(sum(cast(${transacoes.custoBase} as decimal)), 0)`,
+        valorHipotetico: sql<number>`coalesce(sum(cast(${transacoes.valorCobrado} as decimal)), 0)`,
+      })
+      .from(transacoes)
+      .innerJoin(users, eq(transacoes.userId, users.id))
+      .where(
+        and(
+          eq(users.isTestAccount, true),
+          gte(transacoes.createdAt, new Date(anoAtual, mesAtual - 1, 1)),
+          sql`${transacoes.createdAt} < ${new Date(anoAtual, mesAtual, 1)}`
+        )
+      );
+
+    // Tokens consumidos por contas de teste (para calcular custo de IA)
+    const [tokensContasTeste] = await db
+      .select({
+        totalInput: sql<number>`coalesce(sum(cast((${transacoes.metadados}->>'tokensEntrada')::int as bigint)), 0)`,
+        totalOutput: sql<number>`coalesce(sum(cast((${transacoes.metadados}->>'tokensSaida')::int as bigint)), 0)`,
+      })
+      .from(transacoes)
+      .innerJoin(users, eq(transacoes.userId, users.id))
+      .where(
+        and(
+          eq(users.isTestAccount, true),
+          gte(transacoes.createdAt, dataInicio)
+        )
+      );
+
+    // Minutos de áudio consumidos por contas de teste
+    const [whisperContasTeste] = await db
+      .select({
+        totalMinutos: sql<number>`coalesce(sum(cast((${transacoes.metadados}->>'duracaoAudio')::numeric as decimal) / 60), 0)`,
+      })
+      .from(transacoes)
+      .innerJoin(users, eq(transacoes.userId, users.id))
+      .where(
+        and(
+          eq(users.isTestAccount, true),
+          eq(transacoes.tipo, "transcricao_audio"),
+          gte(transacoes.createdAt, dataInicio)
+        )
+      );
+
+    // Lista de contas de teste com seus custos
+    const listaContasTeste = await db
+      .select({
+        id: users.id,
+        nome: users.nome,
+        email: users.email,
+        custo: sql<number>`coalesce(sum(cast(${transacoes.custoBase} as decimal)), 0)`,
+        valorHipotetico: sql<number>`coalesce(sum(cast(${transacoes.valorCobrado} as decimal)), 0)`,
+        totalTransacoes: sql<number>`count(${transacoes.id})::int`,
+      })
+      .from(users)
+      .leftJoin(
+        transacoes,
+        and(
+          eq(users.id, transacoes.userId),
+          gte(transacoes.createdAt, dataInicio)
+        )
+      )
+      .where(eq(users.isTestAccount, true))
+      .groupBy(users.id, users.nome, users.email)
+      .orderBy(desc(sql`coalesce(sum(cast(${transacoes.custoBase} as decimal)), 0)`));
+
+    // Calcular custos de APIs das contas teste
+    const tokensInputTeste = Number(tokensContasTeste.totalInput) || 0;
+    const tokensOutputTeste = Number(tokensContasTeste.totalOutput) || 0;
+    const minutosAudioTeste = Number(whisperContasTeste.totalMinutos) || 0;
+
+    const custoClaudeTesteUSD =
+      (tokensInputTeste / 1_000_000) * API_COSTS.claude.inputPerMillion +
+      (tokensOutputTeste / 1_000_000) * API_COSTS.claude.outputPerMillion;
+    const custoClaudeTesteBRL = custoClaudeTesteUSD * TAXA_CAMBIO_USD_BRL;
+
+    const custoWhisperTesteUSD = minutosAudioTeste * API_COSTS.whisper.perMinute;
+    const custoWhisperTesteBRL = custoWhisperTesteUSD * TAXA_CAMBIO_USD_BRL;
+
+    const custoTotalAPIsTeste = custoClaudeTesteBRL + custoWhisperTesteBRL;
+    const custoInfraTesteAbsorvido = custoTotalAPIsTeste * PERCENTUAL_INFRAESTRUTURA;
+
+    // ========== RESUMO FINANCEIRO (EXCLUINDO CONTAS DE TESTE) ==========
+
+    // Resumo Financeiro (excluindo contas de teste da receita)
     const [resumoTotal] = await db
       .select({
         receitaTotal: sql<number>`coalesce(sum(cast(${faturas.valorTotal} as decimal)), 0)`,
@@ -50,15 +164,22 @@ export async function GET(request: Request) {
           (select sum(cast(custo_base as decimal)) from transacoes), 0
         )`,
       })
-      .from(faturas);
+      .from(faturas)
+      .innerJoin(users, eq(faturas.userId, users.id))
+      .where(eq(users.isTestAccount, false));
 
     const [resumoMesAtual] = await db
       .select({
         receita: sql<number>`coalesce(sum(cast(${faturas.valorTotal} as decimal)), 0)`,
       })
       .from(faturas)
+      .innerJoin(users, eq(faturas.userId, users.id))
       .where(
-        and(eq(faturas.mesReferencia, mesAtual), eq(faturas.anoReferencia, anoAtual))
+        and(
+          eq(faturas.mesReferencia, mesAtual),
+          eq(faturas.anoReferencia, anoAtual),
+          eq(users.isTestAccount, false)
+        )
       );
 
     const [custoMesAtual] = await db
@@ -78,10 +199,12 @@ export async function GET(request: Request) {
         receita: sql<number>`coalesce(sum(cast(${faturas.valorTotal} as decimal)), 0)`,
       })
       .from(faturas)
+      .innerJoin(users, eq(faturas.userId, users.id))
       .where(
         and(
           eq(faturas.mesReferencia, mesAnterior),
-          eq(faturas.anoReferencia, anoMesAnterior)
+          eq(faturas.anoReferencia, anoMesAnterior),
+          eq(users.isTestAccount, false)
         )
       );
 
@@ -372,6 +495,59 @@ export async function GET(request: Request) {
         margemTeorica: receitaTotalNum > 0
           ? ((receitaTotalNum - custoTotalTeorico) / receitaTotalNum) * 100
           : 0,
+      },
+
+      // ========== MÉTRICAS DE CONTAS DE TESTE (QA) ==========
+      // Contas de teste NÃO geram receita contabilizável, mas GERAM custos reais
+      // Esses custos impactam negativamente a margem da plataforma
+      contasTeste: {
+        // Resumo geral
+        totalContas: Number(contasTesteStats.totalContas) || 0,
+        custoTotalPeriodo: Number(custosContasTeste.custoTotal) || 0,
+        faturaHipoteticaPeriodo: Number(custosContasTeste.valorHipotetico) || 0,
+        totalTransacoesPeriodo: Number(custosContasTeste.totalTransacoes) || 0,
+
+        // Mês atual
+        custoMesAtual: Number(custosTestesMesAtual.custo) || 0,
+        faturaHipoteticaMesAtual: Number(custosTestesMesAtual.valorHipotetico) || 0,
+
+        // Detalhamento de custos por API
+        custoAPIs: {
+          claude: {
+            tokensEntrada: tokensInputTeste,
+            tokensSaida: tokensOutputTeste,
+            custoUSD: custoClaudeTesteUSD,
+            custoBRL: custoClaudeTesteBRL,
+          },
+          whisper: {
+            totalMinutos: minutosAudioTeste,
+            custoUSD: custoWhisperTesteUSD,
+            custoBRL: custoWhisperTesteBRL,
+          },
+          infraestruturaAbsorvida: custoInfraTesteAbsorvido,
+          totalAPIs: custoTotalAPIsTeste,
+          totalComInfra: custoTotalAPIsTeste + custoInfraTesteAbsorvido,
+        },
+
+        // Lista detalhada de contas de teste
+        contas: listaContasTeste.map((c) => ({
+          id: c.id,
+          nome: c.nome,
+          email: c.email,
+          custoGerado: Number(c.custo) || 0,
+          faturaHipotetica: Number(c.valorHipotetico) || 0,
+          totalTransacoes: Number(c.totalTransacoes) || 0,
+        })),
+
+        // Impacto na margem da plataforma
+        impactoMargem: {
+          custoAdicionado: custoTotalAPIsTeste + custoInfraTesteAbsorvido,
+          receitaPerdida: Number(custosContasTeste.valorHipotetico) || 0,
+          // Margem ajustada considerando os custos das contas teste
+          margemAjustada: receitaTotalNum > 0
+            ? ((receitaTotalNum - custoTotalTeorico - (custoTotalAPIsTeste + custoInfraTesteAbsorvido)) / receitaTotalNum) * 100
+            : 0,
+        },
       },
     });
   } catch (error) {

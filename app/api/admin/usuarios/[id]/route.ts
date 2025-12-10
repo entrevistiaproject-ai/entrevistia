@@ -131,7 +131,7 @@ export async function GET(
         : null,
       totalEntrevistas: Number(entrevistasCount.total) || 0,
       totalCandidatos: Number(candidatosCount.total) || 0,
-      isTeste: usuario.planType === "free_trial" && gastoTotal < 10,
+      isTeste: usuario.isTestAccount || false,
       faturas: faturasUsuario.map((f) => ({
         id: f.id,
         mes: f.mes,
@@ -212,6 +212,11 @@ export async function PATCH(
         );
       }
       updateData.planType = body.planType;
+    }
+
+    // Atualizar conta de teste (QA)
+    if (body.isTestAccount !== undefined) {
+      updateData.isTestAccount = Boolean(body.isTestAccount);
     }
 
     if (Object.keys(updateData).length === 0) {

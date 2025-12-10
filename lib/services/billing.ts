@@ -5,6 +5,20 @@ import { eq, sql, and } from "drizzle-orm";
 import { FREE_TRIAL_LIMITS } from "@/lib/config/free-trial";
 import { PRECOS_USUARIO, calcularCustoAnalise, USAGE_ESTIMATES_ANALISE_PERGUNTA } from "@/lib/config/pricing";
 
+/**
+ * Verifica se o usuário é uma conta de teste
+ */
+export async function isTestAccount(userId: string): Promise<boolean> {
+  const db = getDB();
+
+  const [usuario] = await db
+    .select({ isTestAccount: users.isTestAccount })
+    .from(users)
+    .where(eq(users.id, userId));
+
+  return usuario?.isTestAccount || false;
+}
+
 export interface UsageFinanceiro {
   /**
    * Valor total gasto (soma de todas as transações)
@@ -35,12 +49,19 @@ export interface UsageFinanceiro {
    * Total de transações realizadas
    */
   totalTransacoes: number;
+
+  /**
+   * Se é uma conta de teste (QA)
+   * Contas teste têm acesso ilimitado e não contam como receita
+   */
+  isTestAccount: boolean;
 }
 
 /**
  * Busca o uso financeiro do usuário
  * Calcula quanto já foi gasto e quanto ainda resta do free trial
  * Considera crédito extra concedido pelo admin
+ * Contas de teste têm acesso ilimitado
  */
 export async function getUsageFinanceiro(userId: string): Promise<UsageFinanceiro> {
   const db = getDB();
@@ -54,23 +75,33 @@ export async function getUsageFinanceiro(userId: string): Promise<UsageFinanceir
     .from(transacoes)
     .where(eq(transacoes.userId, userId));
 
-  // Busca o crédito extra do usuário
+  // Busca o crédito extra e se é conta de teste
   const [usuario] = await db
-    .select({ creditoExtra: users.creditoExtra })
+    .select({
+      creditoExtra: users.creditoExtra,
+      isTestAccount: users.isTestAccount,
+    })
     .from(users)
     .where(eq(users.id, userId));
 
   const totalGasto = parseFloat(resultado?.totalGasto || "0");
   const totalTransacoes = resultado?.totalTransacoes || 0;
   const creditoExtra = parseFloat(usuario?.creditoExtra || "0");
+  const isContaTeste = usuario?.isTestAccount || false;
 
+  // Contas de teste têm limite infinito (999999)
   // Limite financeiro = limite base + crédito extra concedido pelo admin
-  const limiteFinanceiro = FREE_TRIAL_LIMITS.LIMITE_FINANCEIRO + creditoExtra;
+  const limiteFinanceiro = isContaTeste
+    ? 999999
+    : FREE_TRIAL_LIMITS.LIMITE_FINANCEIRO + creditoExtra;
+
   const saldoRestante = Math.max(0, limiteFinanceiro - totalGasto);
-  const percentualUsado = limiteFinanceiro > 0
-    ? Math.min(100, (totalGasto / limiteFinanceiro) * 100)
-    : 0;
-  const limiteAtingido = totalGasto >= limiteFinanceiro;
+  const percentualUsado = isContaTeste
+    ? 0
+    : (limiteFinanceiro > 0 ? Math.min(100, (totalGasto / limiteFinanceiro) * 100) : 0);
+
+  // Contas de teste nunca atingem o limite
+  const limiteAtingido = isContaTeste ? false : totalGasto >= limiteFinanceiro;
 
   return {
     totalGasto,
@@ -79,6 +110,7 @@ export async function getUsageFinanceiro(userId: string): Promise<UsageFinanceir
     percentualUsado,
     limiteAtingido,
     totalTransacoes,
+    isTestAccount: isContaTeste,
   };
 }
 
@@ -138,12 +170,18 @@ export async function getTransacoesRecentes(userId: string, limit: number = 10) 
 
 /**
  * Verifica se o usuário pode realizar uma operação que gera custo
+ * Contas de teste sempre podem realizar operações
  */
 export async function canRealizarOperacao(
   userId: string,
   custoEstimado: number
-): Promise<{ allowed: boolean; reason?: string }> {
+): Promise<{ allowed: boolean; reason?: string; isTestAccount?: boolean }> {
   const usage = await getUsageFinanceiro(userId);
+
+  // Contas de teste sempre podem realizar operações
+  if (usage.isTestAccount) {
+    return { allowed: true, isTestAccount: true };
+  }
 
   // Se já atingiu o limite
   if (usage.limiteAtingido) {
