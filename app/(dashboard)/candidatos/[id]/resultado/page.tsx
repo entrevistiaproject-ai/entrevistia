@@ -729,9 +729,6 @@ export default function ResultadoCandidatoPage() {
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-sm">{item.pergunta.texto}</p>
-                    <Badge variant="outline" className="mt-1 text-xs">
-                      {item.pergunta.tipo}
-                    </Badge>
                   </div>
                 </div>
 
