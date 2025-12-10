@@ -3,6 +3,29 @@ import { verifyAdminSession } from "@/lib/auth/admin-auth";
 import { getDB } from "@/lib/db";
 import { users, faturas, transacoes } from "@/lib/db/schema";
 import { sql, desc, gte, and, eq } from "drizzle-orm";
+import { API_COSTS, TAXA_CAMBIO_USD_BRL } from "@/lib/config/pricing";
+
+/**
+ * Custos fixos mensais de infraestrutura (estimativas)
+ * Estes valores devem ser atualizados conforme os custos reais
+ */
+const CUSTOS_INFRAESTRUTURA = {
+  vercel: {
+    nome: "Vercel (Hosting)",
+    custoMensal: 0, // Plano gratuito ou Pro ($20/mês)
+    descricao: "Hospedagem e deploy do Next.js",
+  },
+  neon: {
+    nome: "Neon (Database)",
+    custoMensal: 0, // Plano gratuito ou Pro ($19/mês)
+    descricao: "Banco de dados PostgreSQL serverless",
+  },
+  resend: {
+    nome: "Resend (Email)",
+    custoMensal: 0, // Plano gratuito (100 emails/dia) ou Pro ($20/mês)
+    descricao: "Envio de emails transacionais",
+  },
+};
 
 export async function GET(request: Request) {
   try {
@@ -148,23 +171,68 @@ export async function GET(request: Request) {
       };
     });
 
-    // Consumo de Tokens (simulado - precisa extrair de metadados)
+    // Consumo de Tokens do Claude (análises de IA)
     const [tokensStats] = await db
       .select({
         totalInput: sql<number>`coalesce(sum(cast((${transacoes.metadados}->>'tokensEntrada')::int as bigint)), 0)`,
         totalOutput: sql<number>`coalesce(sum(cast((${transacoes.metadados}->>'tokensSaida')::int as bigint)), 0)`,
-        custoTokens: sql<number>`coalesce(sum(cast(${transacoes.custoBase} as decimal)), 0)`,
+        custoTokens: sql<number>`coalesce(sum(
+          CASE WHEN ${transacoes.tipo} IN ('analise_pergunta', 'analise_ia')
+          THEN cast(${transacoes.custoBase} as decimal) ELSE 0 END
+        ), 0)`,
+        totalAnalises: sql<number>`count(CASE WHEN ${transacoes.tipo} IN ('analise_pergunta', 'analise_ia') THEN 1 END)`,
       })
       .from(transacoes)
       .where(gte(transacoes.createdAt, dataInicio));
 
-    // Por modelo (simplificado)
+    // Consumo de áudio do Whisper (transcrições)
+    const [whisperStats] = await db
+      .select({
+        totalMinutos: sql<number>`coalesce(sum(cast((${transacoes.metadados}->>'duracaoAudio')::numeric as decimal) / 60), 0)`,
+        totalSegundos: sql<number>`coalesce(sum(cast((${transacoes.metadados}->>'duracaoAudio')::numeric as decimal)), 0)`,
+        totalBytes: sql<number>`coalesce(sum(cast((${transacoes.metadados}->>'tamanhoArquivo')::bigint as bigint)), 0)`,
+        custoWhisper: sql<number>`coalesce(sum(
+          CASE WHEN ${transacoes.tipo} = 'transcricao_audio'
+          THEN cast(${transacoes.custoBase} as decimal) ELSE 0 END
+        ), 0)`,
+        totalTranscricoes: sql<number>`count(CASE WHEN ${transacoes.tipo} = 'transcricao_audio' THEN 1 END)`,
+      })
+      .from(transacoes)
+      .where(gte(transacoes.createdAt, dataInicio));
+
+    // Calcular custos detalhados por API
+    const totalInputTokens = Number(tokensStats.totalInput) || 0;
+    const totalOutputTokens = Number(tokensStats.totalOutput) || 0;
+    const totalMinutosAudio = Number(whisperStats.totalMinutos) || 0;
+
+    // Custo teórico do Claude (baseado em tokens reais)
+    const custoClaude = {
+      inputUSD: (totalInputTokens / 1_000_000) * API_COSTS.claude.inputPerMillion,
+      outputUSD: (totalOutputTokens / 1_000_000) * API_COSTS.claude.outputPerMillion,
+    };
+    const custoClaudeTotalUSD = custoClaude.inputUSD + custoClaude.outputUSD;
+    const custoClaudeTotalBRL = custoClaudeTotalUSD * TAXA_CAMBIO_USD_BRL;
+
+    // Custo teórico do Whisper (baseado em minutos reais)
+    const custoWhisperUSD = totalMinutosAudio * API_COSTS.whisper.perMinute;
+    const custoWhisperBRL = custoWhisperUSD * TAXA_CAMBIO_USD_BRL;
+
+    // Custos de infraestrutura (proporcional ao período)
+    const mesesNoPeriodo = mesesAtras;
+    const custoInfraestruturaTotal = Object.values(CUSTOS_INFRAESTRUTURA).reduce(
+      (acc, infra) => acc + (infra.custoMensal * mesesNoPeriodo), 0
+    );
+
+    // Por modelo (detalhado)
     const porModelo = [
       {
         modelo: "Claude 3.5 Sonnet",
-        input: Number(tokensStats.totalInput) || 0,
-        output: Number(tokensStats.totalOutput) || 0,
-        custo: Number(tokensStats.custoTokens) || 0,
+        input: totalInputTokens,
+        output: totalOutputTokens,
+        custo: custoClaudeTotalBRL,
+        custoUSD: custoClaudeTotalUSD,
+        precoInputPorMilhao: API_COSTS.claude.inputPerMillion,
+        precoOutputPorMilhao: API_COSTS.claude.outputPerMillion,
       },
     ];
 
@@ -209,6 +277,12 @@ export async function GET(request: Request) {
     const mediaReceita = ultimosMeses.reduce((acc, m) => acc + m.receita, 0) / (ultimosMeses.length || 1);
     const mediaCusto = ultimosMeses.reduce((acc, m) => acc + m.custo, 0) / (ultimosMeses.length || 1);
 
+    // Custo total de APIs (Claude + Whisper)
+    const custoTotalAPIs = custoClaudeTotalBRL + custoWhisperBRL;
+
+    // Custo total incluindo infraestrutura
+    const custoTotalComInfraestrutura = custoTotalNum + custoInfraestruturaTotal;
+
     return NextResponse.json({
       resumo: {
         receitaTotal: receitaTotalNum,
@@ -236,12 +310,68 @@ export async function GET(request: Request) {
         quantidade: Number(c.quantidade) || 0,
       })),
       receitaPorMes: receitaCustoMerged,
+
+      // Métricas detalhadas do Claude (IA)
+      custosClaudeDetalhado: {
+        tokensEntrada: totalInputTokens,
+        tokensSaida: totalOutputTokens,
+        totalTokens: totalInputTokens + totalOutputTokens,
+        totalAnalises: Number(tokensStats.totalAnalises) || 0,
+        custoEntradaUSD: custoClaude.inputUSD,
+        custoSaidaUSD: custoClaude.outputUSD,
+        custoTotalUSD: custoClaudeTotalUSD,
+        custoTotalBRL: custoClaudeTotalBRL,
+        precos: {
+          inputPorMilhao: API_COSTS.claude.inputPerMillion,
+          outputPorMilhao: API_COSTS.claude.outputPerMillion,
+          taxaCambio: TAXA_CAMBIO_USD_BRL,
+        },
+      },
+
+      // Métricas detalhadas do Whisper (Áudio)
+      custosWhisperDetalhado: {
+        totalMinutos: totalMinutosAudio,
+        totalSegundos: Number(whisperStats.totalSegundos) || 0,
+        totalTranscricoes: Number(whisperStats.totalTranscricoes) || 0,
+        totalBytesAudio: Number(whisperStats.totalBytes) || 0,
+        custoTotalUSD: custoWhisperUSD,
+        custoTotalBRL: custoWhisperBRL,
+        precos: {
+          porMinutoUSD: API_COSTS.whisper.perMinute,
+          taxaCambio: TAXA_CAMBIO_USD_BRL,
+        },
+      },
+
+      // Custos de infraestrutura
+      custosInfraestrutura: {
+        periodo: mesesNoPeriodo,
+        custoTotalPeriodo: custoInfraestruturaTotal,
+        servicos: Object.entries(CUSTOS_INFRAESTRUTURA).map(([key, value]) => ({
+          id: key,
+          nome: value.nome,
+          descricao: value.descricao,
+          custoMensal: value.custoMensal,
+          custoPeriodo: value.custoMensal * mesesNoPeriodo,
+        })),
+      },
+
+      // Resumo de custos por categoria
+      custosPorCategoria: {
+        claude: custoClaudeTotalBRL,
+        whisper: custoWhisperBRL,
+        infraestrutura: custoInfraestruturaTotal,
+        total: custoTotalAPIs + custoInfraestruturaTotal,
+        totalSemInfraestrutura: custoTotalAPIs,
+      },
+
+      // Legado (mantido para compatibilidade)
       tokensConsumo: {
-        totalInput: Number(tokensStats.totalInput) || 0,
-        totalOutput: Number(tokensStats.totalOutput) || 0,
-        custoTokens: Number(tokensStats.custoTokens) || 0,
+        totalInput: totalInputTokens,
+        totalOutput: totalOutputTokens,
+        custoTokens: custoClaudeTotalBRL,
         porModelo,
       },
+
       margemPorOperacao,
       topCustosUsuarios: topCustosUsuarios.map((u) => {
         const custo = Number(u.custo) || 0;
@@ -258,6 +388,18 @@ export async function GET(request: Request) {
         receitaProjetada: mediaReceita * 1.1, // 10% de crescimento projetado
         custoProjetado: mediaCusto * 1.05, // 5% de aumento projetado
         lucroProjetado: mediaReceita * 1.1 - mediaCusto * 1.05,
+      },
+
+      // Margem teórica (considerando todos os custos)
+      margemTeorica: {
+        receitaTotal: receitaTotalNum,
+        custoAPIs: custoTotalAPIs,
+        custoInfraestrutura: custoInfraestruturaTotal,
+        custoTotalReal: custoTotalComInfraestrutura,
+        lucroReal: receitaTotalNum - custoTotalComInfraestrutura,
+        margemReal: receitaTotalNum > 0
+          ? ((receitaTotalNum - custoTotalComInfraestrutura) / receitaTotalNum) * 100
+          : 0,
       },
     });
   } catch (error) {

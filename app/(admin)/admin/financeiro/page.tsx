@@ -9,9 +9,6 @@ import { Button } from "@/components/ui/button";
 import {
   DollarSign,
   TrendingUp,
-  TrendingDown,
-  CreditCard,
-  Wallet,
   PiggyBank,
   Receipt,
   ArrowUpRight,
@@ -28,6 +25,13 @@ import {
   MessageSquare,
   FileText,
   Users,
+  Mic,
+  Server,
+  Database,
+  Mail,
+  Cloud,
+  Calculator,
+  Info,
 } from "lucide-react";
 import {
   AreaChart,
@@ -86,7 +90,59 @@ interface FinanceiroData {
       input: number;
       output: number;
       custo: number;
+      custoUSD?: number;
+      precoInputPorMilhao?: number;
+      precoOutputPorMilhao?: number;
     }>;
+  };
+  // Métricas detalhadas do Claude
+  custosClaudeDetalhado: {
+    tokensEntrada: number;
+    tokensSaida: number;
+    totalTokens: number;
+    totalAnalises: number;
+    custoEntradaUSD: number;
+    custoSaidaUSD: number;
+    custoTotalUSD: number;
+    custoTotalBRL: number;
+    precos: {
+      inputPorMilhao: number;
+      outputPorMilhao: number;
+      taxaCambio: number;
+    };
+  };
+  // Métricas detalhadas do Whisper
+  custosWhisperDetalhado: {
+    totalMinutos: number;
+    totalSegundos: number;
+    totalTranscricoes: number;
+    totalBytesAudio: number;
+    custoTotalUSD: number;
+    custoTotalBRL: number;
+    precos: {
+      porMinutoUSD: number;
+      taxaCambio: number;
+    };
+  };
+  // Custos de infraestrutura
+  custosInfraestrutura: {
+    periodo: number;
+    custoTotalPeriodo: number;
+    servicos: Array<{
+      id: string;
+      nome: string;
+      descricao: string;
+      custoMensal: number;
+      custoPeriodo: number;
+    }>;
+  };
+  // Custos por categoria
+  custosPorCategoria: {
+    claude: number;
+    whisper: number;
+    infraestrutura: number;
+    total: number;
+    totalSemInfraestrutura: number;
   };
   margemPorOperacao: Array<{
     operacao: string;
@@ -106,6 +162,15 @@ interface FinanceiroData {
     receitaProjetada: number;
     custoProjetado: number;
     lucroProjetado: number;
+  };
+  // Margem teórica
+  margemTeorica: {
+    receitaTotal: number;
+    custoAPIs: number;
+    custoInfraestrutura: number;
+    custoTotalReal: number;
+    lucroReal: number;
+    margemReal: number;
   };
 }
 
@@ -176,7 +241,20 @@ export default function FinanceiroPage() {
     );
   }
 
-  const { resumo, custosPorTipo, receitaPorMes, tokensConsumo, margemPorOperacao, topCustosUsuarios, projecao } = data;
+  const {
+    resumo,
+    custosPorTipo,
+    receitaPorMes,
+    tokensConsumo,
+    margemPorOperacao,
+    topCustosUsuarios,
+    projecao,
+    custosClaudeDetalhado,
+    custosWhisperDetalhado,
+    custosInfraestrutura,
+    custosPorCategoria,
+    margemTeorica,
+  } = data;
 
   return (
     <div className="space-y-6">
@@ -477,74 +555,353 @@ export default function FinanceiroPage() {
         </Card>
       </div>
 
-      {/* Token Consumption */}
-      <Card className="bg-slate-900/50 border-slate-700">
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Cpu className="h-5 w-5" />
-                Consumo de Tokens
-              </CardTitle>
-              <CardDescription className="text-slate-400">
-                Monitoramento de uso de API
-              </CardDescription>
+      {/* Custos Detalhados por Serviço */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Custos Claude (IA) */}
+        <Card className="bg-slate-900/50 border-slate-700">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Cpu className="h-5 w-5 text-purple-400" />
+                  Claude AI (Anthropic)
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Custo de tokens para analise de respostas
+                </CardDescription>
+              </div>
+              <Badge className="bg-purple-500/20 text-purple-400 border-0">
+                ${custosClaudeDetalhado?.precos?.inputPorMilhao || 3}/1M input
+              </Badge>
             </div>
-            <div className="flex items-center gap-6">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-purple-400">
-                  {(tokensConsumo.totalInput / 1000000).toFixed(2)}M
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Indicadores principais */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
+                <p className="text-xs text-slate-500 mb-1">Tokens de Entrada</p>
+                <p className="text-xl font-bold text-purple-400">
+                  {((custosClaudeDetalhado?.tokensEntrada || 0) / 1000).toFixed(1)}K
                 </p>
-                <p className="text-xs text-slate-500">Tokens Input</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  ${custosClaudeDetalhado?.precos?.inputPorMilhao || 3}/1M tokens
+                </p>
               </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-cyan-400">
-                  {(tokensConsumo.totalOutput / 1000000).toFixed(2)}M
+              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
+                <p className="text-xs text-slate-500 mb-1">Tokens de Saida</p>
+                <p className="text-xl font-bold text-cyan-400">
+                  {((custosClaudeDetalhado?.tokensSaida || 0) / 1000).toFixed(1)}K
                 </p>
-                <p className="text-xs text-slate-500">Tokens Output</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-amber-400">
-                  R$ {tokensConsumo.custoTokens.toFixed(2)}
+                <p className="text-xs text-slate-500 mt-1">
+                  ${custosClaudeDetalhado?.precos?.outputPorMilhao || 15}/1M tokens
                 </p>
-                <p className="text-xs text-slate-500">Custo Total</p>
               </div>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {tokensConsumo.porModelo.map((modelo, index) => (
-              <div
-                key={modelo.modelo}
-                className="p-4 rounded-lg bg-slate-800/50 border border-slate-700"
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: COLORS.tokens[index % COLORS.tokens.length] }}
-                  />
-                  <span className="text-sm font-medium text-white">{modelo.modelo}</span>
-                </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Input</span>
-                    <span className="text-white">{(modelo.input / 1000).toFixed(1)}K</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Output</span>
-                    <span className="text-white">{(modelo.output / 1000).toFixed(1)}K</span>
-                  </div>
-                  <div className="flex justify-between pt-2 border-t border-slate-700">
-                    <span className="text-slate-400">Custo</span>
-                    <span className="text-emerald-400 font-medium">R$ {modelo.custo.toFixed(2)}</span>
-                  </div>
-                </div>
+
+            {/* Detalhamento de custos */}
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between py-2 border-b border-slate-700">
+                <span className="text-slate-400">Total de Tokens</span>
+                <span className="text-white font-medium">
+                  {((custosClaudeDetalhado?.totalTokens || 0) / 1000).toFixed(1)}K
+                </span>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              <div className="flex justify-between py-2 border-b border-slate-700">
+                <span className="text-slate-400">Total de Analises</span>
+                <span className="text-white font-medium">
+                  {custosClaudeDetalhado?.totalAnalises || 0}
+                </span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-slate-700">
+                <span className="text-slate-400">Custo Input (USD)</span>
+                <span className="text-white">
+                  ${(custosClaudeDetalhado?.custoEntradaUSD || 0).toFixed(4)}
+                </span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-slate-700">
+                <span className="text-slate-400">Custo Output (USD)</span>
+                <span className="text-white">
+                  ${(custosClaudeDetalhado?.custoSaidaUSD || 0).toFixed(4)}
+                </span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-slate-700">
+                <span className="text-slate-400">Total USD</span>
+                <span className="text-amber-400 font-medium">
+                  ${(custosClaudeDetalhado?.custoTotalUSD || 0).toFixed(4)}
+                </span>
+              </div>
+              <div className="flex justify-between py-2 bg-slate-800/50 px-2 rounded">
+                <span className="text-white font-medium">Total BRL (1 USD = R$ {custosClaudeDetalhado?.precos?.taxaCambio || 5})</span>
+                <span className="text-emerald-400 font-bold">
+                  R$ {(custosClaudeDetalhado?.custoTotalBRL || 0).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Custos Whisper (Audio) */}
+        <Card className="bg-slate-900/50 border-slate-700">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Mic className="h-5 w-5 text-orange-400" />
+                  Whisper (OpenAI)
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Custo de transcricao de audio
+                </CardDescription>
+              </div>
+              <Badge className="bg-orange-500/20 text-orange-400 border-0">
+                ${custosWhisperDetalhado?.precos?.porMinutoUSD || 0.006}/min
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Indicadores principais */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
+                <p className="text-xs text-slate-500 mb-1">Minutos de Audio</p>
+                <p className="text-xl font-bold text-orange-400">
+                  {(custosWhisperDetalhado?.totalMinutos || 0).toFixed(1)}
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  {Math.floor((custosWhisperDetalhado?.totalSegundos || 0) / 3600)}h {Math.floor(((custosWhisperDetalhado?.totalSegundos || 0) % 3600) / 60)}m
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
+                <p className="text-xs text-slate-500 mb-1">Transcricoes</p>
+                <p className="text-xl font-bold text-blue-400">
+                  {custosWhisperDetalhado?.totalTranscricoes || 0}
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  {((custosWhisperDetalhado?.totalBytesAudio || 0) / (1024 * 1024)).toFixed(1)} MB total
+                </p>
+              </div>
+            </div>
+
+            {/* Detalhamento de custos */}
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between py-2 border-b border-slate-700">
+                <span className="text-slate-400">Total Segundos</span>
+                <span className="text-white font-medium">
+                  {(custosWhisperDetalhado?.totalSegundos || 0).toFixed(0)}s
+                </span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-slate-700">
+                <span className="text-slate-400">Preco por Minuto</span>
+                <span className="text-white">
+                  ${custosWhisperDetalhado?.precos?.porMinutoUSD || 0.006}
+                </span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-slate-700">
+                <span className="text-slate-400">Total USD</span>
+                <span className="text-amber-400 font-medium">
+                  ${(custosWhisperDetalhado?.custoTotalUSD || 0).toFixed(4)}
+                </span>
+              </div>
+              <div className="flex justify-between py-2 bg-slate-800/50 px-2 rounded">
+                <span className="text-white font-medium">Total BRL (1 USD = R$ {custosWhisperDetalhado?.precos?.taxaCambio || 5})</span>
+                <span className="text-emerald-400 font-bold">
+                  R$ {(custosWhisperDetalhado?.custoTotalBRL || 0).toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            {/* Info */}
+            <div className="flex items-start gap-2 p-2 rounded bg-slate-800/30 text-xs text-slate-400">
+              <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <span>Transcricao de audio e gratuita para o usuario - custo absorvido na taxa de analise</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Custos de Infraestrutura e Resumo */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Infraestrutura */}
+        <Card className="bg-slate-900/50 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <Server className="h-5 w-5 text-blue-400" />
+              Infraestrutura
+            </CardTitle>
+            <CardDescription className="text-slate-400">
+              Custos fixos mensais de hospedagem
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {custosInfraestrutura?.servicos?.map((servico) => {
+              const icons: Record<string, React.ElementType> = {
+                vercel: Cloud,
+                neon: Database,
+                resend: Mail,
+              };
+              const IconComp = icons[servico.id] || Server;
+              return (
+                <div key={servico.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 border border-slate-700">
+                  <div className="flex items-center gap-3">
+                    <IconComp className="h-5 w-5 text-blue-400" />
+                    <div>
+                      <p className="text-sm font-medium text-white">{servico.nome}</p>
+                      <p className="text-xs text-slate-500">{servico.descricao}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-white">
+                      R$ {servico.custoMensal.toFixed(2)}/mes
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      R$ {servico.custoPeriodo.toFixed(2)} ({custosInfraestrutura?.periodo}m)
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+            <div className="flex justify-between pt-3 border-t border-slate-700">
+              <span className="text-slate-400">Total Periodo ({custosInfraestrutura?.periodo} meses)</span>
+              <span className="text-emerald-400 font-bold">
+                R$ {(custosInfraestrutura?.custoTotalPeriodo || 0).toFixed(2)}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Resumo de Custos por Categoria */}
+        <Card className="bg-slate-900/50 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <PieChartIcon className="h-5 w-5 text-amber-400" />
+              Custos por Categoria
+            </CardTitle>
+            <CardDescription className="text-slate-400">
+              Distribuicao de custos por servico
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {/* Claude */}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
+              <div className="flex items-center gap-2">
+                <Cpu className="h-4 w-4 text-purple-400" />
+                <span className="text-sm text-white">Claude AI</span>
+              </div>
+              <span className="text-sm font-medium text-purple-400">
+                R$ {(custosPorCategoria?.claude || 0).toFixed(2)}
+              </span>
+            </div>
+
+            {/* Whisper */}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
+              <div className="flex items-center gap-2">
+                <Mic className="h-4 w-4 text-orange-400" />
+                <span className="text-sm text-white">Whisper</span>
+              </div>
+              <span className="text-sm font-medium text-orange-400">
+                R$ {(custosPorCategoria?.whisper || 0).toFixed(2)}
+              </span>
+            </div>
+
+            {/* Infraestrutura */}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <div className="flex items-center gap-2">
+                <Server className="h-4 w-4 text-blue-400" />
+                <span className="text-sm text-white">Infraestrutura</span>
+              </div>
+              <span className="text-sm font-medium text-blue-400">
+                R$ {(custosPorCategoria?.infraestrutura || 0).toFixed(2)}
+              </span>
+            </div>
+
+            {/* Separador */}
+            <div className="border-t border-slate-700 pt-3 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-400">APIs (sem infra)</span>
+                <span className="text-white">
+                  R$ {(custosPorCategoria?.totalSemInfraestrutura || 0).toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-white font-medium">Total Geral</span>
+                <span className="text-emerald-400 font-bold">
+                  R$ {(custosPorCategoria?.total || 0).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Margem Teórica Real */}
+        <Card className="bg-slate-900/50 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <Calculator className="h-5 w-5 text-emerald-400" />
+              Margem Teorica Real
+            </CardTitle>
+            <CardDescription className="text-slate-400">
+              Considerando todos os custos
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between py-2 border-b border-slate-700">
+                <span className="text-slate-400">Receita Total</span>
+                <span className="text-emerald-400 font-medium">
+                  R$ {(margemTeorica?.receitaTotal || 0).toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-slate-700">
+                <span className="text-slate-400">(-) Custo APIs</span>
+                <span className="text-red-400">
+                  -R$ {(margemTeorica?.custoAPIs || 0).toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-slate-700">
+                <span className="text-slate-400">(-) Infraestrutura</span>
+                <span className="text-red-400">
+                  -R$ {(margemTeorica?.custoInfraestrutura || 0).toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-slate-700">
+                <span className="text-slate-400">(=) Custo Total Real</span>
+                <span className="text-amber-400 font-medium">
+                  R$ {(margemTeorica?.custoTotalReal || 0).toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            {/* Lucro e Margem */}
+            <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 space-y-3">
+              <div className="flex justify-between">
+                <span className="text-emerald-300">Lucro Real</span>
+                <span className="text-2xl font-bold text-emerald-400">
+                  R$ {(margemTeorica?.lucroReal || 0).toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-emerald-300">Margem Real</span>
+                <Badge
+                  className={`text-lg px-3 py-1 ${
+                    (margemTeorica?.margemReal || 0) >= 60
+                      ? "bg-emerald-500/20 text-emerald-400"
+                      : (margemTeorica?.margemReal || 0) >= 40
+                      ? "bg-amber-500/20 text-amber-400"
+                      : "bg-red-500/20 text-red-400"
+                  } border-0`}
+                >
+                  {(margemTeorica?.margemReal || 0).toFixed(1)}%
+                </Badge>
+              </div>
+            </div>
+
+            {/* Info */}
+            <div className="flex items-start gap-2 p-2 rounded bg-slate-800/30 text-xs text-slate-400">
+              <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <span>Esta margem considera todos os custos reais incluindo infraestrutura fixa</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Margem por Operação & Top Custos */}
       <div className="grid lg:grid-cols-2 gap-6">

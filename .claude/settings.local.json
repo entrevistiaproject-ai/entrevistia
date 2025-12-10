@@ -52,7 +52,10 @@
       "Bash(node scripts/migrate-billing-data.js:*)",
       "Bash(echo:*)",
       "Bash(npx tsc:*)",
-      "Bash(node scripts/apply-migrations.js:*)"
+      "Bash(node scripts/apply-migrations.js:*)",
+      "Bash(mv:*)",
+      "Bash(git rm:*)",
+      "Bash(xargs ls:*)"
     ],
     "deny": [],
     "ask": []
