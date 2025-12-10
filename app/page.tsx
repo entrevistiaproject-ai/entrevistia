@@ -15,7 +15,6 @@ import {
   Brain,
   Sparkles,
   Clock,
-  ChevronRight,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import {
@@ -335,7 +334,7 @@ export default function LandingPage() {
                       <div className="flex-1 flex flex-col justify-center">
                         <div className="bg-muted/50 rounded-xl p-4 mb-6">
                           <p className="text-sm leading-relaxed">
-                            "Como você lida com situações de pressão no trabalho?"
+                            &ldquo;Como você lida com situações de pressão no trabalho?&rdquo;
                           </p>
                         </div>
                         <div className="flex justify-center">
@@ -388,8 +387,8 @@ export default function LandingPage() {
                       <p className="text-xs font-medium">Análise da IA</p>
                     </div>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      "Candidata demonstrou excelente capacidade de comunicação e experiência sólida
-                      em atendimento. Destacou-se na resolução de problemas..."
+                      &ldquo;Candidata demonstrou excelente capacidade de comunicação e experiência sólida
+                      em atendimento. Destacou-se na resolução de problemas...&rdquo;
                     </p>
                   </div>
                 </div>
