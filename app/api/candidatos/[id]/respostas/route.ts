@@ -31,6 +31,7 @@ export async function GET(
       .select({
         status: candidatoEntrevistas.status,
         notaGeral: candidatoEntrevistas.notaGeral,
+        compatibilidadeVaga: candidatoEntrevistas.compatibilidadeVaga,
         recomendacao: candidatoEntrevistas.recomendacao,
         resumoGeral: candidatoEntrevistas.resumoGeral,
         competencias: candidatoEntrevistas.competencias,

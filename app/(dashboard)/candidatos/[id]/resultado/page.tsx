@@ -57,6 +57,7 @@ interface Competencia {
 interface Participacao {
   status: string;
   notaGeral: number | null;
+  compatibilidadeVaga: number | null;
   recomendacao: string | null;
   resumoGeral: string | null;
   competencias: Competencia[] | null;
@@ -351,79 +352,128 @@ export default function ResultadoCandidatoPage() {
         </Card>
       )}
 
-      {/* Score Geral e Recomendação (se tiver avaliação) */}
+      {/* Scores e Recomendação (se tiver avaliação) */}
       {temAvaliacao && (
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Score Geral */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Nota Geral</CardTitle>
-              <CardDescription>Pontuação consolidada da avaliação</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center py-8">
-                <div className="relative">
-                  <svg className="w-48 h-48 transform -rotate-90">
-                    <circle
-                      cx="96"
-                      cy="96"
-                      r="88"
-                      stroke="currentColor"
-                      strokeWidth="12"
-                      fill="none"
-                      className="text-muted"
-                    />
-                    <circle
-                      cx="96"
-                      cy="96"
-                      r="88"
-                      stroke="currentColor"
-                      strokeWidth="12"
-                      fill="none"
-                      strokeDasharray={`${2 * Math.PI * 88}`}
-                      strokeDashoffset={`${2 * Math.PI * 88 * (1 - (participacao?.notaGeral || 0) / 10)}`}
-                      className={getScoreColor((participacao?.notaGeral || 0) * 10)}
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className={`text-5xl font-bold ${getScoreColor((participacao?.notaGeral || 0) * 10)}`}>
-                      {participacao?.notaGeral?.toFixed(1)}
-                    </span>
-                    <span className="text-sm text-muted-foreground mt-1">
-                      {getScoreLabel((participacao?.notaGeral || 0) * 10)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recomendação */}
-          {recomendacaoConfig && RecomendacaoIcon && (
-            <Card className={`border-2 ${recomendacaoConfig.borderColor} ${recomendacaoConfig.bgColor}`}>
+        <>
+          {/* Nota Geral e Compatibilidade */}
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Nota Geral */}
+            <Card>
               <CardHeader>
-                <CardTitle>Recomendação da IA</CardTitle>
-                <CardDescription>Decisão sobre seguir no processo seletivo</CardDescription>
+                <CardTitle>Nota Geral</CardTitle>
+                <CardDescription>Avaliação geral do candidato</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col items-center justify-center py-8 space-y-4">
-                  <RecomendacaoIcon className={`w-20 h-20 ${recomendacaoConfig.iconColor}`} />
-                  <div className="text-center">
-                    <h3 className={`text-2xl font-bold ${recomendacaoConfig.textColor}`}>
-                      {recomendacaoConfig.label}
-                    </h3>
-                    {participacao?.avaliadoEm && (
-                      <p className="text-sm text-muted-foreground mt-2">
-                        Avaliação em {new Date(participacao.avaliadoEm).toLocaleDateString('pt-BR')}
-                      </p>
-                    )}
+                <div className="flex items-center justify-center py-6">
+                  <div className="relative">
+                    <svg className="w-40 h-40 transform -rotate-90">
+                      <circle
+                        cx="80"
+                        cy="80"
+                        r="72"
+                        stroke="currentColor"
+                        strokeWidth="10"
+                        fill="none"
+                        className="text-muted"
+                      />
+                      <circle
+                        cx="80"
+                        cy="80"
+                        r="72"
+                        stroke="currentColor"
+                        strokeWidth="10"
+                        fill="none"
+                        strokeDasharray={`${2 * Math.PI * 72}`}
+                        strokeDashoffset={`${2 * Math.PI * 72 * (1 - (participacao?.notaGeral || 0) / 100)}`}
+                        className={getScoreColor(participacao?.notaGeral || 0)}
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className={`text-4xl font-bold ${getScoreColor(participacao?.notaGeral || 0)}`}>
+                        {Math.round(participacao?.notaGeral || 0)}
+                      </span>
+                      <span className="text-xs text-muted-foreground mt-1">
+                        {getScoreLabel(participacao?.notaGeral || 0)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
+
+            {/* Compatibilidade com a Vaga */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Compatibilidade</CardTitle>
+                <CardDescription>Fit com a vaga específica</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-center py-6">
+                  <div className="relative">
+                    <svg className="w-40 h-40 transform -rotate-90">
+                      <circle
+                        cx="80"
+                        cy="80"
+                        r="72"
+                        stroke="currentColor"
+                        strokeWidth="10"
+                        fill="none"
+                        className="text-muted"
+                      />
+                      <circle
+                        cx="80"
+                        cy="80"
+                        r="72"
+                        stroke="currentColor"
+                        strokeWidth="10"
+                        fill="none"
+                        strokeDasharray={`${2 * Math.PI * 72}`}
+                        strokeDashoffset={`${2 * Math.PI * 72 * (1 - (participacao?.compatibilidadeVaga || 0) / 100)}`}
+                        className={getScoreColor(participacao?.compatibilidadeVaga || 0)}
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className={`text-4xl font-bold ${getScoreColor(participacao?.compatibilidadeVaga || 0)}`}>
+                        {Math.round(participacao?.compatibilidadeVaga || 0)}
+                      </span>
+                      <span className="text-xs text-muted-foreground mt-1">
+                        {getScoreLabel(participacao?.compatibilidadeVaga || 0)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recomendação */}
+          {recomendacaoConfig && RecomendacaoIcon && (
+            <Card className={`border-2 ${recomendacaoConfig.borderColor} ${recomendacaoConfig.bgColor}`}>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <RecomendacaoIcon className={`w-12 h-12 ${recomendacaoConfig.iconColor}`} />
+                    <div>
+                      <h3 className={`text-xl font-bold ${recomendacaoConfig.textColor}`}>
+                        {recomendacaoConfig.label}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Recomendação da IA para o processo seletivo
+                      </p>
+                    </div>
+                  </div>
+                  {participacao?.avaliadoEm && (
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(participacao.avaliadoEm).toLocaleDateString('pt-BR')}
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           )}
-        </div>
+        </>
       )}
 
       {/* Resumo Executivo (se tiver) */}
