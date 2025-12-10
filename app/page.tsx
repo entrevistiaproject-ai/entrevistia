@@ -37,6 +37,9 @@ export default function LandingPage() {
             <a href="#como-funciona" className="text-sm font-medium hover:text-primary transition-colors">
               Como Funciona
             </a>
+            <a href="#precos" className="text-sm font-medium hover:text-primary transition-colors">
+              Preços
+            </a>
             <a href="#casos-de-uso" className="text-sm font-medium hover:text-primary transition-colors">
               Casos de Uso
             </a>
@@ -67,6 +70,9 @@ export default function LandingPage() {
                   </a>
                   <a href="#como-funciona" className="w-full text-center text-base font-medium hover:bg-muted transition-colors py-3 rounded-lg">
                     Como Funciona
+                  </a>
+                  <a href="#precos" className="w-full text-center text-base font-medium hover:bg-muted transition-colors py-3 rounded-lg">
+                    Preços
                   </a>
                   <a href="#casos-de-uso" className="w-full text-center text-base font-medium hover:bg-muted transition-colors py-3 rounded-lg">
                     Casos de Uso
@@ -293,30 +299,158 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Use Cases */}
-      <section id="casos-de-uso" className="container mx-auto px-4 py-12 sm:py-20">
+      {/* Pricing Section */}
+      <section id="precos" className="container mx-auto px-4 py-12 sm:py-20">
         <div className="mx-auto max-w-3xl text-center mb-8 sm:mb-12">
           <h2 className="mb-4 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
-            Casos de Uso Ideais
+            Preços Simples e Transparentes
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground">
-            Perfeito para diversos cenários de recrutamento
+            Pague apenas pelo que usar. Sem mensalidades, sem surpresas.
           </p>
         </div>
 
-        <div className="mx-auto max-w-3xl space-y-3 sm:space-y-4">
-          {[
-            "Startups e PMEs que precisam maximizar resultados com equipes enxutas",
-            "Vagas com alto volume de candidatos para filtrar rapidamente",
-            "Contratação remota para avaliar talentos de qualquer parte do mundo",
-            "Processos seletivos estruturados que exigem consistência e qualidade",
-            "Recrutamento terceirizado para oferecer mais valor aos clientes",
-          ].map((useCase, i) => (
-            <div key={i} className="flex items-start gap-3 rounded-lg border bg-card p-4 transition-colors hover:bg-muted/50">
-              <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 shrink-0 text-primary mt-0.5" />
-              <p className="text-sm sm:text-base text-card-foreground">{useCase}</p>
+        <div className="mx-auto max-w-5xl">
+          {/* Modelo de Preço Principal */}
+          <Card className="border-2 border-primary mb-8">
+            <CardHeader className="text-center pb-2">
+              <div className="mx-auto mb-2 inline-block rounded-full bg-primary/10 px-4 py-1">
+                <span className="text-sm font-medium text-primary">Pay-per-Use</span>
+              </div>
+              <CardTitle className="text-2xl sm:text-3xl">Modelo por Candidato</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-6">
+                <div className="text-center">
+                  <p className="text-4xl sm:text-5xl font-bold text-primary">R$ 1,00</p>
+                  <p className="text-sm text-muted-foreground">taxa base por candidato</p>
+                </div>
+                <span className="text-2xl text-muted-foreground">+</span>
+                <div className="text-center">
+                  <p className="text-4xl sm:text-5xl font-bold text-primary">R$ 0,25</p>
+                  <p className="text-sm text-muted-foreground">por pergunta analisada</p>
+                </div>
+              </div>
+
+              <div className="bg-muted/50 rounded-lg p-4 mb-6">
+                <p className="text-sm font-medium mb-2">Fórmula simples:</p>
+                <p className="text-lg font-mono bg-background rounded px-3 py-2 inline-block">
+                  Custo = R$ 1,00 + (perguntas × R$ 0,25)
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                <div className="p-3 rounded-lg border bg-card">
+                  <p className="text-xs text-muted-foreground mb-1">5 perguntas</p>
+                  <p className="text-lg font-bold">R$ 2,25</p>
+                  <p className="text-xs text-muted-foreground">por candidato</p>
+                </div>
+                <div className="p-3 rounded-lg border bg-card">
+                  <p className="text-xs text-muted-foreground mb-1">10 perguntas</p>
+                  <p className="text-lg font-bold">R$ 3,50</p>
+                  <p className="text-xs text-muted-foreground">por candidato</p>
+                </div>
+                <div className="p-3 rounded-lg border bg-card">
+                  <p className="text-xs text-muted-foreground mb-1">15 perguntas</p>
+                  <p className="text-lg font-bold">R$ 4,75</p>
+                  <p className="text-xs text-muted-foreground">por candidato</p>
+                </div>
+                <div className="p-3 rounded-lg border bg-card">
+                  <p className="text-xs text-muted-foreground mb-1">20 perguntas</p>
+                  <p className="text-lg font-bold">R$ 6,00</p>
+                  <p className="text-xs text-muted-foreground">por candidato</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* O que está incluído */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+            <div className="flex items-start gap-3 p-4 rounded-lg border bg-card">
+              <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-medium">Criar entrevistas</p>
+                <p className="text-sm text-muted-foreground">Ilimitado e gratuito</p>
+              </div>
             </div>
-          ))}
+            <div className="flex items-start gap-3 p-4 rounded-lg border bg-card">
+              <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-medium">Criar perguntas</p>
+                <p className="text-sm text-muted-foreground">Ilimitado e gratuito</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-4 rounded-lg border bg-card">
+              <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-medium">Candidatos ilimitados</p>
+                <p className="text-sm text-muted-foreground">Sem limite por vaga</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-4 rounded-lg border bg-card">
+              <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-medium">Transcrição de áudio</p>
+                <p className="text-sm text-muted-foreground">Incluída na análise</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-4 rounded-lg border bg-card">
+              <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-medium">Análise com IA avançada</p>
+                <p className="text-sm text-muted-foreground">Claude AI (Anthropic)</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-4 rounded-lg border bg-card">
+              <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-medium">Relatórios detalhados</p>
+                <p className="text-sm text-muted-foreground">Competências e insights</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Free Trial */}
+          <div className="text-center p-6 rounded-lg border-2 border-dashed border-primary/50 bg-primary/5">
+            <h3 className="text-lg font-semibold mb-2">Comece com R$ 50 de crédito grátis</h3>
+            <p className="text-muted-foreground mb-4">
+              Teste a plataforma sem compromisso. Avalie até 15 candidatos gratuitamente.
+            </p>
+            <Button asChild>
+              <Link href="/cadastro">
+                Começar Grátis <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Use Cases */}
+      <section id="casos-de-uso" className="bg-secondary/30 py-12 sm:py-20">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-3xl text-center mb-8 sm:mb-12">
+            <h2 className="mb-4 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
+              Casos de Uso Ideais
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground">
+              Perfeito para diversos cenários de recrutamento
+            </p>
+          </div>
+
+          <div className="mx-auto max-w-3xl space-y-3 sm:space-y-4">
+            {[
+              "Startups e PMEs que precisam maximizar resultados com equipes enxutas",
+              "Vagas com alto volume de candidatos para filtrar rapidamente",
+              "Contratação remota para avaliar talentos de qualquer parte do mundo",
+              "Processos seletivos estruturados que exigem consistência e qualidade",
+              "Recrutamento terceirizado para oferecer mais valor aos clientes",
+            ].map((useCase, i) => (
+              <div key={i} className="flex items-start gap-3 rounded-lg border bg-card p-4 transition-colors hover:bg-muted/50">
+                <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 shrink-0 text-primary mt-0.5" />
+                <p className="text-sm sm:text-base text-card-foreground">{useCase}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -369,6 +503,7 @@ export default function LandingPage() {
               <ul className="space-y-3 text-sm">
                 <li><a href="#beneficios" className="text-muted-foreground hover:text-foreground transition-colors">Benefícios</a></li>
                 <li><a href="#como-funciona" className="text-muted-foreground hover:text-foreground transition-colors">Como Funciona</a></li>
+                <li><a href="#precos" className="text-muted-foreground hover:text-foreground transition-colors">Preços</a></li>
               </ul>
             </div>
             <div>

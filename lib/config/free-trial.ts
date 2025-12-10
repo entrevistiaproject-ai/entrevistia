@@ -1,28 +1,36 @@
 /**
  * Configurações do Free Trial
  *
- * Modifique esses valores para ajustar os limites do plano gratuito
+ * O free trial é baseado em CRÉDITO FINANCEIRO de R$ 50,00
+ * Não há limites de entrevistas, perguntas ou candidatos - apenas o saldo.
+ *
+ * Com R$ 50 de crédito, o usuário pode avaliar aproximadamente:
+ * - 14 candidatos com 10 perguntas cada (R$ 3,50 × 14 = R$ 49)
+ * - 20 candidatos com 5 perguntas cada (R$ 2,25 × 20 = R$ 45)
+ * - 10 candidatos com 15 perguntas cada (R$ 4,75 × 10 = R$ 47,50)
  */
 export const FREE_TRIAL_LIMITS = {
   /**
    * Número máximo de entrevistas que podem ser criadas
+   * null = ilimitado (controle é pelo saldo financeiro)
    */
-  MAX_ENTREVISTAS: 4,
+  MAX_ENTREVISTAS: null,
 
   /**
    * Número máximo de perguntas por entrevista
+   * null = ilimitado (controle é pelo saldo financeiro)
    */
-  MAX_PERGUNTAS_POR_ENTREVISTA: 12,
+  MAX_PERGUNTAS_POR_ENTREVISTA: null,
 
   /**
    * Número máximo de candidatos únicos que podem participar
-   * (considera candidatos únicos em todas as entrevistas)
+   * null = ilimitado (controle é pelo saldo financeiro)
    */
-  MAX_CANDIDATOS_TOTAL: 5,
+  MAX_CANDIDATOS_TOTAL: null,
 
   /**
    * Limite financeiro em reais para o free trial
-   * Valor total que o usuário pode gastar gratuitamente
+   * Este é o ÚNICO limite do free trial - R$ 50 de crédito grátis
    */
   LIMITE_FINANCEIRO: 50.00,
 } as const;
@@ -49,30 +57,37 @@ export enum PlanStatus {
 
 /**
  * Configurações de limites por tipo de plano
+ *
+ * FREE_TRIAL: Controlado apenas pelo saldo financeiro (R$ 50)
+ * Outros planos: Sem limites (pay-per-use)
  */
 export const PLAN_LIMITS = {
   [PlanType.FREE_TRIAL]: {
-    maxEntrevistas: FREE_TRIAL_LIMITS.MAX_ENTREVISTAS,
-    maxPerguntasPorEntrevista: FREE_TRIAL_LIMITS.MAX_PERGUNTAS_POR_ENTREVISTA,
-    maxCandidatosTotal: FREE_TRIAL_LIMITS.MAX_CANDIDATOS_TOTAL,
+    maxEntrevistas: null, // ilimitado - controle pelo saldo
+    maxPerguntasPorEntrevista: null, // ilimitado - controle pelo saldo
+    maxCandidatosTotal: null, // ilimitado - controle pelo saldo
     maxCandidatosPorEntrevista: null, // ilimitado
+    limiteFinanceiro: FREE_TRIAL_LIMITS.LIMITE_FINANCEIRO, // R$ 50
   },
   [PlanType.BASIC]: {
-    maxEntrevistas: 50,
-    maxPerguntasPorEntrevista: 20,
+    maxEntrevistas: null, // ilimitado - pay per use
+    maxPerguntasPorEntrevista: null, // ilimitado
     maxCandidatosTotal: null, // ilimitado
     maxCandidatosPorEntrevista: null, // ilimitado
+    limiteFinanceiro: null, // sem limite - paga conforme usa
   },
   [PlanType.PROFESSIONAL]: {
     maxEntrevistas: null, // ilimitado
     maxPerguntasPorEntrevista: null, // ilimitado
     maxCandidatosTotal: null, // ilimitado
     maxCandidatosPorEntrevista: null, // ilimitado
+    limiteFinanceiro: null, // sem limite - paga conforme usa
   },
   [PlanType.ENTERPRISE]: {
     maxEntrevistas: null, // ilimitado
     maxPerguntasPorEntrevista: null, // ilimitado
     maxCandidatosTotal: null, // ilimitado
     maxCandidatosPorEntrevista: null, // ilimitado
+    limiteFinanceiro: null, // sem limite - paga conforme usa
   },
 } as const;

@@ -160,6 +160,7 @@ export type TipoTransacao =
   | "transcricao_audio"
   | "analise_ia"
   | "analise_pergunta"
+  | "taxa_base_candidato"
   | "pergunta_criada"
   | "entrevista_criada";
 
@@ -181,6 +182,7 @@ export async function registrarTransacao(params: {
     tentativas?: number;
     perguntaId?: string;
     perguntaTexto?: string;
+    totalPerguntas?: number;
   };
 }): Promise<{ success: boolean; transacaoId?: string; error?: string }> {
   const db = getDB();
@@ -191,32 +193,47 @@ export async function registrarTransacao(params: {
     let valorCobrado: number;
 
     switch (params.tipo) {
+      case "taxa_base_candidato":
+        // Taxa base cobrada uma vez por candidato avaliado
+        custoBase = 0.10; // Custo interno estimado
+        valorCobrado = PRECOS_USUARIO.taxaBasePorCandidato; // R$ 1,00
+        break;
       case "analise_pergunta":
+        // Taxa por cada pergunta analisada
         custoBase = calcularCustoAnalise(
           USAGE_ESTIMATES_ANALISE_PERGUNTA.input,
           USAGE_ESTIMATES_ANALISE_PERGUNTA.output
         );
-        valorCobrado = PRECOS_USUARIO.analisePorPergunta;
+        valorCobrado = PRECOS_USUARIO.analisePorPergunta; // R$ 0,25
         break;
       case "transcricao_audio":
-        custoBase = 0.01; // Custo base aproximado
-        valorCobrado = PRECOS_USUARIO.respostaAudio;
+        // Transcrição incluída (grátis)
+        custoBase = 0.01;
+        valorCobrado = 0;
         break;
       case "analise_ia":
-        custoBase = 0.01; // Custo base aproximado
-        valorCobrado = PRECOS_USUARIO.respostaTexto;
+        // Análise incluída na taxa por pergunta (grátis separadamente)
+        custoBase = 0.01;
+        valorCobrado = 0;
         break;
       case "pergunta_criada":
-        custoBase = 0.004; // Custo base
-        valorCobrado = PRECOS_USUARIO.perguntaCriada;
+        // Criar pergunta é grátis
+        custoBase = 0;
+        valorCobrado = 0;
         break;
       case "entrevista_criada":
-        custoBase = 0.02; // Custo base
-        valorCobrado = PRECOS_USUARIO.entrevistaCriada;
+        // Criar entrevista é grátis
+        custoBase = 0;
+        valorCobrado = 0;
         break;
       default:
-        custoBase = 0.01;
-        valorCobrado = 0.01;
+        custoBase = 0;
+        valorCobrado = 0;
+    }
+
+    // Se o valor cobrado for 0, não registra transação
+    if (valorCobrado === 0) {
+      return { success: true, transacaoId: undefined };
     }
 
     // Busca ou cria a fatura do mês atual
@@ -292,7 +309,8 @@ export async function registrarTransacao(params: {
 }
 
 /**
- * Registra múltiplas transações de análise por pergunta
+ * Registra cobrança completa de análise de candidato
+ * Modelo: Taxa base por candidato (R$ 1,00) + Por pergunta analisada (R$ 0,25)
  */
 export async function registrarAnalisePerguntas(params: {
   userId: string;
@@ -305,13 +323,29 @@ export async function registrarAnalisePerguntas(params: {
 }): Promise<{ success: boolean; totalCobrado: number; error?: string }> {
   let totalCobrado = 0;
 
+  // 1. Cobra taxa base por candidato (R$ 1,00)
+  const taxaBaseResult = await registrarTransacao({
+    userId: params.userId,
+    tipo: "taxa_base_candidato",
+    entrevistaId: params.entrevistaId,
+    descricao: `Taxa base - análise de candidato`,
+    metadados: {
+      totalPerguntas: params.perguntas.length,
+    },
+  });
+
+  if (taxaBaseResult.success) {
+    totalCobrado += PRECOS_USUARIO.taxaBasePorCandidato;
+  }
+
+  // 2. Cobra por cada pergunta analisada (R$ 0,25 cada)
   for (const pergunta of params.perguntas) {
     const result = await registrarTransacao({
       userId: params.userId,
       tipo: "analise_pergunta",
       entrevistaId: params.entrevistaId,
       respostaId: pergunta.respostaId,
-      descricao: `Análise da pergunta: ${pergunta.perguntaTexto.substring(0, 50)}...`,
+      descricao: `Análise: ${pergunta.perguntaTexto.substring(0, 50)}...`,
       metadados: {
         modeloIA: "claude-sonnet-4-5-20250929",
         tokensEntrada: USAGE_ESTIMATES_ANALISE_PERGUNTA.input,

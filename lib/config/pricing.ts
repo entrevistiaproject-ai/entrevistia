@@ -1,11 +1,14 @@
 /**
  * Configuração de Pricing e Custos
  *
- * CUSTOS BASE (APIs externas):
+ * MODELO DE PRECIFICAÇÃO PAY-PER-USE:
+ * - Taxa base por candidato: R$ 1,00
+ * - Por pergunta analisada: R$ 0,25
+ * - Fórmula: Custo = R$ 1,00 + (nº perguntas × R$ 0,25)
+ *
+ * CUSTOS BASE (APIs externas - para referência):
  * - Claude 3.5 Sonnet: $3.00/1M tokens input, $15.00/1M tokens output
  * - Whisper API (OpenAI): $0.006/minuto de áudio
- *
- * MARKUP: 2.5x (150% de margem de lucro)
  *
  * Conversões:
  * - 1 USD = R$ 5.00 (aproximado, ajustar conforme câmbio)
@@ -14,7 +17,7 @@
 // Taxas de conversão
 export const TAXA_CAMBIO_USD_BRL = 5.0;
 
-// Custos das APIs (em USD)
+// Custos das APIs (em USD) - para cálculo de margem
 export const API_COSTS = {
   // Claude 3.5 Sonnet
   claude: {
@@ -27,7 +30,7 @@ export const API_COSTS = {
   },
 };
 
-// Estimativas de uso
+// Estimativas de uso (para referência interna)
 export const USAGE_ESTIMATES = {
   // Tokens médios por análise de resposta em texto
   analiseTexto: {
@@ -43,7 +46,7 @@ export const USAGE_ESTIMATES = {
 };
 
 /**
- * Calcula custo de transcrição de áudio
+ * Calcula custo de transcrição de áudio (custo real da API)
  */
 export function calcularCustoTranscricao(duracaoSegundos: number): number {
   const minutos = duracaoSegundos / 60;
@@ -53,7 +56,7 @@ export function calcularCustoTranscricao(duracaoSegundos: number): number {
 }
 
 /**
- * Calcula custo de análise com Claude
+ * Calcula custo de análise com Claude (custo real da API)
  */
 export function calcularCustoAnalise(tokensInput: number, tokensOutput: number): number {
   const custoInputUSD = (tokensInput / 1_000_000) * API_COSTS.claude.inputPerMillion;
@@ -65,12 +68,13 @@ export function calcularCustoAnalise(tokensInput: number, tokensOutput: number):
 
 /**
  * Calcula valor a ser cobrado do usuário (com markup)
+ * @deprecated Use PRECOS_USUARIO diretamente
  */
 export function aplicarMarkup(custoBase: number, markup: number = 2.5): number {
   return Number((custoBase * markup).toFixed(2));
 }
 
-// Estimativas de uso para análise por pergunta
+// Estimativas de uso para análise por pergunta (para referência interna)
 export const USAGE_ESTIMATES_ANALISE_PERGUNTA = {
   // Tokens médios por análise de UMA pergunta/resposta
   input: 300, // tokens (pergunta + resposta + contexto mínimo)
@@ -79,80 +83,71 @@ export const USAGE_ESTIMATES_ANALISE_PERGUNTA = {
 
 /**
  * TABELA DE PREÇOS PARA O USUÁRIO
- * (Já com markup aplicado)
+ * Modelo Pay-per-Use simplificado e competitivo
  */
 export const PRECOS_USUARIO = {
-  // Por resposta em texto (análise com IA)
-  respostaTexto: (() => {
-    const custo = calcularCustoAnalise(
-      USAGE_ESTIMATES.analiseTexto.input,
-      USAGE_ESTIMATES.analiseTexto.output
-    );
-    return aplicarMarkup(custo);
-  })(),
+  /**
+   * Taxa base cobrada por cada candidato avaliado
+   * Cobre overhead de processamento e infraestrutura
+   */
+  taxaBasePorCandidato: 1.0, // R$ 1,00
 
-  // Por resposta em áudio (transcrição + análise)
-  respostaAudio: (() => {
-    const custoTranscricao = calcularCustoTranscricao(
-      USAGE_ESTIMATES.analiseAudio.duracaoMedia * 60
-    );
-    const custoAnalise = calcularCustoAnalise(
-      USAGE_ESTIMATES.analiseAudio.input,
-      USAGE_ESTIMATES.analiseAudio.output
-    );
-    return aplicarMarkup(custoTranscricao + custoAnalise);
-  })(),
+  /**
+   * Taxa por cada pergunta analisada pela IA
+   * Cobrada quando a IA avalia a resposta do candidato
+   */
+  analisePorPergunta: 0.25, // R$ 0,25
 
-  // Taxa fixa por pergunta criada (overhead de sistema)
-  perguntaCriada: 0.01, // R$ 0.01
-
-  // Taxa fixa por entrevista criada
-  entrevistaCriada: 0.05, // R$ 0.05
-
-  // Taxa por análise de pergunta individual (quando a IA avalia a resposta de uma pergunta)
-  analisePorPergunta: 0.70, // R$ 0,70 por pergunta analisada
+  // Taxas legadas (mantidas em 0 para não cobrar)
+  respostaTexto: 0, // GRÁTIS - incluído na análise
+  respostaAudio: 0, // GRÁTIS - incluído na análise
+  perguntaCriada: 0, // GRÁTIS
+  entrevistaCriada: 0, // GRÁTIS
 };
 
 /**
+ * Calcula custo por candidato baseado no número de perguntas
+ * Fórmula: R$ 1,00 (taxa base) + (nº perguntas × R$ 0,25)
+ */
+export function calcularCustoPorCandidato(numPerguntas: number): number {
+  const taxaBase = PRECOS_USUARIO.taxaBasePorCandidato;
+  const custoPerguntas = PRECOS_USUARIO.analisePorPergunta * numPerguntas;
+  return Number((taxaBase + custoPerguntas).toFixed(2));
+}
+
+/**
  * Calcula custo estimado de uma entrevista completa
- * Inclui: criação da entrevista, criação das perguntas, respostas e análise por pergunta
+ * Modelo: Taxa base por candidato + custo por pergunta analisada
  */
 export function estimarCustoEntrevista(
   numPerguntas: number,
-  numCandidatos: number,
-  tipoResposta: "texto" | "audio" = "audio"
+  numCandidatos: number
 ): {
   custoBase: number;
   custoTotal: number;
   custoPorCandidato: number;
   breakdown: {
-    criacaoEntrevista: number;
-    criacaoPerguntas: number;
-    respostas: number;
-    analisePorPergunta: number;
+    taxaBaseCandidatos: number;
+    analisePerguntas: number;
   };
 } {
-  const custoEntrevista = PRECOS_USUARIO.entrevistaCriada;
-  const custoPerguntas = PRECOS_USUARIO.perguntaCriada * numPerguntas;
-  const custoResposta =
-    tipoResposta === "audio" ? PRECOS_USUARIO.respostaAudio : PRECOS_USUARIO.respostaTexto;
-  const custoRespostas = custoResposta * numPerguntas * numCandidatos;
+  // Custo por candidato = R$ 1,00 (taxa base) + (perguntas × R$ 0,25)
+  const custoPorCandidato = calcularCustoPorCandidato(numPerguntas);
 
-  // Custo de análise: cobra por cada pergunta analisada por candidato
-  const custoAnalise = PRECOS_USUARIO.analisePorPergunta * numPerguntas * numCandidatos;
+  // Custo total = custo por candidato × número de candidatos
+  const custoTotal = custoPorCandidato * numCandidatos;
 
-  const custoTotal = custoEntrevista + custoPerguntas + custoRespostas + custoAnalise;
-  const custoPorCandidato = (custoRespostas + custoAnalise) / numCandidatos;
+  // Breakdown detalhado
+  const taxaBaseCandidatos = PRECOS_USUARIO.taxaBasePorCandidato * numCandidatos;
+  const analisePerguntas = PRECOS_USUARIO.analisePorPergunta * numPerguntas * numCandidatos;
 
   return {
-    custoBase: custoEntrevista + custoPerguntas,
+    custoBase: 0, // Criar entrevista e perguntas é grátis
     custoTotal: Number(custoTotal.toFixed(2)),
     custoPorCandidato: Number(custoPorCandidato.toFixed(2)),
     breakdown: {
-      criacaoEntrevista: custoEntrevista,
-      criacaoPerguntas: Number(custoPerguntas.toFixed(2)),
-      respostas: Number(custoRespostas.toFixed(2)),
-      analisePorPergunta: Number(custoAnalise.toFixed(2)),
+      taxaBaseCandidatos: Number(taxaBaseCandidatos.toFixed(2)),
+      analisePerguntas: Number(analisePerguntas.toFixed(2)),
     },
   };
 }
@@ -205,7 +200,7 @@ export const EXEMPLOS_USO = {
     perguntasPorEntrevista: 8,
     candidatosPorEntrevista: 10,
     custoEstimado: (() => {
-      const est = estimarCustoEntrevista(8, 10, "audio");
+      const est = estimarCustoEntrevista(8, 10);
       return est.custoTotal * 2;
     })(),
   },
@@ -215,7 +210,7 @@ export const EXEMPLOS_USO = {
     perguntasPorEntrevista: 10,
     candidatosPorEntrevista: 25,
     custoEstimado: (() => {
-      const est = estimarCustoEntrevista(10, 25, "audio");
+      const est = estimarCustoEntrevista(10, 25);
       return est.custoTotal * 5;
     })(),
   },
@@ -225,22 +220,19 @@ export const EXEMPLOS_USO = {
     perguntasPorEntrevista: 12,
     candidatosPorEntrevista: 50,
     custoEstimado: (() => {
-      const est = estimarCustoEntrevista(12, 50, "audio");
+      const est = estimarCustoEntrevista(12, 50);
       return est.custoTotal * 20;
     })(),
   },
 };
 
-console.log("🚀 Tabela de Preços Calculada:");
+console.log("🚀 Tabela de Preços - Modelo Pay-per-Use:");
 console.log("=".repeat(50));
-console.log(`Resposta Texto: R$ ${PRECOS_USUARIO.respostaTexto.toFixed(2)}`);
-console.log(`Resposta Áudio: R$ ${PRECOS_USUARIO.respostaAudio.toFixed(2)}`);
+console.log(`Taxa Base por Candidato: R$ ${PRECOS_USUARIO.taxaBasePorCandidato.toFixed(2)}`);
 console.log(`Análise por Pergunta: R$ ${PRECOS_USUARIO.analisePorPergunta.toFixed(2)}`);
-console.log(`Pergunta Criada: R$ ${PRECOS_USUARIO.perguntaCriada.toFixed(2)}`);
-console.log(`Entrevista Criada: R$ ${PRECOS_USUARIO.entrevistaCriada.toFixed(2)}`);
 console.log("=".repeat(50));
-console.log("\n📊 Exemplo: Entrevista com 10 perguntas e 20 candidatos (áudio)");
-const exemplo = estimarCustoEntrevista(10, 20, "audio");
-console.log(`Custo Total: R$ ${exemplo.custoTotal}`);
+console.log("\n📊 Exemplo: Entrevista com 10 perguntas e 20 candidatos");
+const exemplo = estimarCustoEntrevista(10, 20);
 console.log(`Custo por Candidato: R$ ${exemplo.custoPorCandidato}`);
+console.log(`Custo Total (20 candidatos): R$ ${exemplo.custoTotal}`);
 console.log(`Breakdown:`, exemplo.breakdown);

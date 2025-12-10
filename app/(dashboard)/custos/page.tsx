@@ -540,9 +540,10 @@ export default function CustosPage() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {Object.entries(periodoData.custoPorTipo || {}).map(([tipo, valor]) => {
               const tipoLabels: Record<string, { label: string; icon: React.ElementType }> = {
+                taxa_base_candidato: { label: "Taxa Base (Candidatos)", icon: Users },
+                analise_pergunta: { label: "Análise por Pergunta", icon: TrendingUp },
                 transcricao_audio: { label: "Transcrição de Áudio", icon: Users },
                 analise_ia: { label: "Análise com IA", icon: TrendingUp },
-                analise_pergunta: { label: "Análise por Pergunta", icon: TrendingUp },
                 pergunta_criada: { label: "Perguntas Criadas", icon: Briefcase },
                 entrevista_criada: { label: "Entrevistas Criadas", icon: Briefcase },
               };
