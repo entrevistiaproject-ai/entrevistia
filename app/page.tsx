@@ -86,12 +86,6 @@ export default function LandingPage() {
 
         <div className="container mx-auto px-4 py-16 sm:py-24 lg:py-32 relative">
           <div className="max-w-4xl mx-auto text-center">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-1.5 text-sm font-medium mb-8">
-              <Sparkles className="h-4 w-4" />
-              Powered by Claude AI
-            </div>
-
             {/* Headline */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6 text-balance">
               Entreviste mais candidatos,{" "}
@@ -154,53 +148,79 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Dashboard mockup */}
+              {/* Dashboard mockup - Lista de candidatos da entrevista */}
               <div className="p-4 sm:p-6 bg-muted/30">
-                <div className="grid sm:grid-cols-4 gap-4 mb-6">
+                {/* Header da entrevista */}
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="font-semibold text-sm">Analista de Suporte Jr</h3>
+                    <p className="text-xs text-muted-foreground">12 candidatos • 8 perguntas</p>
+                  </div>
+                  <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">Ativa</Badge>
+                </div>
+
+                {/* Cards resumo */}
+                <div className="grid grid-cols-4 gap-3 mb-4">
                   {[
-                    { label: "Candidatos", value: "127", color: "text-foreground" },
-                    { label: "Em análise", value: "43", color: "text-blue-600" },
-                    { label: "Aprovados", value: "24", color: "text-emerald-600" },
-                    { label: "Taxa de conversão", value: "19%", color: "text-primary" },
+                    { label: "Candidatos", value: "12", icon: Users },
+                    { label: "Perguntas", value: "8", icon: FileText },
+                    { label: "Duração média", value: "15m", icon: Clock },
+                    { label: "Concluídas", value: "9", icon: CheckCircle2 },
                   ].map((stat, i) => (
-                    <div key={i} className="bg-background rounded-lg p-4 border">
-                      <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
-                      <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                    <div key={i} className="bg-background rounded-lg p-3 border">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-xs text-muted-foreground">{stat.label}</p>
+                        <stat.icon className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                      <p className="text-lg font-bold">{stat.value}</p>
                     </div>
                   ))}
                 </div>
 
+                {/* Lista de candidatos */}
                 <div className="bg-background rounded-lg border overflow-hidden">
-                  <div className="px-4 py-3 border-b bg-muted/30">
-                    <p className="text-sm font-medium">Candidatos recentes</p>
+                  <div className="px-4 py-3 border-b bg-muted/30 flex items-center justify-between">
+                    <p className="text-sm font-medium">Candidatos</p>
+                    <div className="flex gap-2">
+                      <Badge variant="outline" className="text-xs">Todos</Badge>
+                    </div>
                   </div>
                   <div className="divide-y">
                     {[
-                      { name: "Maria Silva", role: "Analista de Suporte", score: 92, status: "Recomendado" },
-                      { name: "João Santos", role: "Atendente", score: 78, status: "Com ressalvas" },
-                      { name: "Ana Costa", role: "Analista de Suporte", score: 85, status: "Recomendado" },
+                      { name: "Maria Silva", email: "maria@email.com", score: 92, status: "Concluída", decision: "aprovado" },
+                      { name: "João Santos", email: "joao@email.com", score: 78, status: "Concluída", decision: "reprovado" },
+                      { name: "Ana Costa", email: "ana@email.com", score: 85, status: "Concluída", decision: null },
+                      { name: "Pedro Lima", email: "pedro@email.com", score: null, status: "Em andamento", decision: null },
                     ].map((candidate, i) => (
                       <div key={i} className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
                           <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                             <span className="text-xs font-semibold text-primary">
                               {candidate.name.split(' ').map(n => n[0]).join('')}
                             </span>
                           </div>
-                          <div>
-                            <p className="text-sm font-medium">{candidate.name}</p>
-                            <p className="text-xs text-muted-foreground">{candidate.role}</p>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium truncate">{candidate.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{candidate.email}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                          <Badge variant={candidate.score >= 85 ? "default" : "secondary"} className={candidate.score >= 85 ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" : ""}>
+                        <div className="flex items-center gap-3">
+                          {candidate.score !== null && (
+                            <div className="flex items-center gap-1">
+                              <BarChart3 className="h-3.5 w-3.5 text-yellow-500" />
+                              <span className={`text-sm font-bold ${candidate.score >= 85 ? 'text-emerald-600' : candidate.score >= 70 ? 'text-amber-600' : 'text-red-600'}`}>
+                                {candidate.score}
+                              </span>
+                            </div>
+                          )}
+                          {candidate.decision && (
+                            <Badge variant={candidate.decision === "aprovado" ? "default" : "destructive"} className={candidate.decision === "aprovado" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" : "bg-red-100 text-red-700 hover:bg-red-100"}>
+                              {candidate.decision === "aprovado" ? "Aprovado" : "Reprovado"}
+                            </Badge>
+                          )}
+                          <Badge variant={candidate.status === "Concluída" ? "secondary" : "outline"}>
                             {candidate.status}
                           </Badge>
-                          <div className="text-right hidden sm:block">
-                            <p className={`text-lg font-bold ${candidate.score >= 85 ? 'text-emerald-600' : 'text-amber-600'}`}>
-                              {candidate.score}
-                            </p>
-                          </div>
                         </div>
                       </div>
                     ))}
@@ -318,33 +338,50 @@ export default function LandingPage() {
                 </ul>
               </div>
               <div className="order-1 lg:order-2">
-                {/* Mobile mockup */}
+                {/* Mobile mockup - Interface real de entrevista */}
                 <div className="bg-slate-900 rounded-[2.5rem] p-3 max-w-[280px] mx-auto shadow-2xl">
                   <div className="bg-background rounded-[2rem] overflow-hidden">
-                    <div className="bg-primary px-4 py-3">
-                      <p className="text-primary-foreground text-sm font-medium text-center">EntrevistIA</p>
-                    </div>
-                    <div className="p-5 min-h-[380px] flex flex-col">
-                      <div className="text-center mb-6">
-                        <p className="text-xs text-muted-foreground mb-4">Pergunta 2 de 5</p>
-                        <div className="w-16 h-16 rounded-full bg-primary/10 mx-auto flex items-center justify-center">
-                          <Mic className="h-8 w-8 text-primary" />
-                        </div>
+                    {/* Barra de progresso do topo */}
+                    <div className="bg-muted/30 px-4 py-3 border-b">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-xs text-muted-foreground">Pergunta 2 de 5</span>
+                        <span className="text-xs font-bold text-primary">40%</span>
                       </div>
-                      <div className="flex-1 flex flex-col justify-center">
-                        <div className="bg-muted/50 rounded-xl p-4 mb-6">
-                          <p className="text-sm leading-relaxed">
-                            &ldquo;Como você lida com situações de pressão no trabalho?&rdquo;
-                          </p>
-                        </div>
-                        <div className="flex justify-center">
-                          <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center">
-                            <Mic className="h-6 w-6 text-primary-foreground" />
+                      <div className="w-full h-1.5 bg-muted rounded-full">
+                        <div className="h-1.5 bg-primary rounded-full" style={{ width: '40%' }} />
+                      </div>
+                    </div>
+                    <div className="p-5 min-h-[360px] flex flex-col">
+                      {/* Pergunta */}
+                      <div className="bg-muted/30 rounded-xl p-4 mb-6">
+                        <p className="text-sm font-medium leading-relaxed">
+                          &ldquo;Como você lida com situações de pressão no trabalho?&rdquo;
+                        </p>
+                      </div>
+
+                      {/* Timer circular de reflexão */}
+                      <div className="flex-1 flex flex-col items-center justify-center">
+                        <div className="relative w-24 h-24 mb-4">
+                          <svg className="w-full h-full transform -rotate-90">
+                            <circle cx="48" cy="48" r="42" stroke="currentColor" strokeWidth="4" fill="none" className="text-muted/30" />
+                            <circle cx="48" cy="48" r="42" stroke="currentColor" strokeWidth="4" fill="none" strokeDasharray="264" strokeDashoffset="88" className="text-primary" strokeLinecap="round" />
+                          </svg>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-2xl font-bold">30</span>
                           </div>
                         </div>
-                        <p className="text-center text-xs text-muted-foreground mt-4">
-                          Toque para gravar
+                        <p className="text-xs text-muted-foreground text-center mb-4">
+                          Use esse tempo para pensar
                         </p>
+                        <button className="w-full bg-primary text-primary-foreground text-sm font-medium py-2.5 rounded-lg">
+                          Estou pronto, começar
+                        </button>
+                      </div>
+
+                      {/* Info */}
+                      <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        <span>Até 3 min por resposta</span>
                       </div>
                     </div>
                   </div>
@@ -355,41 +392,96 @@ export default function LandingPage() {
             {/* Feature 2 */}
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
               <div>
-                {/* Analysis card */}
-                <div className="bg-background rounded-2xl border shadow-xl p-6">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-lg font-bold text-primary">MS</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold">Maria Silva</p>
-                      <p className="text-sm text-muted-foreground">Analista de Suporte</p>
-                    </div>
-                    <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
-                      Recomendado
-                    </Badge>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="bg-muted/50 rounded-lg p-4 text-center">
-                      <p className="text-3xl font-bold text-emerald-600">92</p>
-                      <p className="text-xs text-muted-foreground mt-1">Score Geral</p>
-                    </div>
-                    <div className="bg-muted/50 rounded-lg p-4 text-center">
-                      <p className="text-3xl font-bold text-blue-600">85</p>
-                      <p className="text-xs text-muted-foreground mt-1">Fit com Vaga</p>
+                {/* Analysis card - Página de avaliação real */}
+                <div className="bg-background rounded-2xl border shadow-xl p-5 sm:p-6">
+                  {/* Header com recomendação */}
+                  <div className="flex items-center gap-4 p-3 mb-5 rounded-lg bg-emerald-50 border border-emerald-200">
+                    <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+                    <div>
+                      <p className="font-semibold text-emerald-700">Recomendado para Próxima Fase</p>
+                      <p className="text-xs text-muted-foreground">Recomendação da IA</p>
                     </div>
                   </div>
 
-                  <div className="bg-muted/50 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Brain className="h-4 w-4 text-primary" />
-                      <p className="text-xs font-medium">Análise da IA</p>
+                  {/* Scores circulares */}
+                  <div className="grid grid-cols-2 gap-4 mb-5">
+                    <div className="bg-muted/30 rounded-lg p-4 text-center">
+                      <div className="relative w-20 h-20 mx-auto mb-2">
+                        <svg className="w-full h-full transform -rotate-90">
+                          <circle cx="40" cy="40" r="34" stroke="currentColor" strokeWidth="6" fill="none" className="text-muted" />
+                          <circle cx="40" cy="40" r="34" stroke="currentColor" strokeWidth="6" fill="none" strokeDasharray="214" strokeDashoffset="17" className="text-emerald-500" strokeLinecap="round" />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-xl font-bold text-emerald-600">92</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Nota Geral</p>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      &ldquo;Candidata demonstrou excelente capacidade de comunicação e experiência sólida
-                      em atendimento. Destacou-se na resolução de problemas...&rdquo;
-                    </p>
+                    <div className="bg-muted/30 rounded-lg p-4 text-center">
+                      <div className="relative w-20 h-20 mx-auto mb-2">
+                        <svg className="w-full h-full transform -rotate-90">
+                          <circle cx="40" cy="40" r="34" stroke="currentColor" strokeWidth="6" fill="none" className="text-muted" />
+                          <circle cx="40" cy="40" r="34" stroke="currentColor" strokeWidth="6" fill="none" strokeDasharray="214" strokeDashoffset="32" className="text-emerald-500" strokeLinecap="round" />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-xl font-bold text-emerald-600">85</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Compatibilidade</p>
+                    </div>
+                  </div>
+
+                  {/* Pontos fortes e de atenção */}
+                  <div className="grid grid-cols-2 gap-3 mb-5">
+                    <div className="bg-muted/30 rounded-lg p-3">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <Zap className="h-3.5 w-3.5 text-emerald-600" />
+                        <p className="text-xs font-medium">Pontos Fortes</p>
+                      </div>
+                      <ul className="space-y-1">
+                        <li className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                          <CheckCircle2 className="h-3 w-3 text-emerald-500 mt-0.5 shrink-0" />
+                          <span>Excelente comunicação</span>
+                        </li>
+                        <li className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                          <CheckCircle2 className="h-3 w-3 text-emerald-500 mt-0.5 shrink-0" />
+                          <span>Experiência em suporte</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="bg-muted/30 rounded-lg p-3">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <Brain className="h-3.5 w-3.5 text-amber-600" />
+                        <p className="text-xs font-medium">Pontos de Atenção</p>
+                      </div>
+                      <ul className="space-y-1">
+                        <li className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                          <BarChart3 className="h-3 w-3 text-amber-500 mt-0.5 shrink-0" />
+                          <span>Conhecimento técnico</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Competências */}
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium mb-2">Competências Avaliadas</p>
+                    {[
+                      { name: "Comunicação", score: 95 },
+                      { name: "Resolução de Problemas", score: 88 },
+                      { name: "Experiência", score: 82 },
+                    ].map((comp, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <span className="text-xs text-muted-foreground w-28 truncate">{comp.name}</span>
+                        <div className="flex-1 h-2 bg-muted rounded-full">
+                          <div
+                            className={`h-2 rounded-full ${comp.score >= 85 ? 'bg-emerald-500' : comp.score >= 70 ? 'bg-amber-500' : 'bg-red-500'}`}
+                            style={{ width: `${comp.score}%` }}
+                          />
+                        </div>
+                        <span className={`text-xs font-bold w-8 text-right ${comp.score >= 85 ? 'text-emerald-600' : 'text-amber-600'}`}>{comp.score}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -402,7 +494,7 @@ export default function LandingPage() {
                   Decisões baseadas em dados
                 </h3>
                 <p className="text-muted-foreground mb-6 leading-relaxed">
-                  Cada resposta é transcrita e analisada pela Claude AI. Você recebe scores,
+                  Cada resposta é transcrita e analisada por inteligência artificial. Você recebe scores,
                   pontos fortes, áreas de atenção e recomendação final.
                 </p>
                 <ul className="space-y-3">
@@ -558,7 +650,7 @@ export default function LandingPage() {
                 </Badge>
                 <Badge variant="outline" className="text-xs">
                   <Sparkles className="h-3 w-3 mr-1" />
-                  Claude AI
+                  IA Avançada
                 </Badge>
               </div>
             </div>
