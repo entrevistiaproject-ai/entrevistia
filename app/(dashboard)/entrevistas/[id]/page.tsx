@@ -27,6 +27,7 @@ import { AdicionarCandidatoDialog } from "@/components/entrevistas/adicionar-can
 import { UploadCandidatosDialog } from "@/components/entrevistas/upload-candidatos-dialog";
 import { CompartilharLinkDialog } from "@/components/entrevistas/compartilhar-link-dialog";
 import { DecisaoCandidato } from "@/components/entrevistas/decisao-candidato";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -106,6 +107,7 @@ export default function EntrevistaDetalhesPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [descricaoAberta, setDescricaoAberta] = useState(false);
+  const [filtroDecisao, setFiltroDecisao] = useState<string>("todos");
 
   const fetchData = async () => {
     try {
@@ -328,7 +330,7 @@ export default function EntrevistaDetalhesPage() {
         <TabsContent value="candidatos" className="space-y-4">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <CardTitle>Gerenciar Candidatos</CardTitle>
                   <CardDescription>
@@ -336,7 +338,18 @@ export default function EntrevistaDetalhesPage() {
                     entrevista
                   </CardDescription>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
+                  <Select value={filtroDecisao} onValueChange={setFiltroDecisao}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Filtrar por" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todos">Todos</SelectItem>
+                      <SelectItem value="aprovado">Aprovados</SelectItem>
+                      <SelectItem value="reprovado">Reprovados</SelectItem>
+                      <SelectItem value="sem_avaliacao">Sem avaliação</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <CompartilharLinkDialog
                     entrevistaId={entrevista.id}
                     slug={entrevista.slug}
@@ -353,17 +366,42 @@ export default function EntrevistaDetalhesPage() {
               </div>
             </CardHeader>
             <CardContent>
-              {candidatos.length === 0 ? (
-                <div className="text-center py-12">
-                  <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                  <p className="text-lg font-semibold">Nenhum candidato ainda</p>
-                  <p className="text-muted-foreground">
-                    Adicione candidatos usando os botões acima
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {candidatos.map((candidato) => {
+              {(() => {
+                const candidatosFiltrados = candidatos.filter((c) => {
+                  if (filtroDecisao === "todos") return true;
+                  if (filtroDecisao === "aprovado") return c.decisaoRecrutador === "aprovado";
+                  if (filtroDecisao === "reprovado") return c.decisaoRecrutador === "reprovado";
+                  if (filtroDecisao === "sem_avaliacao") return c.decisaoRecrutador === null;
+                  return true;
+                });
+
+                if (candidatos.length === 0) {
+                  return (
+                    <div className="text-center py-12">
+                      <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+                      <p className="text-lg font-semibold">Nenhum candidato ainda</p>
+                      <p className="text-muted-foreground">
+                        Adicione candidatos usando os botões acima
+                      </p>
+                    </div>
+                  );
+                }
+
+                if (candidatosFiltrados.length === 0) {
+                  return (
+                    <div className="text-center py-12">
+                      <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+                      <p className="text-lg font-semibold">Nenhum candidato encontrado</p>
+                      <p className="text-muted-foreground">
+                        Nenhum candidato corresponde ao filtro selecionado
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="space-y-3">
+                    {candidatosFiltrados.map((candidato) => {
                     return (
                       <div
                         key={candidato.id}
@@ -414,8 +452,9 @@ export default function EntrevistaDetalhesPage() {
                       </div>
                     );
                   })}
-                </div>
-              )}
+                  </div>
+                );
+              })()}
             </CardContent>
           </Card>
         </TabsContent>
