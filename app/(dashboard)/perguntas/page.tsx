@@ -55,7 +55,7 @@ export default async function PerguntasPage() {
   const cargosUnicos = new Set(perguntasVisiveis.map(p => p.cargo));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <PageHeader
         title="Perguntas"
@@ -71,53 +71,53 @@ export default async function PerguntasPage() {
 
       {/* Estatísticas - scroll horizontal no mobile */}
       <div className="scroll-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
-        <div className="inline-flex gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
-          <div className="rounded-lg border bg-card p-4 sm:p-6 min-w-[130px] sm:min-w-0 shrink-0">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="rounded-lg bg-primary/10 p-2">
+        <div className="inline-flex gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
+          <div className="rounded-xl border bg-card p-5 sm:p-6 min-w-[140px] sm:min-w-0 shrink-0">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="rounded-lg bg-primary/10 p-2.5">
                 <FileQuestion className="h-4 w-4 text-primary" />
               </div>
             </div>
-            <div className="text-2xl font-bold">{perguntasVisiveis.length}</div>
-            <p className="text-xs sm:text-sm text-muted-foreground">Disponíveis</p>
+            <div className="text-2xl sm:text-3xl font-bold">{perguntasVisiveis.length}</div>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">Disponíveis</p>
           </div>
-          <div className="rounded-lg border bg-card p-4 sm:p-6 min-w-[130px] sm:min-w-0 shrink-0">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="rounded-lg bg-primary/10 p-2">
+          <div className="rounded-xl border bg-card p-5 sm:p-6 min-w-[140px] sm:min-w-0 shrink-0">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="rounded-lg bg-primary/10 p-2.5">
                 <Star className="h-4 w-4 text-primary" />
               </div>
             </div>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl sm:text-3xl font-bold">
               {perguntasVisiveis.filter(p => p.isPadrao).length}
             </div>
-            <p className="text-xs sm:text-sm text-muted-foreground">Do sistema</p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">Do sistema</p>
           </div>
-          <div className="rounded-lg border bg-card p-4 sm:p-6 min-w-[130px] sm:min-w-0 shrink-0">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="rounded-lg bg-primary/10 p-2">
+          <div className="rounded-xl border bg-card p-5 sm:p-6 min-w-[140px] sm:min-w-0 shrink-0">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="rounded-lg bg-primary/10 p-2.5">
                 <User className="h-4 w-4 text-primary" />
               </div>
             </div>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl sm:text-3xl font-bold">
               {perguntasVisiveis.filter(p => !p.isPadrao).length}
             </div>
-            <p className="text-xs sm:text-sm text-muted-foreground">Criadas por você</p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">Criadas por você</p>
           </div>
-          <div className="rounded-lg border bg-card p-4 sm:p-6 min-w-[130px] sm:min-w-0 shrink-0">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="rounded-lg bg-primary/10 p-2">
+          <div className="rounded-xl border bg-card p-5 sm:p-6 min-w-[140px] sm:min-w-0 shrink-0">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="rounded-lg bg-primary/10 p-2.5">
                 <Briefcase className="h-4 w-4 text-primary" />
               </div>
             </div>
-            <div className="text-2xl font-bold">{cargosUnicos.size}</div>
-            <p className="text-xs sm:text-sm text-muted-foreground">Cargos cobertos</p>
+            <div className="text-2xl sm:text-3xl font-bold">{cargosUnicos.size}</div>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">Cargos cobertos</p>
           </div>
         </div>
       </div>
 
       {/* Listagem de Perguntas */}
       <Suspense fallback={
-        <div className="space-y-4">
+        <div className="space-y-5">
           <SkeletonCard lines={2} />
           <SkeletonCard lines={2} />
           <SkeletonCard lines={2} />

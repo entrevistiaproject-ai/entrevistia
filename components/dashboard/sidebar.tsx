@@ -101,15 +101,15 @@ export function Sidebar() {
     <aside className="fixed left-0 top-0 z-40 hidden h-screen w-64 border-r border-border bg-card md:block">
       <div className="flex h-full flex-col">
         {/* Logo/Header */}
-        <div className="flex h-16 items-center border-b border-border px-4">
+        <div className="flex h-16 items-center border-b border-border px-5">
           <Logo size="md" />
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-6 px-3 py-4 overflow-y-auto scroll-smooth">
+        <nav className="flex-1 space-y-8 px-4 py-6 overflow-y-auto scroll-smooth">
           {/* Menu Principal */}
-          <div className="space-y-1">
-            <p className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <div className="space-y-1.5">
+            <p className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
               Principal
             </p>
             {mainMenuItems.map((item) => {
@@ -135,8 +135,8 @@ export function Sidebar() {
           </div>
 
           {/* Menu Secundário */}
-          <div className="space-y-1">
-            <p className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <div className="space-y-1.5">
+            <p className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
               Configurações
             </p>
             {secondaryMenuItems.map((item) => {
@@ -163,7 +163,7 @@ export function Sidebar() {
         </nav>
 
         {/* User Info */}
-        <div className="border-t border-border p-4">
+        <div className="border-t border-border p-5">
           {userInfo ? (
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold shrink-0">
@@ -173,13 +173,13 @@ export function Sidebar() {
                 <p className="text-sm font-medium truncate">
                   {userInfo.nome || "Usuário"}
                 </p>
-                <p className="text-xs text-muted-foreground truncate">
+                <p className="text-xs text-muted-foreground truncate mt-0.5">
                   {userInfo.email}
                 </p>
               </div>
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}
-                className="p-2 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                className="p-2.5 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
                 title="Sair"
               >
                 <LogOut className="h-5 w-5" />

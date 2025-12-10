@@ -180,21 +180,21 @@ Maria Santos,maria@example.com`;
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
+        <DialogHeader className="pb-4">
           <DialogTitle>Importar candidatos em lote</DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="mt-1.5">
             Envie um arquivo CSV com nome e email. Todos receberão o convite automaticamente.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-5 py-2">
           {/* Botão para baixar modelo */}
-          <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
-            <div className="flex items-center gap-3">
-              <FileSpreadsheet className="h-8 w-8 text-blue-600" />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 border rounded-xl bg-muted/50">
+            <div className="flex items-center gap-4">
+              <FileSpreadsheet className="h-10 w-10 text-blue-600 shrink-0" />
               <div>
                 <p className="font-medium">Precisa de um modelo?</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground mt-0.5">
                   Baixe o CSV de exemplo com as colunas certas
                 </p>
               </div>
@@ -203,6 +203,7 @@ Maria Santos,maria@example.com`;
               variant="outline"
               size="sm"
               onClick={handleDownloadModelo}
+              className="shrink-0"
             >
               <Download className="mr-2 h-4 w-4" />
               Baixar modelo
@@ -210,7 +211,7 @@ Maria Santos,maria@example.com`;
           </div>
 
           {/* Upload do arquivo */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <input
               ref={inputRef}
               type="file"
@@ -221,7 +222,7 @@ Maria Santos,maria@example.com`;
             <Button
               type="button"
               variant="outline"
-              className="w-full"
+              className="w-full h-12"
               onClick={() => inputRef.current?.click()}
             >
               <Upload className="mr-2 h-4 w-4" />
@@ -239,23 +240,23 @@ Maria Santos,maria@example.com`;
 
           {/* Preview */}
           {preview.length > 0 && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <p className="text-sm font-medium">
                 Prévia dos {preview.length} primeiros:
               </p>
-              <div className="border rounded-lg overflow-hidden">
+              <div className="border rounded-xl overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-muted">
                     <tr>
-                      <th className="p-2 text-left">Nome</th>
-                      <th className="p-2 text-left">Email</th>
+                      <th className="p-3 text-left font-medium">Nome</th>
+                      <th className="p-3 text-left font-medium">Email</th>
                     </tr>
                   </thead>
                   <tbody>
                     {preview.map((candidato, index) => (
                       <tr key={index} className="border-t">
-                        <td className="p-2">{candidato.nome}</td>
-                        <td className="p-2">{candidato.email}</td>
+                        <td className="p-3">{candidato.nome}</td>
+                        <td className="p-3">{candidato.email}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -265,7 +266,7 @@ Maria Santos,maria@example.com`;
           )}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="gap-3 sm:gap-2">
           <Button
             type="button"
             variant="outline"

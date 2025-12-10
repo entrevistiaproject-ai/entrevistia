@@ -131,32 +131,32 @@ function LoginForm() {
       </div>
 
       {/* Conteúdo principal */}
-      <div className="max-w-md mx-auto px-4 py-8">
+      <div className="max-w-md mx-auto px-4 sm:px-6 py-10 sm:py-12">
         {/* Mensagem de sucesso */}
         {showSuccessMessage && (
-          <div className="mb-6 p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg flex items-start gap-3">
+          <div className="mb-8 p-5 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-xl flex items-start gap-4">
             <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-green-900 dark:text-green-100">Email confirmado!</p>
-              <p className="text-sm text-green-600 dark:text-green-400">Tudo pronto. Faça login para começar.</p>
+              <p className="text-sm text-green-600 dark:text-green-400 mt-0.5">Tudo pronto. Faça login para começar.</p>
             </div>
           </div>
         )}
 
         <Card className="shadow-lg">
-          <CardHeader className="text-center pb-2">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 mx-auto">
+          <CardHeader className="text-center pb-4 pt-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-5 mx-auto">
               <LogoIcon className="w-10 h-10" />
             </div>
             <CardTitle className="text-2xl sm:text-3xl">Acesse sua conta</CardTitle>
-            <CardDescription>
+            <CardDescription className="mt-2">
               Entre para gerenciar suas entrevistas
             </CardDescription>
           </CardHeader>
-          <CardContent className="pt-4">
+          <CardContent className="pt-2 pb-8 px-6 sm:px-8">
             {/* Erro geral */}
             {errors.geral && (
-              <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-3">
+              <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-4">
                 <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
                 <p className="text-sm text-destructive">{errors.geral}</p>
               </div>
@@ -165,7 +165,7 @@ function LoginForm() {
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email */}
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <Label htmlFor="email" className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-muted-foreground" />
                   Email
@@ -182,12 +182,12 @@ function LoginForm() {
                   autoFocus
                 />
                 {errors.email && (
-                  <p className="text-sm text-destructive">{errors.email}</p>
+                  <p className="text-sm text-destructive mt-1.5">{errors.email}</p>
                 )}
               </div>
 
               {/* Senha */}
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="senha" className="flex items-center gap-2">
                     <Lock className="w-4 h-4 text-muted-foreground" />
@@ -222,30 +222,32 @@ function LoginForm() {
                   </button>
                 </div>
                 {errors.senha && (
-                  <p className="text-sm text-destructive">{errors.senha}</p>
+                  <p className="text-sm text-destructive mt-1.5">{errors.senha}</p>
                 )}
               </div>
 
               {/* Botão de Submit */}
-              <Button
-                type="submit"
-                className="w-full"
-                size="touch"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Entrando...
-                  </>
-                ) : (
-                  "Entrar"
-                )}
-              </Button>
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  className="w-full"
+                  size="touch"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Entrando...
+                    </>
+                  ) : (
+                    "Entrar"
+                  )}
+                </Button>
+              </div>
             </form>
 
             {/* Footer */}
-            <div className="mt-6 text-center">
+            <div className="mt-8 text-center">
               <p className="text-muted-foreground">
                 Ainda não tem conta?{" "}
                 <Link
@@ -260,22 +262,22 @@ function LoginForm() {
         </Card>
 
         {/* Benefícios */}
-        <div className="mt-8 text-center">
-          <p className="text-sm text-muted-foreground mb-4">
+        <div className="mt-10 text-center">
+          <p className="text-sm text-muted-foreground mb-5">
             Por que recrutadores escolhem a EntrevistIA:
           </p>
-          <div className="grid grid-cols-3 gap-3">
-            <Card className="p-4">
-              <p className="text-lg font-bold text-primary">90%</p>
-              <p className="text-xs text-muted-foreground">Menos tempo em triagem</p>
+          <div className="grid grid-cols-3 gap-4">
+            <Card className="p-4 sm:p-5">
+              <p className="text-lg sm:text-xl font-bold text-primary">90%</p>
+              <p className="text-xs text-muted-foreground mt-1">Menos tempo em triagem</p>
             </Card>
-            <Card className="p-4">
-              <p className="text-lg font-bold text-primary">R$ 3</p>
-              <p className="text-xs text-muted-foreground">Por candidato</p>
+            <Card className="p-4 sm:p-5">
+              <p className="text-lg sm:text-xl font-bold text-primary">R$ 3</p>
+              <p className="text-xs text-muted-foreground mt-1">Por candidato</p>
             </Card>
-            <Card className="p-4">
-              <p className="text-lg font-bold text-primary">24/7</p>
-              <p className="text-xs text-muted-foreground">Sempre disponível</p>
+            <Card className="p-4 sm:p-5">
+              <p className="text-lg sm:text-xl font-bold text-primary">24/7</p>
+              <p className="text-xs text-muted-foreground mt-1">Sempre disponível</p>
             </Card>
           </div>
         </div>

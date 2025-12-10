@@ -175,7 +175,7 @@ export default function CriarEntrevistaPage() {
   const completedSteps = progressSteps.filter((s) => s.done).length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link href="/entrevistas">
@@ -185,18 +185,18 @@ export default function CriarEntrevistaPage() {
         </Link>
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl sm:text-3xl font-bold truncate">Criar entrevista</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-2">
             Defina a vaga e escolha as perguntas em poucos minutos
           </p>
         </div>
       </div>
 
       {/* Indicador de Progresso */}
-      <div className="flex items-center gap-2 overflow-x-auto scroll-x-hidden pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div className="flex items-center gap-3 overflow-x-auto scroll-x-hidden pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
         {progressSteps.map((step, index) => (
           <div
             key={step.label}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+            className={`flex items-center gap-2.5 px-3.5 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
               step.done
                 ? "bg-primary/10 text-primary"
                 : "bg-muted text-muted-foreground"
@@ -217,17 +217,17 @@ export default function CriarEntrevistaPage() {
         </span>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-8">
         {/* Informações da Vaga */}
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-4">
             <CardTitle>Sobre a vaga</CardTitle>
-            <CardDescription>
+            <CardDescription className="mt-1.5">
               Essas informações ajudam a IA a avaliar melhor os candidatos
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
+          <CardContent className="space-y-7">
+            <div className="space-y-2.5">
               <Label htmlFor="titulo">Nome da entrevista</Label>
               <Input
                 id="titulo"
@@ -238,7 +238,7 @@ export default function CriarEntrevistaPage() {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <Label htmlFor="empresa">Empresa (aparece para o candidato)</Label>
               <Input
                 id="empresa"
@@ -246,7 +246,7 @@ export default function CriarEntrevistaPage() {
                 value={empresa}
                 onChange={(e) => setEmpresa(e.target.value)}
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground mt-1.5">
                 Os candidatos verão este nome ao responder a entrevista
               </p>
             </div>
@@ -330,8 +330,8 @@ Breve contexto sobre a posição e equipe...
               </Alert>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
+            <div className="grid gap-5 sm:gap-6 sm:grid-cols-2">
+              <div className="space-y-2.5">
                 <Label htmlFor="cargo">Cargo *</Label>
                 <AutocompleteCargo
                   value={cargo}
@@ -340,7 +340,7 @@ Breve contexto sobre a posição e equipe...
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <Label htmlFor="nivel">Nível *</Label>
                 <Select value={nivel} onValueChange={setNivel} required>
                   <SelectTrigger className="h-11 sm:h-10">
@@ -361,15 +361,15 @@ Breve contexto sobre a posição e equipe...
 
         {/* Configurações */}
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-4">
             <CardTitle>Configurações</CardTitle>
-            <CardDescription>
+            <CardDescription className="mt-1.5">
               Personalize a experiência do candidato
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-start sm:items-center justify-between gap-4">
-              <div className="space-y-0.5 flex-1">
+          <CardContent className="space-y-5">
+            <div className="flex items-start sm:items-center justify-between gap-5">
+              <div className="space-y-1 flex-1">
                 <Label htmlFor="compartilhar-resultados" className="text-sm sm:text-base">
                   Mostrar resultado para o candidato
                 </Label>
@@ -389,9 +389,9 @@ Breve contexto sobre a posição e equipe...
 
         {/* Perguntas */}
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-4">
             <CardTitle>Perguntas</CardTitle>
-            <CardDescription>
+            <CardDescription className="mt-1.5">
               Escolha do banco ou crie suas próprias ({perguntas.length} {perguntas.length === 1 ? "selecionada" : "selecionadas"})
             </CardDescription>
           </CardHeader>
@@ -402,7 +402,7 @@ Breve contexto sobre a posição e equipe...
                 <TabsTrigger value="nova" className="text-sm">Criar pergunta</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="banco" className="mt-4">
+              <TabsContent value="banco" className="mt-5">
                 <SelecionarPerguntasBanco
                   cargo={cargo}
                   nivel={nivel}
@@ -411,7 +411,7 @@ Breve contexto sobre a posição e equipe...
                 />
               </TabsContent>
 
-              <TabsContent value="nova" className="mt-4">
+              <TabsContent value="nova" className="mt-5">
                 <CriarPerguntaNova
                   cargo={cargo}
                   nivel={nivel}
@@ -422,7 +422,7 @@ Breve contexto sobre a posição e equipe...
 
             {/* Lista de Perguntas Selecionadas */}
             {perguntas.length > 0 && (
-              <div className="mt-6">
+              <div className="mt-8">
                 <ListaPerguntasSelecionadas
                   perguntas={perguntas}
                   onRemover={handleRemoverPergunta}
@@ -434,7 +434,7 @@ Breve contexto sobre a posição e equipe...
         </Card>
 
         {/* Ações - Fixo no mobile */}
-        <div className="flex flex-col sm:flex-row justify-end gap-3 sticky bottom-20 sm:static bg-background/95 backdrop-blur-sm -mx-4 px-4 py-4 sm:mx-0 sm:px-0 sm:py-0 sm:bg-transparent sm:backdrop-blur-none border-t sm:border-0 border-border">
+        <div className="flex flex-col sm:flex-row justify-end gap-4 sticky bottom-20 sm:static bg-background/95 backdrop-blur-sm -mx-4 px-4 py-5 sm:mx-0 sm:px-0 sm:py-0 sm:bg-transparent sm:backdrop-blur-none border-t sm:border-0 border-border">
           <Link href="/entrevistas" className="w-full sm:w-auto">
             <Button type="button" variant="outline" disabled={loading} className="w-full sm:w-auto" size="touch">
               Cancelar

@@ -103,25 +103,25 @@ function VerificarEmailContent() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/5 via-background to-primary/10 p-4">
         <Card className="w-full max-w-md p-8 text-center">
-          <CheckCircle2 className="w-16 h-16 text-green-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <CheckCircle2 className="w-16 h-16 text-green-600 mx-auto mb-5" />
+          <h2 className="text-2xl font-bold mb-3">
             Tudo certo!
           </h2>
-          <p className="text-gray-600 mb-4">
+          <p className="text-muted-foreground mb-5">
             Seu email foi confirmado. Entrando na sua conta...
           </p>
-          <Loader2 className="w-6 h-6 animate-spin text-blue-600 mx-auto" />
+          <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" />
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+    <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-primary/10">
       {/* Header com navegação */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -131,18 +131,18 @@ function VerificarEmailContent() {
 
             {/* Links de navegação */}
             <nav className="hidden md:flex items-center gap-6">
-              <Link href="/" className="text-gray-600 hover:text-gray-900">
+              <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
                 Início
               </Link>
-              <Link href="/login" className="text-gray-600 hover:text-gray-900">
+              <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors">
                 Login
               </Link>
             </nav>
 
             {/* Botão mobile */}
             <Link href="/" className="md:hidden">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4" />
+              <Button variant="ghost" size="touch-icon">
+                <ArrowLeft className="w-5 h-5" />
               </Button>
             </Link>
           </div>
@@ -151,134 +151,139 @@ function VerificarEmailContent() {
 
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <nav className="flex items-center gap-2 text-sm text-gray-600">
-          <Link href="/" className="hover:text-gray-900 flex items-center gap-1">
+        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Link href="/" className="hover:text-foreground flex items-center gap-1 transition-colors">
             <Home className="w-4 h-4" />
             Início
           </Link>
           <ChevronRight className="w-4 h-4" />
-          <span className="text-gray-900 font-medium">Verificar email</span>
+          <span className="text-foreground font-medium">Verificar email</span>
         </nav>
       </div>
 
       {/* Conteúdo principal */}
-      <div className="max-w-md mx-auto px-4 py-8">
-        <Card className="p-8 shadow-lg">
+      <div className="max-w-md mx-auto px-4 sm:px-6 py-10 sm:py-12">
+        <Card className="shadow-lg">
           {/* Header */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-              <Mail className="w-8 h-8 text-blue-600" />
+          <div className="text-center pt-8 pb-6 px-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-5">
+              <Mail className="w-8 h-8 text-primary" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Confirme seu email</h1>
-            <p className="text-gray-600 mt-2">
+            <h1 className="text-2xl sm:text-3xl font-bold">Confirme seu email</h1>
+            <p className="text-muted-foreground mt-3">
               Enviamos um código de 6 dígitos para:
             </p>
-            <p className="text-blue-600 font-semibold mt-1">{email}</p>
+            <p className="text-primary font-semibold mt-1">{email}</p>
           </div>
 
-          {/* Alerta de sucesso ao reenviar */}
-          {resendSuccess && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-green-600">
-                Pronto! Enviamos um novo código para seu email.
+          <div className="px-6 sm:px-8 pb-8">
+            {/* Alerta de sucesso ao reenviar */}
+            {resendSuccess && (
+              <div className="mb-6 p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg flex items-start gap-4">
+                <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                <p className="text-sm text-green-600 dark:text-green-400">
+                  Pronto! Enviamos um novo código para seu email.
+                </p>
+              </div>
+            )}
+
+            {/* Erro */}
+            {error && (
+              <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-4">
+                <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+                <p className="text-sm text-destructive">{error}</p>
+              </div>
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Código de verificação */}
+              <div className="space-y-2.5">
+                <label htmlFor="code" className="block text-sm font-medium">
+                  Código de verificação
+                </label>
+                <Input
+                  id="code"
+                  name="code"
+                  type="text"
+                  placeholder="000000"
+                  maxLength={6}
+                  value={code}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, "");
+                    setCode(value);
+                    setError("");
+                  }}
+                  className={`text-center text-2xl tracking-widest font-bold ${error ? "border-destructive" : ""}`}
+                  disabled={isLoading}
+                  autoFocus
+                />
+                <p className="text-xs text-muted-foreground text-center">
+                  O código tem 6 números e está no email que enviamos
+                </p>
+              </div>
+
+              {/* Botão de Submit */}
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  className="w-full"
+                  size="touch"
+                  disabled={isLoading || code.length !== 6}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Verificando...
+                    </>
+                  ) : (
+                    "Confirmar"
+                  )}
+                </Button>
+              </div>
+            </form>
+
+            {/* Reenviar código */}
+            <div className="mt-8 text-center">
+              <p className="text-sm text-muted-foreground mb-3">
+                Não chegou?
               </p>
-            </div>
-          )}
-
-          {/* Erro */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Código de verificação */}
-            <div className="space-y-2">
-              <label htmlFor="code" className="block text-sm font-medium text-gray-700">
-                Código de verificação
-              </label>
-              <Input
-                id="code"
-                name="code"
-                type="text"
-                placeholder="000000"
-                maxLength={6}
-                value={code}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, "");
-                  setCode(value);
-                  setError("");
-                }}
-                className={`text-center text-2xl tracking-widest font-bold ${error ? "border-red-500" : ""}`}
-                disabled={isLoading}
-                autoFocus
-              />
-              <p className="text-xs text-gray-500 text-center">
-                O código tem 6 números e está no email que enviamos
-              </p>
-            </div>
-
-            {/* Botão de Submit */}
-            <Button
-              type="submit"
-              className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700"
-              disabled={isLoading || code.length !== 6}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Verificando...
-                </>
-              ) : (
-                "Confirmar"
-              )}
-            </Button>
-          </form>
-
-          {/* Reenviar código */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600 mb-2">
-              Não chegou?
-            </p>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={handleResendCode}
-              disabled={isResending}
-              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-            >
-              {isResending ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Enviando...
-                </>
-              ) : (
-                "Enviar novo código"
-              )}
-            </Button>
-          </div>
-
-          {/* Footer */}
-          <div className="mt-8 pt-6 border-t border-gray-200 text-center">
-            <p className="text-sm text-gray-600">
-              Digitou o email errado?{" "}
-              <Link
-                href="/cadastro"
-                className="text-blue-600 hover:underline font-semibold"
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleResendCode}
+                disabled={isResending}
+                className="text-primary hover:text-primary/90"
               >
-                Criar nova conta
-              </Link>
-            </p>
+                {isResending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Enviando...
+                  </>
+                ) : (
+                  "Enviar novo código"
+                )}
+              </Button>
+            </div>
+
+            {/* Footer */}
+            <div className="mt-8 pt-6 border-t text-center">
+              <p className="text-sm text-muted-foreground">
+                Digitou o email errado?{" "}
+                <Link
+                  href="/cadastro"
+                  className="text-primary hover:underline font-semibold"
+                >
+                  Criar nova conta
+                </Link>
+              </p>
+            </div>
           </div>
         </Card>
 
         {/* Dica */}
-        <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
-          <p className="text-sm text-gray-600 text-center">
+        <div className="mt-8 p-5 bg-card rounded-xl border">
+          <p className="text-sm text-muted-foreground text-center">
             <strong>Dica:</strong> Olhe também na pasta de spam ou lixo eletrônico
           </p>
         </div>

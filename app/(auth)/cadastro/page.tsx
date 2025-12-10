@@ -205,30 +205,30 @@ export default function CadastroPage() {
       </div>
 
       {/* Conteúdo principal */}
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
         <Card className="shadow-lg">
-          <CardHeader className="text-center pb-2">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 mx-auto">
+          <CardHeader className="text-center pb-4 pt-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-5 mx-auto">
               <LogoIcon className="w-10 h-10" />
             </div>
             <CardTitle className="text-2xl sm:text-3xl">Crie sua conta gratuita</CardTitle>
-            <CardDescription>
+            <CardDescription className="mt-2">
               Ganhe R$ 50 em créditos para testar. Sem cartão de crédito.
             </CardDescription>
           </CardHeader>
-          <CardContent className="pt-4">
+          <CardContent className="pt-2 pb-8 px-6 sm:px-8">
             {/* Erro geral */}
             {errors.geral && (
-              <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-3">
+              <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-4">
                 <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
                 <p className="text-sm text-destructive">{errors.geral}</p>
               </div>
             )}
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-7">
               {/* Grid de 2 colunas */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
                 {/* Nome Completo */}
                 <div className="space-y-2">
                   <Label htmlFor="nome" className="flex items-center gap-2">
@@ -400,7 +400,7 @@ export default function CadastroPage() {
               </div>
 
               {/* Termos e Privacidade */}
-              <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
+              <div className="space-y-4 p-5 bg-muted/30 rounded-xl">
                 <div className="flex items-start gap-3">
                   <Checkbox
                     id="aceitouTermos"
@@ -457,25 +457,27 @@ export default function CadastroPage() {
               </div>
 
               {/* Botão de Submit */}
-              <Button
-                type="submit"
-                className="w-full"
-                size="touch"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Criando conta...
-                  </>
-                ) : (
-                  "Criar conta gratuita"
-                )}
-              </Button>
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  className="w-full"
+                  size="touch"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Criando conta...
+                    </>
+                  ) : (
+                    "Criar conta gratuita"
+                  )}
+                </Button>
+              </div>
             </form>
 
             {/* Footer */}
-            <div className="mt-6 text-center">
+            <div className="mt-8 text-center">
               <p className="text-muted-foreground">
                 Já tem uma conta?{" "}
                 <Link
@@ -488,22 +490,22 @@ export default function CadastroPage() {
             </div>
 
             {/* Benefícios */}
-            <div className="mt-8 pt-6 border-t">
-              <p className="text-sm text-muted-foreground text-center mb-4">
+            <div className="mt-10 pt-8 border-t">
+              <p className="text-sm text-muted-foreground text-center mb-5">
                 O que você ganha ao criar sua conta:
               </p>
-              <div className="grid grid-cols-3 gap-3 text-center">
-                <Card className="p-3 sm:p-4">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <Card className="p-4 sm:p-5">
                   <p className="text-xl sm:text-2xl font-bold text-primary">R$ 50</p>
-                  <p className="text-xs text-muted-foreground">Em créditos grátis</p>
+                  <p className="text-xs text-muted-foreground mt-1">Em créditos grátis</p>
                 </Card>
-                <Card className="p-3 sm:p-4">
+                <Card className="p-4 sm:p-5">
                   <p className="text-xl sm:text-2xl font-bold text-primary">∞</p>
-                  <p className="text-xs text-muted-foreground">Vagas ilimitadas</p>
+                  <p className="text-xs text-muted-foreground mt-1">Vagas ilimitadas</p>
                 </Card>
-                <Card className="p-3 sm:p-4">
+                <Card className="p-4 sm:p-5">
                   <p className="text-xl sm:text-2xl font-bold text-primary">IA</p>
-                  <p className="text-xs text-muted-foreground">Análise automática</p>
+                  <p className="text-xs text-muted-foreground mt-1">Análise automática</p>
                 </Card>
               </div>
             </div>

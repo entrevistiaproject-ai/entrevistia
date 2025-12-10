@@ -93,14 +93,14 @@ export function AdicionarCandidatoDialog({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <form onSubmit={handleSubmit}>
-          <DialogHeader>
+          <DialogHeader className="pb-4">
             <DialogTitle>Convidar candidato</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="mt-1.5">
               Preencha os dados e o candidato receberá um email com o link para responder.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
+          <div className="grid gap-5 py-5">
+            <div className="grid gap-2.5">
               <Label htmlFor="nome">Nome do candidato</Label>
               <Input
                 id="nome"
@@ -110,7 +110,7 @@ export function AdicionarCandidatoDialog({
                 required
               />
             </div>
-            <div className="grid gap-2">
+            <div className="grid gap-2.5">
               <Label htmlFor="email">Email do candidato</Label>
               <Input
                 id="email"
@@ -121,7 +121,7 @@ export function AdicionarCandidatoDialog({
                 required
               />
             </div>
-            <div className="grid gap-2">
+            <div className="grid gap-2.5">
               <Label htmlFor="telefone">Telefone (opcional)</Label>
               <Input
                 id="telefone"
@@ -131,7 +131,7 @@ export function AdicionarCandidatoDialog({
                 placeholder="(11) 99999-9999"
               />
             </div>
-            <div className="grid gap-2">
+            <div className="grid gap-2.5">
               <Label htmlFor="linkedin">LinkedIn (opcional)</Label>
               <Input
                 id="linkedin"
@@ -142,7 +142,7 @@ export function AdicionarCandidatoDialog({
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-3 sm:gap-2">
             <Button
               type="button"
               variant="outline"

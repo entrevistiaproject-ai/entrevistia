@@ -304,38 +304,39 @@ export function DecisaoCandidato({
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-lg" onClick={(e) => e.stopPropagation()}>
-        <DialogHeader>
+        <DialogHeader className="pb-4">
           <DialogTitle>Avaliar candidato</DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="mt-1.5">
             Decida se <span className="font-medium text-foreground">{candidatoNome}</span> segue para a próxima fase.
           </DialogDescription>
         </DialogHeader>
 
-        {/* Recomendação da IA */}
-        {recomendacaoIA && (
-          <div className={cn(
-            "flex items-center gap-2 p-3 rounded-lg",
-            recomendacaoIAConfig[recomendacaoIA].bgColor
-          )}>
-            <Sparkles className="h-4 w-4 text-blue-600" />
-            <span className={cn(
-              "text-sm font-medium",
-              recomendacaoIAConfig[recomendacaoIA].textColor
+        <div className="space-y-5 py-2">
+          {/* Recomendação da IA */}
+          {recomendacaoIA && (
+            <div className={cn(
+              "flex items-center gap-3 p-4 rounded-xl",
+              recomendacaoIAConfig[recomendacaoIA].bgColor
             )}>
-              {recomendacaoIAConfig[recomendacaoIA].label}
-            </span>
-          </div>
-        )}
+              <Sparkles className="h-5 w-5 text-blue-600 shrink-0" />
+              <span className={cn(
+                "text-sm font-medium",
+                recomendacaoIAConfig[recomendacaoIA].textColor
+              )}>
+                {recomendacaoIAConfig[recomendacaoIA].label}
+              </span>
+            </div>
+          )}
 
-        {/* Opções de decisão */}
-        <div className="space-y-3">
-          <Label>Sua decisão</Label>
-          <div className="grid grid-cols-2 gap-3">
+          {/* Opções de decisão */}
+          <div className="space-y-3">
+            <Label>Sua decisão</Label>
+            <div className="grid grid-cols-2 gap-4">
             <button
               type="button"
               onClick={() => setDecisaoSelecionada("aprovado")}
               className={cn(
-                "flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all",
+                "flex flex-col items-center gap-2.5 p-5 rounded-xl border-2 transition-all",
                 decisaoSelecionada === "aprovado"
                   ? "border-emerald-500 bg-emerald-50"
                   : "border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/50"
@@ -360,7 +361,7 @@ export function DecisaoCandidato({
               type="button"
               onClick={() => setDecisaoSelecionada("reprovado")}
               className={cn(
-                "flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all",
+                "flex flex-col items-center gap-2.5 p-5 rounded-xl border-2 transition-all",
                 decisaoSelecionada === "reprovado"
                   ? "border-red-500 bg-red-50"
                   : "border-slate-200 hover:border-red-300 hover:bg-red-50/50"
@@ -383,119 +384,120 @@ export function DecisaoCandidato({
           </div>
         </div>
 
-        {/* Observação opcional */}
-        <div className="space-y-2">
-          <Label htmlFor="observacao">Anotação interna (opcional)</Label>
-          <Textarea
-            id="observacao"
-            placeholder="Escreva uma nota para você ou sua equipe..."
-            value={observacao}
-            onChange={(e) => setObservacao(e.target.value)}
-            rows={2}
-          />
-        </div>
+          {/* Observação opcional */}
+          <div className="space-y-2.5">
+            <Label htmlFor="observacao">Anotação interna (opcional)</Label>
+            <Textarea
+              id="observacao"
+              placeholder="Escreva uma nota para você ou sua equipe..."
+              value={observacao}
+              onChange={(e) => setObservacao(e.target.value)}
+              rows={2}
+            />
+          </div>
 
-        {/* Opção de enviar email de encerramento (só aparece quando reprova) */}
-        {decisaoSelecionada === "reprovado" && !emailJaEnviado && (
-          <div className="space-y-3 p-4 bg-slate-50 rounded-lg border">
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id="enviar-email"
-                checked={enviarEmail}
-                onCheckedChange={(checked) => setEnviarEmail(checked as boolean)}
-              />
-              <div className="space-y-1">
-                <Label htmlFor="enviar-email" className="cursor-pointer flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  Avisar o candidato por email
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  Envia uma mensagem cordial informando que o processo foi encerrado
-                </p>
+          {/* Opção de enviar email de encerramento (só aparece quando reprova) */}
+          {decisaoSelecionada === "reprovado" && !emailJaEnviado && (
+            <div className="space-y-4 p-5 bg-slate-50 rounded-xl border">
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="enviar-email"
+                  checked={enviarEmail}
+                  onCheckedChange={(checked) => setEnviarEmail(checked as boolean)}
+                />
+                <div className="space-y-1.5">
+                  <Label htmlFor="enviar-email" className="cursor-pointer flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    Avisar o candidato por email
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Envia uma mensagem cordial informando que o processo foi encerrado
+                  </p>
+                </div>
               </div>
+
+              {enviarEmail && (
+                <div className="space-y-3 ml-6">
+                  <button
+                    type="button"
+                    onClick={() => setMostrarEdicaoEmail(!mostrarEdicaoEmail)}
+                    className="text-xs text-blue-600 hover:text-blue-800 underline"
+                  >
+                    {mostrarEdicaoEmail ? "Ocultar edição" : "Personalizar mensagem"}
+                  </button>
+
+                  {mostrarEdicaoEmail && (
+                    <Textarea
+                      value={textoEmail}
+                      onChange={(e) => setTextoEmail(e.target.value)}
+                      rows={6}
+                      className="text-sm"
+                      placeholder="Digite a mensagem personalizada..."
+                    />
+                  )}
+                </div>
+              )}
             </div>
+          )}
 
-            {enviarEmail && (
-              <div className="space-y-2 ml-6">
-                <button
-                  type="button"
-                  onClick={() => setMostrarEdicaoEmail(!mostrarEdicaoEmail)}
-                  className="text-xs text-blue-600 hover:text-blue-800 underline"
-                >
-                  {mostrarEdicaoEmail ? "Ocultar edição" : "Personalizar mensagem"}
-                </button>
-
-                {mostrarEdicaoEmail && (
-                  <Textarea
-                    value={textoEmail}
-                    onChange={(e) => setTextoEmail(e.target.value)}
-                    rows={6}
-                    className="text-sm"
-                    placeholder="Digite a mensagem personalizada..."
-                  />
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Mostrar se email já foi enviado */}
-        {decisaoAtual === "reprovado" && emailJaEnviado && (
-          <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-200">
-            <Check className="h-4 w-4 text-green-600" />
-            <span className="text-sm text-green-700">
-              Email de encerramento já enviado
-            </span>
-          </div>
-        )}
-
-        {/* Opção de enviar email se já reprovou mas não enviou */}
-        {decisaoAtual === "reprovado" && !emailJaEnviado && (
-          <div className="space-y-3 p-4 bg-amber-50 rounded-lg border border-amber-200">
-            <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-amber-600" />
-              <span className="text-sm font-medium text-amber-800">
-                Email de encerramento não enviado
+          {/* Mostrar se email já foi enviado */}
+          {decisaoAtual === "reprovado" && emailJaEnviado && (
+            <div className="flex items-center gap-3 p-4 bg-green-50 rounded-xl border border-green-200">
+              <Check className="h-5 w-5 text-green-600 shrink-0" />
+              <span className="text-sm text-green-700">
+                Email de encerramento já enviado
               </span>
             </div>
+          )}
 
-            <button
-              type="button"
-              onClick={() => setMostrarEdicaoEmail(!mostrarEdicaoEmail)}
-              className="text-xs text-amber-700 hover:text-amber-900 underline"
-            >
-              {mostrarEdicaoEmail ? "Ocultar edição" : "Personalizar mensagem antes de enviar"}
-            </button>
+          {/* Opção de enviar email se já reprovou mas não enviou */}
+          {decisaoAtual === "reprovado" && !emailJaEnviado && (
+            <div className="space-y-4 p-5 bg-amber-50 rounded-xl border border-amber-200">
+              <div className="flex items-center gap-3">
+                <Mail className="h-5 w-5 text-amber-600 shrink-0" />
+                <span className="text-sm font-medium text-amber-800">
+                  Email de encerramento não enviado
+                </span>
+              </div>
 
-            {mostrarEdicaoEmail && (
-              <Textarea
-                value={textoEmail}
-                onChange={(e) => setTextoEmail(e.target.value)}
-                rows={6}
-                className="text-sm"
-                placeholder="Digite a mensagem personalizada..."
-              />
-            )}
+              <button
+                type="button"
+                onClick={() => setMostrarEdicaoEmail(!mostrarEdicaoEmail)}
+                className="text-xs text-amber-700 hover:text-amber-900 underline"
+              >
+                {mostrarEdicaoEmail ? "Ocultar edição" : "Personalizar mensagem antes de enviar"}
+              </button>
 
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleEnviarEmailSeparado}
-              disabled={sendingEmail}
-              className="w-full"
-            >
-              {sendingEmail ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Send className="h-4 w-4 mr-2" />
+              {mostrarEdicaoEmail && (
+                <Textarea
+                  value={textoEmail}
+                  onChange={(e) => setTextoEmail(e.target.value)}
+                  rows={6}
+                  className="text-sm"
+                  placeholder="Digite a mensagem personalizada..."
+                />
               )}
-              Enviar email de encerramento agora
-            </Button>
-          </div>
-        )}
 
-        <DialogFooter className="flex-col sm:flex-row gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleEnviarEmailSeparado}
+                disabled={sendingEmail}
+                className="w-full"
+              >
+                {sendingEmail ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Send className="h-4 w-4 mr-2" />
+                )}
+                Enviar email de encerramento agora
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <DialogFooter className="flex-col sm:flex-row gap-3 sm:gap-2">
           {decisaoAtual && (
             <Button
               type="button"

@@ -169,7 +169,7 @@ export default function ResponderEntrevistaPage() {
   if (carregando) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted/30">
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-5">
           <Loader2 className="h-10 w-10 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">Preparando sua entrevista...</p>
         </div>
@@ -179,13 +179,13 @@ export default function ResponderEntrevistaPage() {
 
   if (erro || !entrevista) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
+      <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-muted/30">
         <Card className="max-w-md w-full">
-          <CardContent className="pt-6 text-center">
-            <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+          <CardContent className="pt-8 pb-8 px-6 text-center">
+            <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-5">
               <AlertCircle className="h-8 w-8 text-destructive" />
             </div>
-            <h1 className="text-2xl font-bold mb-2">Ops!</h1>
+            <h1 className="text-2xl font-bold mb-3">Ops!</h1>
             <p className="text-muted-foreground">{erro || "Não conseguimos encontrar essa entrevista"}</p>
           </CardContent>
         </Card>
@@ -196,11 +196,11 @@ export default function ResponderEntrevistaPage() {
   // Etapa de verificação do microfone
   if (etapaPreparacao === "verificacao-microfone") {
     return (
-      <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-primary/10 py-8 px-4">
+      <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-primary/10 py-10 sm:py-12 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
+          <div className="text-center mb-10">
             <h1 className="text-2xl sm:text-3xl font-bold">{entrevista.titulo}</h1>
-            <p className="text-muted-foreground mt-2">Vamos verificar se está tudo pronto</p>
+            <p className="text-muted-foreground mt-3">Vamos verificar se está tudo pronto</p>
           </div>
           <VerificacaoMicrofone
             onMicrofoneVerificado={() => setEtapaPreparacao("tutorial")}
@@ -213,11 +213,11 @@ export default function ResponderEntrevistaPage() {
   // Etapa do tutorial
   if (etapaPreparacao === "tutorial") {
     return (
-      <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-primary/10 py-8 px-4">
+      <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-primary/10 py-10 sm:py-12 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
+          <div className="text-center mb-10">
             <h1 className="text-2xl sm:text-3xl font-bold">{entrevista.titulo}</h1>
-            <p className="text-muted-foreground mt-2">Veja como funciona antes de começar</p>
+            <p className="text-muted-foreground mt-3">Veja como funciona antes de começar</p>
           </div>
           <TutorialEntrevista
             onTutorialCompleto={() => setEtapaPreparacao("entrevista")}
@@ -229,26 +229,26 @@ export default function ResponderEntrevistaPage() {
 
   if (fase === "concluida") {
     return (
-      <div className="min-h-screen bg-linear-to-br from-green-50 to-primary/10 dark:from-green-950/20 dark:to-primary/5 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-linear-to-br from-green-50 to-primary/10 dark:from-green-950/20 dark:to-primary/5 flex items-center justify-center p-4 sm:p-6">
         <Card className="max-w-md w-full text-center">
-          <CardContent className="pt-8 pb-8">
-            <div className="relative mx-auto w-20 h-20 mb-6">
+          <CardContent className="pt-10 pb-10 px-6">
+            <div className="relative mx-auto w-20 h-20 mb-7">
               <div className="absolute inset-0 rounded-full bg-green-500/20 animate-ping" />
               <div className="relative w-full h-full rounded-full bg-green-500/10 flex items-center justify-center">
                 <CheckCircle2 className="h-10 w-10 text-green-500" />
               </div>
             </div>
-            <div className="flex items-center justify-center gap-2 mb-4">
+            <div className="flex items-center justify-center gap-2 mb-5">
               <Sparkles className="h-5 w-5 text-yellow-500" />
               <h1 className="text-2xl sm:text-3xl font-bold">
                 Pronto!
               </h1>
               <PartyPopper className="h-5 w-5 text-yellow-500" />
             </div>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-muted-foreground mb-7">
               Suas respostas foram enviadas. Obrigado por participar!
             </p>
-            <div className="bg-muted/50 rounded-lg p-4">
+            <div className="bg-muted/50 rounded-xl p-5">
               <p className="text-sm text-muted-foreground">
                 A empresa vai analisar suas respostas e entrará em contato em breve.
               </p>
@@ -265,12 +265,12 @@ export default function ResponderEntrevistaPage() {
   const tempoMaximoResposta = perguntaAtual.tempoMaximo || entrevista.tempoResposta || 180;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-primary/10 py-6 sm:py-8 px-4">
-      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+    <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-primary/10 py-8 sm:py-10 px-4 sm:px-6">
+      <div className="max-w-4xl mx-auto space-y-5 sm:space-y-6">
         {/* Progresso */}
         <Card>
-          <CardContent className="pt-4 pb-4">
-            <div className="flex justify-between items-center mb-3">
+          <CardContent className="py-5 px-5 sm:px-6">
+            <div className="flex justify-between items-center mb-4">
               <span className="text-sm font-medium text-muted-foreground">
                 Pergunta {perguntaAtualIndex + 1} de {totalPerguntas}
               </span>
@@ -278,21 +278,21 @@ export default function ResponderEntrevistaPage() {
                 {Math.round(progresso)}%
               </span>
             </div>
-            <Progress value={progresso} className="h-2" />
+            <Progress value={progresso} className="h-2.5" />
           </CardContent>
         </Card>
 
         {/* Pergunta */}
         <Card>
-          <CardHeader className="pb-4">
+          <CardHeader className="pb-5 pt-6 px-5 sm:px-6">
             <CardTitle className="text-xl sm:text-2xl leading-relaxed">
               {perguntaAtual.texto}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-5 sm:px-6 pb-6">
             {fase === "reflexao" && (
-              <div className="text-center py-8 sm:py-12">
-                <div className="relative mx-auto w-24 h-24 sm:w-28 sm:h-28 mb-6">
+              <div className="text-center py-10 sm:py-14">
+                <div className="relative mx-auto w-24 h-24 sm:w-28 sm:h-28 mb-7">
                   <svg className="w-full h-full transform -rotate-90">
                     <circle
                       cx="50%"
@@ -328,12 +328,12 @@ export default function ResponderEntrevistaPage() {
             )}
 
             {fase === "resposta" && (
-              <div className="py-6 sm:py-8">
+              <div className="py-8 sm:py-10">
                 <GravadorAudio
                   onTranscricaoCompleta={handleTranscricaoCompleta}
                   tempoMaximo={tempoMaximoResposta}
                 />
-                <div className="text-center mt-6">
+                <div className="text-center mt-7">
                   <p className="text-sm text-muted-foreground">
                     Tempo máximo: {Math.floor(tempoMaximoResposta / 60)}:{(tempoMaximoResposta % 60)
                       .toString()
@@ -344,8 +344,8 @@ export default function ResponderEntrevistaPage() {
             )}
 
             {fase === "processando" && (
-              <div className="text-center py-8 sm:py-12">
-                <div className="relative mx-auto w-20 h-20 mb-6">
+              <div className="text-center py-10 sm:py-14">
+                <div className="relative mx-auto w-20 h-20 mb-7">
                   <Loader2 className="h-20 w-20 text-primary animate-spin" />
                 </div>
                 <p className="text-muted-foreground font-medium">
@@ -361,14 +361,14 @@ export default function ResponderEntrevistaPage() {
 
         {/* Informações */}
         <Card className="bg-muted/30">
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-start gap-3">
+          <CardContent className="py-5 px-5 sm:px-6">
+            <div className="flex items-start gap-4">
               <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div>
-                <h3 className="font-semibold mb-2">
+                <h3 className="font-semibold mb-3">
                   Como funciona
                 </h3>
-                <ul className="text-sm text-muted-foreground space-y-1.5">
+                <ul className="text-sm text-muted-foreground space-y-2">
                   <li>• Você tem 45 segundos para pensar antes de cada pergunta</li>
                   <li>• Depois, pode gravar sua resposta em áudio (até 3 min)</li>
                   <li>• Se quiser, pode pular o tempo de reflexão e responder direto</li>
