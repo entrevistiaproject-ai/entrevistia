@@ -13,9 +13,11 @@ import {
   User,
   HelpCircle,
   LogOut,
+  MessageSquare,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { signOut } from "next-auth/react";
+import { SupportWidget } from "@/components/support/support-widget";
 
 const mainMenuItems = [
   {
@@ -161,6 +163,18 @@ export function Sidebar() {
             })}
           </div>
         </nav>
+
+        {/* Suporte */}
+        <div className="px-4 pb-4">
+          <SupportWidget
+            trigger={
+              <button className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-200">
+                <MessageSquare className="h-5 w-5 shrink-0" />
+                <span className="truncate">Ajuda e Suporte</span>
+              </button>
+            }
+          />
+        </div>
 
         {/* User Info */}
         <div className="border-t border-border p-5">

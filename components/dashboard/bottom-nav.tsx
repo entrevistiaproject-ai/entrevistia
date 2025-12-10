@@ -12,6 +12,7 @@ import {
   User,
   DollarSign,
   PlusCircle,
+  MessageSquare,
 } from "lucide-react";
 import { useState } from "react";
 import {
@@ -21,6 +22,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { SupportWidget } from "@/components/support/support-widget";
 
 const navItems = [
   {
@@ -159,6 +161,25 @@ export function BottomNav() {
                   </Link>
                 );
               })}
+
+              {/* Botão de Suporte */}
+              <SupportWidget
+                trigger={
+                  <button
+                    className="w-full flex items-center gap-4 rounded-xl p-4 transition-all duration-200 active:scale-[0.98] hover:bg-accent active:bg-accent"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted transition-colors">
+                      <MessageSquare className="h-6 w-6" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <p className="font-medium">Ajuda e Suporte</p>
+                      <p className="text-sm text-muted-foreground">
+                        Abrir um chamado de suporte
+                      </p>
+                    </div>
+                  </button>
+                }
+              />
             </div>
           </SheetContent>
         </Sheet>

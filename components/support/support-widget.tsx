@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -95,6 +95,25 @@ export function SupportWidget({
   const [categoria, setCategoria] = useState(categoriaInicial || "usuario");
   const [email, setEmail] = useState(user?.email || "");
   const [nome, setNome] = useState(user?.name || "");
+  const [userLoaded, setUserLoaded] = useState(!!user?.email);
+
+  // Buscar dados do usuário automaticamente se não foram passados via props
+  useEffect(() => {
+    if (!user?.email && !userLoaded) {
+      fetch("/api/user")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.email) {
+            setEmail(data.email);
+            setNome(data.nome || "");
+            setUserLoaded(true);
+          }
+        })
+        .catch(() => {
+          // Ignora erro - usuário pode não estar logado
+        });
+    }
+  }, [user?.email, userLoaded]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,8 +130,8 @@ export function SupportWidget({
           categoria,
           origem,
           pageUrl: pageUrl || window.location.href,
-          email: user?.email || email,
-          nome: user?.name || nome,
+          email: email,
+          nome: nome,
           errorMessage: errorInfo?.message,
           errorStack: errorInfo?.stack,
           errorContext: errorInfo?.digest ? { digest: errorInfo.digest } : undefined,
@@ -209,7 +228,7 @@ export function SupportWidget({
 
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               {/* Email (se não logado) */}
-              {!user?.email && (
+              {!userLoaded && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="nome">Nome</Label>
