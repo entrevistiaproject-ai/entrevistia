@@ -94,19 +94,18 @@ export async function GET(request: Request) {
       );
     }
 
-    let entrevistaId: string | null = null;
+    let includeEntrevistas = false;
     try {
       const { searchParams } = new URL(request.url);
-      entrevistaId = searchParams.get("entrevistaId");
+      includeEntrevistas = searchParams.get("includeEntrevistas") === "true";
     } catch (error) {
-      // Se falhar ao criar URL (ex: durante build), continua com entrevistaId = null
       console.warn("Falha ao processar URL:", error);
     }
 
     const db = getDB();
 
     // Buscar candidatos do usuário
-    let query = db
+    const candidatosList = await db
       .select()
       .from(candidatos)
       .where(
@@ -117,9 +116,36 @@ export async function GET(request: Request) {
       )
       .orderBy(desc(candidatos.createdAt));
 
-    const resultado = await query;
+    // Se não precisa incluir entrevistas, retorna só os candidatos
+    if (!includeEntrevistas) {
+      return NextResponse.json(candidatosList);
+    }
 
-    return NextResponse.json(resultado);
+    // Buscar entrevistas de cada candidato
+    const candidatosComEntrevistas = await Promise.all(
+      candidatosList.map(async (candidato) => {
+        const entrevistasDoCandidato = await db
+          .select({
+            entrevistaId: candidatoEntrevistas.entrevistaId,
+            status: candidatoEntrevistas.status,
+            notaGeral: candidatoEntrevistas.notaGeral,
+            concluidaEm: candidatoEntrevistas.concluidaEm,
+            entrevistaTitulo: entrevistas.titulo,
+            entrevistaCargo: entrevistas.cargo,
+          })
+          .from(candidatoEntrevistas)
+          .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
+          .where(eq(candidatoEntrevistas.candidatoId, candidato.id))
+          .orderBy(desc(candidatoEntrevistas.createdAt));
+
+        return {
+          ...candidato,
+          entrevistas: entrevistasDoCandidato,
+        };
+      })
+    );
+
+    return NextResponse.json(candidatosComEntrevistas);
   } catch (error) {
     console.error("Erro ao buscar candidatos:", error);
     return NextResponse.json(

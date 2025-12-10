@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -179,6 +179,7 @@ function calcularMediasPorCategoria(competencias: Competencia[]) {
 export default function ResultadoCandidatoPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
@@ -188,6 +189,8 @@ export default function ResultadoCandidatoPage() {
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>("todas");
 
   const candidatoId = params.id as string;
+  // Pega entrevistaId da query string (se vier da página do candidato)
+  const entrevistaIdParam = searchParams.get('entrevistaId');
 
   // Busca dados do candidato, participação e respostas
   const fetchData = async () => {
@@ -198,12 +201,15 @@ export default function ResultadoCandidatoPage() {
       const candidatoRes = await fetch(`/api/candidatos/${candidatoId}`);
       if (!candidatoRes.ok) throw new Error('Erro ao buscar candidato');
       const candidatoData = await candidatoRes.json();
-      setCandidato(candidatoData);
+
+      // Usa o entrevistaId da query string se disponível, senão usa o do candidato
+      const entrevistaId = entrevistaIdParam || candidatoData.entrevistaId;
+      setCandidato({ ...candidatoData, entrevistaId });
 
       // Busca respostas se tiver entrevistaId
-      if (candidatoData.entrevistaId) {
+      if (entrevistaId) {
         const respostasRes = await fetch(
-          `/api/candidatos/${candidatoId}/respostas?entrevistaId=${candidatoData.entrevistaId}`
+          `/api/candidatos/${candidatoId}/respostas?entrevistaId=${entrevistaId}`
         );
         if (respostasRes.ok) {
           const respostasData = await respostasRes.json();
@@ -225,7 +231,7 @@ export default function ResultadoCandidatoPage() {
 
   useEffect(() => {
     fetchData();
-  }, [candidatoId]);
+  }, [candidatoId, entrevistaIdParam]);
 
   // Inicia análise com IA
   const handleAnalisar = async () => {
