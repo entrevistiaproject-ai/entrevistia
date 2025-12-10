@@ -38,7 +38,7 @@ export const candidatoEntrevistas = pgTable("candidato_entrevistas", {
   podeRefazer: boolean("pode_refazer").default(false).notNull(),
 
   // Avaliação da IA
-  notaGeral: real("nota_geral"), // Nota geral de 0 a 100
+  notaGeral: real("nota_geral"), // Nota geral de 0 a 10
   compatibilidadeVaga: real("compatibilidade_vaga"), // Compatibilidade com a vaga de 0 a 100
   recomendacao: text("recomendacao"), // 'recomendado', 'recomendado_com_ressalvas', 'nao_recomendado'
   resumoGeral: text("resumo_geral"), // Resumo executivo da avaliação
