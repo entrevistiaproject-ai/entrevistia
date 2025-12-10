@@ -588,22 +588,28 @@ export default function UsuariosPage() {
                         Inativo
                       </Badge>
                     )}
-                    {usuario.isTeste && (
-                      <Badge variant="outline" className="text-amber-400 border-amber-500/30 text-xs">
-                        Teste
-                      </Badge>
-                    )}
                   </div>
-                  <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-700/50">
-                    <div className="text-xs text-slate-400">
-                      Recebido: <span className="text-emerald-400 font-medium">R$ {(usuario.totalRecebido || 0).toFixed(2)}</span>
-                    </div>
-                    {usuario.totalDevido > 0 && (
+                  {usuario.planType === "free_trial" ? (
+                    <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-700/50">
                       <div className="text-xs text-slate-400">
-                        Devido: <span className="text-amber-400 font-medium">R$ {(usuario.totalDevido || 0).toFixed(2)}</span>
+                        Usado: <span className="text-white font-medium">R$ {(usuario.gastoTotal || 0).toFixed(2)}</span>
                       </div>
-                    )}
-                  </div>
+                      <div className="text-xs text-slate-400">
+                        Saldo: <span className={cn("font-medium", usuario.saldoRestante > 0 ? "text-emerald-400" : "text-red-400")}>R$ {(usuario.saldoRestante || 0).toFixed(2)}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-700/50">
+                      <div className="text-xs text-slate-400">
+                        Recebido: <span className="text-emerald-400 font-medium">R$ {(usuario.totalRecebido || 0).toFixed(2)}</span>
+                      </div>
+                      {usuario.totalDevido > 0 && (
+                        <div className="text-xs text-slate-400">
+                          Devido: <span className="text-amber-400 font-medium">R$ {(usuario.totalDevido || 0).toFixed(2)}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -640,12 +646,12 @@ export default function UsuariosPage() {
                 </th>
                 <th className="px-4 py-3 text-left hidden xl:table-cell">
                   <span className="text-xs font-semibold uppercase text-slate-400">
-                    Pagamento
+                    Uso/Pgto
                   </span>
                 </th>
                 <th className="px-4 py-3 text-right hidden lg:table-cell">
                   <span className="text-xs font-semibold uppercase text-slate-400">
-                    Devido
+                    Saldo/Devido
                   </span>
                 </th>
                 <th className="px-4 py-3 text-right">
@@ -701,24 +707,17 @@ export default function UsuariosPage() {
 
                   {/* Status */}
                   <td className="px-4 py-4">
-                    <div className="flex flex-col gap-1">
-                      {usuario.isActive ? (
-                        <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 w-fit">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Ativo
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-red-500/20 text-red-400 border-red-500/30 w-fit">
-                          <XCircle className="h-3 w-3 mr-1" />
-                          Inativo
-                        </Badge>
-                      )}
-                      {usuario.isTeste && (
-                        <Badge variant="outline" className="text-amber-400 border-amber-500/30 w-fit text-xs">
-                          Teste
-                        </Badge>
-                      )}
-                    </div>
+                    {usuario.isActive ? (
+                      <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 w-fit">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Ativo
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-red-500/20 text-red-400 border-red-500/30 w-fit">
+                        <XCircle className="h-3 w-3 mr-1" />
+                        Inativo
+                      </Badge>
+                    )}
                   </td>
 
                   {/* Plano */}
@@ -726,16 +725,33 @@ export default function UsuariosPage() {
                     {getPlanBadge(usuario.planType)}
                   </td>
 
-                  {/* Pagamento */}
+                  {/* Saldo/Financeiro - muda baseado no tipo de plano */}
                   <td className="px-4 py-4 hidden xl:table-cell">
-                    {getPaymentStatus(usuario)}
+                    {usuario.planType === "free_trial" ? (
+                      <div className="text-sm">
+                        <p className="text-slate-400">
+                          Usado: <span className="text-white">R$ {(usuario.gastoTotal || 0).toFixed(2)}</span>
+                        </p>
+                        <p className="text-slate-400">
+                          Limite: <span className="text-slate-300">R$ {(usuario.limiteTotal || 0).toFixed(2)}</span>
+                        </p>
+                      </div>
+                    ) : (
+                      getPaymentStatus(usuario)
+                    )}
                   </td>
 
-                  {/* Total Devido */}
+                  {/* Saldo/Devido */}
                   <td className="px-4 py-4 text-right hidden lg:table-cell">
-                    <p className="text-sm text-amber-400">
-                      R$ {(usuario.totalDevido || 0).toFixed(2)}
-                    </p>
+                    {usuario.planType === "free_trial" ? (
+                      <p className={cn("text-sm font-medium", usuario.saldoRestante > 0 ? "text-emerald-400" : "text-red-400")}>
+                        R$ {(usuario.saldoRestante || 0).toFixed(2)}
+                      </p>
+                    ) : (
+                      <p className="text-sm text-amber-400">
+                        R$ {(usuario.totalDevido || 0).toFixed(2)}
+                      </p>
+                    )}
                   </td>
 
                   {/* Total Recebido */}
