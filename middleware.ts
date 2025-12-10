@@ -13,11 +13,31 @@ export function middleware(request: NextRequest) {
     "/privacidade",
     "/verificar-email",
     "/auth-error",
+    "/admin-login",
   ];
+
+  // Verifica se é rota do painel admin
+  const isAdminRoute = pathname.startsWith("/admin") && !pathname.startsWith("/admin-login");
+  const isAdminApiRoute = pathname.startsWith("/api/admin") && !pathname.startsWith("/api/admin/auth");
+
+  // Trata rotas do admin separadamente
+  if (isAdminRoute || isAdminApiRoute) {
+    const adminSession = request.cookies.get("admin-session");
+
+    if (!adminSession) {
+      if (isAdminApiRoute) {
+        return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      }
+      return NextResponse.redirect(new URL("/admin-login", request.url));
+    }
+
+    return NextResponse.next();
+  }
 
   const isPublicRoute =
     publicRoutes.includes(pathname) ||
-    pathname.startsWith("/api/auth");
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/admin/auth");
 
   // Se for rota pública, permite acesso
   if (isPublicRoute) {

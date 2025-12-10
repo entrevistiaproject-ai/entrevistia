@@ -9,6 +9,7 @@ export * from "./audit-logs";
 export * from "./verification-codes";
 export * from "./transacoes";
 export * from "./candidato-entrevistas";
+export * from "./admin-users";
 
 // Export schema for Drizzle migrations
 import { users } from "./users";
@@ -21,6 +22,7 @@ import { auditLogs } from "./audit-logs";
 import { verificationCodes } from "./verification-codes";
 import { faturas, transacoes } from "./transacoes";
 import { candidatoEntrevistas } from "./candidato-entrevistas";
+import { adminUsers } from "./admin-users";
 
 export const schema = {
   users,
@@ -35,4 +37,5 @@ export const schema = {
   faturas,
   transacoes,
   candidatoEntrevistas,
+  adminUsers,
 };
