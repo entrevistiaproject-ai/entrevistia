@@ -43,6 +43,13 @@
       "when": 1765245802274,
       "tag": "0005_sloppy_sebastian_shaw",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1765500000000,
+      "tag": "0006_add_is_test_account",
+      "breakpoints": true
     }
   ]
 }
