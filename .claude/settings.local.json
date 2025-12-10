@@ -48,7 +48,9 @@
       "Bash(node scripts/verificar-consistencia-perguntas.js:*)",
       "Bash(node scripts/verificar-consistencia-final.js:*)",
       "Bash(find:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(node scripts/migrate-billing-data.js:*)",
+      "Bash(echo:*)"
     ],
     "deny": [],
     "ask": []
