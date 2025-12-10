@@ -20,11 +20,11 @@ export function EntrevistasEmptyState() {
             {/* Título e descrição */}
             <div className="space-y-3">
               <h2 className="text-2xl font-bold tracking-tight">
-                Nenhuma entrevista criada ainda
+                Crie sua primeira entrevista
               </h2>
               <p className="text-muted-foreground max-w-md">
-                Comece sua jornada de recrutamento criando sua primeira entrevista.
-                Configure perguntas personalizadas e encontre os melhores talentos.
+                Em poucos minutos você terá uma entrevista pronta para enviar aos candidatos.
+                A IA cuida da análise, você foca nas decisões.
               </p>
             </div>
 
@@ -32,18 +32,18 @@ export function EntrevistasEmptyState() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mt-4">
               <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
                 <Sparkles className="h-5 w-5 text-blue-600 mb-2" />
-                <p className="text-sm font-medium">IA Avançada</p>
-                <p className="text-xs text-muted-foreground">Análise automática</p>
+                <p className="text-sm font-medium">Análise automática</p>
+                <p className="text-xs text-muted-foreground">IA avalia cada resposta</p>
               </div>
               <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
                 <Briefcase className="h-5 w-5 text-blue-600 mb-2" />
-                <p className="text-sm font-medium">Personalizável</p>
-                <p className="text-xs text-muted-foreground">Perguntas sob medida</p>
+                <p className="text-sm font-medium">Perguntas prontas</p>
+                <p className="text-xs text-muted-foreground">Use nosso banco ou crie</p>
               </div>
               <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
                 <ArrowRight className="h-5 w-5 text-blue-600 mb-2" />
-                <p className="text-sm font-medium">Rápido</p>
-                <p className="text-xs text-muted-foreground">Resultados em minutos</p>
+                <p className="text-sm font-medium">Resultados rápidos</p>
+                <p className="text-xs text-muted-foreground">Veja tudo em minutos</p>
               </div>
             </div>
 
@@ -51,18 +51,18 @@ export function EntrevistasEmptyState() {
             <Button asChild size="lg" className="mt-4">
               <Link href="/criar-entrevista">
                 <Plus className="mr-2 h-5 w-5" />
-                Criar Primeira Entrevista
+                Criar minha primeira entrevista
               </Link>
             </Button>
 
             {/* Link secundário */}
             <p className="text-sm text-muted-foreground">
-              Ou{" "}
+              Quer ver as perguntas antes?{" "}
               <Link
                 href="/perguntas"
                 className="text-blue-600 hover:underline font-medium"
               >
-                explore nosso banco de perguntas
+                Explore o banco de perguntas
               </Link>
             </p>
           </div>

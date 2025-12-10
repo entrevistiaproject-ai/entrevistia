@@ -58,13 +58,13 @@ export default async function PerguntasPage() {
     <div className="space-y-6">
       {/* Header */}
       <PageHeader
-        title="Banco de Perguntas"
-        description="Gerencie suas perguntas e monte pacotes para cada vaga"
+        title="Perguntas"
+        description="Seu banco de perguntas para usar nas entrevistas"
       >
         <Button asChild size="touch" className="w-full sm:w-auto">
           <Link href="/perguntas/nova">
             <PlusCircle className="h-4 w-4" />
-            Nova Pergunta
+            Criar pergunta
           </Link>
         </Button>
       </PageHeader>
@@ -79,7 +79,7 @@ export default async function PerguntasPage() {
               </div>
             </div>
             <div className="text-2xl font-bold">{perguntasVisiveis.length}</div>
-            <p className="text-xs sm:text-sm text-muted-foreground">Perguntas Visíveis</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Disponíveis</p>
           </div>
           <div className="rounded-lg border bg-card p-4 sm:p-6 min-w-[130px] sm:min-w-0 shrink-0">
             <div className="flex items-center gap-3 mb-2">
@@ -90,7 +90,7 @@ export default async function PerguntasPage() {
             <div className="text-2xl font-bold">
               {perguntasVisiveis.filter(p => p.isPadrao).length}
             </div>
-            <p className="text-xs sm:text-sm text-muted-foreground">Perguntas Padrão</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Do sistema</p>
           </div>
           <div className="rounded-lg border bg-card p-4 sm:p-6 min-w-[130px] sm:min-w-0 shrink-0">
             <div className="flex items-center gap-3 mb-2">
@@ -101,7 +101,7 @@ export default async function PerguntasPage() {
             <div className="text-2xl font-bold">
               {perguntasVisiveis.filter(p => !p.isPadrao).length}
             </div>
-            <p className="text-xs sm:text-sm text-muted-foreground">Minhas Perguntas</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Criadas por você</p>
           </div>
           <div className="rounded-lg border bg-card p-4 sm:p-6 min-w-[130px] sm:min-w-0 shrink-0">
             <div className="flex items-center gap-3 mb-2">
@@ -110,7 +110,7 @@ export default async function PerguntasPage() {
               </div>
             </div>
             <div className="text-2xl font-bold">{cargosUnicos.size}</div>
-            <p className="text-xs sm:text-sm text-muted-foreground">Cargos Cobertos</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Cargos cobertos</p>
           </div>
         </div>
       </div>

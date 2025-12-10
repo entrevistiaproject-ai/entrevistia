@@ -147,12 +147,12 @@ export default function CadastroPage() {
             <div className="flex items-center justify-center gap-2 mb-2">
               <Sparkles className="h-5 w-5 text-yellow-500" />
               <h2 className="text-2xl font-bold">
-                Cadastro realizado!
+                Conta criada!
               </h2>
               <Sparkles className="h-5 w-5 text-yellow-500" />
             </div>
             <p className="text-muted-foreground mb-6">
-              Verifique seu email para confirmar sua conta...
+              Enviamos um código de verificação para seu email...
             </p>
             <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" />
           </CardContent>
@@ -211,9 +211,9 @@ export default function CadastroPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 mx-auto">
               <LogoIcon className="w-10 h-10" />
             </div>
-            <CardTitle className="text-2xl sm:text-3xl">Criar conta</CardTitle>
+            <CardTitle className="text-2xl sm:text-3xl">Crie sua conta gratuita</CardTitle>
             <CardDescription>
-              Comece a automatizar suas entrevistas hoje
+              Ganhe R$ 50 em créditos para testar. Sem cartão de crédito.
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-4">
@@ -233,7 +233,7 @@ export default function CadastroPage() {
                 <div className="space-y-2">
                   <Label htmlFor="nome" className="flex items-center gap-2">
                     <User className="w-4 h-4 text-muted-foreground" />
-                    Nome completo *
+                    Seu nome completo
                   </Label>
                   <Input
                     id="nome"
@@ -254,7 +254,7 @@ export default function CadastroPage() {
                 <div className="space-y-2">
                   <Label htmlFor="email" className="flex items-center gap-2">
                     <Mail className="w-4 h-4 text-muted-foreground" />
-                    Email corporativo *
+                    Seu email de trabalho
                   </Label>
                   <Input
                     id="email"
@@ -275,7 +275,7 @@ export default function CadastroPage() {
                 <div className="space-y-2">
                   <Label htmlFor="telefone" className="flex items-center gap-2">
                     <Phone className="w-4 h-4 text-muted-foreground" />
-                    Telefone
+                    WhatsApp ou telefone
                   </Label>
                   <Input
                     id="telefone"
@@ -296,7 +296,7 @@ export default function CadastroPage() {
                 <div className="space-y-2">
                   <Label htmlFor="empresa" className="flex items-center gap-2">
                     <Building2 className="w-4 h-4 text-muted-foreground" />
-                    Empresa
+                    Nome da sua empresa
                   </Label>
                   <Input
                     id="empresa"
@@ -317,13 +317,13 @@ export default function CadastroPage() {
                 <div className="space-y-2">
                   <Label htmlFor="cargo" className="flex items-center gap-2">
                     <Briefcase className="w-4 h-4 text-muted-foreground" />
-                    Cargo
+                    Seu cargo
                   </Label>
                   <Input
                     id="cargo"
                     name="cargo"
                     type="text"
-                    placeholder="Ex: Gerente de RH"
+                    placeholder="Ex: Analista de RH, Recrutador"
                     value={formData.cargo}
                     onChange={handleChange}
                     error={!!errors.cargo}
@@ -338,7 +338,7 @@ export default function CadastroPage() {
                 <div className="space-y-2">
                   <Label htmlFor="senha" className="flex items-center gap-2">
                     <Lock className="w-4 h-4 text-muted-foreground" />
-                    Senha *
+                    Crie uma senha
                   </Label>
                   <div className="relative">
                     <Input
@@ -370,14 +370,14 @@ export default function CadastroPage() {
                 <div className="space-y-2">
                   <Label htmlFor="confirmarSenha" className="flex items-center gap-2">
                     <Lock className="w-4 h-4 text-muted-foreground" />
-                    Confirmar senha *
+                    Confirme a senha
                   </Label>
                   <div className="relative">
                     <Input
                       id="confirmarSenha"
                       name="confirmarSenha"
                       type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Repita a senha"
+                      placeholder="Digite novamente"
                       value={formData.confirmarSenha}
                       onChange={handleChange}
                       error={!!errors.confirmarSenha}
@@ -411,11 +411,10 @@ export default function CadastroPage() {
                     disabled={isLoading}
                   />
                   <label htmlFor="aceitouTermos" className="text-sm leading-relaxed cursor-pointer">
-                    Li e aceito os{" "}
+                    Concordo com os{" "}
                     <Link href="/termos" className="text-primary hover:underline" target="_blank">
                       Termos de Uso
-                    </Link>{" "}
-                    *
+                    </Link>
                   </label>
                 </div>
                 {errors.aceitouTermos && (
@@ -432,11 +431,10 @@ export default function CadastroPage() {
                     disabled={isLoading}
                   />
                   <label htmlFor="aceitouPrivacidade" className="text-sm leading-relaxed cursor-pointer">
-                    Li e aceito a{" "}
+                    Concordo com a{" "}
                     <Link href="/privacidade" className="text-primary hover:underline" target="_blank">
                       Política de Privacidade
-                    </Link>{" "}
-                    *
+                    </Link>
                   </label>
                 </div>
                 {errors.aceitouPrivacidade && (
@@ -453,7 +451,7 @@ export default function CadastroPage() {
                     disabled={isLoading}
                   />
                   <label htmlFor="aceitaEmailMarketing" className="text-sm leading-relaxed cursor-pointer text-muted-foreground">
-                    Aceito receber novidades e promoções por email (opcional)
+                    Quero receber dicas e novidades sobre recrutamento
                   </label>
                 </div>
               </div>
@@ -471,7 +469,7 @@ export default function CadastroPage() {
                     Criando conta...
                   </>
                 ) : (
-                  "Criar minha conta"
+                  "Criar conta gratuita"
                 )}
               </Button>
             </form>
@@ -492,20 +490,20 @@ export default function CadastroPage() {
             {/* Benefícios */}
             <div className="mt-8 pt-6 border-t">
               <p className="text-sm text-muted-foreground text-center mb-4">
-                Ao criar sua conta você terá acesso a:
+                O que você ganha ao criar sua conta:
               </p>
               <div className="grid grid-cols-3 gap-3 text-center">
                 <Card className="p-3 sm:p-4">
+                  <p className="text-xl sm:text-2xl font-bold text-primary">R$ 50</p>
+                  <p className="text-xs text-muted-foreground">Em créditos grátis</p>
+                </Card>
+                <Card className="p-3 sm:p-4">
                   <p className="text-xl sm:text-2xl font-bold text-primary">∞</p>
-                  <p className="text-xs text-muted-foreground">Entrevistas ilimitadas</p>
+                  <p className="text-xs text-muted-foreground">Vagas ilimitadas</p>
                 </Card>
                 <Card className="p-3 sm:p-4">
-                  <p className="text-xl sm:text-2xl font-bold text-primary">90%</p>
-                  <p className="text-xs text-muted-foreground">Redução de tempo</p>
-                </Card>
-                <Card className="p-3 sm:p-4">
-                  <p className="text-xl sm:text-2xl font-bold text-primary">24/7</p>
-                  <p className="text-xs text-muted-foreground">Disponibilidade</p>
+                  <p className="text-xl sm:text-2xl font-bold text-primary">IA</p>
+                  <p className="text-xs text-muted-foreground">Análise automática</p>
                 </Card>
               </div>
             </div>

@@ -107,10 +107,10 @@ function VerificarEmailContent() {
         <Card className="w-full max-w-md p-8 text-center">
           <CheckCircle2 className="w-16 h-16 text-green-600 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Email verificado com sucesso!
+            Tudo certo!
           </h2>
           <p className="text-gray-600 mb-4">
-            Redirecionando para o login...
+            Seu email foi confirmado. Entrando na sua conta...
           </p>
           <Loader2 className="w-6 h-6 animate-spin text-blue-600 mx-auto" />
         </Card>
@@ -169,9 +169,9 @@ function VerificarEmailContent() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
               <Mail className="w-8 h-8 text-blue-600" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Verificar email</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Confirme seu email</h1>
             <p className="text-gray-600 mt-2">
-              Enviamos um código de 6 dígitos para
+              Enviamos um código de 6 dígitos para:
             </p>
             <p className="text-blue-600 font-semibold mt-1">{email}</p>
           </div>
@@ -181,7 +181,7 @@ function VerificarEmailContent() {
             <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
               <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-green-600">
-                Código reenviado com sucesso! Verifique sua caixa de entrada.
+                Pronto! Enviamos um novo código para seu email.
               </p>
             </div>
           )}
@@ -218,7 +218,7 @@ function VerificarEmailContent() {
                 autoFocus
               />
               <p className="text-xs text-gray-500 text-center">
-                Digite o código de 6 dígitos recebido por email
+                O código tem 6 números e está no email que enviamos
               </p>
             </div>
 
@@ -234,7 +234,7 @@ function VerificarEmailContent() {
                   Verificando...
                 </>
               ) : (
-                "Verificar código"
+                "Confirmar"
               )}
             </Button>
           </form>
@@ -242,7 +242,7 @@ function VerificarEmailContent() {
           {/* Reenviar código */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600 mb-2">
-              Não recebeu o código?
+              Não chegou?
             </p>
             <Button
               type="button"
@@ -254,10 +254,10 @@ function VerificarEmailContent() {
               {isResending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Reenviando...
+                  Enviando...
                 </>
               ) : (
-                "Reenviar código"
+                "Enviar novo código"
               )}
             </Button>
           </div>
@@ -265,7 +265,7 @@ function VerificarEmailContent() {
           {/* Footer */}
           <div className="mt-8 pt-6 border-t border-gray-200 text-center">
             <p className="text-sm text-gray-600">
-              Email incorreto?{" "}
+              Digitou o email errado?{" "}
               <Link
                 href="/cadastro"
                 className="text-blue-600 hover:underline font-semibold"
@@ -279,7 +279,7 @@ function VerificarEmailContent() {
         {/* Dica */}
         <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
           <p className="text-sm text-gray-600 text-center">
-            <strong>Dica:</strong> Verifique também a pasta de spam ou lixo eletrônico
+            <strong>Dica:</strong> Olhe também na pasta de spam ou lixo eletrônico
           </p>
         </div>
       </div>

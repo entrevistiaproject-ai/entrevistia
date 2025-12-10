@@ -176,14 +176,14 @@ Maria Santos,maria@example.com`;
       <DialogTrigger asChild>
         <Button variant="outline">
           <Upload className="mr-2 h-4 w-4" />
-          Upload em Lote
+          Importar lista
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Upload de Candidatos em Lote</DialogTitle>
+          <DialogTitle>Importar candidatos em lote</DialogTitle>
           <DialogDescription>
-            Importe múltiplos candidatos de uma vez através de um arquivo CSV
+            Envie um arquivo CSV com nome e email. Todos receberão o convite automaticamente.
           </DialogDescription>
         </DialogHeader>
 
@@ -193,9 +193,9 @@ Maria Santos,maria@example.com`;
             <div className="flex items-center gap-3">
               <FileSpreadsheet className="h-8 w-8 text-blue-600" />
               <div>
-                <p className="font-medium">Arquivo modelo</p>
+                <p className="font-medium">Precisa de um modelo?</p>
                 <p className="text-sm text-muted-foreground">
-                  Baixe o modelo CSV com as colunas corretas
+                  Baixe o CSV de exemplo com as colunas certas
                 </p>
               </div>
             </div>
@@ -205,7 +205,7 @@ Maria Santos,maria@example.com`;
               onClick={handleDownloadModelo}
             >
               <Download className="mr-2 h-4 w-4" />
-              Baixar Modelo
+              Baixar modelo
             </Button>
           </div>
 
@@ -225,7 +225,7 @@ Maria Santos,maria@example.com`;
               onClick={() => inputRef.current?.click()}
             >
               <Upload className="mr-2 h-4 w-4" />
-              {arquivo ? arquivo.name : "Selecionar Arquivo CSV"}
+              {arquivo ? arquivo.name : "Escolher arquivo CSV"}
             </Button>
           </div>
 
@@ -241,7 +241,7 @@ Maria Santos,maria@example.com`;
           {preview.length > 0 && (
             <div className="space-y-2">
               <p className="text-sm font-medium">
-                Preview ({preview.length} primeiros candidatos):
+                Prévia dos {preview.length} primeiros:
               </p>
               <div className="border rounded-lg overflow-hidden">
                 <table className="w-full text-sm">
@@ -284,7 +284,7 @@ Maria Santos,maria@example.com`;
             disabled={loading || !arquivo || preview.length === 0}
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Importar Candidatos
+            Importar e enviar convites
           </Button>
         </DialogFooter>
       </DialogContent>

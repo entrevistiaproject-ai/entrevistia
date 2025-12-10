@@ -171,7 +171,7 @@ export default function ResponderEntrevistaPage() {
       <div className="min-h-screen flex items-center justify-center bg-muted/30">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-10 w-10 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Carregando entrevista...</p>
+          <p className="text-sm text-muted-foreground">Preparando sua entrevista...</p>
         </div>
       </div>
     );
@@ -185,8 +185,8 @@ export default function ResponderEntrevistaPage() {
             <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
               <AlertCircle className="h-8 w-8 text-destructive" />
             </div>
-            <h1 className="text-2xl font-bold mb-2">Erro</h1>
-            <p className="text-muted-foreground">{erro || "Entrevista não encontrada"}</p>
+            <h1 className="text-2xl font-bold mb-2">Ops!</h1>
+            <p className="text-muted-foreground">{erro || "Não conseguimos encontrar essa entrevista"}</p>
           </CardContent>
         </Card>
       </div>
@@ -200,7 +200,7 @@ export default function ResponderEntrevistaPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold">{entrevista.titulo}</h1>
-            <p className="text-muted-foreground mt-2">Preparação para a entrevista</p>
+            <p className="text-muted-foreground mt-2">Vamos verificar se está tudo pronto</p>
           </div>
           <VerificacaoMicrofone
             onMicrofoneVerificado={() => setEtapaPreparacao("tutorial")}
@@ -217,7 +217,7 @@ export default function ResponderEntrevistaPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold">{entrevista.titulo}</h1>
-            <p className="text-muted-foreground mt-2">Tutorial de prática</p>
+            <p className="text-muted-foreground mt-2">Veja como funciona antes de começar</p>
           </div>
           <TutorialEntrevista
             onTutorialCompleto={() => setEtapaPreparacao("entrevista")}
@@ -241,16 +241,16 @@ export default function ResponderEntrevistaPage() {
             <div className="flex items-center justify-center gap-2 mb-4">
               <Sparkles className="h-5 w-5 text-yellow-500" />
               <h1 className="text-2xl sm:text-3xl font-bold">
-                Entrevista Concluída!
+                Pronto!
               </h1>
               <PartyPopper className="h-5 w-5 text-yellow-500" />
             </div>
             <p className="text-muted-foreground mb-6">
-              Obrigado por participar. Suas respostas foram registradas com sucesso.
+              Suas respostas foram enviadas. Obrigado por participar!
             </p>
             <div className="bg-muted/50 rounded-lg p-4">
               <p className="text-sm text-muted-foreground">
-                Em breve você receberá um retorno sobre o processo seletivo.
+                A empresa vai analisar suas respostas e entrará em contato em breve.
               </p>
             </div>
           </CardContent>
@@ -319,10 +319,10 @@ export default function ResponderEntrevistaPage() {
                   </div>
                 </div>
                 <p className="text-muted-foreground mb-8">
-                  Tempo para refletir sobre sua resposta
+                  Use esse tempo para pensar na sua resposta
                 </p>
                 <Button onClick={pularReflexao} size="touch" className="w-full sm:w-auto">
-                  Começar a Responder Agora
+                  Estou pronto, começar agora
                 </Button>
               </div>
             )}
@@ -349,10 +349,10 @@ export default function ResponderEntrevistaPage() {
                   <Loader2 className="h-20 w-20 text-primary animate-spin" />
                 </div>
                 <p className="text-muted-foreground font-medium">
-                  Processando sua resposta...
+                  Salvando sua resposta...
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Isso pode levar alguns segundos
+                  Só um momento
                 </p>
               </div>
             )}
@@ -366,13 +366,13 @@ export default function ResponderEntrevistaPage() {
               <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div>
                 <h3 className="font-semibold mb-2">
-                  Como funciona?
+                  Como funciona
                 </h3>
                 <ul className="text-sm text-muted-foreground space-y-1.5">
-                  <li>• Você terá 45 segundos para refletir sobre cada pergunta</li>
-                  <li>• Em seguida, terá até 3 minutos para gravar sua resposta em áudio</li>
-                  <li>• Você pode começar a gravar antes dos 45 segundos</li>
-                  <li>• Suas respostas serão automaticamente transcritas</li>
+                  <li>• Você tem 45 segundos para pensar antes de cada pergunta</li>
+                  <li>• Depois, pode gravar sua resposta em áudio (até 3 min)</li>
+                  <li>• Se quiser, pode pular o tempo de reflexão e responder direto</li>
+                  <li>• Suas respostas são transcritas automaticamente</li>
                 </ul>
               </div>
             </div>

@@ -25,15 +25,15 @@ export default function Error({
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
             <AlertTriangle className="h-8 w-8 text-destructive" />
           </div>
-          <CardTitle className="text-2xl">Algo deu errado</CardTitle>
+          <CardTitle className="text-2xl">Ops! Algo deu errado</CardTitle>
           <CardDescription className="text-base">
-            Ocorreu um erro inesperado. Não se preocupe, nossa equipe já foi notificada.
+            Tivemos um problema técnico. Tente novamente ou volte para o início.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {process.env.NODE_ENV === "development" && (
             <div className="rounded-lg bg-muted p-3 text-xs font-mono">
-              <p className="text-destructive font-semibold mb-1">Erro (dev only):</p>
+              <p className="text-destructive font-semibold mb-1">Detalhes (dev):</p>
               <p className="text-muted-foreground break-words">
                 {error.message || "Erro desconhecido"}
               </p>
@@ -48,12 +48,12 @@ export default function Error({
           <div className="flex flex-col gap-2">
             <Button onClick={reset} className="w-full">
               <RefreshCcw className="mr-2 h-4 w-4" />
-              Tentar Novamente
+              Tentar novamente
             </Button>
             <Button asChild variant="outline" className="w-full">
               <Link href="/">
                 <Home className="mr-2 h-4 w-4" />
-                Voltar para Início
+                Voltar ao início
               </Link>
             </Button>
           </div>

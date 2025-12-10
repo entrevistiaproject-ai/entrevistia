@@ -28,10 +28,10 @@ export function emailVerificacaoTemplate(params: {
           <tr>
             <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 40px 30px; text-align: center;">
               <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: 700;">
-                🎯 EntrevistIA
+                EntrevistIA
               </h1>
               <p style="margin: 10px 0 0 0; color: #e0e7ff; font-size: 16px;">
-                Verifique seu email
+                Confirme seu email para começar
               </p>
             </td>
           </tr>
@@ -40,15 +40,15 @@ export function emailVerificacaoTemplate(params: {
           <tr>
             <td style="padding: 40px 30px;">
               <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 24px; font-weight: 600;">
-                Olá, ${nome}! 👋
+                Olá, ${nome}!
               </h2>
 
               <p style="margin: 0 0 20px 0; color: #4b5563; font-size: 16px; line-height: 1.6;">
-                Obrigado por se cadastrar na <strong>EntrevistIA</strong>! Para concluir seu cadastro e começar a automatizar suas entrevistas, precisamos verificar seu email.
+                Bem-vindo(a) à <strong>EntrevistIA</strong>! Falta só um passo para você começar a entrevistar candidatos com IA.
               </p>
 
               <p style="margin: 0 0 30px 0; color: #4b5563; font-size: 16px; line-height: 1.6;">
-                Use o código abaixo para verificar sua conta:
+                Use este código para confirmar seu email:
               </p>
 
               <!-- Código de Verificação -->
@@ -67,14 +67,14 @@ export function emailVerificacaoTemplate(params: {
 
               <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 8px; margin: 0 0 30px 0;">
                 <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.5;">
-                  ⚠️ <strong>Atenção:</strong> Se você não se cadastrou na EntrevistIA, por favor ignore este email.
+                  Não foi você? Pode ignorar este email com segurança.
                 </p>
               </div>
 
               <!-- Informações adicionais -->
               <div style="background-color: #eff6ff; border-radius: 8px; padding: 20px; margin: 0 0 20px 0;">
                 <p style="margin: 0 0 10px 0; color: #1e40af; font-size: 14px; font-weight: 600;">
-                  📧 Email cadastrado:
+                  Conta criada para:
                 </p>
                 <p style="margin: 0; color: #3730a3; font-size: 14px;">
                   ${email}
@@ -82,12 +82,12 @@ export function emailVerificacaoTemplate(params: {
               </div>
 
               <p style="margin: 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
-                Após verificar seu email, você terá acesso completo à plataforma e poderá:
+                Depois de confirmar, você já pode:
               </p>
               <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #6b7280; font-size: 14px; line-height: 1.8;">
-                <li>Criar entrevistas ilimitadas</li>
-                <li>Automatizar processos seletivos com IA</li>
-                <li>Economizar até 90% do tempo de recrutamento</li>
+                <li>Criar sua primeira entrevista em 2 minutos</li>
+                <li>Usar R$ 50 em créditos grátis</li>
+                <li>Deixar a IA analisar os candidatos por você</li>
               </ul>
             </td>
           </tr>
@@ -114,7 +114,7 @@ export function emailVerificacaoTemplate(params: {
           <tr>
             <td style="text-align: center; padding: 0 30px;">
               <p style="margin: 0; color: #9ca3af; font-size: 12px; line-height: 1.6;">
-                Está tendo problemas? Entre em contato conosco em
+                Precisa de ajuda? Fale com a gente em
                 <a href="mailto:contato@entrevistia.com.br" style="color: #3b82f6; text-decoration: none;">contato@entrevistia.com.br</a>
               </p>
             </td>
@@ -148,13 +148,13 @@ export function emailEncerramentoTemplate(params: {
 }) {
   const { nomeCandidato, cargo, empresa, mensagemPersonalizada } = params;
 
-  const mensagemPadrao = `Agradecemos imensamente seu interesse na vaga de <strong>${cargo}</strong> e o tempo dedicado ao nosso processo seletivo.
+  const mensagemPadrao = `Agradecemos muito seu interesse na vaga de <strong>${cargo}</strong> e o tempo que você dedicou ao nosso processo.
 
-Após uma análise cuidadosa, informamos que seu perfil não foi selecionado para avançar neste momento. Essa decisão não diminui suas qualidades profissionais - sabemos que você possui habilidades valiosas que certamente serão reconhecidas.
+Após avaliar todos os candidatos, decidimos seguir com outros perfis que estão mais alinhados com o que buscamos neste momento. Isso não diminui suas qualidades — sabemos que você tem muito a oferecer.
 
-Ficamos impressionados com sua participação e gostaríamos de manter seu currículo em nosso banco de talentos para futuras oportunidades que estejam mais alinhadas ao seu perfil.
+Vamos manter seu perfil em nosso banco para futuras oportunidades.
 
-Desejamos muito sucesso em sua jornada profissional!`;
+Desejamos sucesso na sua busca!`;
 
   const mensagemFinal = mensagemPersonalizada || mensagemPadrao;
 
@@ -199,8 +199,7 @@ Desejamos muito sucesso em sua jornada profissional!`;
               <!-- Card de informação -->
               <div style="background-color: #f0f9ff; border-left: 4px solid #3b82f6; padding: 16px; border-radius: 8px; margin: 30px 0;">
                 <p style="margin: 0; color: #1e40af; font-size: 14px; line-height: 1.5;">
-                  💼 <strong>Seu perfil foi adicionado ao nosso banco de talentos.</strong><br>
-                  Entraremos em contato caso surjam novas oportunidades compatíveis.
+                  <strong>Guardamos seu perfil.</strong> Se surgir uma vaga com o seu perfil, entraremos em contato.
                 </p>
               </div>
 
@@ -238,11 +237,11 @@ Desejamos muito sucesso em sua jornada profissional!`;
  * Gera texto padrão para email de encerramento
  */
 export function getTextoEncerramentoPadrao(cargo: string): string {
-  return `Agradecemos imensamente seu interesse na vaga de ${cargo} e o tempo dedicado ao nosso processo seletivo.
+  return `Agradecemos muito seu interesse na vaga de ${cargo} e o tempo que você dedicou ao nosso processo.
 
-Após uma análise cuidadosa, informamos que seu perfil não foi selecionado para avançar neste momento. Essa decisão não diminui suas qualidades profissionais - sabemos que você possui habilidades valiosas que certamente serão reconhecidas.
+Após avaliar todos os candidatos, decidimos seguir com outros perfis que estão mais alinhados com o que buscamos neste momento. Isso não diminui suas qualidades — sabemos que você tem muito a oferecer.
 
-Ficamos impressionados com sua participação e gostaríamos de manter seu currículo em nosso banco de talentos para futuras oportunidades que estejam mais alinhadas ao seu perfil.
+Vamos manter seu perfil em nosso banco para futuras oportunidades.
 
-Desejamos muito sucesso em sua jornada profissional!`;
+Desejamos sucesso na sua busca!`;
 }

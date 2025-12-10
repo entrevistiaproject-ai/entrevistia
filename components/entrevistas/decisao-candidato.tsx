@@ -45,7 +45,7 @@ interface DecisaoCandidatoProps {
 const decisaoConfig = {
   aprovado: {
     label: "Aprovado",
-    labelLongo: "Aprovado para próxima fase",
+    labelLongo: "Avançou para próxima fase",
     icon: CheckCircle2,
     bgColor: "bg-emerald-50 hover:bg-emerald-100",
     borderColor: "border-emerald-200",
@@ -53,8 +53,8 @@ const decisaoConfig = {
     iconColor: "text-emerald-600",
   },
   reprovado: {
-    label: "Não aprovado",
-    labelLongo: "Não aprovado",
+    label: "Dispensado",
+    labelLongo: "Processo encerrado",
     icon: XCircle,
     bgColor: "bg-red-50 hover:bg-red-100",
     borderColor: "border-red-200",
@@ -62,8 +62,8 @@ const decisaoConfig = {
     iconColor: "text-red-600",
   },
   pendente: {
-    label: "Pendente",
-    labelLongo: "Aguardando decisão",
+    label: "Avaliar",
+    labelLongo: "Aguardando sua decisão",
     icon: Clock,
     bgColor: "bg-slate-50 hover:bg-slate-100",
     borderColor: "border-slate-200",
@@ -74,29 +74,29 @@ const decisaoConfig = {
 
 const recomendacaoIAConfig = {
   recomendado: {
-    label: "IA: Recomendado",
+    label: "IA sugere: Aprovar",
     bgColor: "bg-blue-50",
     textColor: "text-blue-700",
   },
   recomendado_com_ressalvas: {
-    label: "IA: Com ressalvas",
+    label: "IA sugere: Avaliar com atenção",
     bgColor: "bg-amber-50",
     textColor: "text-amber-700",
   },
   nao_recomendado: {
-    label: "IA: Não recomendado",
+    label: "IA sugere: Não avançar",
     bgColor: "bg-rose-50",
     textColor: "text-rose-700",
   },
 };
 
-const TEXTO_EMAIL_PADRAO = `Agradecemos imensamente seu interesse na vaga e o tempo dedicado ao nosso processo seletivo.
+const TEXTO_EMAIL_PADRAO = `Agradecemos muito seu interesse na vaga e o tempo dedicado ao nosso processo seletivo.
 
-Após uma análise cuidadosa, informamos que seu perfil não foi selecionado para avançar neste momento. Essa decisão não diminui suas qualidades profissionais - sabemos que você possui habilidades valiosas que certamente serão reconhecidas.
+Após avaliar todos os candidatos, decidimos seguir com outros perfis que estão mais alinhados com o que buscamos neste momento. Isso não diminui suas qualidades — sabemos que você tem muito a oferecer.
 
-Ficamos impressionados com sua participação e gostaríamos de manter seu currículo em nosso banco de talentos para futuras oportunidades que estejam mais alinhadas ao seu perfil.
+Vamos manter seu perfil em nosso banco para futuras oportunidades.
 
-Desejamos muito sucesso em sua jornada profissional!`;
+Desejamos sucesso na sua busca!`;
 
 export function DecisaoCandidato({
   candidatoId,
@@ -305,9 +305,9 @@ export function DecisaoCandidato({
 
       <DialogContent className="sm:max-w-lg" onClick={(e) => e.stopPropagation()}>
         <DialogHeader>
-          <DialogTitle>Decisão sobre candidato</DialogTitle>
+          <DialogTitle>Avaliar candidato</DialogTitle>
           <DialogDescription>
-            Avalie se <span className="font-medium text-foreground">{candidatoNome}</span> deve avançar para a próxima fase do processo seletivo.
+            Decida se <span className="font-medium text-foreground">{candidatoNome}</span> segue para a próxima fase.
           </DialogDescription>
         </DialogHeader>
 
@@ -352,7 +352,7 @@ export function DecisaoCandidato({
                 Aprovar
               </span>
               <span className="text-xs text-slate-500 text-center">
-                Avançar para próxima fase
+                Segue para próxima fase
               </span>
             </button>
 
@@ -374,10 +374,10 @@ export function DecisaoCandidato({
                 "text-sm font-medium",
                 decisaoSelecionada === "reprovado" ? "text-red-700" : "text-slate-600"
               )}>
-                Não aprovar
+                Dispensar
               </span>
               <span className="text-xs text-slate-500 text-center">
-                Encerrar participação
+                Encerra a participação
               </span>
             </button>
           </div>
@@ -385,10 +385,10 @@ export function DecisaoCandidato({
 
         {/* Observação opcional */}
         <div className="space-y-2">
-          <Label htmlFor="observacao">Observação (opcional)</Label>
+          <Label htmlFor="observacao">Anotação interna (opcional)</Label>
           <Textarea
             id="observacao"
-            placeholder="Adicione uma nota sobre sua decisão..."
+            placeholder="Escreva uma nota para você ou sua equipe..."
             value={observacao}
             onChange={(e) => setObservacao(e.target.value)}
             rows={2}
@@ -407,10 +407,10 @@ export function DecisaoCandidato({
               <div className="space-y-1">
                 <Label htmlFor="enviar-email" className="cursor-pointer flex items-center gap-2">
                   <Mail className="h-4 w-4" />
-                  Enviar email de encerramento
+                  Avisar o candidato por email
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Notificar o candidato sobre o encerramento da participação de forma cordial
+                  Envia uma mensagem cordial informando que o processo foi encerrado
                 </p>
               </div>
             </div>

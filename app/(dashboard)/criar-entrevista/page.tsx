@@ -184,9 +184,9 @@ export default function CriarEntrevistaPage() {
           </Button>
         </Link>
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold truncate">Nova Entrevista</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold truncate">Criar entrevista</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Configure a vaga e selecione ou crie as perguntas
+            Defina a vaga e escolha as perguntas em poucos minutos
           </p>
         </div>
       </div>
@@ -221,17 +221,17 @@ export default function CriarEntrevistaPage() {
         {/* Informações da Vaga */}
         <Card>
           <CardHeader>
-            <CardTitle>Informações da Vaga</CardTitle>
+            <CardTitle>Sobre a vaga</CardTitle>
             <CardDescription>
-              Defina o cargo e os detalhes da posição
+              Essas informações ajudam a IA a avaliar melhor os candidatos
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="titulo">Título da Entrevista *</Label>
+              <Label htmlFor="titulo">Nome da entrevista</Label>
               <Input
                 id="titulo"
-                placeholder="Ex: Entrevista para Advogado Pleno"
+                placeholder="Ex: Processo seletivo - Advogado Pleno"
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
                 required
@@ -239,7 +239,7 @@ export default function CriarEntrevistaPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="empresa">Nome da Empresa</Label>
+              <Label htmlFor="empresa">Empresa (aparece para o candidato)</Label>
               <Input
                 id="empresa"
                 placeholder="Ex: Empresa XYZ Ltda"
@@ -247,13 +247,13 @@ export default function CriarEntrevistaPage() {
                 onChange={(e) => setEmpresa(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                Será exibido para os candidatos como informação da vaga
+                Os candidatos verão este nome ao responder a entrevista
               </p>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="descricao">Descrição da Vaga *</Label>
+                <Label htmlFor="descricao">Descreva a vaga em detalhes</Label>
                 <Button
                   type="button"
                   variant="ghost"
@@ -261,7 +261,7 @@ export default function CriarEntrevistaPage() {
                   className="text-xs h-8"
                   onClick={() => setDescricao(TEMPLATE_DESCRICAO)}
                 >
-                  Usar template
+                  Usar modelo pronto
                 </Button>
               </div>
               <Textarea
@@ -324,8 +324,8 @@ Breve contexto sobre a posição e equipe...
               <Alert className="mt-2">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription className="text-xs sm:text-sm">
-                  A descrição é utilizada pela IA para calcular o <strong>score de compatibilidade</strong> dos candidatos com a vaga.
-                  Quanto mais detalhada (200-1000 caracteres), melhor será a análise das respostas.
+                  <strong>Dica importante:</strong> A IA usa esta descrição para calcular o score de cada candidato.
+                  Quanto mais detalhes você incluir, mais precisa será a análise.
                 </AlertDescription>
               </Alert>
             </div>
@@ -364,17 +364,17 @@ Breve contexto sobre a posição e equipe...
           <CardHeader>
             <CardTitle>Configurações</CardTitle>
             <CardDescription>
-              Defina como a entrevista funcionará
+              Personalize a experiência do candidato
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-start sm:items-center justify-between gap-4">
               <div className="space-y-0.5 flex-1">
                 <Label htmlFor="compartilhar-resultados" className="text-sm sm:text-base">
-                  Compartilhar resultados com candidatos
+                  Mostrar resultado para o candidato
                 </Label>
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  Permite que candidatos vejam suas respostas e feedback após completar a entrevista
+                  Após responder, o candidato pode ver seu desempenho e feedback da IA
                 </p>
               </div>
               <Switch
@@ -390,16 +390,16 @@ Breve contexto sobre a posição e equipe...
         {/* Perguntas */}
         <Card>
           <CardHeader>
-            <CardTitle>Perguntas da Entrevista</CardTitle>
+            <CardTitle>Perguntas</CardTitle>
             <CardDescription>
-              Selecione perguntas do banco ou crie novas ({perguntas.length} selecionadas)
+              Escolha do banco ou crie suas próprias ({perguntas.length} {perguntas.length === 1 ? "selecionada" : "selecionadas"})
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="banco" className="w-full">
               <TabsList className="grid w-full grid-cols-2 h-11 sm:h-10">
-                <TabsTrigger value="banco" className="text-sm">Do Banco</TabsTrigger>
-                <TabsTrigger value="nova" className="text-sm">Criar Nova</TabsTrigger>
+                <TabsTrigger value="banco" className="text-sm">Usar do banco</TabsTrigger>
+                <TabsTrigger value="nova" className="text-sm">Criar pergunta</TabsTrigger>
               </TabsList>
 
               <TabsContent value="banco" className="mt-4">
@@ -446,7 +446,7 @@ Breve contexto sobre a posição e equipe...
             className="w-full sm:w-auto"
             size="touch"
           >
-            {loading ? "Criando..." : "Criar Entrevista"}
+            {loading ? "Criando..." : "Criar entrevista"}
           </Button>
         </div>
       </form>

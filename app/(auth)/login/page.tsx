@@ -137,8 +137,8 @@ function LoginForm() {
           <div className="mb-6 p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg flex items-start gap-3">
             <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-green-900 dark:text-green-100">Email verificado com sucesso!</p>
-              <p className="text-sm text-green-600 dark:text-green-400">Agora você pode fazer login na sua conta.</p>
+              <p className="text-sm font-semibold text-green-900 dark:text-green-100">Email confirmado!</p>
+              <p className="text-sm text-green-600 dark:text-green-400">Tudo pronto. Faça login para começar.</p>
             </div>
           </div>
         )}
@@ -148,9 +148,9 @@ function LoginForm() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 mx-auto">
               <LogoIcon className="w-10 h-10" />
             </div>
-            <CardTitle className="text-2xl sm:text-3xl">Bem-vindo de volta</CardTitle>
+            <CardTitle className="text-2xl sm:text-3xl">Acesse sua conta</CardTitle>
             <CardDescription>
-              Faça login para continuar
+              Entre para gerenciar suas entrevistas
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-4">
@@ -191,13 +191,13 @@ function LoginForm() {
                 <div className="flex items-center justify-between">
                   <Label htmlFor="senha" className="flex items-center gap-2">
                     <Lock className="w-4 h-4 text-muted-foreground" />
-                    Senha
+                    Sua senha
                   </Label>
                   <Link
                     href="/recuperar-senha"
                     className="text-sm text-primary hover:underline"
                   >
-                    Esqueceu a senha?
+                    Esqueci minha senha
                   </Link>
                 </div>
                 <div className="relative">
@@ -247,12 +247,12 @@ function LoginForm() {
             {/* Footer */}
             <div className="mt-6 text-center">
               <p className="text-muted-foreground">
-                Não tem uma conta?{" "}
+                Ainda não tem conta?{" "}
                 <Link
                   href="/cadastro"
                   className="text-primary hover:underline font-semibold"
                 >
-                  Criar conta grátis
+                  Criar conta gratuita
                 </Link>
               </p>
             </div>
@@ -262,20 +262,20 @@ function LoginForm() {
         {/* Benefícios */}
         <div className="mt-8 text-center">
           <p className="text-sm text-muted-foreground mb-4">
-            Mais de 500 empresas confiam na EntrevistIA
+            Por que recrutadores escolhem a EntrevistIA:
           </p>
           <div className="grid grid-cols-3 gap-3">
             <Card className="p-4">
               <p className="text-lg font-bold text-primary">90%</p>
-              <p className="text-xs text-muted-foreground">Menos tempo</p>
+              <p className="text-xs text-muted-foreground">Menos tempo em triagem</p>
             </Card>
             <Card className="p-4">
-              <p className="text-lg font-bold text-primary">70%</p>
-              <p className="text-xs text-muted-foreground">Economia</p>
+              <p className="text-lg font-bold text-primary">R$ 3</p>
+              <p className="text-xs text-muted-foreground">Por candidato</p>
             </Card>
             <Card className="p-4">
-              <p className="text-lg font-bold text-primary">100%</p>
-              <p className="text-xs text-muted-foreground">Automação</p>
+              <p className="text-lg font-bold text-primary">24/7</p>
+              <p className="text-xs text-muted-foreground">Sempre disponível</p>
             </Card>
           </div>
         </div>

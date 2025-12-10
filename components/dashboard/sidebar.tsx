@@ -19,27 +19,27 @@ import { signOut } from "next-auth/react";
 
 const mainMenuItems = [
   {
-    title: "Dashboard",
+    title: "Visão geral",
     href: "/dashboard",
     icon: BarChart3,
   },
   {
-    title: "Minhas Entrevistas",
+    title: "Entrevistas",
     href: "/entrevistas",
     icon: Briefcase,
   },
   {
-    title: "Criar Entrevista",
+    title: "Nova entrevista",
     href: "/criar-entrevista",
     icon: PlusCircle,
   },
   {
-    title: "Banco de Perguntas",
+    title: "Perguntas",
     href: "/perguntas",
     icon: HelpCircle,
   },
   {
-    title: "Banco de Candidatos",
+    title: "Candidatos",
     href: "/candidatos",
     icon: Users,
   },
@@ -47,12 +47,12 @@ const mainMenuItems = [
 
 const secondaryMenuItems = [
   {
-    title: "Custos e Uso",
+    title: "Uso e créditos",
     href: "/custos",
     icon: DollarSign,
   },
   {
-    title: "Minha Conta",
+    title: "Minha conta",
     href: "/conta",
     icon: User,
   },

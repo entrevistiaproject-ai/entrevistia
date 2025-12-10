@@ -88,10 +88,9 @@ export function CompartilharLinkDialog({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Compartilhar Link da Entrevista</DialogTitle>
+          <DialogTitle>Compartilhar entrevista</DialogTitle>
           <DialogDescription>
-            Gere um link público para que candidatos possam acessar e responder
-            a entrevista
+            Gere um link para os candidatos acessarem e responderem
           </DialogDescription>
         </DialogHeader>
 
@@ -99,18 +98,18 @@ export function CompartilharLinkDialog({
           {!slug ? (
             <div className="text-center space-y-4">
               <p className="text-sm text-muted-foreground">
-                Nenhum link público foi gerado ainda para esta entrevista.
-                Clique no botão abaixo para criar um link compartilhável.
+                Esta entrevista ainda não tem um link público.
+                Clique abaixo para gerar um link que você pode enviar aos candidatos.
               </p>
               <Button onClick={gerarLink} disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Gerar Link Público
+                Gerar link de acesso
               </Button>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Link da Entrevista</Label>
+                <Label>Link para os candidatos</Label>
                 <div className="flex gap-2">
                   <Input value={linkCompleto} readOnly className="font-mono text-sm" />
                   <Button
@@ -127,8 +126,7 @@ export function CompartilharLinkDialog({
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Compartilhe este link com candidatos para que possam acessar a
-                  entrevista
+                  Envie este link por email ou mensagem. O candidato clica e já pode responder.
                 </p>
               </div>
 
@@ -152,13 +150,11 @@ export function CompartilharLinkDialog({
                   <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
-                      Recomendação
+                      Quer mais controle?
                     </p>
                     <p className="text-sm text-amber-800 dark:text-amber-200">
-                      Para melhor controle de quem faz a entrevista, quantas vezes cada
-                      pessoa realiza e melhor gestão de prazos, não compartilhe o link
-                      diretamente. Utilize o <strong>cadastro individual de participantes</strong> ou
-                      a <strong>importação em lote</strong>.
+                      Para saber exatamente quem respondeu e acompanhar cada candidato,
+                      use o <strong>cadastro individual</strong> ou a <strong>importação em lote</strong> em vez de compartilhar o link direto.
                     </p>
                   </div>
                 </div>

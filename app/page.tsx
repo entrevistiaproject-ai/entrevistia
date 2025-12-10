@@ -96,39 +96,39 @@ export default function LandingPage() {
         <div className="mx-auto max-w-4xl text-center">
           <div className="mb-4 inline-block rounded-full bg-primary/10 px-4 py-1.5">
             <span className="text-sm font-medium text-primary">
-              ✨ Inteligência Artificial a serviço do seu talento humano
+              Recrutamento inteligente para equipes que crescem rápido
             </span>
           </div>
           <h1 className="mb-6 text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl lg:text-6xl">
-            Transforme Suas Entrevistas com{" "}
-            <span className="text-primary">Inteligência Artificial</span>
+            Entreviste 10x mais candidatos{" "}
+            <span className="text-primary">sem aumentar sua equipe</span>
           </h1>
           <p className="mb-8 text-lg text-muted-foreground sm:text-xl md:text-2xl max-w-3xl mx-auto">
-            Automatize o filtro inicial de candidatos, economize tempo e contrate os melhores talentos
-            com análise inteligente de IA.
+            A IA conduz entrevistas por áudio, transcreve e analisa cada resposta.
+            Você foca apenas nos melhores talentos.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Button size="touch" className="text-base sm:text-lg" asChild>
               <Link href="/cadastro">
-                Começar Gratuitamente <ArrowRight className="ml-2 h-5 w-5" />
+                Criar conta gratuita <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
             <Button size="touch" variant="outline" className="text-base sm:text-lg" asChild>
-              <Link href="#como-funciona">Ver Como Funciona</Link>
+              <Link href="#como-funciona">Ver demonstração</Link>
             </Button>
           </div>
           <div className="mt-6 flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <CheckCircle2 className="h-4 w-4 text-primary" />
+              R$ 50 em créditos grátis
+            </span>
+            <span className="flex items-center gap-1">
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              Primeira entrevista em 2 min
+            </span>
+            <span className="flex items-center gap-1">
+              <CheckCircle2 className="h-4 w-4 text-primary" />
               Sem cartão de crédito
-            </span>
-            <span className="flex items-center gap-1">
-              <CheckCircle2 className="h-4 w-4 text-primary" />
-              Configuração em 2 min
-            </span>
-            <span className="flex items-center gap-1">
-              <CheckCircle2 className="h-4 w-4 text-primary" />
-              Suporte em português
             </span>
           </div>
         </div>
@@ -140,19 +140,19 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 gap-6 sm:gap-8 md:grid-cols-4 text-center">
             <div className="space-y-1">
               <p className="text-3xl sm:text-4xl font-bold text-primary">90%</p>
-              <p className="text-xs sm:text-sm text-muted-foreground">Redução de tempo</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Menos tempo em triagem</p>
             </div>
             <div className="space-y-1">
-              <p className="text-3xl sm:text-4xl font-bold text-primary">70%</p>
-              <p className="text-xs sm:text-sm text-muted-foreground">Economia de custos</p>
+              <p className="text-3xl sm:text-4xl font-bold text-primary">R$ 3</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Custo médio por candidato</p>
             </div>
             <div className="space-y-1">
               <p className="text-3xl sm:text-4xl font-bold text-primary">24/7</p>
-              <p className="text-xs sm:text-sm text-muted-foreground">Disponibilidade</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Candidatos respondem quando quiserem</p>
             </div>
             <div className="space-y-1">
               <p className="text-3xl sm:text-4xl font-bold text-primary">100+</p>
-              <p className="text-xs sm:text-sm text-muted-foreground">Candidatos simultâneos</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Entrevistas simultâneas</p>
             </div>
           </div>
         </div>
@@ -162,10 +162,10 @@ export default function LandingPage() {
       <section id="beneficios" className="container mx-auto px-4 py-12 sm:py-20">
         <div className="mx-auto max-w-3xl text-center mb-8 sm:mb-12">
           <h2 className="mb-4 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
-            Por que usar o EntrevistIA?
+            O que você ganha com a EntrevistIA?
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground">
-            Economize tempo, reduza custos e melhore a qualidade das suas contratações
+            Contrate melhor gastando menos tempo e dinheiro
           </p>
         </div>
 
@@ -173,12 +173,12 @@ export default function LandingPage() {
           <Card>
             <CardHeader>
               <Clock className="h-10 w-10 text-primary mb-2" />
-              <CardTitle>Economia de Tempo</CardTitle>
+              <CardTitle>Recupere seu tempo</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Automatize o filtro inicial de candidatos e foque apenas na seleção final dos melhores talentos.
-                Economize horas preciosas de entrevistas presenciais.
+                Pare de gastar horas em calls de triagem. A IA faz as perguntas iniciais e você só
+                conversa com quem realmente importa.
               </p>
             </CardContent>
           </Card>
@@ -186,12 +186,12 @@ export default function LandingPage() {
           <Card>
             <CardHeader>
               <DollarSign className="h-10 w-10 text-primary mb-2" />
-              <CardTitle>Reduza Custos</CardTitle>
+              <CardTitle>Custo previsível</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Elimine múltiplas rodadas iniciais de entrevistas. Pague apenas pela análise das respostas –
-                uma fração do custo de mobilizar sua equipe de RH.
+                Pague apenas quando um candidato completar a entrevista. Sem mensalidades,
+                sem surpresas na fatura.
               </p>
             </CardContent>
           </Card>
@@ -199,12 +199,12 @@ export default function LandingPage() {
           <Card>
             <CardHeader>
               <Globe className="h-10 w-10 text-primary mb-2" />
-              <CardTitle>Flexibilidade Total</CardTitle>
+              <CardTitle>Sem conflito de agenda</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Candidatos respondem quando e onde quiserem. Sem conflitos de agenda, sem fusos horários,
-                sem limitações geográficas.
+                Candidatos respondem quando puderem: de manhã, à noite, fim de semana.
+                Você não precisa bloquear horário na sua agenda.
               </p>
             </CardContent>
           </Card>
@@ -212,12 +212,12 @@ export default function LandingPage() {
           <Card>
             <CardHeader>
               <TrendingUp className="h-10 w-10 text-primary mb-2" />
-              <CardTitle>Escale Infinitamente</CardTitle>
+              <CardTitle>Escale sem contratar</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Avalie 10, 50 ou 100 candidatos simultaneamente. Receba todas as respostas organizadas
-                e analisadas automaticamente.
+                Entreviste 10, 50 ou 200 candidatos ao mesmo tempo.
+                Todas as respostas chegam analisadas e prontas para você decidir.
               </p>
             </CardContent>
           </Card>
@@ -225,12 +225,12 @@ export default function LandingPage() {
           <Card>
             <CardHeader>
               <BarChart3 className="h-10 w-10 text-primary mb-2" />
-              <CardTitle>Análise Inteligente</CardTitle>
+              <CardTitle>Decisões embasadas</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                IA analisa cada resposta identificando competências-chave, pontos fortes e fornece
-                insights valiosos para sua decisão.
+                Cada resposta vem com análise de competências, pontos fortes e score de compatibilidade.
+                Chega de depender só do "feeling".
               </p>
             </CardContent>
           </Card>
@@ -238,12 +238,12 @@ export default function LandingPage() {
           <Card>
             <CardHeader>
               <Shield className="h-10 w-10 text-primary mb-2" />
-              <CardTitle>Compliance e Documentação</CardTitle>
+              <CardTitle>Tudo documentado</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Todas as respostas ficam gravadas e transcritas. Perfeito para auditorias, revisões
-                futuras e requisitos legais.
+                Áudios, transcrições e análises ficam salvos. Perfeito para auditorias,
+                revisões com gestores e histórico do processo.
               </p>
             </CardContent>
           </Card>
@@ -255,10 +255,10 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl text-center mb-8 sm:mb-12">
             <h2 className="mb-4 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
-              Como Funciona
+              Como funciona na prática
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground">
-              Comece a entrevistar em 3 passos simples
+              Da criação da vaga aos resultados em 3 passos
             </p>
           </div>
 
@@ -268,9 +268,9 @@ export default function LandingPage() {
                 <div className="mx-auto mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-primary text-xl sm:text-2xl font-bold text-primary-foreground">
                   1
                 </div>
-                <h3 className="mb-2 text-lg sm:text-xl font-semibold">Crie sua Entrevista</h3>
+                <h3 className="mb-2 text-lg sm:text-xl font-semibold">Monte sua entrevista</h3>
                 <p className="text-sm sm:text-base text-muted-foreground">
-                  Configure as perguntas para a vaga em menos de 2 minutos
+                  Escolha perguntas do nosso banco ou crie as suas. Pronto em 2 minutos.
                 </p>
               </div>
 
@@ -278,9 +278,9 @@ export default function LandingPage() {
                 <div className="mx-auto mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-primary text-xl sm:text-2xl font-bold text-primary-foreground">
                   2
                 </div>
-                <h3 className="mb-2 text-lg sm:text-xl font-semibold">Envie o Link</h3>
+                <h3 className="mb-2 text-lg sm:text-xl font-semibold">Convide candidatos</h3>
                 <p className="text-sm sm:text-base text-muted-foreground">
-                  Compartilhe o link temporário com seus candidatos por email
+                  Envie o link por email ou importe uma lista. Cada um responde no seu tempo.
                 </p>
               </div>
 
@@ -288,9 +288,9 @@ export default function LandingPage() {
                 <div className="mx-auto mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-primary text-xl sm:text-2xl font-bold text-primary-foreground">
                   3
                 </div>
-                <h3 className="mb-2 text-lg sm:text-xl font-semibold">Receba Análises</h3>
+                <h3 className="mb-2 text-lg sm:text-xl font-semibold">Receba os resultados</h3>
                 <p className="text-sm sm:text-base text-muted-foreground">
-                  A IA analisa e pontua as respostas automaticamente
+                  Veja transcrições, análises e scores. Decida quem avança com confiança.
                 </p>
               </div>
             </div>
@@ -302,10 +302,10 @@ export default function LandingPage() {
       <section id="precos" className="container mx-auto px-4 py-12 sm:py-20">
         <div className="mx-auto max-w-3xl text-center mb-8 sm:mb-12">
           <h2 className="mb-4 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
-            Preços Simples e Transparentes
+            Preço justo: pague só pelo que usar
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground">
-            Pague apenas pelo que usar. Sem mensalidades, sem surpresas.
+            Sem mensalidade. Você só paga quando um candidato completar a entrevista.
           </p>
         </div>
 
@@ -316,7 +316,7 @@ export default function LandingPage() {
               <div className="mx-auto mb-2 inline-block rounded-full bg-primary/10 px-4 py-1">
                 <span className="text-sm font-medium text-primary">Pay-per-Use</span>
               </div>
-              <CardTitle className="text-2xl sm:text-3xl">Modelo por Candidato</CardTitle>
+              <CardTitle className="text-2xl sm:text-3xl">Pague por entrevista concluída</CardTitle>
             </CardHeader>
             <CardContent className="text-center">
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-6">
@@ -411,13 +411,13 @@ export default function LandingPage() {
 
           {/* Free Trial */}
           <div className="text-center p-6 rounded-lg border-2 border-dashed border-primary/50 bg-primary/5">
-            <h3 className="text-lg font-semibold mb-2">Comece com R$ 50 de crédito grátis</h3>
+            <h3 className="text-lg font-semibold mb-2">Ganhe R$ 50 em créditos ao criar sua conta</h3>
             <p className="text-muted-foreground mb-4">
-              Teste a plataforma sem compromisso. Avalie até 15 candidatos gratuitamente.
+              Teste sem compromisso. Dá para avaliar até 15 candidatos de graça.
             </p>
             <Button asChild>
               <Link href="/cadastro">
-                Começar Grátis <ArrowRight className="ml-2 h-4 w-4" />
+                Criar conta e ganhar créditos <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
@@ -429,20 +429,20 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl text-center mb-8 sm:mb-12">
             <h2 className="mb-4 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
-              Casos de Uso Ideais
+              Feito para quem precisa contratar mais rápido
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground">
-              Perfeito para diversos cenários de recrutamento
+              Veja se a EntrevistIA resolve o seu problema
             </p>
           </div>
 
           <div className="mx-auto max-w-3xl space-y-3 sm:space-y-4">
             {[
-              "Startups e PMEs que precisam maximizar resultados com equipes enxutas",
-              "Vagas com alto volume de candidatos para filtrar rapidamente",
-              "Contratação remota para avaliar talentos de qualquer parte do mundo",
-              "Processos seletivos estruturados que exigem consistência e qualidade",
-              "Recrutamento terceirizado para oferecer mais valor aos clientes",
+              "Equipes de RH enxutas que precisam entrevistar dezenas de candidatos",
+              "Vagas com muitos candidatos onde não dá pra falar com todo mundo",
+              "Contratação remota: candidatos de qualquer lugar respondem quando puderem",
+              "Processos seletivos que precisam de padronização e documentação",
+              "Consultorias e recrutadores que querem entregar mais com menos esforço",
             ].map((useCase, i) => (
               <div key={i} className="flex items-start gap-3 rounded-lg border bg-card p-4 transition-colors hover:bg-muted/50">
                 <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 shrink-0 text-primary mt-0.5" />
@@ -458,27 +458,27 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 text-center">
           <div className="mx-auto max-w-3xl">
             <h2 className="mb-4 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
-              Pronto para Transformar Suas Entrevistas?
+              Comece a entrevistar de um jeito mais inteligente
             </h2>
             <p className="mb-8 text-base sm:text-lg opacity-90">
-              Junte-se a centenas de empresas que já economizam tempo e contratam melhor
+              Crie sua conta, ganhe créditos grátis e faça sua primeira entrevista hoje
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Button size="touch" variant="secondary" className="text-base sm:text-lg" asChild>
                 <Link href="/cadastro">
-                  Começar Gratuitamente <ArrowRight className="ml-2 h-5 w-5" />
+                  Criar conta gratuita <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             </div>
             <div className="mt-6 flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm opacity-75">
               <span className="flex items-center gap-1">
                 <Zap className="h-4 w-4" />
-                Configuração instantânea
+                Pronto em 2 minutos
               </span>
               <span>•</span>
-              <span>Sem cartão de crédito</span>
+              <span>R$ 50 em créditos grátis</span>
               <span>•</span>
-              <span>Cancele quando quiser</span>
+              <span>Sem cartão de crédito</span>
             </div>
           </div>
         </div>
@@ -493,7 +493,7 @@ export default function LandingPage() {
                 <Logo size="md" />
               </Link>
               <p className="text-sm text-muted-foreground">
-                Inteligência artificial a serviço do seu talento humano.
+                Entrevistas por IA para equipes que precisam contratar rápido.
               </p>
             </div>
             <div>

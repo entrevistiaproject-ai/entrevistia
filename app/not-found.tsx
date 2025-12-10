@@ -13,7 +13,7 @@ export default function NotFound() {
           </div>
           <CardTitle className="text-2xl">Página não encontrada</CardTitle>
           <CardDescription className="text-base">
-            A página que você está procurando não existe ou foi movida.
+            O endereço que você acessou não existe ou foi movido.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -25,13 +25,13 @@ export default function NotFound() {
             <Button asChild className="w-full">
               <Link href="/">
                 <Home className="mr-2 h-4 w-4" />
-                Voltar para Início
+                Ir para o início
               </Link>
             </Button>
             <Button asChild variant="outline" className="w-full">
               <Link href="/dashboard">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Ir para Dashboard
+                Acessar minha conta
               </Link>
             </Button>
           </div>

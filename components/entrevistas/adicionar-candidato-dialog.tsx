@@ -88,42 +88,41 @@ export function AdicionarCandidatoDialog({
       <DialogTrigger asChild>
         <Button>
           <UserPlus className="mr-2 h-4 w-4" />
-          Adicionar Candidato
+          Convidar candidato
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Adicionar Candidato Manualmente</DialogTitle>
+            <DialogTitle>Convidar candidato</DialogTitle>
             <DialogDescription>
-              Preencha os dados do candidato. Um email com o link da entrevista
-              será enviado automaticamente.
+              Preencha os dados e o candidato receberá um email com o link para responder.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="nome">Nome Completo *</Label>
+              <Label htmlFor="nome">Nome do candidato</Label>
               <Input
                 id="nome"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
-                placeholder="João Silva"
+                placeholder="Ex: João Silva"
                 required
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="email">Email *</Label>
+              <Label htmlFor="email">Email do candidato</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="joao@example.com"
+                placeholder="joao@email.com"
                 required
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="telefone">Telefone</Label>
+              <Label htmlFor="telefone">Telefone (opcional)</Label>
               <Input
                 id="telefone"
                 type="tel"
@@ -133,7 +132,7 @@ export function AdicionarCandidatoDialog({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="linkedin">LinkedIn</Label>
+              <Label htmlFor="linkedin">LinkedIn (opcional)</Label>
               <Input
                 id="linkedin"
                 type="url"
@@ -154,7 +153,7 @@ export function AdicionarCandidatoDialog({
             </Button>
             <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Adicionar e Enviar Email
+              Enviar convite
             </Button>
           </DialogFooter>
         </form>
