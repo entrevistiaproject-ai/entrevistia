@@ -38,6 +38,7 @@ interface Entrevista {
   titulo: string;
   descricao: string | null;
   cargo: string | null;
+  nivel: string | null;
   empresa: string | null;
   status: string;
   duracao: number | null;
@@ -550,6 +551,8 @@ export default function EntrevistaDetalhesPage() {
                   entrevistaId={entrevista.id}
                   perguntas={perguntas}
                   temCandidatos={candidatos.length > 0}
+                  cargo={entrevista.cargo || undefined}
+                  nivel={entrevista.nivel || undefined}
                   onSuccess={fetchData}
                 />
               </div>

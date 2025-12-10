@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,9 +11,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Pencil, Loader2, AlertTriangle, Plus, Trash2, GripVertical } from "lucide-react";
+import { Pencil, Loader2, AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  GerenciadorPerguntas,
+  PerguntaSelecionada,
+} from "@/components/entrevista/gerenciador-perguntas";
 
 interface Pergunta {
   id: string;
@@ -25,6 +28,8 @@ interface EditarPerguntasDialogProps {
   entrevistaId: string;
   perguntas: Pergunta[];
   temCandidatos: boolean;
+  cargo?: string;
+  nivel?: string;
   onSuccess?: () => void;
 }
 
@@ -32,50 +37,30 @@ export function EditarPerguntasDialog({
   entrevistaId,
   perguntas: perguntasIniciais,
   temCandidatos,
+  cargo,
+  nivel,
   onSuccess,
 }: EditarPerguntasDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [perguntas, setPerguntas] = useState<{ id?: string; texto: string; ordem: number }[]>([]);
-  const [novaPergunta, setNovaPergunta] = useState("");
+  const [perguntas, setPerguntas] = useState<PerguntaSelecionada[]>([]);
 
   const handleOpenChange = (newOpen: boolean) => {
     if (newOpen) {
-      // Reset para valores atuais ao abrir
-      setPerguntas(
-        perguntasIniciais.map((p) => ({
-          id: p.id,
-          texto: p.texto,
-          ordem: p.ordem,
-        }))
-      );
-      setNovaPergunta("");
+      // Converter perguntas existentes para o formato do gerenciador
+      const perguntasConvertidas: PerguntaSelecionada[] = perguntasIniciais.map((p) => ({
+        id: p.id,
+        texto: p.texto,
+        origem: "banco" as const, // Perguntas existentes são tratadas como vindas do banco
+      }));
+      setPerguntas(perguntasConvertidas);
     }
     setOpen(newOpen);
   };
 
-  const handleAddPergunta = () => {
-    if (!novaPergunta.trim()) return;
-
-    setPerguntas([
-      ...perguntas,
-      {
-        texto: novaPergunta.trim(),
-        ordem: perguntas.length + 1,
-      },
-    ]);
-    setNovaPergunta("");
-  };
-
-  const handleRemovePergunta = (index: number) => {
-    setPerguntas(perguntas.filter((_, i) => i !== index).map((p, i) => ({ ...p, ordem: i + 1 })));
-  };
-
-  const handleUpdatePergunta = (index: number, texto: string) => {
-    setPerguntas(
-      perguntas.map((p, i) => (i === index ? { ...p, texto } : p))
-    );
-  };
+  const handlePerguntasChange = useCallback((novasPerguntas: PerguntaSelecionada[]) => {
+    setPerguntas(novasPerguntas);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,9 +80,15 @@ export function EditarPerguntasDialog({
         },
         body: JSON.stringify({
           perguntas: perguntas.map((p, index) => ({
-            id: p.id,
+            id: p.id.startsWith("nova-") ? undefined : p.id, // Novas perguntas não têm ID
             texto: p.texto,
             ordem: index + 1,
+            // Dados para salvar no banco se for nova pergunta
+            ...(p.origem === "nova" && p.salvarNoBanco && {
+              salvarNoBanco: true,
+              competencia: p.competencia,
+              categoria: p.categoria,
+            }),
           })),
         }),
       });
@@ -127,7 +118,7 @@ export function EditarPerguntasDialog({
           Editar Perguntas
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[650px] max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-[900px] max-h-[90vh] flex flex-col">
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <DialogHeader className="pb-4">
             <DialogTitle>Editar Perguntas</DialogTitle>
@@ -139,7 +130,7 @@ export function EditarPerguntasDialog({
           {temCandidatos && (
             <Alert className="mb-4 border-amber-200 bg-amber-50">
               <div className="flex gap-3">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
                   <AlertTriangle className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
@@ -154,66 +145,14 @@ export function EditarPerguntasDialog({
             </Alert>
           )}
 
-          <div className="flex-1 overflow-y-auto py-4 space-y-4 min-h-0">
-            {/* Lista de perguntas */}
-            <div className="space-y-3">
-              {perguntas.map((pergunta, index) => (
-                <div
-                  key={pergunta.id || `new-${index}`}
-                  className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30"
-                >
-                  <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-sm font-semibold shrink-0">
-                    {index + 1}
-                  </div>
-                  <Input
-                    value={pergunta.texto}
-                    onChange={(e) => handleUpdatePergunta(index, e.target.value)}
-                    className="flex-1"
-                    placeholder="Digite a pergunta..."
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleRemovePergunta(index)}
-                    className="shrink-0 text-muted-foreground hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-
-            {/* Adicionar nova pergunta */}
-            <div className="flex gap-2 pt-2 border-t">
-              <Input
-                value={novaPergunta}
-                onChange={(e) => setNovaPergunta(e.target.value)}
-                placeholder="Digite uma nova pergunta..."
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleAddPergunta();
-                  }
-                }}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleAddPergunta}
-                disabled={!novaPergunta.trim()}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Adicionar
-              </Button>
-            </div>
-
-            {perguntas.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>Nenhuma pergunta adicionada ainda.</p>
-                <p className="text-sm">Use o campo acima para adicionar perguntas.</p>
-              </div>
-            )}
+          <div className="flex-1 overflow-y-auto py-4 min-h-0">
+            <GerenciadorPerguntas
+              cargo={cargo}
+              nivel={nivel}
+              perguntasIniciais={perguntas}
+              onChange={handlePerguntasChange}
+              modoEdicao={true}
+            />
           </div>
 
           <DialogFooter className="gap-3 sm:gap-2 pt-4 border-t">

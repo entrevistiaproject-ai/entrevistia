@@ -19,7 +19,9 @@ interface Entrevista {
   status: string;
   createdAt: Date;
   totalCandidatos: number;
-  totalRespostas: number;
+  totalConcluiram: number;
+  totalAprovados: number;
+  mediaScore: number | null;
   totalPerguntas: number;
   slug: string | null;
 }
