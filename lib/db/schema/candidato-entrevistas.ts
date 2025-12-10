@@ -7,7 +7,7 @@ import { entrevistas } from "./entrevistas";
  */
 export interface CompetenciaAvaliada {
   nome: string;
-  categoria: "Técnicas" | "Comunicação" | "Comportamental" | "Trabalho em Equipe" | "Fit Cultural";
+  categoria: "Experiência" | "Comunicação" | "Resolução de Problemas" | "Motivação" | "Fit com a Vaga";
   nota: number; // 0-100
   descricao: string;
 }

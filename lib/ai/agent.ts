@@ -9,7 +9,7 @@ import { z } from 'zod';
  */
 const CompetenciaSchema = z.object({
   nome: z.string(),
-  categoria: z.enum(['Técnicas', 'Comunicação', 'Comportamental', 'Trabalho em Equipe', 'Fit Cultural']),
+  categoria: z.enum(['Experiência', 'Comunicação', 'Resolução de Problemas', 'Motivação', 'Fit com a Vaga']),
   nota: z.number().min(0).max(100),
   descricao: z.string(),
 });
@@ -131,31 +131,28 @@ Analise as respostas acima e retorne APENAS um objeto JSON com esta estrutura ex
   "pontosMelhoria": ["<ponto melhoria 1>", "<ponto melhoria 2>", "<ponto melhoria 3>"],
   "recomendacao": "<recomendado | recomendado_com_ressalvas | nao_recomendado>",
   "competencias": [
-    // TÉCNICAS
-    {"nome": "Conhecimento Técnico", "categoria": "Técnicas", "nota": <0-100>, "descricao": "Domínio de ferramentas e tecnologias"},
-    {"nome": "Resolução de Problemas", "categoria": "Técnicas", "nota": <0-100>, "descricao": "Capacidade analítica e lógica"},
-    {"nome": "Qualidade e Detalhes", "categoria": "Técnicas", "nota": <0-100>, "descricao": "Atenção aos detalhes"},
-    {"nome": "Aprendizado Técnico", "categoria": "Técnicas", "nota": <0-100>, "descricao": "Capacidade de aprender novas tecnologias"},
+    // EXPERIÊNCIA E CONHECIMENTO
+    {"nome": "Conhecimento Técnico", "categoria": "Experiência", "nota": <0-100>, "descricao": "Domínio das ferramentas e tecnologias necessárias"},
+    {"nome": "Experiência Relevante", "categoria": "Experiência", "nota": <0-100>, "descricao": "Histórico profissional alinhado com a vaga"},
     // COMUNICAÇÃO
-    {"nome": "Clareza Verbal", "categoria": "Comunicação", "nota": <0-100>, "descricao": "Expressão clara e objetiva"},
-    {"nome": "Escuta Ativa", "categoria": "Comunicação", "nota": <0-100>, "descricao": "Atenção e compreensão"},
-    {"nome": "Capacidade de Síntese", "categoria": "Comunicação", "nota": <0-100>, "descricao": "Resumir ideias complexas"},
-    // COMPORTAMENTAL
-    {"nome": "Proatividade", "categoria": "Comportamental", "nota": <0-100>, "descricao": "Iniciativa e autonomia"},
-    {"nome": "Adaptabilidade", "categoria": "Comportamental", "nota": <0-100>, "descricao": "Flexibilidade a mudanças"},
-    {"nome": "Resiliência", "categoria": "Comportamental", "nota": <0-100>, "descricao": "Gestão de pressão"},
-    // TRABALHO EM EQUIPE
-    {"nome": "Colaboração", "categoria": "Trabalho em Equipe", "nota": <0-100>, "descricao": "Trabalho em grupo"},
-    {"nome": "Compartilhamento de Conhecimento", "categoria": "Trabalho em Equipe", "nota": <0-100>, "descricao": "Ensinar e aprender com o time"},
-    // FIT CULTURAL
-    {"nome": "Motivação", "categoria": "Fit Cultural", "nota": <0-100>, "descricao": "Interesse genuíno pela vaga"}
+    {"nome": "Clareza na Comunicação", "categoria": "Comunicação", "nota": <0-100>, "descricao": "Capacidade de se expressar de forma clara e objetiva"},
+    {"nome": "Articulação de Ideias", "categoria": "Comunicação", "nota": <0-100>, "descricao": "Habilidade de estruturar e apresentar pensamentos"},
+    // RESOLUÇÃO DE PROBLEMAS
+    {"nome": "Pensamento Analítico", "categoria": "Resolução de Problemas", "nota": <0-100>, "descricao": "Capacidade de analisar situações e encontrar soluções"},
+    {"nome": "Criatividade", "categoria": "Resolução de Problemas", "nota": <0-100>, "descricao": "Abordagem inovadora para desafios"},
+    // MOTIVAÇÃO E INTERESSE
+    {"nome": "Interesse pela Vaga", "categoria": "Motivação", "nota": <0-100>, "descricao": "Demonstração de interesse genuíno pela oportunidade"},
+    {"nome": "Ambição Profissional", "categoria": "Motivação", "nota": <0-100>, "descricao": "Clareza sobre objetivos de carreira"},
+    // FIT COM A VAGA
+    {"nome": "Alinhamento Cultural", "categoria": "Fit com a Vaga", "nota": <0-100>, "descricao": "Compatibilidade com valores e cultura da empresa"},
+    {"nome": "Adequação ao Perfil", "categoria": "Fit com a Vaga", "nota": <0-100>, "descricao": "Encaixe com os requisitos específicos da posição"}
   ]
 }
 
 IMPORTANTE:
 - notaGeral: Avaliação geral do candidato de 0 a 10 (com uma casa decimal, ex: 7.5)
 - compatibilidadeVaga: Quão bem o candidato se encaixa ESPECIFICAMENTE nesta vaga, considerando cargo, nível e descrição (0-100)
-- Avalie TODAS as 13 competências listadas acima (notas de 0 a 100)
+- Avalie TODAS as 10 competências listadas acima (notas de 0 a 100)
 - Base sua avaliação nas respostas da entrevista
 - Se não houver evidências suficientes para avaliar uma competência, atribua nota 50 (neutra)
 
