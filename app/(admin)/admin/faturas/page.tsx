@@ -726,7 +726,7 @@ export default function FaturasPage() {
 
       {/* Modal de Detalhes */}
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="bg-slate-900 border-slate-700 max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-slate-900 border-slate-700 max-w-3xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
           {detailsLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
