@@ -16,6 +16,14 @@ export function middleware(request: NextRequest) {
     "/admin-login",
   ];
 
+  // Rotas públicas que começam com determinados prefixos (para candidatos)
+  const publicPrefixes = [
+    "/convite/",
+    "/entrevista/",
+    "/api/convite/",
+    "/api/entrevista-publica/",
+  ];
+
   // Verifica se é rota do painel admin
   const isAdminRoute = pathname.startsWith("/admin") && !pathname.startsWith("/admin-login");
   const isAdminApiRoute = pathname.startsWith("/api/admin") && !pathname.startsWith("/api/admin/auth");
@@ -37,7 +45,8 @@ export function middleware(request: NextRequest) {
   const isPublicRoute =
     publicRoutes.includes(pathname) ||
     pathname.startsWith("/api/auth") ||
-    pathname.startsWith("/api/admin/auth");
+    pathname.startsWith("/api/admin/auth") ||
+    publicPrefixes.some(prefix => pathname.startsWith(prefix));
 
   // Se for rota pública, permite acesso
   if (isPublicRoute) {

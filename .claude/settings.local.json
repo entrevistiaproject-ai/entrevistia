@@ -59,7 +59,8 @@
       "Bash(rm:*)",
       "Bash(python3:*)",
       "Bash(vercel:*)",
-      "Bash(node scripts/merge-duplicate-candidatos.js:*)"
+      "Bash(node scripts/merge-duplicate-candidatos.js:*)",
+      "Bash(xxd:*)"
     ],
     "deny": [],
     "ask": []
