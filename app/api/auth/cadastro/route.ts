@@ -103,7 +103,10 @@ export async function POST(request: NextRequest) {
 
     // Envia email de verificação
     try {
-      await enviarEmail({
+      console.log(`📧 Tentando enviar email de verificação para: ${newUser.email}`);
+      console.log(`🔢 Código gerado: ${codigo}`);
+
+      const emailResult = await enviarEmail({
         to: newUser.email,
         subject: "Verifique seu email - EntrevistIA",
         html: emailVerificacaoTemplate({
@@ -112,7 +115,10 @@ export async function POST(request: NextRequest) {
           email: newUser.email,
         }),
       });
+
+      console.log("✅ Email enviado com sucesso:", emailResult);
     } catch (emailError) {
+      console.error("❌ Erro ao enviar email de verificação:", emailError);
       logger.error("Erro ao enviar email de verificação", emailError);
       // Não falha o cadastro se o email não for enviado
     }
