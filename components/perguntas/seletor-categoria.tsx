@@ -69,7 +69,7 @@ export function SeletorCategoria({
         <button
           type="button"
           onClick={() => setMostrarOpcoes(!mostrarOpcoes)}
-          className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-400 transition-colors w-full justify-between"
+          className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-400 transition-colors w-full justify-between cursor-pointer"
         >
           <div className="flex items-center gap-2">
             <span className="text-xl">{categoriaInfo?.icone}</span>
@@ -104,7 +104,7 @@ export function SeletorCategoria({
                 key={categoria.id}
                 type="button"
                 onClick={() => handleMudarCategoria(categoria.id)}
-                className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors first:rounded-t-lg last:rounded-b-lg cursor-pointer ${
                   categoriaLocal === categoria.id ? 'bg-blue-50' : ''
                 }`}
               >

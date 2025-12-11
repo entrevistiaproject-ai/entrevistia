@@ -373,7 +373,7 @@ export default function EntrevistaDetalhesPage() {
           {entrevista.descricao && (
             <button
               onClick={() => setDescricaoAberta(!descricaoAberta)}
-              className="flex items-center gap-2 mt-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-2 mt-2 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             >
               <FileText className="h-4 w-4" />
               <span>Ver descrição da vaga</span>

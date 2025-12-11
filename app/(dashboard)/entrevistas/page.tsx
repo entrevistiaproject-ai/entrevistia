@@ -173,7 +173,7 @@ export default function EntrevistasPage() {
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             >
               <X className="h-4 w-4" />
             </button>
@@ -192,7 +192,7 @@ export default function EntrevistasPage() {
               key={filter.value}
               onClick={() => setStatusFilter(filter.value)}
               className={`
-                relative flex flex-col items-center justify-center gap-0.5 rounded-md px-2 py-2 text-xs font-medium transition-all
+                relative flex flex-col items-center justify-center gap-0.5 rounded-md px-2 py-2 text-xs font-medium transition-all cursor-pointer
                 sm:flex-row sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-sm
                 ${statusFilter === filter.value
                   ? "bg-background text-foreground shadow-sm"

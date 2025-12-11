@@ -91,7 +91,7 @@ export function AdminHeader() {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMobileMenuOpen(true)}
-          className="lg:hidden p-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+          className="lg:hidden p-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
         >
           <Menu className="h-5 w-5" />
         </button>
@@ -125,13 +125,13 @@ export function AdminHeader() {
           {/* Search - Mobile */}
           <button
             onClick={() => setSearchOpen(!searchOpen)}
-            className="md:hidden p-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+            className="md:hidden p-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
           >
             <Search className="h-5 w-5" />
           </button>
 
           {/* Notifications */}
-          <button className="relative p-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+          <button className="relative p-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer">
             <Bell className="h-5 w-5" />
             <span className="absolute top-1 right-1 flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
@@ -193,7 +193,7 @@ export function AdminHeader() {
               </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white"
+                className="p-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>

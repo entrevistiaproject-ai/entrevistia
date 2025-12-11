@@ -753,7 +753,7 @@ export default function FaturaPage() {
                       key={fatura.id}
                       onClick={() => fetchFaturaDetails(fatura.id)}
                       className={cn(
-                        "w-full flex items-center justify-between p-3 rounded-lg transition-colors text-left",
+                        "w-full flex items-center justify-between p-3 rounded-lg transition-colors text-left cursor-pointer",
                         selectedFatura?.id === fatura.id
                           ? "bg-primary/10 border border-primary/30"
                           : "bg-muted/30 hover:bg-muted/50"

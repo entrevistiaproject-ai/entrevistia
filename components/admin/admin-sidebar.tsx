@@ -228,7 +228,7 @@ export function AdminSidebar() {
                 <div key={group.title} className="space-y-1">
                   <button
                     onClick={() => toggleGroup(group.title)}
-                    className="flex w-full items-center justify-between px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors"
+                    className="flex w-full items-center justify-between px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors cursor-pointer"
                   >
                     <span>{group.title}</span>
                     <ChevronDown
@@ -274,7 +274,7 @@ export function AdminSidebar() {
 
         {/* Notifications */}
         <div className="border-t border-slate-700 p-3">
-          <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
+          <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all cursor-pointer">
             <Bell className="h-5 w-5" />
             <span>Notificações</span>
             <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-white">
@@ -318,7 +318,7 @@ export function AdminSidebar() {
 
                 <button
                   onClick={handleLogout}
-                  className="p-2 rounded-lg text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-colors"
+                  className="p-2 rounded-lg text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-colors cursor-pointer"
                   title="Sair"
                 >
                   <LogOut className="h-4 w-4" />

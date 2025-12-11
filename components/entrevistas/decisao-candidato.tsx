@@ -357,7 +357,7 @@ export function DecisaoCandidato({
         <DialogTrigger asChild>
           <button
             className={cn(
-              "flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all",
+              "flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all cursor-pointer",
               config.bgColor,
               config.borderColor,
               "focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500"
@@ -406,7 +406,7 @@ export function DecisaoCandidato({
               type="button"
               onClick={() => setDecisaoSelecionada("aprovado")}
               className={cn(
-                "flex flex-col items-center gap-2.5 p-5 rounded-xl border-2 transition-all",
+                "flex flex-col items-center gap-2.5 p-5 rounded-xl border-2 transition-all cursor-pointer",
                 decisaoSelecionada === "aprovado"
                   ? "border-emerald-500 bg-emerald-50"
                   : "border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/50"
@@ -431,7 +431,7 @@ export function DecisaoCandidato({
               type="button"
               onClick={() => setDecisaoSelecionada("reprovado")}
               className={cn(
-                "flex flex-col items-center gap-2.5 p-5 rounded-xl border-2 transition-all",
+                "flex flex-col items-center gap-2.5 p-5 rounded-xl border-2 transition-all cursor-pointer",
                 decisaoSelecionada === "reprovado"
                   ? "border-red-500 bg-red-50"
                   : "border-slate-200 hover:border-red-300 hover:bg-red-50/50"
@@ -492,7 +492,7 @@ export function DecisaoCandidato({
                   <button
                     type="button"
                     onClick={() => setMostrarEdicaoEmail(!mostrarEdicaoEmail)}
-                    className="text-sm text-blue-600 hover:text-blue-800 underline"
+                    className="text-sm text-blue-600 hover:text-blue-800 underline cursor-pointer"
                   >
                     {mostrarEdicaoEmail ? "Ocultar edição" : "Personalizar mensagem"}
                   </button>
@@ -535,7 +535,7 @@ export function DecisaoCandidato({
                 <button
                   type="button"
                   onClick={() => setMostrarEdicaoEmail(!mostrarEdicaoEmail)}
-                  className="text-sm text-amber-700 hover:text-amber-900 underline"
+                  className="text-sm text-amber-700 hover:text-amber-900 underline cursor-pointer"
                 >
                   {mostrarEdicaoEmail ? "Ocultar edição" : "Personalizar mensagem antes de enviar"}
                 </button>

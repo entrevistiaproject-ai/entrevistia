@@ -88,7 +88,7 @@ export function AutocompleteCargo({
                   <CommandEmpty>
                     <button
                       onClick={() => handleSelect(value)}
-                      className="w-full text-left px-2 py-1.5 text-sm hover:bg-accent rounded-sm"
+                      className="w-full text-left px-2 py-1.5 text-sm hover:bg-accent rounded-sm cursor-pointer"
                     >
                       Criar &quot;<strong>{value}</strong>&quot;
                     </button>

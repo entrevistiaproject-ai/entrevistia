@@ -126,7 +126,7 @@ export function BottomNav() {
           <SheetTrigger asChild>
             <button
               className={cn(
-                "flex flex-col items-center justify-center gap-1 min-w-16 min-h-14 px-2 py-2 transition-all duration-200 active:scale-95",
+                "flex flex-col items-center justify-center gap-1 min-w-16 min-h-14 px-2 py-2 transition-all duration-200 active:scale-95 cursor-pointer",
                 isMoreActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
@@ -182,7 +182,7 @@ export function BottomNav() {
               <SupportWidget
                 trigger={
                   <button
-                    className="w-full flex items-center gap-4 rounded-xl p-4 transition-all duration-200 active:scale-[0.98] hover:bg-accent active:bg-accent"
+                    className="w-full flex items-center gap-4 rounded-xl p-4 transition-all duration-200 active:scale-[0.98] hover:bg-accent active:bg-accent cursor-pointer"
                   >
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted transition-colors">
                       <MessageSquare className="h-6 w-6" />

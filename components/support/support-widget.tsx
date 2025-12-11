@@ -172,7 +172,7 @@ export function SupportWidget({
 
     if (variant === "card") {
       return (
-        <button className="w-full p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left">
+        <button className="w-full p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left cursor-pointer">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10">
               <MessageSquare className="h-5 w-5 text-primary" />
