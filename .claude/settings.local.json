@@ -60,7 +60,12 @@
       "Bash(python3:*)",
       "Bash(vercel:*)",
       "Bash(node scripts/merge-duplicate-candidatos.js:*)",
-      "Bash(xxd:*)"
+      "Bash(xxd:*)",
+      "Bash(timeout 30 npm run:*)",
+      "Bash(mkdir:*)",
+      "Bash(timeout 180 npm run build:*)",
+      "Bash(timeout 10 npm run dev:*)",
+      "Bash(timeout 15 npm run dev:*)"
     ],
     "deny": [],
     "ask": []

@@ -132,8 +132,8 @@ export default function LandingPage() {
           </div>
 
           {/* Product Preview - Simplified */}
-          <div className="mt-16 sm:mt-20 max-w-5xl mx-auto">
-            <div className="relative rounded-xl sm:rounded-2xl border bg-card shadow-2xl shadow-primary/5 overflow-hidden">
+          <div className="max-w-5xl mx-auto -mb-[35%] sm:-mb-[25%] md:-mb-[10%] lg:mb-0 mt-6 sm:mt-10 md:mt-16 lg:mt-20">
+            <div className="relative rounded-xl sm:rounded-2xl border bg-card shadow-2xl shadow-primary/5 overflow-hidden origin-top scale-[0.65] sm:scale-75 md:scale-90 lg:scale-100">
               {/* Browser chrome */}
               <div className="flex items-center gap-2 px-4 py-3 border-b bg-muted/50">
                 <div className="flex gap-1.5">
