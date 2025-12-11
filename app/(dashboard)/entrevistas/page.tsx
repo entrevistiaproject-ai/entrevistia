@@ -180,34 +180,32 @@ export default function EntrevistasPage() {
           )}
         </div>
 
-        {/* Filtro por status - Grid 2x2 no mobile, inline no desktop */}
-        <div className="grid grid-cols-4 gap-1.5 p-1 bg-muted/50 rounded-lg sm:inline-flex sm:gap-1 sm:bg-muted sm:p-1">
+        {/* Filtro por status */}
+        <div className="flex p-1 bg-muted rounded-lg w-full">
           {[
             { value: "todas", label: "Todas", count: counts.todas },
             { value: "ativas", label: "Ativas", count: counts.ativas },
-            { value: "encerradas", label: "Encerr.", fullLabel: "Encerradas", count: counts.encerradas },
-            { value: "arquivadas", label: "Arquiv.", fullLabel: "Arquivadas", count: counts.arquivadas },
+            { value: "encerradas", label: "Encerradas", count: counts.encerradas },
+            { value: "arquivadas", label: "Arquivadas", count: counts.arquivadas },
           ].map((filter) => (
             <button
               key={filter.value}
               onClick={() => setStatusFilter(filter.value)}
               className={`
-                relative flex flex-col items-center justify-center gap-0.5 rounded-md px-2 py-2 text-xs font-medium transition-all cursor-pointer
-                sm:flex-row sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-sm
+                flex-1 flex items-center justify-center gap-1.5 rounded-md px-2 py-2 text-xs sm:text-sm font-medium transition-all cursor-pointer
                 ${statusFilter === filter.value
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground hover:bg-background/50"
                 }
               `}
             >
-              <span className="sm:hidden">{filter.label}</span>
-              <span className="hidden sm:inline">{filter.fullLabel || filter.label}</span>
+              <span className="hidden sm:inline">{filter.label}</span>
+              <span className="sm:hidden">{filter.label.slice(0, 5)}{filter.label.length > 5 ? '.' : ''}</span>
               <span className={`
-                rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums
-                sm:text-xs sm:px-2
+                rounded-full px-1.5 py-0.5 text-[10px] sm:text-xs font-semibold tabular-nums
                 ${statusFilter === filter.value
                   ? "bg-primary/10 text-primary"
-                  : "bg-muted text-muted-foreground"
+                  : "bg-muted-foreground/20 text-muted-foreground"
                 }
               `}>
                 {filter.count}
