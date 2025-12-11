@@ -50,12 +50,14 @@ export async function middleware(request: NextRequest) {
     "/admin-login",
   ];
 
-  // Rotas públicas que começam com determinados prefixos (para candidatos)
+  // Rotas públicas que começam com determinados prefixos (para candidatos e convites)
   const publicPrefixes = [
     "/convite/",
+    "/convite-time/",
     "/entrevista/",
     "/api/convite/",
     "/api/entrevista-publica/",
+    "/api/time/convite/aceitar/", // Rota para verificar convite (GET é público)
   ];
 
   // Rotas de autenticação com rate limiting mais rigoroso

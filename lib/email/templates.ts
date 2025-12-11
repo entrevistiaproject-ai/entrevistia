@@ -528,3 +528,330 @@ export function emailConviteEntrevistaTemplate(params: {
 </html>
   `.trim();
 }
+
+/**
+ * Template de email de convite para time de recrutadores
+ */
+export function emailConviteTimeTemplate(params: {
+  nomeConvidado: string;
+  nomeQuemConvidou: string;
+  empresaQuemConvidou: string;
+  role: string;
+  linkConvite: string;
+  mensagemPersonalizada?: string;
+}) {
+  const { nomeConvidado, nomeQuemConvidou, empresaQuemConvidou, role, linkConvite, mensagemPersonalizada } = params;
+
+  const roleDescriptions: Record<string, string> = {
+    admin: "Administrador (pode gerenciar membros e configurações)",
+    recruiter: "Recrutador (pode criar entrevistas e avaliar candidatos)",
+    viewer: "Visualizador (apenas visualização)",
+  };
+
+  const roleDescription = roleDescriptions[role] || role;
+
+  return `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Convite para Time - EntrevistIA</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 40px 30px; text-align: center;">
+              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">
+                EntrevistIA
+              </h1>
+              <p style="margin: 10px 0 0 0; color: #e0e7ff; font-size: 16px;">
+                Convite para Time de Recrutamento
+              </p>
+            </td>
+          </tr>
+
+          <!-- Conteudo -->
+          <tr>
+            <td style="padding: 40px 30px;">
+              <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 24px; font-weight: 600;">
+                Olá, ${nomeConvidado}!
+              </h2>
+
+              <p style="margin: 0 0 20px 0; color: #4b5563; font-size: 16px; line-height: 1.6;">
+                <strong>${nomeQuemConvidou}</strong> convidou você para fazer parte do time de recrutamento da <strong>${empresaQuemConvidou}</strong> na EntrevistIA!
+              </p>
+
+              ${mensagemPersonalizada ? `
+              <div style="background-color: #f0f9ff; border-left: 4px solid #3b82f6; padding: 16px; border-radius: 8px; margin: 0 0 24px 0;">
+                <p style="margin: 0; color: #1e40af; font-size: 14px; font-style: italic;">
+                  "${mensagemPersonalizada}"
+                </p>
+                <p style="margin: 8px 0 0 0; color: #6b7280; font-size: 12px;">
+                  - ${nomeQuemConvidou}
+                </p>
+              </div>
+              ` : ''}
+
+              <!-- Role -->
+              <div style="background-color: #f9fafb; border-radius: 8px; padding: 20px; margin: 0 0 24px 0;">
+                <p style="margin: 0 0 8px 0; color: #374151; font-size: 14px; font-weight: 600;">
+                  Sua função no time:
+                </p>
+                <p style="margin: 0; color: #6366f1; font-size: 16px; font-weight: 500;">
+                  ${roleDescription}
+                </p>
+              </div>
+
+              <p style="margin: 0 0 24px 0; color: #4b5563; font-size: 16px; line-height: 1.6;">
+                Com a EntrevistIA, você poderá:
+              </p>
+
+              <ul style="margin: 0 0 30px 0; padding-left: 20px; color: #4b5563; font-size: 14px; line-height: 1.8;">
+                <li>Criar e gerenciar entrevistas com IA</li>
+                <li>Avaliar candidatos de forma rápida e eficiente</li>
+                <li>Colaborar com seu time em tempo real</li>
+                <li>Tomar decisões baseadas em dados</li>
+              </ul>
+
+              <!-- CTA Button -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 24px 0;">
+                <tr>
+                  <td align="center">
+                    <a href="${linkConvite}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600;">
+                      Aceitar Convite
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Link alternativo -->
+              <div style="background-color: #f8fafc; border-radius: 8px; padding: 16px; margin: 0 0 24px 0;">
+                <p style="margin: 0 0 8px 0; color: #64748b; font-size: 12px; text-align: center;">
+                  Se o botão não funcionar, copie e cole este link:
+                </p>
+                <p style="margin: 0; color: #6366f1; font-size: 12px; word-break: break-all; text-align: center;">
+                  ${linkConvite}
+                </p>
+              </div>
+
+              <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 8px;">
+                <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.5;">
+                  Este convite expira em <strong>7 dias</strong>. Se você não fez esta solicitação, pode ignorar este email.
+                </p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">
+                Este email foi enviado pela <strong>EntrevistIA</strong>
+              </p>
+              <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+                © ${new Date().getFullYear()} EntrevistIA. Todos os direitos reservados.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+}
+
+/**
+ * Template de email de aprovação automática para candidato
+ */
+export function emailAprovacaoAutomaticaTemplate(params: {
+  nomeCandidato: string;
+  cargo: string;
+  empresa: string;
+  mensagemPersonalizada?: string;
+}) {
+  const { nomeCandidato, cargo, empresa, mensagemPersonalizada } = params;
+
+  const mensagemPadrao = `Temos ótimas notícias! Após analisar sua entrevista para a vaga de <strong>${cargo}</strong>, ficamos muito impressionados com seu perfil.
+
+Você foi aprovado(a) para a próxima fase do processo seletivo! Em breve entraremos em contato com mais detalhes sobre os próximos passos.
+
+Parabéns pelo excelente desempenho!`;
+
+  const mensagemFinal = mensagemPersonalizada || mensagemPadrao;
+
+  return `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parabéns! Você foi aprovado(a) - ${empresa}</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+
+          <!-- Header com gradiente verde -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); padding: 40px 30px; text-align: center;">
+              <div style="font-size: 48px; margin-bottom: 16px;">&#127881;</div>
+              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">
+                Parabéns!
+              </h1>
+              <p style="margin: 10px 0 0 0; color: #dcfce7; font-size: 16px;">
+                Você foi aprovado(a) para a próxima fase
+              </p>
+            </td>
+          </tr>
+
+          <!-- Conteudo -->
+          <tr>
+            <td style="padding: 40px 30px;">
+              <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 600;">
+                Olá, ${nomeCandidato}!
+              </h2>
+
+              <div style="color: #4b5563; font-size: 16px; line-height: 1.7;">
+                ${mensagemFinal.split('\n\n').map(p => `<p style="margin: 0 0 16px 0;">${p}</p>`).join('')}
+              </div>
+
+              <!-- Card de informação -->
+              <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; border-radius: 8px; margin: 30px 0;">
+                <p style="margin: 0; color: #166534; font-size: 14px; line-height: 1.5;">
+                  <strong>Próximos passos:</strong> Nossa equipe entrará em contato em breve para agendar as próximas etapas.
+                </p>
+              </div>
+
+              <p style="margin: 30px 0 0 0; color: #4b5563; font-size: 16px;">
+                Atenciosamente,<br>
+                <strong>Equipe de Recrutamento</strong><br>
+                ${empresa}
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">
+                Este email foi enviado via <strong>EntrevistIA</strong>
+              </p>
+              <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+                © ${new Date().getFullYear()} ${empresa}. Todos os direitos reservados.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+}
+
+/**
+ * Template de email de reprovação automática para candidato
+ */
+export function emailReprovacaoAutomaticaTemplate(params: {
+  nomeCandidato: string;
+  cargo: string;
+  empresa: string;
+  mensagemPersonalizada?: string;
+}) {
+  const { nomeCandidato, cargo, empresa, mensagemPersonalizada } = params;
+
+  const mensagemPadrao = `Agradecemos muito seu interesse na vaga de <strong>${cargo}</strong> e o tempo que você dedicou ao nosso processo seletivo.
+
+Após uma análise cuidadosa, decidimos seguir com outros candidatos que estão mais alinhados com o perfil que buscamos neste momento.
+
+Isso não diminui suas qualidades profissionais. Manteremos seu perfil em nosso banco para futuras oportunidades que possam ser mais adequadas ao seu perfil.
+
+Desejamos muito sucesso em sua jornada profissional!`;
+
+  const mensagemFinal = mensagemPersonalizada || mensagemPadrao;
+
+  return `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atualização sobre sua candidatura - ${empresa}</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 40px 30px; text-align: center;">
+              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">
+                ${empresa}
+              </h1>
+              <p style="margin: 10px 0 0 0; color: #e0e7ff; font-size: 16px;">
+                Atualização sobre sua candidatura
+              </p>
+            </td>
+          </tr>
+
+          <!-- Conteudo -->
+          <tr>
+            <td style="padding: 40px 30px;">
+              <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 600;">
+                Olá, ${nomeCandidato}!
+              </h2>
+
+              <div style="color: #4b5563; font-size: 16px; line-height: 1.7;">
+                ${mensagemFinal.split('\n\n').map(p => `<p style="margin: 0 0 16px 0;">${p}</p>`).join('')}
+              </div>
+
+              <!-- Card de informação -->
+              <div style="background-color: #f0f9ff; border-left: 4px solid #3b82f6; padding: 16px; border-radius: 8px; margin: 30px 0;">
+                <p style="margin: 0; color: #1e40af; font-size: 14px; line-height: 1.5;">
+                  <strong>Seu perfil foi guardado.</strong> Caso surja uma oportunidade mais adequada, entraremos em contato.
+                </p>
+              </div>
+
+              <p style="margin: 30px 0 0 0; color: #4b5563; font-size: 16px;">
+                Atenciosamente,<br>
+                <strong>Equipe de Recrutamento</strong><br>
+                ${empresa}
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">
+                Este email foi enviado via <strong>EntrevistIA</strong>
+              </p>
+              <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+                © ${new Date().getFullYear()} ${empresa}. Todos os direitos reservados.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+}

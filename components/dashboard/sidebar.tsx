@@ -14,6 +14,7 @@ import {
   HelpCircle,
   LogOut,
   MessageSquare,
+  UsersRound,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { signOut } from "next-auth/react";
@@ -47,11 +48,20 @@ const mainMenuItems = [
   },
 ];
 
-const secondaryMenuItems = [
+// Itens que requerem acesso financeiro
+const financialMenuItems = [
   {
     title: "Uso e créditos",
     href: "/custos",
     icon: DollarSign,
+  },
+];
+
+const secondaryMenuItems = [
+  {
+    title: "Meu Time",
+    href: "/time",
+    icon: UsersRound,
   },
   {
     title: "Minha conta",
@@ -63,6 +73,7 @@ const secondaryMenuItems = [
 interface UserInfo {
   nome: string | null;
   email: string;
+  canAccessFinancials: boolean;
 }
 
 export function Sidebar() {
@@ -78,6 +89,7 @@ export function Sidebar() {
           setUserInfo({
             nome: data.nome,
             email: data.email,
+            canAccessFinancials: data.canAccessFinancials ?? true,
           });
         }
       })
@@ -141,6 +153,28 @@ export function Sidebar() {
             <p className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
               Configurações
             </p>
+            {/* Itens financeiros - apenas para owners */}
+            {userInfo?.canAccessFinancials && financialMenuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  )}
+                >
+                  <Icon className="h-5 w-5 shrink-0" />
+                  <span className="truncate">{item.title}</span>
+                </Link>
+              );
+            })}
+            {/* Itens gerais */}
             {secondaryMenuItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;

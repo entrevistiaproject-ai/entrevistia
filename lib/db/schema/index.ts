@@ -12,6 +12,7 @@ export * from "./candidato-entrevistas";
 export * from "./admin-users";
 export * from "./system-config";
 export * from "./tickets";
+export * from "./team";
 
 // Export schema for Drizzle migrations
 import { users } from "./users";
@@ -37,6 +38,13 @@ import {
   ticketCategoryEnum,
   ticketSourceEnum,
 } from "./tickets";
+import {
+  teamMembers,
+  teamInvitations,
+  teamSettings,
+  teamRoleEnum,
+  invitationStatusEnum,
+} from "./team";
 
 export const schema = {
   users,
@@ -63,4 +71,9 @@ export const schema = {
   ticketPriorityEnum,
   ticketCategoryEnum,
   ticketSourceEnum,
+  teamMembers,
+  teamInvitations,
+  teamSettings,
+  teamRoleEnum,
+  invitationStatusEnum,
 };

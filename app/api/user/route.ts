@@ -3,6 +3,7 @@ import { getUserId } from "@/lib/auth/get-user";
 import { getDB } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { canAccessFinancials } from "@/lib/services/team-service";
 
 /**
  * GET /api/user
@@ -43,7 +44,13 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json(user);
+    // Verifica se o usuário tem acesso às páginas financeiras
+    const hasFinancialAccess = await canAccessFinancials(userId);
+
+    return NextResponse.json({
+      ...user,
+      canAccessFinancials: hasFinancialAccess,
+    });
   } catch (error) {
     console.error("Erro ao buscar usuário:", error);
     return NextResponse.json(

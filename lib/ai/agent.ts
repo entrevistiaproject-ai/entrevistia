@@ -4,6 +4,7 @@ import { entrevistas, respostas, perguntas, candidatoEntrevistas, CompetenciaAva
 import { eq, and } from 'drizzle-orm';
 import { z } from 'zod';
 import { registrarAnalisePerguntas } from '@/lib/services/billing';
+import { processAutoDecision } from '@/lib/services/team-service';
 
 /**
  * Schema para competência individual
@@ -226,6 +227,19 @@ Retorne APENAS o JSON, sem texto adicional, sem markdown, sem explicações.`;
           respostaId: r.respostaId,
         })),
       });
+    }
+
+    // Processa aprovação/reprovação automática se configurado
+    try {
+      const autoDecision = await processAutoDecision(updated.id);
+      if (autoDecision.processed) {
+        console.log(
+          `Decisão automática processada para candidato-entrevista ${updated.id}: ${autoDecision.decision}`
+        );
+      }
+    } catch (autoDecisionError) {
+      // Não falha a análise se a decisão automática falhar
+      console.error('Erro ao processar decisão automática:', autoDecisionError);
     }
 
     return { success: true, avaliacaoId: updated.id };
