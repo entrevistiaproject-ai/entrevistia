@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getDB } from "@/lib/db";
 import { entrevistas, candidatos, candidatoEntrevistas } from "@/lib/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
@@ -9,9 +9,11 @@ import {
   sanitizeName,
   sanitizeCPF,
   sanitizeSlug,
-  checkRateLimit,
+  checkCombinedRateLimit,
   getClientIP,
-  createRateLimitKey,
+  getRateLimitHeaders,
+  withBotProtection,
+  recordFailedAttempt,
 } from "@/lib/security";
 
 const iniciarEntrevistaSchema = z.object({
@@ -30,15 +32,18 @@ const iniciarEntrevistaSchema = z.object({
  * Cria/atualiza candidato e inicia a entrevista
  *
  * Validações de segurança:
- * - Rate limiting por IP
+ * - Rate limiting por IP e email
+ * - Detecção de bots
  * - Sanitização de inputs
  * - Validação de status da entrevista
  * - Verificação de expiração do link
  */
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  const clientIP = getClientIP(request);
+
   try {
     const { slug: rawSlug } = await params;
     const slug = sanitizeSlug(rawSlug);
@@ -50,15 +55,34 @@ export async function POST(
       );
     }
 
+    // Proteção contra bots
+    const botCheck = withBotProtection(request, "public-interview-start", {
+      allowLegitBots: false, // Não permite bots em entrevistas
+      blockThreshold: 60, // Threshold mais baixo para endpoint crítico
+    });
+
+    if (!botCheck.allowed) {
+      recordFailedAttempt(clientIP, "public-interview-start");
+      return botCheck.response;
+    }
+
     // Rate limiting por IP para evitar abuso
-    const clientIP = getClientIP(request);
-    const rateLimitKey = createRateLimitKey("entrevista-iniciar", clientIP);
-    const rateLimitResult = checkRateLimit(rateLimitKey, "api");
+    const rateLimitResult = checkCombinedRateLimit({
+      ip: clientIP,
+      endpoint: "public-interview-start",
+      configKey: "publicInterviewStart",
+    });
 
     if (!rateLimitResult.success) {
       return NextResponse.json(
-        { error: "Muitas tentativas. Aguarde alguns minutos." },
-        { status: 429 }
+        {
+          error: "Muitas tentativas. Aguarde alguns minutos.",
+          retryAfter: rateLimitResult.retryAfter,
+        },
+        {
+          status: 429,
+          headers: getRateLimitHeaders(rateLimitResult),
+        }
       );
     }
 
@@ -256,11 +280,16 @@ export async function POST(
       sessaoId = novaSessao.id;
     }
 
-    return NextResponse.json({
-      candidatoId,
-      sessaoId,
-      entrevistaId: entrevista.id,
-    });
+    return NextResponse.json(
+      {
+        candidatoId,
+        sessaoId,
+        entrevistaId: entrevista.id,
+      },
+      {
+        headers: getRateLimitHeaders(rateLimitResult),
+      }
+    );
   } catch (error) {
     logger.error("Erro ao iniciar entrevista", error);
     return NextResponse.json(

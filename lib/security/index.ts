@@ -13,12 +13,25 @@ export {
   checkRateLimit,
   checkRateLimitCustom,
   clearRateLimit,
+  resetBlockCount,
   getClientIP,
   createRateLimitKey,
   getRateLimitHeaders,
   rateLimitExceededResponse,
+  withRateLimit,
+  checkAIRateLimit,
+  checkCombinedRateLimit,
+  consumeTokens,
+  recordFailedAttempt,
+  clearSuspiciousPattern,
+  isSuspicious,
+  getRateLimitStats,
   RATE_LIMIT_CONFIGS,
+  TOKEN_BUCKET_CONFIGS,
   type RateLimitResult,
+  type TokenBucketConfig,
+  type SuspiciousPatternResult,
+  type CombinedRateLimitOptions,
 } from './rate-limit';
 
 // Security Headers
@@ -70,3 +83,35 @@ export {
   isValidCodeFormat,
   generateCodeSalt,
 } from './verification-code';
+
+// Bot Detection
+export {
+  detectBot,
+  shouldBlockRequest,
+  withBotProtection,
+  analyzeUserAgent,
+  analyzeHeaders,
+  analyzeBehavior,
+  extractFingerprint,
+  clearBehaviorData,
+  getBotDetectionStats,
+  checkAIEndpointProtection,
+  type BotSignature,
+  type RequestFingerprint,
+} from './bot-detection';
+
+// API Protection (Centralized)
+export {
+  applyProtection,
+  applyAIProtection,
+  securityErrorResponse,
+  recordSuccess,
+  createProtectedHandler,
+  validateContentType,
+  validatePayloadSize,
+  SecurityResponses,
+  extractSecurityContext,
+  type ProtectionLevel,
+  type ProtectionConfig,
+  type ProtectionResult,
+} from './api-protection';

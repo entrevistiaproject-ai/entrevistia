@@ -1,16 +1,70 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import OpenAI, { toFile } from "openai";
+import { auth } from "@/auth";
+import {
+  checkAIRateLimit,
+  getClientIP,
+  getRateLimitHeaders,
+  checkAIEndpointProtection,
+  recordFailedAttempt,
+} from "@/lib/security";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || "placeholder-for-build",
 });
 
-export async function POST(request: Request) {
+// Tipos de arquivo de áudio permitidos
+const ALLOWED_AUDIO_TYPES = [
+  "audio/webm",
+  "audio/ogg",
+  "audio/wav",
+  "audio/mp3",
+  "audio/mpeg",
+  "audio/mp4",
+  "audio/flac",
+  "audio/x-m4a",
+  "video/webm", // Alguns navegadores enviam áudio como video/webm
+];
+
+const VALID_EXTENSIONS = ["flac", "m4a", "mp3", "mp4", "mpeg", "mpga", "oga", "ogg", "wav", "webm"];
+
+export async function POST(request: NextRequest) {
+  const clientIP = getClientIP(request);
+
   try {
+    // Verifica se API key está configurada
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
         { error: "OPENAI_API_KEY não configurada" },
         { status: 500 }
+      );
+    }
+
+    // Verifica sessão (opcional para transcrição em entrevistas públicas)
+    const session = await auth();
+    const userId = session?.user?.id;
+
+    // Proteção contra bots para endpoints de IA
+    const botCheck = checkAIEndpointProtection(request, "transcription");
+    if (!botCheck.allowed) {
+      // Registra tentativa suspeita
+      recordFailedAttempt(clientIP, "transcription");
+      return botCheck.response;
+    }
+
+    // Rate limiting específico para IA
+    const rateLimitCheck = checkAIRateLimit(request, userId, "transcription");
+    if (!rateLimitCheck.allowed) {
+      return rateLimitCheck.response;
+    }
+
+    // Validação do Content-Type
+    const contentType = request.headers.get("content-type") || "";
+    if (!contentType.includes("multipart/form-data")) {
+      recordFailedAttempt(clientIP, "transcription");
+      return NextResponse.json(
+        { error: "Content-Type deve ser multipart/form-data" },
+        { status: 400 }
       );
     }
 
@@ -24,6 +78,20 @@ export async function POST(request: Request) {
       );
     }
 
+    // Validação do tipo de arquivo
+    const fileType = audioFile.type.toLowerCase();
+    const isValidType = ALLOWED_AUDIO_TYPES.some(type =>
+      fileType.includes(type.split("/")[1]) || fileType === type
+    );
+
+    if (!isValidType && audioFile.type !== "") {
+      recordFailedAttempt(clientIP, "transcription");
+      return NextResponse.json(
+        { error: "Tipo de arquivo não suportado. Use: webm, ogg, wav, mp3, mp4, flac" },
+        { status: 400 }
+      );
+    }
+
     // Verificar tamanho do arquivo (25MB limite da OpenAI)
     const maxSize = 25 * 1024 * 1024; // 25MB
     if (audioFile.size > maxSize) {
@@ -33,12 +101,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Log para debug
-    console.log("Arquivo recebido:", {
-      name: audioFile.name,
-      type: audioFile.type,
-      size: audioFile.size,
-    });
+    // Tamanho mínimo (evita requisições vazias ou com arquivos corrompidos)
+    const minSize = 1024; // 1KB
+    if (audioFile.size < minSize) {
+      recordFailedAttempt(clientIP, "transcription");
+      return NextResponse.json(
+        { error: "Arquivo muito pequeno ou corrompido" },
+        { status: 400 }
+      );
+    }
 
     // Converter File para Buffer
     const arrayBuffer = await audioFile.arrayBuffer();
@@ -56,10 +127,9 @@ export async function POST(request: Request) {
     let fileName = audioFile.name || "audio.webm";
 
     // Se o nome não tem extensão válida, adicionar baseado no tipo
-    const validExtensions = ["flac", "m4a", "mp3", "mp4", "mpeg", "mpga", "oga", "ogg", "wav", "webm"];
     const currentExt = fileName.split(".").pop()?.toLowerCase();
 
-    if (!currentExt || !validExtensions.includes(currentExt)) {
+    if (!currentExt || !VALID_EXTENSIONS.includes(currentExt)) {
       // Determinar extensão baseada no tipo MIME
       const mimeType = audioFile.type || "";
       if (mimeType.includes("webm")) {
@@ -80,13 +150,7 @@ export async function POST(request: Request) {
       }
     }
 
-    console.log("Enviando para Whisper:", {
-      fileName,
-      originalType: audioFile.type,
-      size: buffer.length,
-    });
-
-    // Transcrever com OpenAI Whisper - NÃO passar o type, deixar a SDK detectar pela extensão
+    // Transcrever com OpenAI Whisper
     const file = await toFile(buffer, fileName);
     const transcription = await openai.audio.transcriptions.create({
       file: file,
@@ -95,15 +159,28 @@ export async function POST(request: Request) {
       response_format: "json",
     });
 
-    return NextResponse.json({
-      transcricao: transcription.text,
-    });
+    // Retorna com headers de rate limit para feedback ao cliente
+    return NextResponse.json(
+      { transcricao: transcription.text },
+      {
+        headers: getRateLimitHeaders(rateLimitCheck.result),
+      }
+    );
   } catch (error) {
-    console.error("Erro ao transcrever áudio:", error);
+    // Registra erro mas não conta como tentativa falhada de segurança
+    // pois pode ser erro legítimo da API do OpenAI
+    if (process.env.NODE_ENV === "development") {
+      console.error("Erro ao transcrever áudio:", error);
+    }
 
     if (error instanceof Error) {
+      // Não expõe detalhes internos em produção
+      const message = process.env.NODE_ENV === "development"
+        ? `Erro na transcrição: ${error.message}`
+        : "Erro ao processar transcrição";
+
       return NextResponse.json(
-        { error: `Erro na transcrição: ${error.message}` },
+        { error: message },
         { status: 500 }
       );
     }
