@@ -19,6 +19,7 @@ import {
   Database,
   Ticket,
   Bug,
+  Shield,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 
@@ -106,6 +107,12 @@ const menuGroups = [
         title: "Monitoramento",
         href: "/admin/monitoramento",
         icon: Activity,
+        permission: "canViewAnalytics" as const,
+      },
+      {
+        title: "Segurança",
+        href: "/admin/seguranca",
+        icon: Shield,
         permission: "canViewAnalytics" as const,
       },
       {
