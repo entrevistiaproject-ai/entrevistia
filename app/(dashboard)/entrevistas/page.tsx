@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Search, Filter, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import { EntrevistaCard } from "@/components/entrevistas/entrevista-card";
@@ -181,36 +180,40 @@ export default function EntrevistasPage() {
           )}
         </div>
 
-        {/* Tabs de filtro - scroll horizontal no mobile */}
-        <div className="scroll-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
-          <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-            <TabsList className="inline-flex w-auto min-w-full sm:min-w-0 sm:grid sm:grid-cols-4 sm:w-full lg:w-auto">
-              <TabsTrigger value="todas" className="flex-1 sm:flex-none text-xs sm:text-sm whitespace-nowrap px-3 sm:px-4">
-                Todas
-                <span className="ml-1.5 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
-                  {counts.todas}
-                </span>
-              </TabsTrigger>
-              <TabsTrigger value="ativas" className="flex-1 sm:flex-none text-xs sm:text-sm whitespace-nowrap px-3 sm:px-4">
-                Ativas
-                <span className="ml-1.5 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
-                  {counts.ativas}
-                </span>
-              </TabsTrigger>
-              <TabsTrigger value="encerradas" className="flex-1 sm:flex-none text-xs sm:text-sm whitespace-nowrap px-3 sm:px-4">
-                Encerradas
-                <span className="ml-1.5 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
-                  {counts.encerradas}
-                </span>
-              </TabsTrigger>
-              <TabsTrigger value="arquivadas" className="flex-1 sm:flex-none text-xs sm:text-sm whitespace-nowrap px-3 sm:px-4">
-                Arquivadas
-                <span className="ml-1.5 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
-                  {counts.arquivadas}
-                </span>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+        {/* Filtro por status - Grid 2x2 no mobile, inline no desktop */}
+        <div className="grid grid-cols-4 gap-1.5 p-1 bg-muted/50 rounded-lg sm:inline-flex sm:gap-1 sm:bg-muted sm:p-1">
+          {[
+            { value: "todas", label: "Todas", count: counts.todas },
+            { value: "ativas", label: "Ativas", count: counts.ativas },
+            { value: "encerradas", label: "Encerr.", fullLabel: "Encerradas", count: counts.encerradas },
+            { value: "arquivadas", label: "Arquiv.", fullLabel: "Arquivadas", count: counts.arquivadas },
+          ].map((filter) => (
+            <button
+              key={filter.value}
+              onClick={() => setStatusFilter(filter.value)}
+              className={`
+                relative flex flex-col items-center justify-center gap-0.5 rounded-md px-2 py-2 text-xs font-medium transition-all
+                sm:flex-row sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-sm
+                ${statusFilter === filter.value
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                }
+              `}
+            >
+              <span className="sm:hidden">{filter.label}</span>
+              <span className="hidden sm:inline">{filter.fullLabel || filter.label}</span>
+              <span className={`
+                rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums
+                sm:text-xs sm:px-2
+                ${statusFilter === filter.value
+                  ? "bg-primary/10 text-primary"
+                  : "bg-muted text-muted-foreground"
+                }
+              `}>
+                {filter.count}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 
