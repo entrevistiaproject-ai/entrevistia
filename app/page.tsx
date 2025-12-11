@@ -46,37 +46,74 @@ export default function LandingPage() {
             </a>
           </nav>
 
-          <div className="hidden sm:flex items-center gap-3">
-            <Button variant="ghost" size="sm" asChild>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
               <Link href="/login">Entrar</Link>
             </Button>
             <Button size="sm" asChild>
-              <Link href="/cadastro">Começar Grátis</Link>
+              <Link href="/cadastro">
+                <span className="hidden sm:inline">Começar Grátis</span>
+                <span className="sm:hidden">Criar conta</span>
+              </Link>
             </Button>
-          </div>
 
-          {/* Mobile menu */}
-          <Sheet>
-            <SheetTrigger asChild className="sm:hidden">
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-72">
-              <nav className="flex flex-col gap-4 mt-8">
-                <a href="#como-funciona" className="text-lg font-medium py-2">Como Funciona</a>
-                <a href="#recursos" className="text-lg font-medium py-2">Recursos</a>
-                <a href="#precos" className="text-lg font-medium py-2">Preços</a>
-                <hr className="my-4" />
-                <Button asChild className="w-full">
-                  <Link href="/cadastro">Começar Grátis</Link>
+            {/* Mobile menu */}
+            <Sheet>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
                 </Button>
-                <Button variant="outline" asChild className="w-full">
-                  <Link href="/login">Entrar</Link>
-                </Button>
-              </nav>
-            </SheetContent>
-          </Sheet>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80 p-0">
+                <div className="flex flex-col h-full">
+                  {/* Header do menu */}
+                  <div className="p-6 border-b bg-muted/30">
+                    <Logo size="md" />
+                  </div>
+
+                  {/* Links de navegação */}
+                  <nav className="flex-1 p-4">
+                    <div className="space-y-1">
+                      <a
+                        href="#como-funciona"
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                      >
+                        <Play className="h-4 w-4" />
+                        Como Funciona
+                      </a>
+                      <a
+                        href="#recursos"
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                      >
+                        <Zap className="h-4 w-4" />
+                        Recursos
+                      </a>
+                      <a
+                        href="#precos"
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                      >
+                        <BarChart3 className="h-4 w-4" />
+                        Preços
+                      </a>
+                    </div>
+                  </nav>
+
+                  {/* Botões de ação */}
+                  <div className="p-6 border-t bg-muted/30 space-y-3">
+                    <Button asChild className="w-full h-11">
+                      <Link href="/cadastro">
+                        Começar Grátis
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button variant="outline" asChild className="w-full h-11">
+                      <Link href="/login">Entrar</Link>
+                    </Button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </header>
 
