@@ -7,7 +7,8 @@ import {
   candidatos,
   candidatoEntrevistas,
 } from "@/lib/db/schema";
-import { eq, and, isNull, sql, desc, gte } from "drizzle-orm";
+import { eq, and, isNull, isNotNull, sql, desc, gte, inArray, or } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
 export interface DashboardMetrics {
   // KPIs principais
@@ -366,5 +367,315 @@ export async function getDashboardMetrics(): Promise<{
   } catch (error) {
     console.error("Erro ao buscar métricas do dashboard:", error);
     return { success: false, error: "Erro ao buscar métricas" };
+  }
+}
+
+// ===== PIPELINE DE CANDIDATOS =====
+
+export interface PipelineCandidate {
+  id: string; // candidatoEntrevistas.id
+  candidatoId: string;
+  nome: string;
+  email: string;
+  entrevistaId: string;
+  entrevistaTitulo: string;
+  cargo: string | null;
+  empresa: string | null;
+  notaGeral: number | null;
+  compatibilidadeVaga: number | null;
+  recomendacao: string | null;
+  concluidaEm: Date | null;
+  decisaoRecrutador: string | null;
+  decisaoRecrutadorEm: Date | null;
+  arquivadoEm: Date | null;
+}
+
+export interface PipelineData {
+  pendentes: PipelineCandidate[]; // Concluídos aguardando decisão
+  shortlist: PipelineCandidate[]; // Aprovados não arquivados
+  arquivados: PipelineCandidate[]; // Arquivados (aprovados e reprovados)
+  counts: {
+    pendentes: number;
+    shortlist: number;
+    arquivados: number;
+    emAndamento: number;
+  };
+}
+
+export async function getPipelineData(): Promise<{
+  success: boolean;
+  data?: PipelineData;
+  error?: string;
+}> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Usuário não autenticado" };
+  }
+
+  const userId = session.user.id;
+
+  try {
+    const db = getDB();
+
+    // Base query para candidatos do usuário
+    const baseQuery = db
+      .select({
+        id: candidatoEntrevistas.id,
+        candidatoId: candidatos.id,
+        nome: candidatos.nome,
+        email: candidatos.email,
+        entrevistaId: entrevistas.id,
+        entrevistaTitulo: entrevistas.titulo,
+        cargo: entrevistas.cargo,
+        empresa: entrevistas.empresa,
+        notaGeral: candidatoEntrevistas.notaGeral,
+        compatibilidadeVaga: candidatoEntrevistas.compatibilidadeVaga,
+        recomendacao: candidatoEntrevistas.recomendacao,
+        concluidaEm: candidatoEntrevistas.concluidaEm,
+        decisaoRecrutador: candidatoEntrevistas.decisaoRecrutador,
+        decisaoRecrutadorEm: candidatoEntrevistas.decisaoRecrutadorEm,
+        arquivadoEm: candidatoEntrevistas.arquivadoEm,
+        status: candidatoEntrevistas.status,
+      })
+      .from(candidatoEntrevistas)
+      .innerJoin(candidatos, eq(candidatoEntrevistas.candidatoId, candidatos.id))
+      .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
+      .where(and(eq(entrevistas.userId, userId), isNull(entrevistas.deletedAt)));
+
+    const allCandidates = await baseQuery.orderBy(desc(candidatoEntrevistas.concluidaEm));
+
+    // Separar por categorias
+    const pendentes: PipelineCandidate[] = [];
+    const shortlist: PipelineCandidate[] = [];
+    const arquivados: PipelineCandidate[] = [];
+    let emAndamento = 0;
+
+    allCandidates.forEach((c) => {
+      const candidate: PipelineCandidate = {
+        id: c.id,
+        candidatoId: c.candidatoId,
+        nome: c.nome,
+        email: c.email,
+        entrevistaId: c.entrevistaId,
+        entrevistaTitulo: c.entrevistaTitulo,
+        cargo: c.cargo,
+        empresa: c.empresa,
+        notaGeral: c.notaGeral,
+        compatibilidadeVaga: c.compatibilidadeVaga,
+        recomendacao: c.recomendacao,
+        concluidaEm: c.concluidaEm,
+        decisaoRecrutador: c.decisaoRecrutador,
+        decisaoRecrutadorEm: c.decisaoRecrutadorEm,
+        arquivadoEm: c.arquivadoEm,
+      };
+
+      // Arquivados
+      if (c.arquivadoEm) {
+        arquivados.push(candidate);
+      }
+      // Shortlist: aprovados e não arquivados
+      else if (c.decisaoRecrutador === "aprovado") {
+        shortlist.push(candidate);
+      }
+      // Pendentes: concluídos sem decisão e não arquivados
+      else if (c.status === "concluida" && !c.decisaoRecrutador) {
+        pendentes.push(candidate);
+      }
+      // Em andamento
+      else if (c.status === "em_andamento") {
+        emAndamento++;
+      }
+    });
+
+    return {
+      success: true,
+      data: {
+        pendentes,
+        shortlist,
+        arquivados,
+        counts: {
+          pendentes: pendentes.length,
+          shortlist: shortlist.length,
+          arquivados: arquivados.length,
+          emAndamento,
+        },
+      },
+    };
+  } catch (error) {
+    console.error("Erro ao buscar pipeline:", error);
+    return { success: false, error: "Erro ao buscar pipeline" };
+  }
+}
+
+// Arquivar candidatos em lote
+export async function arquivarCandidatos(ids: string[]): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Usuário não autenticado" };
+  }
+
+  if (!ids.length) {
+    return { success: false, error: "Nenhum candidato selecionado" };
+  }
+
+  try {
+    const db = getDB();
+
+    await db
+      .update(candidatoEntrevistas)
+      .set({
+        arquivadoEm: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(inArray(candidatoEntrevistas.id, ids));
+
+    revalidatePath("/visao-geral");
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao arquivar candidatos:", error);
+    return { success: false, error: "Erro ao arquivar candidatos" };
+  }
+}
+
+// Desarquivar candidatos em lote
+export async function desarquivarCandidatos(ids: string[]): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Usuário não autenticado" };
+  }
+
+  if (!ids.length) {
+    return { success: false, error: "Nenhum candidato selecionado" };
+  }
+
+  try {
+    const db = getDB();
+
+    await db
+      .update(candidatoEntrevistas)
+      .set({
+        arquivadoEm: null,
+        updatedAt: new Date(),
+      })
+      .where(inArray(candidatoEntrevistas.id, ids));
+
+    revalidatePath("/visao-geral");
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao desarquivar candidatos:", error);
+    return { success: false, error: "Erro ao desarquivar candidatos" };
+  }
+}
+
+// Aprovar candidatos em lote
+export async function aprovarCandidatosEmLote(ids: string[]): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Usuário não autenticado" };
+  }
+
+  if (!ids.length) {
+    return { success: false, error: "Nenhum candidato selecionado" };
+  }
+
+  try {
+    const db = getDB();
+
+    await db
+      .update(candidatoEntrevistas)
+      .set({
+        decisaoRecrutador: "aprovado",
+        decisaoRecrutadorEm: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(inArray(candidatoEntrevistas.id, ids));
+
+    revalidatePath("/visao-geral");
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao aprovar candidatos:", error);
+    return { success: false, error: "Erro ao aprovar candidatos" };
+  }
+}
+
+// Reprovar candidatos em lote
+export async function reprovarCandidatosEmLote(ids: string[]): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Usuário não autenticado" };
+  }
+
+  if (!ids.length) {
+    return { success: false, error: "Nenhum candidato selecionado" };
+  }
+
+  try {
+    const db = getDB();
+
+    await db
+      .update(candidatoEntrevistas)
+      .set({
+        decisaoRecrutador: "reprovado",
+        decisaoRecrutadorEm: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(inArray(candidatoEntrevistas.id, ids));
+
+    revalidatePath("/visao-geral");
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao reprovar candidatos:", error);
+    return { success: false, error: "Erro ao reprovar candidatos" };
+  }
+}
+
+// Marcar como processo finalizado (arquiva aprovados)
+export async function finalizarProcesso(ids: string[]): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Usuário não autenticado" };
+  }
+
+  if (!ids.length) {
+    return { success: false, error: "Nenhum candidato selecionado" };
+  }
+
+  try {
+    const db = getDB();
+
+    await db
+      .update(candidatoEntrevistas)
+      .set({
+        arquivadoEm: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(inArray(candidatoEntrevistas.id, ids));
+
+    revalidatePath("/visao-geral");
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao finalizar processo:", error);
+    return { success: false, error: "Erro ao finalizar processo" };
   }
 }

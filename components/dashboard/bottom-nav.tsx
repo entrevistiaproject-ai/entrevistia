@@ -13,6 +13,8 @@ import {
   DollarSign,
   PlusCircle,
   MessageSquare,
+  ClipboardList,
+  UsersRound,
 } from "lucide-react";
 import { useState } from "react";
 import {
@@ -24,11 +26,12 @@ import {
 } from "@/components/ui/sheet";
 import { SupportWidget } from "@/components/support/support-widget";
 
+// 4 itens principais no mobile (baseado em UX de apps de recrutamento)
 const navItems = [
   {
-    href: "/visao-geral",
-    icon: BarChart3,
-    label: "Visão Geral",
+    href: "/inicio",
+    icon: ClipboardList,
+    label: "Início",
   },
   {
     href: "/entrevistas",
@@ -41,18 +44,31 @@ const navItems = [
     label: "Candidatos",
   },
   {
-    href: "/perguntas",
-    icon: HelpCircle,
-    label: "Perguntas",
+    href: "/criar-entrevista",
+    icon: PlusCircle,
+    label: "Nova",
   },
 ];
 
+// Itens secundários no menu "Mais"
 const moreItems = [
   {
-    href: "/criar-entrevista",
-    icon: PlusCircle,
-    label: "Criar Entrevista",
-    description: "Nova entrevista rápida",
+    href: "/visao-geral",
+    icon: BarChart3,
+    label: "Visão Geral",
+    description: "Métricas e relatórios",
+  },
+  {
+    href: "/perguntas",
+    icon: HelpCircle,
+    label: "Perguntas",
+    description: "Banco de perguntas",
+  },
+  {
+    href: "/time",
+    icon: UsersRound,
+    label: "Meu Time",
+    description: "Gerenciar equipe",
   },
   {
     href: "/conta",
@@ -63,7 +79,7 @@ const moreItems = [
   {
     href: "/custos",
     icon: DollarSign,
-    label: "Custos e Uso",
+    label: "Uso e Créditos",
     description: "Gerenciar plano e pagamentos",
   },
 ];

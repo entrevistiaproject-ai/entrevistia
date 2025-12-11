@@ -176,7 +176,7 @@ export async function middleware(request: NextRequest) {
 
   // Se tem sessão e está tentando acessar login/cadastro
   if (sessionToken && (pathname === "/login" || pathname === "/cadastro")) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/inicio", request.url));
   }
 
   return response;

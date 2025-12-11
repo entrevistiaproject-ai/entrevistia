@@ -15,6 +15,7 @@ import {
   LogOut,
   MessageSquare,
   UsersRound,
+  ClipboardList,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { signOut } from "next-auth/react";
@@ -22,9 +23,9 @@ import { SupportWidget } from "@/components/support/support-widget";
 
 const mainMenuItems = [
   {
-    title: "Visão geral",
-    href: "/visao-geral",
-    icon: BarChart3,
+    title: "Início",
+    href: "/inicio",
+    icon: ClipboardList,
   },
   {
     title: "Entrevistas",
@@ -37,14 +38,19 @@ const mainMenuItems = [
     icon: PlusCircle,
   },
   {
-    title: "Perguntas",
-    href: "/perguntas",
-    icon: HelpCircle,
-  },
-  {
     title: "Candidatos",
     href: "/candidatos",
     icon: Users,
+  },
+  {
+    title: "Visão geral",
+    href: "/visao-geral",
+    icon: BarChart3,
+  },
+  {
+    title: "Perguntas",
+    href: "/perguntas",
+    icon: HelpCircle,
   },
 ];
 
