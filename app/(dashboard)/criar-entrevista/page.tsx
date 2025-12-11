@@ -292,9 +292,9 @@ Breve contexto sobre a posição e equipe...
 - O que faria o candidato se destacar`}
                 value={descricao}
                 onChange={(e) => setDescricao(e.target.value)}
-                rows={10}
+                rows={8}
                 required
-                className="font-mono text-sm min-h-[280px] resize-y"
+                className="font-mono text-sm min-h-[180px] sm:min-h-[280px] resize-none sm:resize-y"
                 maxLength={1000}
               />
               <div className="space-y-2">
