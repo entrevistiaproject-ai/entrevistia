@@ -410,7 +410,7 @@ export interface PipelineData {
   entrevistas: EntrevistaFiltro[]; // Lista de entrevistas para filtro
 }
 
-export async function getPipelineData(): Promise<{
+export async function getPipelineData(entrevistaIdFiltro?: string): Promise<{
   success: boolean;
   data?: PipelineData;
   error?: string;
@@ -426,7 +426,38 @@ export async function getPipelineData(): Promise<{
   try {
     const db = getDB();
 
+    // Buscar entrevistas para o filtro
+    const entrevistasParaFiltro = await db
+      .select({
+        id: entrevistas.id,
+        titulo: entrevistas.titulo,
+        cargo: entrevistas.cargo,
+        totalCandidatos: sql<number>`(
+          SELECT COUNT(*)::int FROM ${candidatoEntrevistas} ce WHERE ce.entrevista_id = ${entrevistas.id}
+        )`,
+      })
+      .from(entrevistas)
+      .where(and(eq(entrevistas.userId, userId), isNull(entrevistas.deletedAt)))
+      .orderBy(desc(entrevistas.createdAt));
+
+    // Filtrar entrevistas com candidatos
+    const entrevistasComCandidatos: EntrevistaFiltro[] = entrevistasParaFiltro
+      .filter(e => e.totalCandidatos > 0)
+      .map(e => ({
+        id: e.id,
+        titulo: e.titulo,
+        cargo: e.cargo,
+        totalCandidatos: e.totalCandidatos,
+      }));
+
     // Base query para candidatos do usuário
+    const baseConditions = [eq(entrevistas.userId, userId), isNull(entrevistas.deletedAt)];
+
+    // Adicionar filtro por entrevista se especificado
+    if (entrevistaIdFiltro) {
+      baseConditions.push(eq(entrevistas.id, entrevistaIdFiltro));
+    }
+
     const baseQuery = db
       .select({
         id: candidatoEntrevistas.id,
@@ -449,13 +480,13 @@ export async function getPipelineData(): Promise<{
       .from(candidatoEntrevistas)
       .innerJoin(candidatos, eq(candidatoEntrevistas.candidatoId, candidatos.id))
       .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
-      .where(and(eq(entrevistas.userId, userId), isNull(entrevistas.deletedAt)));
+      .where(and(...baseConditions));
 
     const allCandidates = await baseQuery.orderBy(desc(candidatoEntrevistas.concluidaEm));
 
     // Separar por categorias
     const pendentes: PipelineCandidate[] = [];
-    const shortlist: PipelineCandidate[] = [];
+    const finalistas: PipelineCandidate[] = [];
     const arquivados: PipelineCandidate[] = [];
     let emAndamento = 0;
 
@@ -482,9 +513,9 @@ export async function getPipelineData(): Promise<{
       if (c.arquivadoEm) {
         arquivados.push(candidate);
       }
-      // Shortlist: aprovados e não arquivados
+      // Finalistas: aprovados e não arquivados
       else if (c.decisaoRecrutador === "aprovado") {
-        shortlist.push(candidate);
+        finalistas.push(candidate);
       }
       // Pendentes: concluídos sem decisão e não arquivados
       else if (c.status === "concluida" && !c.decisaoRecrutador) {
@@ -500,14 +531,15 @@ export async function getPipelineData(): Promise<{
       success: true,
       data: {
         pendentes,
-        shortlist,
+        finalistas,
         arquivados,
         counts: {
           pendentes: pendentes.length,
-          shortlist: shortlist.length,
+          finalistas: finalistas.length,
           arquivados: arquivados.length,
           emAndamento,
         },
+        entrevistas: entrevistasComCandidatos,
       },
     };
   } catch (error) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,12 +26,16 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  Users,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Briefcase,
   CheckCircle2,
-  XCircle,
   Clock,
-  ArrowRight,
   Loader2,
   AlertCircle,
   PlusCircle,
@@ -42,10 +46,12 @@ import {
   ThumbsDown,
   Star,
   Inbox,
-  CheckCheck,
   ArchiveRestore,
   Sparkles,
   ExternalLink,
+  Filter,
+  Trophy,
+  UserCheck,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -61,9 +67,9 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
-type TabValue = "pendentes" | "shortlist" | "arquivados";
+type TabValue = "pendentes" | "finalistas" | "arquivados";
 
-export default function TarefasPage() {
+export default function PainelPage() {
   const [data, setData] = useState<PipelineData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -74,23 +80,24 @@ export default function TarefasPage() {
     ids: string[];
   } | null>(null);
   const [activeTab, setActiveTab] = useState<TabValue>("pendentes");
+  const [filtroEntrevista, setFiltroEntrevista] = useState<string>("todas");
   const { toast } = useToast();
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (entrevistaId?: string) => {
     setLoading(true);
     setError(null);
     try {
-      const result = await getPipelineData();
+      const result = await getPipelineData(entrevistaId === "todas" ? undefined : entrevistaId);
       if (result.success && result.data) {
         setData(result.data);
-        // Se não há pendentes mas há shortlist, muda para essa aba
-        if (result.data.counts.pendentes === 0 && result.data.counts.shortlist > 0) {
-          setActiveTab("shortlist");
+        // Se nao ha pendentes mas ha finalistas, muda para essa aba
+        if (result.data.counts.pendentes === 0 && result.data.counts.finalistas > 0) {
+          setActiveTab("finalistas");
         }
       } else {
         setError(result.error || "Erro ao carregar dados");
       }
-    } catch (err) {
+    } catch {
       setError("Erro ao carregar dados");
     } finally {
       setLoading(false);
@@ -98,13 +105,13 @@ export default function TarefasPage() {
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchData(filtroEntrevista);
+  }, [fetchData, filtroEntrevista]);
 
-  // Limpa seleção ao trocar de aba
+  // Limpa selecao ao trocar de aba ou filtro
   useEffect(() => {
     setSelectedIds(new Set());
-  }, [activeTab]);
+  }, [activeTab, filtroEntrevista]);
 
   const getInitials = (nome: string) => {
     return nome
@@ -143,7 +150,7 @@ export default function TarefasPage() {
         return (
           <Badge variant="default" className="bg-red-500/10 text-red-700 hover:bg-red-500/20 border-red-200">
             <ThumbsDown className="h-3 w-3 mr-1" />
-            Não recomendado
+            Nao recomendado
           </Badge>
         );
       default:
@@ -156,6 +163,13 @@ export default function TarefasPage() {
     if (score >= 70) return "text-green-600";
     if (score >= 50) return "text-amber-600";
     return "text-red-600";
+  };
+
+  const getScoreBg = (score: number | null) => {
+    if (score === null) return "bg-muted";
+    if (score >= 70) return "bg-green-100";
+    if (score >= 50) return "bg-amber-100";
+    return "bg-red-100";
   };
 
   const toggleSelect = (id: string) => {
@@ -205,21 +219,21 @@ export default function TarefasPage() {
       if (result.success) {
         toast({
           title: "Sucesso",
-          description: `Ação realizada com sucesso em ${confirmAction.ids.length} candidato(s)`,
+          description: `Acao realizada com sucesso em ${confirmAction.ids.length} candidato(s)`,
         });
         setSelectedIds(new Set());
-        fetchData();
+        fetchData(filtroEntrevista);
       } else {
         toast({
           title: "Erro",
-          description: result.error || "Erro ao executar ação",
+          description: result.error || "Erro ao executar acao",
           variant: "destructive",
         });
       }
-    } catch (err) {
+    } catch {
       toast({
         title: "Erro",
-        description: "Erro ao executar ação",
+        description: "Erro ao executar acao",
         variant: "destructive",
       });
     } finally {
@@ -231,32 +245,32 @@ export default function TarefasPage() {
   const actionLabels = {
     aprovar: {
       title: "Aprovar candidatos",
-      description: "Os candidatos selecionados serão movidos para a Shortlist.",
+      description: "Os candidatos selecionados serao movidos para Finalistas.",
       action: "Aprovar",
     },
     reprovar: {
       title: "Reprovar candidatos",
-      description: "Os candidatos serão marcados como reprovados e arquivados.",
+      description: "Os candidatos serao marcados como reprovados e arquivados.",
       action: "Reprovar",
     },
     arquivar: {
       title: "Arquivar candidatos",
-      description: "Os candidatos serão arquivados e removidos da lista ativa.",
+      description: "Os candidatos serao arquivados e removidos da lista ativa.",
       action: "Arquivar",
     },
     desarquivar: {
       title: "Restaurar candidatos",
-      description: "Os candidatos serão restaurados para a lista ativa.",
+      description: "Os candidatos serao restaurados para a lista ativa.",
       action: "Restaurar",
     },
     finalizar: {
       title: "Finalizar processo",
-      description: "Os candidatos serão marcados como processo concluído e arquivados.",
+      description: "Os candidatos serao marcados como contratados e arquivados.",
       action: "Finalizar",
     },
   };
 
-  // Card de candidato responsivo
+  // Card de candidato pendente
   const CandidateCard = ({
     candidate,
     showActions = true,
@@ -269,7 +283,7 @@ export default function TarefasPage() {
     <div
       className={cn(
         "group flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-xl border bg-card transition-all",
-        selectedIds.has(candidate.id) && "border-primary bg-primary/5",
+        selectedIds.has(candidate.id) && "border-primary bg-primary/5 ring-1 ring-primary/20",
         "hover:shadow-md hover:border-primary/30"
       )}
     >
@@ -280,99 +294,136 @@ export default function TarefasPage() {
           onCheckedChange={() => toggleSelect(candidate.id)}
           className="mt-1 sm:mt-0"
         />
-        <Avatar className="h-10 w-10 shrink-0">
-          <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
-            {getInitials(candidate.nome)}
-          </AvatarFallback>
-        </Avatar>
+        <div className="relative">
+          <Avatar className="h-11 w-11 shrink-0">
+            <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
+              {getInitials(candidate.nome)}
+            </AvatarFallback>
+          </Avatar>
+          {/* Score badge no avatar */}
+          {candidate.notaGeral !== null && (
+            <div className={cn(
+              "absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 border-card",
+              getScoreBg(candidate.notaGeral),
+              getScoreColor(candidate.notaGeral)
+            )}>
+              {Math.round(candidate.notaGeral)}
+            </div>
+          )}
+        </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="font-medium truncate">{candidate.nome}</p>
+            <Link
+              href={`/candidatos/${candidate.candidatoId}/resultado?entrevistaId=${candidate.entrevistaId}`}
+              className="font-medium truncate hover:text-primary hover:underline"
+            >
+              {candidate.nome}
+            </Link>
             {getRecomendacaoBadge(candidate.recomendacao)}
           </div>
-          <p className="text-sm text-muted-foreground truncate">
-            {candidate.cargo || candidate.entrevistaTitulo}
-            {candidate.empresa && ` · ${candidate.empresa}`}
-          </p>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Briefcase className="h-3 w-3 shrink-0" />
+            <span className="truncate">
+              {candidate.entrevistaTitulo}
+            </span>
+          </div>
+          {/* Data no mobile */}
+          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1 sm:hidden">
+            <Clock className="h-3 w-3" />
+            {formatDate(candidate.concluidaEm)}
+          </div>
         </div>
       </div>
 
-      {/* Score + Data + Ações */}
-      <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 pl-11 sm:pl-0">
-        {/* Score */}
-        <div className="text-center">
-          <p className={cn("text-xl font-bold tabular-nums", getScoreColor(candidate.notaGeral))}>
-            {candidate.notaGeral !== null ? Math.round(candidate.notaGeral) : "-"}
-          </p>
-          <p className="text-xs text-muted-foreground">Score</p>
-        </div>
-
-        {/* Data */}
-        <div className="text-center hidden sm:block">
+      {/* Data + Acoes */}
+      <div className="flex items-center justify-end gap-3 sm:gap-4 pl-11 sm:pl-0">
+        {/* Data (desktop) */}
+        <div className="text-right hidden sm:block">
           <p className="text-sm font-medium">{formatDate(candidate.concluidaEm)}</p>
-          <p className="text-xs text-muted-foreground">Concluída</p>
+          <p className="text-xs text-muted-foreground">Concluida</p>
         </div>
 
-        {/* Ações */}
+        {/* Acoes */}
         <div className="flex items-center gap-1">
-          <Button asChild variant="ghost" size="icon" className="h-8 w-8">
-            <Link href={`/candidatos/${candidate.candidatoId}/resultado?entrevistaId=${candidate.entrevistaId}`}>
-              <ExternalLink className="h-4 w-4" />
-            </Link>
-          </Button>
-
           {showActions && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setConfirmAction({ type: "aprovar", ids: [candidate.id] })}>
-                  <ThumbsUp className="h-4 w-4 mr-2 text-green-600" />
-                  Aprovar
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setConfirmAction({ type: "reprovar", ids: [candidate.id] })}>
-                  <ThumbsDown className="h-4 w-4 mr-2 text-red-600" />
-                  Reprovar
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setConfirmAction({ type: "arquivar", ids: [candidate.id] })}>
-                  <Archive className="h-4 w-4 mr-2" />
-                  Arquivar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 px-2 text-green-600 hover:text-green-700 hover:bg-green-50"
+                onClick={() => setConfirmAction({ type: "aprovar", ids: [candidate.id] })}
+              >
+                <ThumbsUp className="h-4 w-4" />
+                <span className="hidden sm:inline ml-1">Aprovar</span>
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={() => setConfirmAction({ type: "reprovar", ids: [candidate.id] })}
+              >
+                <ThumbsDown className="h-4 w-4" />
+                <span className="hidden sm:inline ml-1">Reprovar</span>
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link href={`/candidatos/${candidate.candidatoId}/resultado?entrevistaId=${candidate.entrevistaId}`}>
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Ver detalhes
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setConfirmAction({ type: "arquivar", ids: [candidate.id] })}>
+                    <Archive className="h-4 w-4 mr-2" />
+                    Arquivar
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
           )}
 
           {showArchiveRestore && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setConfirmAction({ type: "desarquivar", ids: [candidate.id] })}>
-                  <ArchiveRestore className="h-4 w-4 mr-2" />
-                  Restaurar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <>
+              <Button asChild variant="ghost" size="icon" className="h-8 w-8">
+                <Link href={`/candidatos/${candidate.candidatoId}/resultado?entrevistaId=${candidate.entrevistaId}`}>
+                  <ExternalLink className="h-4 w-4" />
+                </Link>
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setConfirmAction({ type: "desarquivar", ids: [candidate.id] })}>
+                    <ArchiveRestore className="h-4 w-4 mr-2" />
+                    Restaurar
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
           )}
         </div>
       </div>
     </div>
   );
 
-  // Shortlist card (aprovados)
-  const ShortlistCard = ({ candidate }: { candidate: PipelineCandidate }) => (
+  // Card de finalista (aprovados)
+  const FinalistaCard = ({ candidate }: { candidate: PipelineCandidate }) => (
     <div
       className={cn(
-        "group flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-xl border bg-card transition-all",
-        selectedIds.has(candidate.id) && "border-green-500 bg-green-50/50",
-        "hover:shadow-md hover:border-green-300"
+        "group flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-xl border transition-all",
+        selectedIds.has(candidate.id)
+          ? "border-green-500 bg-green-50/80 ring-1 ring-green-200"
+          : "border-green-200 bg-green-50/30",
+        "hover:shadow-md hover:border-green-400"
       )}
     >
       {/* Checkbox + Avatar + Info */}
@@ -382,40 +433,56 @@ export default function TarefasPage() {
           onCheckedChange={() => toggleSelect(candidate.id)}
           className="mt-1 sm:mt-0"
         />
-        <Avatar className="h-10 w-10 shrink-0">
-          <AvatarFallback className="bg-green-100 text-green-700 text-sm font-medium">
-            {getInitials(candidate.nome)}
-          </AvatarFallback>
-        </Avatar>
+        <div className="relative">
+          <Avatar className="h-11 w-11 shrink-0 ring-2 ring-green-300">
+            <AvatarFallback className="bg-green-100 text-green-700 text-sm font-medium">
+              {getInitials(candidate.nome)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+            <CheckCircle2 className="h-3 w-3 text-white" />
+          </div>
+        </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="font-medium truncate">{candidate.nome}</p>
-            <Badge variant="default" className="bg-green-500 hover:bg-green-600">
-              <CheckCircle2 className="h-3 w-3 mr-1" />
-              Aprovado
+            <Link
+              href={`/candidatos/${candidate.candidatoId}/resultado?entrevistaId=${candidate.entrevistaId}`}
+              className="font-medium truncate hover:text-green-700 hover:underline"
+            >
+              {candidate.nome}
+            </Link>
+            <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-white">
+              <Trophy className="h-3 w-3 mr-1" />
+              Finalista
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground truncate">
-            {candidate.cargo || candidate.entrevistaTitulo}
-            {candidate.empresa && ` · ${candidate.empresa}`}
-          </p>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Briefcase className="h-3 w-3 shrink-0" />
+            <span className="truncate">
+              {candidate.entrevistaTitulo}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Score + Ações */}
-      <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 pl-11 sm:pl-0">
+      {/* Score + Acoes */}
+      <div className="flex items-center justify-end gap-3 sm:gap-4 pl-11 sm:pl-0">
         <div className="text-center">
-          <p className={cn("text-xl font-bold tabular-nums", getScoreColor(candidate.notaGeral))}>
+          <p className={cn("text-2xl font-bold tabular-nums", getScoreColor(candidate.notaGeral))}>
             {candidate.notaGeral !== null ? Math.round(candidate.notaGeral) : "-"}
           </p>
           <p className="text-xs text-muted-foreground">Score</p>
         </div>
 
         <div className="flex items-center gap-1">
-          <Button asChild variant="ghost" size="icon" className="h-8 w-8">
-            <Link href={`/candidatos/${candidate.candidatoId}/resultado?entrevistaId=${candidate.entrevistaId}`}>
-              <ExternalLink className="h-4 w-4" />
-            </Link>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 border-green-300 text-green-700 hover:bg-green-100"
+            onClick={() => setConfirmAction({ type: "finalizar", ids: [candidate.id] })}
+          >
+            <UserCheck className="h-4 w-4 mr-1" />
+            <span className="hidden sm:inline">Contratar</span>
           </Button>
 
           <DropdownMenu>
@@ -425,9 +492,11 @@ export default function TarefasPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setConfirmAction({ type: "finalizar", ids: [candidate.id] })}>
-                <CheckCheck className="h-4 w-4 mr-2 text-green-600" />
-                Processo concluído
+              <DropdownMenuItem asChild>
+                <Link href={`/candidatos/${candidate.candidatoId}/resultado?entrevistaId=${candidate.entrevistaId}`}>
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Ver detalhes
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setConfirmAction({ type: "arquivar", ids: [candidate.id] })}>
@@ -445,8 +514,8 @@ export default function TarefasPage() {
     return (
       <div className="space-y-6">
         <PageHeader
-          title="Tarefas"
-          description="Gerencie seus candidatos e processos seletivos"
+          title="Painel"
+          description="Acompanhe e gerencie seus candidatos"
         />
         <div className="flex items-center justify-center min-h-[400px]">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -459,15 +528,15 @@ export default function TarefasPage() {
     return (
       <div className="space-y-6">
         <PageHeader
-          title="Tarefas"
-          description="Gerencie seus candidatos e processos seletivos"
+          title="Painel"
+          description="Acompanhe e gerencie seus candidatos"
         />
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">Erro ao carregar dados</h3>
             <p className="text-sm text-muted-foreground mb-4">{error}</p>
-            <Button onClick={fetchData} variant="outline">
+            <Button onClick={() => fetchData(filtroEntrevista)} variant="outline">
               <RefreshCw className="h-4 w-4 mr-2" />
               Tentar novamente
             </Button>
@@ -477,14 +546,14 @@ export default function TarefasPage() {
     );
   }
 
-  const hasAnyData = data.counts.pendentes > 0 || data.counts.shortlist > 0 || data.counts.arquivados > 0 || data.counts.emAndamento > 0;
+  const hasAnyData = data.counts.pendentes > 0 || data.counts.finalistas > 0 || data.counts.arquivados > 0 || data.counts.emAndamento > 0;
 
-  if (!hasAnyData) {
+  if (!hasAnyData && data.entrevistas.length === 0) {
     return (
       <div className="space-y-6">
         <PageHeader
-          title="Tarefas"
-          description="Gerencie seus candidatos e processos seletivos"
+          title="Painel"
+          description="Acompanhe e gerencie seus candidatos"
         >
           <Button asChild size="touch">
             <Link href="/criar-entrevista">
@@ -500,7 +569,7 @@ export default function TarefasPage() {
             </div>
             <h3 className="text-xl font-semibold mb-2">Nenhum candidato ainda</h3>
             <p className="text-sm text-muted-foreground text-center max-w-md mb-6">
-              Crie uma entrevista e adicione candidatos para começar a gerenciar seu processo seletivo aqui.
+              Crie uma entrevista e adicione candidatos para comecar a gerenciar seu processo seletivo aqui.
             </p>
             <Button asChild>
               <Link href="/criar-entrevista">
@@ -516,15 +585,15 @@ export default function TarefasPage() {
 
   const currentCandidates = activeTab === "pendentes"
     ? data.pendentes
-    : activeTab === "shortlist"
-    ? data.shortlist
+    : activeTab === "finalistas"
+    ? data.finalistas
     : data.arquivados;
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Tarefas"
-        description="Gerencie seus candidatos e processos seletivos"
+        title="Painel"
+        description="Acompanhe e gerencie seus candidatos"
       >
         <Button asChild size="touch" className="w-full sm:w-auto">
           <Link href="/criar-entrevista">
@@ -536,7 +605,13 @@ export default function TarefasPage() {
 
       {/* KPIs Resumidos */}
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <Card className="cursor-pointer hover:border-amber-300 transition-colors" onClick={() => setActiveTab("pendentes")}>
+        <Card
+          className={cn(
+            "cursor-pointer transition-all",
+            activeTab === "pendentes" ? "border-amber-400 bg-amber-50/50 ring-1 ring-amber-200" : "hover:border-amber-300"
+          )}
+          onClick={() => setActiveTab("pendentes")}
+        >
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="rounded-lg bg-amber-500/10 p-2.5">
@@ -544,21 +619,27 @@ export default function TarefasPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{data.counts.pendentes}</p>
-                <p className="text-xs text-muted-foreground">Aguardando avaliação</p>
+                <p className="text-xs text-muted-foreground">Aguardando decisao</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:border-green-300 transition-colors" onClick={() => setActiveTab("shortlist")}>
+        <Card
+          className={cn(
+            "cursor-pointer transition-all",
+            activeTab === "finalistas" ? "border-green-400 bg-green-50/50 ring-1 ring-green-200" : "hover:border-green-300"
+          )}
+          onClick={() => setActiveTab("finalistas")}
+        >
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="rounded-lg bg-green-500/10 p-2.5">
-                <Star className="h-5 w-5 text-green-600" />
+                <Trophy className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{data.counts.shortlist}</p>
-                <p className="text-xs text-muted-foreground">Na shortlist</p>
+                <p className="text-2xl font-bold">{data.counts.finalistas}</p>
+                <p className="text-xs text-muted-foreground">Finalistas</p>
               </div>
             </div>
           </CardContent>
@@ -578,7 +659,13 @@ export default function TarefasPage() {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:border-muted-foreground/30 transition-colors" onClick={() => setActiveTab("arquivados")}>
+        <Card
+          className={cn(
+            "cursor-pointer transition-all",
+            activeTab === "arquivados" ? "border-muted-foreground/50 bg-muted/50 ring-1 ring-muted-foreground/20" : "hover:border-muted-foreground/30"
+          )}
+          onClick={() => setActiveTab("arquivados")}
+        >
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="rounded-lg bg-muted p-2.5">
@@ -596,79 +683,101 @@ export default function TarefasPage() {
       {/* Tabs com lista de candidatos */}
       <Card>
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabValue)}>
-          <CardHeader className="pb-3">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <TabsList className="w-full sm:w-auto">
-                <TabsTrigger value="pendentes" className="flex-1 sm:flex-none gap-2">
-                  <Clock className="h-4 w-4" />
-                  <span className="hidden sm:inline">Aguardando</span>
-                  <Badge variant="secondary" className="ml-1">{data.counts.pendentes}</Badge>
-                </TabsTrigger>
-                <TabsTrigger value="shortlist" className="flex-1 sm:flex-none gap-2">
-                  <Star className="h-4 w-4" />
-                  <span className="hidden sm:inline">Shortlist</span>
-                  <Badge variant="secondary" className="ml-1">{data.counts.shortlist}</Badge>
-                </TabsTrigger>
-                <TabsTrigger value="arquivados" className="flex-1 sm:flex-none gap-2">
-                  <Archive className="h-4 w-4" />
-                  <span className="hidden sm:inline">Arquivados</span>
-                  <Badge variant="secondary" className="ml-1">{data.counts.arquivados}</Badge>
-                </TabsTrigger>
-              </TabsList>
-
-              {/* Ações em lote */}
-              {selectedIds.size > 0 && (
+          <div className="p-6 pb-3">
+            <div className="flex flex-col gap-4">
+              {/* Filtro por vaga */}
+              {data.entrevistas.length > 1 && (
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    {selectedIds.size} selecionado(s)
-                  </span>
-                  {activeTab === "pendentes" && (
-                    <>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setConfirmAction({ type: "aprovar", ids: Array.from(selectedIds) })}
-                        className="text-green-600 border-green-200 hover:bg-green-50"
-                      >
-                        <ThumbsUp className="h-4 w-4 mr-1" />
-                        Aprovar
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setConfirmAction({ type: "reprovar", ids: Array.from(selectedIds) })}
-                        className="text-red-600 border-red-200 hover:bg-red-50"
-                      >
-                        <ThumbsDown className="h-4 w-4 mr-1" />
-                        Reprovar
-                      </Button>
-                    </>
-                  )}
-                  {activeTab === "shortlist" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setConfirmAction({ type: "finalizar", ids: Array.from(selectedIds) })}
-                      className="text-green-600 border-green-200 hover:bg-green-50"
-                    >
-                      <CheckCheck className="h-4 w-4 mr-1" />
-                      Finalizar
-                    </Button>
-                  )}
-                  {activeTab === "arquivados" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setConfirmAction({ type: "desarquivar", ids: Array.from(selectedIds) })}
-                    >
-                      <ArchiveRestore className="h-4 w-4 mr-1" />
-                      Restaurar
-                    </Button>
-                  )}
+                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <Select value={filtroEntrevista} onValueChange={setFiltroEntrevista}>
+                    <SelectTrigger className="w-full sm:w-[280px]">
+                      <SelectValue placeholder="Filtrar por vaga" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todas">Todas as vagas</SelectItem>
+                      {data.entrevistas.map((e) => (
+                        <SelectItem key={e.id} value={e.id}>
+                          {e.titulo} ({e.totalCandidatos})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
+
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <TabsList className="w-full sm:w-auto">
+                  <TabsTrigger value="pendentes" className="flex-1 sm:flex-none gap-2">
+                    <Clock className="h-4 w-4" />
+                    <span className="hidden sm:inline">Aguardando</span>
+                    <Badge variant="secondary" className="ml-1">{data.counts.pendentes}</Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="finalistas" className="flex-1 sm:flex-none gap-2">
+                    <Trophy className="h-4 w-4" />
+                    <span className="hidden sm:inline">Finalistas</span>
+                    <Badge variant="secondary" className="ml-1">{data.counts.finalistas}</Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="arquivados" className="flex-1 sm:flex-none gap-2">
+                    <Archive className="h-4 w-4" />
+                    <span className="hidden sm:inline">Arquivados</span>
+                    <Badge variant="secondary" className="ml-1">{data.counts.arquivados}</Badge>
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Acoes em lote */}
+                {selectedIds.size > 0 && (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm text-muted-foreground">
+                      {selectedIds.size} selecionado(s)
+                    </span>
+                    {activeTab === "pendentes" && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setConfirmAction({ type: "aprovar", ids: Array.from(selectedIds) })}
+                          className="text-green-600 border-green-200 hover:bg-green-50"
+                        >
+                          <ThumbsUp className="h-4 w-4 mr-1" />
+                          Aprovar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setConfirmAction({ type: "reprovar", ids: Array.from(selectedIds) })}
+                          className="text-red-600 border-red-200 hover:bg-red-50"
+                        >
+                          <ThumbsDown className="h-4 w-4 mr-1" />
+                          Reprovar
+                        </Button>
+                      </>
+                    )}
+                    {activeTab === "finalistas" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setConfirmAction({ type: "finalizar", ids: Array.from(selectedIds) })}
+                        className="text-green-600 border-green-200 hover:bg-green-50"
+                      >
+                        <UserCheck className="h-4 w-4 mr-1" />
+                        Contratar
+                      </Button>
+                    )}
+                    {activeTab === "arquivados" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setConfirmAction({ type: "desarquivar", ids: Array.from(selectedIds) })}
+                      >
+                        <ArchiveRestore className="h-4 w-4 mr-1" />
+                        Restaurar
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          </CardHeader>
+          </div>
 
           <CardContent>
             {/* Header com select all */}
@@ -679,7 +788,7 @@ export default function TarefasPage() {
                   onCheckedChange={() => toggleSelectAll(currentCandidates)}
                 />
                 <span className="text-sm text-muted-foreground">
-                  Selecionar todos
+                  Selecionar todos ({currentCandidates.length})
                 </span>
               </div>
             )}
@@ -690,7 +799,7 @@ export default function TarefasPage() {
                   <CheckCircle2 className="h-12 w-12 text-green-500 mb-4" />
                   <h3 className="text-lg font-semibold mb-2">Tudo em dia!</h3>
                   <p className="text-sm text-muted-foreground max-w-sm">
-                    Não há candidatos aguardando avaliação no momento.
+                    Nao ha candidatos aguardando sua decisao no momento.
                   </p>
                 </div>
               ) : (
@@ -700,18 +809,18 @@ export default function TarefasPage() {
               )}
             </TabsContent>
 
-            <TabsContent value="shortlist" className="mt-0 space-y-3">
-              {data.shortlist.length === 0 ? (
+            <TabsContent value="finalistas" className="mt-0 space-y-3">
+              {data.finalistas.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <Star className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Shortlist vazia</h3>
+                  <Trophy className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Nenhum finalista ainda</h3>
                   <p className="text-sm text-muted-foreground max-w-sm">
-                    Aprove candidatos para adicioná-los à sua shortlist.
+                    Aprove candidatos para adiciona-los aos finalistas.
                   </p>
                 </div>
               ) : (
-                data.shortlist.map((candidate) => (
-                  <ShortlistCard key={candidate.id} candidate={candidate} />
+                data.finalistas.map((candidate) => (
+                  <FinalistaCard key={candidate.id} candidate={candidate} />
                 ))
               )}
             </TabsContent>
@@ -722,7 +831,7 @@ export default function TarefasPage() {
                   <Archive className="h-12 w-12 text-muted-foreground mb-4" />
                   <h3 className="text-lg font-semibold mb-2">Nenhum arquivado</h3>
                   <p className="text-sm text-muted-foreground max-w-sm">
-                    Candidatos arquivados aparecerão aqui.
+                    Candidatos arquivados aparecerao aqui.
                   </p>
                 </div>
               ) : (
@@ -740,7 +849,7 @@ export default function TarefasPage() {
         </Tabs>
       </Card>
 
-      {/* Dialog de confirmação */}
+      {/* Dialog de confirmacao */}
       <AlertDialog open={!!confirmAction} onOpenChange={() => setConfirmAction(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
