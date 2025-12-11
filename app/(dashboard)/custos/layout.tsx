@@ -21,7 +21,7 @@ export default async function CustosLayout({
   const hasAccess = await canAccessFinancials(userId);
 
   if (!hasAccess) {
-    redirect("/dashboard?error=sem_acesso_financeiro");
+    redirect("/painel?error=sem_acesso_financeiro");
   }
 
   return children;

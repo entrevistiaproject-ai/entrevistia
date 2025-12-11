@@ -29,7 +29,7 @@ export default function NotFound() {
               </Link>
             </Button>
             <Button asChild variant="outline" className="w-full" size="lg">
-              <Link href="/dashboard">
+              <Link href="/painel">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Acessar minha conta
               </Link>

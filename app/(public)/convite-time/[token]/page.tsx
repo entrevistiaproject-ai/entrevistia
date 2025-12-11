@@ -224,8 +224,8 @@ export default function ConviteTimePage({
             </div>
 
             {success.accepted && (
-              <Link href="/dashboard">
-                <Button className="w-full">Ir para o Dashboard</Button>
+              <Link href="/painel">
+                <Button className="w-full">Ir para o Painel</Button>
               </Link>
             )}
           </CardContent>

@@ -23,8 +23,8 @@ import { SupportWidget } from "@/components/support/support-widget";
 
 const mainMenuItems = [
   {
-    title: "Início",
-    href: "/inicio",
+    title: "Painel",
+    href: "/painel",
     icon: ClipboardList,
   },
   {

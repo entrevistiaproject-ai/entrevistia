@@ -29,9 +29,9 @@ import { SupportWidget } from "@/components/support/support-widget";
 // 4 itens principais no mobile (baseado em UX de apps de recrutamento)
 const navItems = [
   {
-    href: "/inicio",
+    href: "/painel",
     icon: ClipboardList,
-    label: "Início",
+    label: "Painel",
   },
   {
     href: "/entrevistas",
