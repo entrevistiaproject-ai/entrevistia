@@ -20,7 +20,7 @@ const CompetenciaSchema = z.object({
  * Schema para validar a resposta da IA
  */
 const AnalysisSchema = z.object({
-  notaGeral: z.number().min(0).max(10),
+  notaGeral: z.number().min(0).max(100),
   compatibilidadeVaga: z.number().min(0).max(100),
   resumoGeral: z.string(),
   pontosFortes: z.array(z.string()),
@@ -128,7 +128,7 @@ ${respostasFormatadas}
 ## Instruções
 Analise as respostas acima e retorne APENAS um objeto JSON com esta estrutura exata:
 {
-  "notaGeral": <número de 0 a 10 - avaliação geral do candidato>,
+  "notaGeral": <número de 0 a 100 - avaliação geral do candidato>,
   "compatibilidadeVaga": <número de 0 a 100 - compatibilidade específica com esta vaga>,
   "resumoGeral": "<resumo da performance do candidato>",
   "pontosFortes": ["<ponto forte 1>", "<ponto forte 2>", "<ponto forte 3>"],
@@ -154,7 +154,7 @@ Analise as respostas acima e retorne APENAS um objeto JSON com esta estrutura ex
 }
 
 IMPORTANTE:
-- notaGeral: Avaliação geral do candidato de 0 a 10 (com uma casa decimal, ex: 7.5)
+- notaGeral: Avaliação geral do candidato de 0 a 100 (número inteiro, ex: 75)
 - compatibilidadeVaga: Quão bem o candidato se encaixa ESPECIFICAMENTE nesta vaga, considerando cargo, nível e descrição (0-100)
 - Avalie TODAS as 10 competências listadas acima (notas de 0 a 100)
 - Base sua avaliação nas respostas da entrevista

@@ -151,7 +151,7 @@ export async function PUT(
           ordem: pergunta.ordem,
           tipo: "aberta",
           obrigatoria: "sim",
-          pontuacaoMaxima: 10,
+          pontuacaoMaxima: 100,
         });
       }
     }

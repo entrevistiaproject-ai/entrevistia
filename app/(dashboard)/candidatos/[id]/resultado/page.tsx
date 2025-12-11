@@ -385,11 +385,11 @@ export default function ResultadoCandidatoPage() {
         <>
           {/* Nota Geral e Compatibilidade */}
           <div className="grid gap-6 md:grid-cols-2">
-            {/* Nota Geral (0-10) */}
+            {/* Nota Geral (0-100) */}
             <Card>
               <CardHeader>
                 <CardTitle>Nota Geral</CardTitle>
-                <CardDescription>Avaliação geral do candidato (0-10)</CardDescription>
+                <CardDescription>Avaliação geral do candidato (0-100)</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-center py-6">
