@@ -10,7 +10,7 @@ import {
 const inviteSchema = z.object({
   email: z.string().email("Email inválido"),
   nome: z.string().min(2, "Nome deve ter pelo menos 2 caracteres").optional(),
-  role: z.enum(["admin", "recruiter", "viewer"]),
+  role: z.enum(["admin", "recruiter", "financial", "viewer"]),
   message: z.string().max(500, "Mensagem deve ter no máximo 500 caracteres").optional(),
 });
 
