@@ -4,6 +4,10 @@ import { jwtVerify } from "jose";
 import { getSecurityHeaders } from "@/lib/security/headers";
 import { checkRateLimit, getClientIP, createRateLimitKey, getRateLimitHeaders } from "@/lib/security/rate-limit";
 
+// Usa Node.js runtime ao invés do Edge Runtime limitado
+// Necessário para funcionalidades como Map, setInterval no rate-limit
+export const runtime = "nodejs";
+
 // Secret para verificação do JWT admin
 const ADMIN_JWT_SECRET = new TextEncoder().encode(
   process.env.ADMIN_JWT_SECRET || process.env.AUTH_SECRET || "admin-secret-key-change-in-production"
