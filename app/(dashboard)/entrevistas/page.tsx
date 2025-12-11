@@ -115,9 +115,9 @@ export default function EntrevistasPage() {
             </Link>
           </Button>
         </PageHeader>
-        <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
-          {[1, 2, 3, 4].map((i) => (
-            <SkeletonCard key={i} lines={4} showFooter />
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <SkeletonCard key={i} lines={4} showFooter className="aspect-[1.586/1]" />
           ))}
         </div>
       </div>
@@ -241,7 +241,7 @@ export default function EntrevistasPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filteredEntrevistas.map((entrevista) => (
             <EntrevistaCard key={entrevista.id} entrevista={entrevista} />
           ))}
