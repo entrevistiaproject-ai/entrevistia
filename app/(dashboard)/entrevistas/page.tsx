@@ -117,7 +117,7 @@ export default function EntrevistasPage() {
         </PageHeader>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <SkeletonCard key={i} lines={4} showFooter className="aspect-[1.586/1]" />
+            <SkeletonCard key={i} lines={3} showFooter />
           ))}
         </div>
       </div>
