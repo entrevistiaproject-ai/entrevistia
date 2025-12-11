@@ -21,6 +21,10 @@ import {
   FileText,
   ChevronRight,
   Star,
+  Zap,
+  XCircle,
+  Info,
+  Mail,
 } from "lucide-react";
 import Link from "next/link";
 import { AdicionarCandidatoDialog } from "@/components/entrevistas/adicionar-candidato-dialog";
@@ -30,6 +34,12 @@ import { DecisaoCandidato } from "@/components/entrevistas/decisao-candidato";
 import { EditarEntrevistaDialog } from "@/components/entrevistas/editar-entrevista-dialog";
 import { EditarPerguntasDialog } from "@/components/entrevistas/editar-perguntas-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -45,6 +55,18 @@ interface Entrevista {
   slug: string | null;
   createdAt: Date;
   updatedAt: Date;
+  // Configurações de aprovação automática
+  autoApprovalEnabled: boolean;
+  autoApprovalMinScore: number;
+  autoApprovalUseCompatibility: boolean;
+  autoApprovalMinCompatibility: number;
+  autoApprovalNotifyCandidate: boolean;
+  autoApprovalCandidateMessage: string | null;
+  // Configurações de reprovação automática
+  autoRejectEnabled: boolean;
+  autoRejectMaxScore: number;
+  autoRejectNotifyCandidate: boolean;
+  autoRejectCandidateMessage: string | null;
 }
 
 interface Candidato {
@@ -104,6 +126,7 @@ const getScoreColor = (score: number) => {
 
 export default function EntrevistaDetalhesPage() {
   const params = useParams();
+  const { toast } = useToast();
   const [entrevista, setEntrevista] = useState<Entrevista | null>(null);
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
@@ -111,6 +134,21 @@ export default function EntrevistaDetalhesPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [descricaoAberta, setDescricaoAberta] = useState(false);
   const [filtroDecisao, setFiltroDecisao] = useState<string>("todos");
+
+  // Estados para aprovação automática
+  const [savingAutoApproval, setSavingAutoApproval] = useState(false);
+  const [autoApprovalEnabled, setAutoApprovalEnabled] = useState(false);
+  const [autoApprovalMinScore, setAutoApprovalMinScore] = useState(70);
+  const [autoApprovalUseCompatibility, setAutoApprovalUseCompatibility] = useState(false);
+  const [autoApprovalMinCompatibility, setAutoApprovalMinCompatibility] = useState(70);
+  const [autoApprovalNotifyCandidate, setAutoApprovalNotifyCandidate] = useState(false);
+  const [autoApprovalCandidateMessage, setAutoApprovalCandidateMessage] = useState("");
+
+  // Estados para reprovação automática
+  const [autoRejectEnabled, setAutoRejectEnabled] = useState(false);
+  const [autoRejectMaxScore, setAutoRejectMaxScore] = useState(30);
+  const [autoRejectNotifyCandidate, setAutoRejectNotifyCandidate] = useState(false);
+  const [autoRejectCandidateMessage, setAutoRejectCandidateMessage] = useState("");
 
   const fetchData = async () => {
     try {
@@ -124,6 +162,17 @@ export default function EntrevistaDetalhesPage() {
       if (resEntrevista.ok) {
         const data = await resEntrevista.json();
         setEntrevista(data);
+        // Preencher estados de aprovação automática
+        setAutoApprovalEnabled(data.autoApprovalEnabled || false);
+        setAutoApprovalMinScore(data.autoApprovalMinScore || 70);
+        setAutoApprovalUseCompatibility(data.autoApprovalUseCompatibility || false);
+        setAutoApprovalMinCompatibility(data.autoApprovalMinCompatibility || 70);
+        setAutoApprovalNotifyCandidate(data.autoApprovalNotifyCandidate || false);
+        setAutoApprovalCandidateMessage(data.autoApprovalCandidateMessage || "");
+        setAutoRejectEnabled(data.autoRejectEnabled || false);
+        setAutoRejectMaxScore(data.autoRejectMaxScore || 30);
+        setAutoRejectNotifyCandidate(data.autoRejectNotifyCandidate || false);
+        setAutoRejectCandidateMessage(data.autoRejectCandidateMessage || "");
       }
 
       // Buscar perguntas da entrevista
@@ -205,6 +254,81 @@ export default function EntrevistaDetalhesPage() {
     } finally {
       setActionLoading(null);
     }
+  };
+
+  // Handler para salvar configurações de aprovação automática
+  const handleSaveAutoApproval = async () => {
+    if (!entrevista) return;
+
+    // Validação
+    if (autoApprovalEnabled && autoRejectEnabled) {
+      if (autoApprovalMinScore <= autoRejectMaxScore) {
+        toast({
+          title: "Erro de configuração",
+          description: "O score mínimo de aprovação deve ser maior que o score máximo de reprovação",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    setSavingAutoApproval(true);
+    try {
+      const res = await fetch(`/api/entrevistas/${entrevista.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          autoApprovalEnabled,
+          autoApprovalMinScore,
+          autoApprovalUseCompatibility,
+          autoApprovalMinCompatibility,
+          autoApprovalNotifyCandidate,
+          autoApprovalCandidateMessage: autoApprovalCandidateMessage || null,
+          autoRejectEnabled,
+          autoRejectMaxScore,
+          autoRejectNotifyCandidate,
+          autoRejectCandidateMessage: autoRejectCandidateMessage || null,
+        }),
+      });
+
+      if (res.ok) {
+        toast({
+          title: "Configurações salvas",
+          description: "As configurações de aprovação automática foram atualizadas",
+        });
+        await fetchData();
+      } else {
+        const data = await res.json();
+        toast({
+          title: "Erro",
+          description: data.error || "Erro ao salvar configurações",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao salvar configurações:", error);
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar configurações",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingAutoApproval(false);
+    }
+  };
+
+  // Handler para input de score com validação
+  const handleScoreChange = (
+    value: string,
+    setter: (v: number) => void,
+    min: number,
+    max: number
+  ) => {
+    const num = parseInt(value, 10);
+    if (isNaN(num)) return;
+    if (num < min) setter(min);
+    else if (num > max) setter(max);
+    else setter(num);
   };
 
   useEffect(() => {
@@ -646,6 +770,251 @@ export default function EntrevistaDetalhesPage() {
                     {statusInfo.label}
                   </Badge>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card de Aprovação Automática */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-100">
+                  <Zap className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <CardTitle>Aprovação Automática</CardTitle>
+                  <CardDescription>
+                    Configure a aprovação e reprovação automática de candidatos para esta vaga
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Explicação */}
+              <div className="flex gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <Info className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+                <div className="text-sm text-blue-900">
+                  <p className="font-medium mb-1">Como funciona?</p>
+                  <p className="text-blue-800">
+                    Após a análise da IA, o sistema pode automaticamente aprovar ou reprovar candidatos com base no score obtido. Isso agiliza o processo de triagem.
+                  </p>
+                </div>
+              </div>
+
+              {/* Aprovação Automática */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-green-100">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Aprovação Automática</p>
+                      <p className="text-sm text-muted-foreground">
+                        Aprove automaticamente candidatos com score alto
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={autoApprovalEnabled}
+                    onCheckedChange={setAutoApprovalEnabled}
+                  />
+                </div>
+
+                {autoApprovalEnabled && (
+                  <div className="space-y-4 pl-4 border-l-2 border-green-200 ml-4">
+                    {/* Score mínimo */}
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Score Mínimo para Aprovação</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Candidatos com score igual ou acima serão aprovados (50-100%)
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          value={autoApprovalMinScore}
+                          onChange={(e) =>
+                            handleScoreChange(e.target.value, setAutoApprovalMinScore, 50, 100)
+                          }
+                          min={50}
+                          max={100}
+                          className="w-20 text-right"
+                        />
+                        <span className="text-lg font-semibold text-green-600">%</span>
+                      </div>
+                    </div>
+
+                    {/* Usar compatibilidade */}
+                    <div className="flex items-center justify-between p-3 rounded-lg border">
+                      <div className="space-y-0.5">
+                        <Label>Considerar Compatibilidade com a Vaga</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Além do score, também verificar a compatibilidade
+                        </p>
+                      </div>
+                      <Switch
+                        checked={autoApprovalUseCompatibility}
+                        onCheckedChange={setAutoApprovalUseCompatibility}
+                      />
+                    </div>
+
+                    {/* Compatibilidade mínima */}
+                    {autoApprovalUseCompatibility && (
+                      <div className="flex items-center justify-between pl-4 border-l-2 border-green-100">
+                        <div className="space-y-0.5">
+                          <Label>Compatibilidade Mínima</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Compatibilidade mínima com a vaga (50-100%)
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="number"
+                            value={autoApprovalMinCompatibility}
+                            onChange={(e) =>
+                              handleScoreChange(e.target.value, setAutoApprovalMinCompatibility, 50, 100)
+                            }
+                            min={50}
+                            max={100}
+                            className="w-20 text-right"
+                          />
+                          <span className="text-lg font-semibold text-green-600">%</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Notificar candidato */}
+                    <div className="flex items-center justify-between p-3 rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        <div className="space-y-0.5">
+                          <Label>Notificar Candidato</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Enviar email ao candidato informando a aprovação
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={autoApprovalNotifyCandidate}
+                        onCheckedChange={setAutoApprovalNotifyCandidate}
+                      />
+                    </div>
+
+                    {autoApprovalNotifyCandidate && (
+                      <div className="space-y-2">
+                        <Label>Mensagem Personalizada (opcional)</Label>
+                        <Textarea
+                          value={autoApprovalCandidateMessage}
+                          onChange={(e) => setAutoApprovalCandidateMessage(e.target.value)}
+                          placeholder="Deixe em branco para usar a mensagem padrão..."
+                          rows={2}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <Separator />
+
+              {/* Reprovação Automática */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-red-100">
+                      <XCircle className="h-5 w-5 text-red-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Reprovação Automática</p>
+                      <p className="text-sm text-muted-foreground">
+                        Reprove automaticamente candidatos com score muito baixo
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={autoRejectEnabled}
+                    onCheckedChange={setAutoRejectEnabled}
+                  />
+                </div>
+
+                {autoRejectEnabled && (
+                  <div className="space-y-4 pl-4 border-l-2 border-red-200 ml-4">
+                    {/* Score máximo */}
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Score Máximo para Reprovação</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Candidatos com score igual ou abaixo serão reprovados (0-50%)
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          value={autoRejectMaxScore}
+                          onChange={(e) =>
+                            handleScoreChange(e.target.value, setAutoRejectMaxScore, 0, 50)
+                          }
+                          min={0}
+                          max={50}
+                          className="w-20 text-right"
+                        />
+                        <span className="text-lg font-semibold text-red-600">%</span>
+                      </div>
+                    </div>
+
+                    {/* Notificar candidato */}
+                    <div className="flex items-center justify-between p-3 rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        <div className="space-y-0.5">
+                          <Label>Notificar Candidato</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Enviar email ao candidato informando a reprovação
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={autoRejectNotifyCandidate}
+                        onCheckedChange={setAutoRejectNotifyCandidate}
+                      />
+                    </div>
+
+                    {autoRejectNotifyCandidate && (
+                      <div className="space-y-2">
+                        <Label>Mensagem Personalizada (opcional)</Label>
+                        <Textarea
+                          value={autoRejectCandidateMessage}
+                          onChange={(e) => setAutoRejectCandidateMessage(e.target.value)}
+                          placeholder="Deixe em branco para usar a mensagem padrão..."
+                          rows={2}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Aviso de conflito */}
+              {autoApprovalEnabled && autoRejectEnabled && autoApprovalMinScore <= autoRejectMaxScore && (
+                <div className="flex gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="text-sm text-amber-900">
+                    <p className="font-medium mb-1">Atenção!</p>
+                    <p className="text-amber-800">
+                      O score mínimo de aprovação ({autoApprovalMinScore}%) deve ser maior que o score máximo de reprovação ({autoRejectMaxScore}%). Ajuste os valores para evitar conflitos.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Botão Salvar */}
+              <div className="flex justify-end">
+                <Button onClick={handleSaveAutoApproval} disabled={savingAutoApproval}>
+                  {savingAutoApproval && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Salvar Configurações
+                </Button>
               </div>
             </CardContent>
           </Card>

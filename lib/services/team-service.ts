@@ -658,6 +658,7 @@ export async function updateAutoApprovalSettings(ownerId: string, settingsData: 
 
 /**
  * Processa aprovação/reprovação automática após avaliação da IA
+ * Usa as configurações da vaga (entrevista) ao invés das configurações gerais do time
  */
 export async function processAutoDecision(candidatoEntrevistaId: string): Promise<{
   processed: boolean;
@@ -682,7 +683,7 @@ export async function processAutoDecision(candidatoEntrevistaId: string): Promis
     return { processed: false, reason: "Já existe decisão manual" };
   }
 
-  // Busca a entrevista para pegar o owner
+  // Busca a entrevista para pegar as configurações de aprovação automática da vaga
   const [entrevista] = await db
     .select()
     .from(entrevistas)
@@ -693,18 +694,15 @@ export async function processAutoDecision(candidatoEntrevistaId: string): Promis
     return { processed: false, reason: "Entrevista não encontrada" };
   }
 
-  // Busca configurações do time
-  const settings = await getOrCreateTeamSettings(entrevista.userId);
-
   const score = candidatura.notaGeral;
   const compatibility = candidatura.compatibilidadeVaga || 0;
 
-  // Verifica aprovação automática
-  if (settings.autoApprovalEnabled) {
-    let shouldApprove = score >= settings.autoApprovalMinScore;
+  // Verifica aprovação automática usando configurações da vaga
+  if (entrevista.autoApprovalEnabled) {
+    let shouldApprove = score >= entrevista.autoApprovalMinScore;
 
-    if (shouldApprove && settings.autoApprovalUseCompatibility) {
-      shouldApprove = compatibility >= settings.autoApprovalMinCompatibility;
+    if (shouldApprove && entrevista.autoApprovalUseCompatibility) {
+      shouldApprove = compatibility >= entrevista.autoApprovalMinCompatibility;
     }
 
     if (shouldApprove) {
@@ -719,8 +717,8 @@ export async function processAutoDecision(candidatoEntrevistaId: string): Promis
         })
         .where(eq(candidatoEntrevistas.id, candidatoEntrevistaId));
 
-      // Notifica candidato se configurado
-      if (settings.autoApprovalNotifyCandidate) {
+      // Notifica candidato se configurado na vaga
+      if (entrevista.autoApprovalNotifyCandidate) {
         const [candidato] = await db
           .select()
           .from(candidatos)
@@ -741,7 +739,7 @@ export async function processAutoDecision(candidatoEntrevistaId: string): Promis
               nomeCandidato: candidato.nome,
               cargo: entrevista.cargo || "Vaga",
               empresa: owner.empresa || owner.nome,
-              mensagemPersonalizada: settings.autoApprovalCandidateMessage || undefined,
+              mensagemPersonalizada: entrevista.autoApprovalCandidateMessage || undefined,
             }),
           });
         }
@@ -751,9 +749,9 @@ export async function processAutoDecision(candidatoEntrevistaId: string): Promis
     }
   }
 
-  // Verifica reprovação automática
-  if (settings.autoRejectEnabled) {
-    if (score <= settings.autoRejectMaxScore) {
+  // Verifica reprovação automática usando configurações da vaga
+  if (entrevista.autoRejectEnabled) {
+    if (score <= entrevista.autoRejectMaxScore) {
       // Reprova automaticamente
       await db
         .update(candidatoEntrevistas)
@@ -765,8 +763,8 @@ export async function processAutoDecision(candidatoEntrevistaId: string): Promis
         })
         .where(eq(candidatoEntrevistas.id, candidatoEntrevistaId));
 
-      // Notifica candidato se configurado
-      if (settings.autoRejectNotifyCandidate) {
+      // Notifica candidato se configurado na vaga
+      if (entrevista.autoRejectNotifyCandidate) {
         const [candidato] = await db
           .select()
           .from(candidatos)
@@ -787,7 +785,7 @@ export async function processAutoDecision(candidatoEntrevistaId: string): Promis
               nomeCandidato: candidato.nome,
               cargo: entrevista.cargo || "Vaga",
               empresa: owner.empresa || owner.nome,
-              mensagemPersonalizada: settings.autoRejectCandidateMessage || undefined,
+              mensagemPersonalizada: entrevista.autoRejectCandidateMessage || undefined,
             }),
           });
         }
@@ -797,7 +795,7 @@ export async function processAutoDecision(candidatoEntrevistaId: string): Promis
     }
   }
 
-  return { processed: false, reason: "Score não atingiu critérios automáticos" };
+  return { processed: false, reason: "Score não atingiu critérios automáticos ou aprovação automática desabilitada para esta vaga" };
 }
 
 /**

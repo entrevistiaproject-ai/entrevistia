@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, jsonb, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid, jsonb, integer, boolean } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 /**
@@ -57,6 +57,40 @@ export const entrevistas = pgTable("entrevistas", {
     // Prazo para resposta do candidato (em horas)
     prazoRespostaHoras?: number; // Padrão: 48 horas
   }>(),
+
+  // === Configurações de Aprovação Automática (por vaga) ===
+
+  // Ativar/desativar aprovação automática para esta vaga
+  autoApprovalEnabled: boolean("auto_approval_enabled").default(false).notNull(),
+
+  // Score mínimo para aprovação automática (0-100)
+  autoApprovalMinScore: integer("auto_approval_min_score").default(70).notNull(),
+
+  // Também usar compatibilidade com a vaga como critério
+  autoApprovalUseCompatibility: boolean("auto_approval_use_compatibility").default(false).notNull(),
+
+  // Compatibilidade mínima com a vaga (0-100)
+  autoApprovalMinCompatibility: integer("auto_approval_min_compatibility").default(70).notNull(),
+
+  // Enviar email ao candidato quando for aprovado automaticamente
+  autoApprovalNotifyCandidate: boolean("auto_approval_notify_candidate").default(false).notNull(),
+
+  // Mensagem personalizada para enviar ao candidato aprovado
+  autoApprovalCandidateMessage: text("auto_approval_candidate_message"),
+
+  // === Configurações de Reprovação Automática (por vaga) ===
+
+  // Ativar/desativar reprovação automática para esta vaga
+  autoRejectEnabled: boolean("auto_reject_enabled").default(false).notNull(),
+
+  // Score máximo para reprovação automática (0-100)
+  autoRejectMaxScore: integer("auto_reject_max_score").default(30).notNull(),
+
+  // Enviar email ao candidato quando for reprovado automaticamente
+  autoRejectNotifyCandidate: boolean("auto_reject_notify_candidate").default(false).notNull(),
+
+  // Mensagem personalizada para enviar ao candidato reprovado
+  autoRejectCandidateMessage: text("auto_reject_candidate_message"),
 
   // Auditoria
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
