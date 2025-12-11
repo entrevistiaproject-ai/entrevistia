@@ -72,9 +72,9 @@ export function EntrevistaCard({ entrevista }: EntrevistaCardProps) {
       className="group relative overflow-hidden hover:shadow-md transition-all duration-200 border hover:border-primary/30 cursor-pointer"
       onClick={handleCardClick}
     >
-      <div className="relative p-3 sm:p-4">
+      <div className="relative p-4">
         {/* Header - Título, Empresa/Cargo e Status */}
-        <div className="flex items-start justify-between gap-3 mb-2">
+        <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-semibold text-foreground line-clamp-1">
               {entrevista.titulo}
@@ -91,44 +91,47 @@ export function EntrevistaCard({ entrevista }: EntrevistaCardProps) {
           </div>
         </div>
 
-        {/* Métricas em linha com labels */}
-        <div className="flex items-center gap-4 py-2 border-y border-border text-xs">
-          <div className="flex items-center gap-1.5" title="Candidatos">
-            <Users className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="font-semibold tabular-nums">{entrevista.totalCandidatos}</span>
-            <span className="text-muted-foreground hidden sm:inline">cand.</span>
+        {/* Métricas em grid de boxes */}
+        <div className="grid grid-cols-5 gap-2 mb-3">
+          <div className="flex flex-col items-center justify-center p-2 bg-muted/50 rounded-lg">
+            <Users className="h-4 w-4 text-muted-foreground mb-1" />
+            <span className="text-base font-bold tabular-nums">{entrevista.totalCandidatos}</span>
+            <span className="text-[10px] text-muted-foreground">Candidatos</span>
           </div>
-          <div className="flex items-center gap-1.5" title="Realizaram">
-            <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="font-semibold tabular-nums">{entrevista.totalConcluiram}</span>
-            <span className="text-muted-foreground hidden sm:inline">feitas</span>
+          <div className="flex flex-col items-center justify-center p-2 bg-muted/50 rounded-lg">
+            <CheckCircle2 className="h-4 w-4 text-muted-foreground mb-1" />
+            <span className="text-base font-bold tabular-nums">{entrevista.totalConcluiram}</span>
+            <span className="text-[10px] text-muted-foreground">Concluídos</span>
           </div>
-          <div className="flex items-center gap-1.5" title="Aprovados">
-            <UserCheck className="h-3.5 w-3.5 text-green-600" />
-            <span className="font-semibold tabular-nums text-green-600">{entrevista.totalAprovados}</span>
+          <div className="flex flex-col items-center justify-center p-2 bg-green-50 dark:bg-green-950/30 rounded-lg">
+            <UserCheck className="h-4 w-4 text-green-600 mb-1" />
+            <span className="text-base font-bold tabular-nums text-green-600">{entrevista.totalAprovados}</span>
+            <span className="text-[10px] text-green-600/80">Aprovados</span>
           </div>
-          <div className="flex items-center gap-1.5" title="Score médio">
-            <Star className="h-3.5 w-3.5 text-amber-500" />
-            <span className="font-semibold tabular-nums text-amber-600">
+          <div className="flex flex-col items-center justify-center p-2 bg-amber-50 dark:bg-amber-950/30 rounded-lg">
+            <Star className="h-4 w-4 text-amber-500 mb-1" />
+            <span className="text-base font-bold tabular-nums text-amber-600">
               {entrevista.mediaScore !== null ? entrevista.mediaScore : "-"}
             </span>
+            <span className="text-[10px] text-amber-600/80">Score</span>
           </div>
-          <div className="flex items-center gap-1.5" title="Perguntas">
-            <FileQuestion className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="font-semibold tabular-nums">{entrevista.totalPerguntas}</span>
+          <div className="flex flex-col items-center justify-center p-2 bg-muted/50 rounded-lg">
+            <FileQuestion className="h-4 w-4 text-muted-foreground mb-1" />
+            <span className="text-base font-bold tabular-nums">{entrevista.totalPerguntas}</span>
+            <span className="text-[10px] text-muted-foreground">Perguntas</span>
           </div>
         </div>
 
         {/* Footer - Progresso, Data e Link */}
-        <div className="flex items-center justify-between gap-3 mt-2">
+        <div className="flex items-center justify-between gap-3 pt-3 border-t border-border">
           <div className="flex items-center gap-2 flex-1">
-            <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden max-w-[120px]">
+            <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
               <div
                 className="h-full bg-blue-600 rounded-full transition-all duration-500"
                 style={{ width: `${taxaConclusao}%` }}
               />
             </div>
-            <span className="text-xs font-medium tabular-nums text-blue-600">{taxaConclusao}%</span>
+            <span className="text-xs font-semibold tabular-nums text-blue-600 min-w-9">{taxaConclusao}%</span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <span className="text-[10px] text-muted-foreground flex items-center gap-1">
