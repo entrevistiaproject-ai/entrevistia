@@ -706,7 +706,7 @@ export default function ResultadoCandidatoPage() {
 
       {/* Perguntas e Respostas */}
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
             Perguntas e Respostas
@@ -715,41 +715,70 @@ export default function ResultadoCandidatoPage() {
             {perguntasRespostas.length} pergunta{perguntasRespostas.length !== 1 ? 's' : ''} respondida{perguntasRespostas.length !== 1 ? 's' : ''}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="p-0">
           {perguntasRespostas.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-12 text-muted-foreground px-6">
               <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>Nenhuma resposta registrada ainda</p>
             </div>
           ) : (
-            perguntasRespostas.map((item, index) => (
-              <div key={item.pergunta.id} className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold shrink-0">
-                    {item.pergunta.ordem || index + 1}
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">{item.pergunta.texto}</p>
-                  </div>
-                </div>
-
-                <div className="ml-11 p-4 bg-muted/50 rounded-lg">
-                  <p className="text-sm leading-relaxed">
-                    {item.resposta.texto || item.resposta.transcricao || (
-                      <span className="text-muted-foreground italic">Sem resposta</span>
-                    )}
-                  </p>
-                  {item.resposta.tempoResposta && (
-                    <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      <span>{item.resposta.tempoResposta} segundos</span>
+            <div className="divide-y divide-border">
+              {perguntasRespostas.map((item, index) => (
+                <div key={item.pergunta.id} className="group">
+                  {/* Pergunta - Estilo entrevistador */}
+                  <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-900/20">
+                    <div className="flex items-start gap-4">
+                      <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-semibold shrink-0 shadow-sm">
+                        {item.pergunta.ordem || index + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-medium text-primary">Entrevistador</span>
+                        </div>
+                        <p className="text-sm font-medium text-foreground leading-relaxed">
+                          {item.pergunta.texto}
+                        </p>
+                      </div>
                     </div>
-                  )}
-                </div>
+                  </div>
 
-                {index < perguntasRespostas.length - 1 && <Separator className="mt-4" />}
-              </div>
-            ))
+                  {/* Resposta - Estilo candidato */}
+                  <div className="px-6 py-4 bg-white dark:bg-background">
+                    <div className="flex items-start gap-4">
+                      <div className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 shrink-0">
+                        <span className="text-xs font-semibold">
+                          {candidato?.nome?.charAt(0).toUpperCase() || 'C'}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                          <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                            {candidato?.nome?.split(' ')[0] || 'Candidato'}
+                          </span>
+                          {item.resposta.tempoResposta && (
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              <span>{item.resposta.tempoResposta}s</span>
+                            </div>
+                          )}
+                        </div>
+                        {item.resposta.texto || item.resposta.transcricao ? (
+                          <div className="relative">
+                            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                              {item.resposta.texto || item.resposta.transcricao}
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground/60 italic">
+                            Sem resposta registrada
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>
