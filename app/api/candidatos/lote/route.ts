@@ -3,6 +3,7 @@ import { getUserId } from "@/lib/auth/get-user";
 import { getDB } from "@/lib/db";
 import { candidatos, candidatoEntrevistas } from "@/lib/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
+import { checkEntrevistaOwnership } from "@/lib/security/ownership";
 
 // Validador de email simples
 function isValidEmail(email: string): boolean {
@@ -31,6 +32,17 @@ export async function POST(request: Request) {
     }
 
     const db = getDB();
+
+    // Se foi fornecido entrevistaId, verificar ownership
+    if (entrevistaId) {
+      const entrevista = await checkEntrevistaOwnership(entrevistaId, userId);
+      if (!entrevista) {
+        return NextResponse.json(
+          { error: "Entrevista não encontrada ou não pertence a você" },
+          { status: 404 }
+        );
+      }
+    }
 
     // Validar dados básicos e email
     const candidatosValidos = candidatosData.filter(

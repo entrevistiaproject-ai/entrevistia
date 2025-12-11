@@ -2,11 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDB } from '@/lib/db';
 import { respostas, perguntas, candidatoEntrevistas } from '@/lib/db/schema';
 import { eq, and, asc } from 'drizzle-orm';
+import {
+  requireParticipacaoAccess,
+  isErrorResponse,
+} from '@/lib/security/ownership';
 
 /**
  * GET /api/candidatos/[id]/respostas?entrevistaId=xxx
  *
  * Busca todas as perguntas e respostas de um candidato em uma entrevista
+ * PROTEGIDO: Requer autenticação e verifica ownership do candidato E entrevista
  */
 export async function GET(
   request: NextRequest,
@@ -22,6 +27,12 @@ export async function GET(
         { error: 'entrevistaId é obrigatório' },
         { status: 400 }
       );
+    }
+
+    // Verifica autenticação e ownership do candidato E entrevista
+    const accessResult = await requireParticipacaoAccess(candidatoId, entrevistaId);
+    if (isErrorResponse(accessResult)) {
+      return accessResult;
     }
 
     const db = getDB();

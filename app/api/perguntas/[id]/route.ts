@@ -1,33 +1,31 @@
 import { NextResponse } from "next/server";
-import { getUserId } from "@/lib/auth/get-user";
 import { getDB } from "@/lib/db";
 import { perguntasTemplates } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { sugerirCategoria } from "@/lib/utils/classificacao-perguntas";
+import {
+  requirePerguntaTemplateAccess,
+  requirePerguntaTemplateEditAccess,
+  isErrorResponse,
+} from "@/lib/security/ownership";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
 // GET - Buscar uma pergunta específica
+// PROTEGIDO: Requer autenticação e verifica ownership (ou permite perguntas padrão do sistema)
 export async function GET(request: Request, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const db = getDB();
 
-    const [pergunta] = await db
-      .select()
-      .from(perguntasTemplates)
-      .where(eq(perguntasTemplates.id, id))
-      .limit(1);
-
-    if (!pergunta) {
-      return NextResponse.json(
-        { error: "Pergunta não encontrada" },
-        { status: 404 }
-      );
+    // Verifica autenticação e ownership (permite templates do sistema)
+    const accessResult = await requirePerguntaTemplateAccess(id, true);
+    if (isErrorResponse(accessResult)) {
+      return accessResult;
     }
 
+    const { pergunta } = accessResult;
     return NextResponse.json(pergunta);
   } catch (error) {
     console.error("Erro ao buscar pergunta:", error);
@@ -39,49 +37,19 @@ export async function GET(request: Request, { params }: RouteParams) {
 }
 
 // PUT - Atualizar uma pergunta
+// PROTEGIDO: Requer autenticação e verifica ownership (não permite editar perguntas padrão)
 export async function PUT(request: Request, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const userId = await getUserId();
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Não autorizado" },
-        { status: 401 }
-      );
+    // Verifica autenticação e permissão de edição
+    const accessResult = await requirePerguntaTemplateEditAccess(id);
+    if (isErrorResponse(accessResult)) {
+      return accessResult;
     }
 
+    const { pergunta: perguntaExistente } = accessResult;
     const db = getDB();
-
-    // Verificar se a pergunta existe e pertence ao usuário
-    const [perguntaExistente] = await db
-      .select()
-      .from(perguntasTemplates)
-      .where(eq(perguntasTemplates.id, id))
-      .limit(1);
-
-    if (!perguntaExistente) {
-      return NextResponse.json(
-        { error: "Pergunta não encontrada" },
-        { status: 404 }
-      );
-    }
-
-    // Não permite editar perguntas padrão do sistema
-    if (perguntaExistente.isPadrao) {
-      return NextResponse.json(
-        { error: "Não é possível editar perguntas padrão do sistema" },
-        { status: 403 }
-      );
-    }
-
-    // Verificar se a pergunta pertence ao usuário
-    if (perguntaExistente.userId !== userId) {
-      return NextResponse.json(
-        { error: "Você não tem permissão para editar esta pergunta" },
-        { status: 403 }
-      );
-    }
 
     const body = await request.json();
     const {
@@ -122,49 +90,18 @@ export async function PUT(request: Request, { params }: RouteParams) {
 }
 
 // DELETE - Deletar uma pergunta (soft delete)
+// PROTEGIDO: Requer autenticação e verifica ownership (não permite deletar perguntas padrão)
 export async function DELETE(request: Request, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const userId = await getUserId();
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Não autorizado" },
-        { status: 401 }
-      );
+    // Verifica autenticação e permissão de edição (mesma regra do PUT)
+    const accessResult = await requirePerguntaTemplateEditAccess(id);
+    if (isErrorResponse(accessResult)) {
+      return accessResult;
     }
 
     const db = getDB();
-
-    // Verificar se a pergunta existe e pertence ao usuário
-    const [perguntaExistente] = await db
-      .select()
-      .from(perguntasTemplates)
-      .where(eq(perguntasTemplates.id, id))
-      .limit(1);
-
-    if (!perguntaExistente) {
-      return NextResponse.json(
-        { error: "Pergunta não encontrada" },
-        { status: 404 }
-      );
-    }
-
-    // Não permite deletar perguntas padrão do sistema
-    if (perguntaExistente.isPadrao) {
-      return NextResponse.json(
-        { error: "Não é possível deletar perguntas padrão do sistema. Use a opção de ocultar." },
-        { status: 403 }
-      );
-    }
-
-    // Verificar se a pergunta pertence ao usuário
-    if (perguntaExistente.userId !== userId) {
-      return NextResponse.json(
-        { error: "Você não tem permissão para deletar esta pergunta" },
-        { status: 403 }
-      );
-    }
 
     // Soft delete - apenas marca a data de exclusão
     await db

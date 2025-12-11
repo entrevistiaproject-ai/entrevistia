@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDB } from '@/lib/db';
-import { candidatos, candidatoEntrevistas } from '@/lib/db/schema';
+import { candidatoEntrevistas } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import {
+  requireCandidatoAccess,
+  isErrorResponse,
+} from '@/lib/security/ownership';
 
 /**
  * GET /api/candidatos/[id]
  *
  * Busca dados de um candidato específico, incluindo a última entrevista
+ * PROTEGIDO: Requer autenticação e verifica ownership do candidato
  */
 export async function GET(
   request: NextRequest,
@@ -16,18 +21,13 @@ export async function GET(
     const { id } = await params;
     const db = getDB();
 
-    const [candidato] = await db
-      .select()
-      .from(candidatos)
-      .where(eq(candidatos.id, id))
-      .limit(1);
-
-    if (!candidato) {
-      return NextResponse.json(
-        { error: 'Candidato não encontrado' },
-        { status: 404 }
-      );
+    // Verifica autenticação e ownership do candidato
+    const accessResult = await requireCandidatoAccess(id);
+    if (isErrorResponse(accessResult)) {
+      return accessResult;
     }
+
+    const { candidato } = accessResult;
 
     // Busca a última entrevista do candidato
     const [ultimaEntrevista] = await db

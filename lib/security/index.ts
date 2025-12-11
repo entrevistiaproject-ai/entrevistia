@@ -115,3 +115,35 @@ export {
   type ProtectionConfig,
   type ProtectionResult,
 } from './api-protection';
+
+// Ownership / Authorization
+export {
+  // Respostas padronizadas
+  unauthorizedResponse,
+  forbiddenResponse,
+  notFoundResponse,
+  // Verificação de autenticação
+  checkAuth,
+  requireAuthentication,
+  // Verificação de ownership - recursos primários
+  checkEntrevistaOwnership,
+  checkCandidatoOwnership,
+  checkFaturaOwnership,
+  checkPerguntaTemplateOwnership,
+  checkPerguntaTemplateEditPermission,
+  // Verificação de ownership - recursos secundários
+  checkPerguntaOwnership,
+  checkParticipacaoOwnership,
+  // Helpers de alto nível para rotas
+  requireEntrevistaAccess,
+  requireCandidatoAccess,
+  requireFaturaAccess,
+  requirePerguntaTemplateAccess,
+  requirePerguntaTemplateEditAccess,
+  requireParticipacaoAccess,
+  // Utilitários
+  isErrorResponse,
+  logUnauthorizedAccess,
+  type OwnershipCheckResult,
+  type AuthResult,
+} from './ownership';
