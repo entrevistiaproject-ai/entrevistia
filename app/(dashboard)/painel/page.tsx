@@ -63,7 +63,7 @@ import { cn } from "@/lib/utils";
 
 type TabValue = "pendentes" | "shortlist" | "arquivados";
 
-export default function InicioPage() {
+export default function TarefasPage() {
   const [data, setData] = useState<PipelineData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -445,7 +445,7 @@ export default function InicioPage() {
     return (
       <div className="space-y-6">
         <PageHeader
-          title="Início"
+          title="Tarefas"
           description="Gerencie seus candidatos e processos seletivos"
         />
         <div className="flex items-center justify-center min-h-[400px]">
@@ -459,7 +459,7 @@ export default function InicioPage() {
     return (
       <div className="space-y-6">
         <PageHeader
-          title="Início"
+          title="Tarefas"
           description="Gerencie seus candidatos e processos seletivos"
         />
         <Card>
@@ -483,7 +483,7 @@ export default function InicioPage() {
     return (
       <div className="space-y-6">
         <PageHeader
-          title="Início"
+          title="Tarefas"
           description="Gerencie seus candidatos e processos seletivos"
         >
           <Button asChild size="touch">
@@ -523,7 +523,7 @@ export default function InicioPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Início"
+        title="Tarefas"
         description="Gerencie seus candidatos e processos seletivos"
       >
         <Button asChild size="touch" className="w-full sm:w-auto">

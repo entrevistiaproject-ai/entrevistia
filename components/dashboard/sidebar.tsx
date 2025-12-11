@@ -23,7 +23,7 @@ import { SupportWidget } from "@/components/support/support-widget";
 
 const mainMenuItems = [
   {
-    title: "Painel",
+    title: "Tarefas",
     href: "/painel",
     icon: ClipboardList,
   },

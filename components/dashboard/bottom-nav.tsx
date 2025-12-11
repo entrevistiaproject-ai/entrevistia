@@ -31,7 +31,7 @@ const navItems = [
   {
     href: "/painel",
     icon: ClipboardList,
-    label: "Painel",
+    label: "Tarefas",
   },
   {
     href: "/entrevistas",

@@ -390,16 +390,24 @@ export interface PipelineCandidate {
   arquivadoEm: Date | null;
 }
 
+export interface EntrevistaFiltro {
+  id: string;
+  titulo: string;
+  cargo: string | null;
+  totalCandidatos: number;
+}
+
 export interface PipelineData {
   pendentes: PipelineCandidate[]; // Concluídos aguardando decisão
-  shortlist: PipelineCandidate[]; // Aprovados não arquivados
+  finalistas: PipelineCandidate[]; // Aprovados não arquivados
   arquivados: PipelineCandidate[]; // Arquivados (aprovados e reprovados)
   counts: {
     pendentes: number;
-    shortlist: number;
+    finalistas: number;
     arquivados: number;
     emAndamento: number;
   };
+  entrevistas: EntrevistaFiltro[]; // Lista de entrevistas para filtro
 }
 
 export async function getPipelineData(): Promise<{
