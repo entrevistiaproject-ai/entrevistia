@@ -6,6 +6,7 @@ import { cadastroUserSchema } from "@/lib/validations";
 import { eq } from "drizzle-orm";
 import { enviarEmail } from "@/lib/email/resend";
 import { emailVerificacaoTemplate, gerarCodigoVerificacao } from "@/lib/email/templates";
+import { logger, sanitizeEmail, sanitizeName, sanitizePhone, sanitizeString, hashVerificationCode } from "@/lib/security";
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,11 +15,21 @@ export async function POST(request: NextRequest) {
     // Validação com Zod
     const validatedData = cadastroUserSchema.parse(body);
 
+    // Sanitiza os dados de entrada
+    const sanitizedData = {
+      ...validatedData,
+      nome: sanitizeName(validatedData.nome),
+      email: sanitizeEmail(validatedData.email),
+      telefone: validatedData.telefone ? sanitizePhone(validatedData.telefone) : null,
+      empresa: validatedData.empresa ? sanitizeString(validatedData.empresa) : null,
+      cargo: validatedData.cargo ? sanitizeString(validatedData.cargo) : null,
+    };
+
     // Verifica se o email já existe
     const existingUser = await db
       .select()
       .from(users)
-      .where(eq(users.email, validatedData.email))
+      .where(eq(users.email, sanitizedData.email))
       .limit(1);
 
     if (existingUser.length > 0) {
@@ -45,17 +56,17 @@ export async function POST(request: NextRequest) {
     const [newUser] = await db
       .insert(users)
       .values({
-        nome: validatedData.nome,
-        email: validatedData.email,
-        telefone: validatedData.telefone || null,
-        empresa: validatedData.empresa || null,
-        cargo: validatedData.cargo || null,
+        nome: sanitizedData.nome,
+        email: sanitizedData.email,
+        telefone: sanitizedData.telefone,
+        empresa: sanitizedData.empresa,
+        cargo: sanitizedData.cargo,
         passwordHash,
         emailVerified: null, // Ainda não verificado
         aceitouTermos: true,
         aceitouPrivacidade: true,
         dataAceiteTermos: new Date(),
-        aceitaEmailMarketing: validatedData.aceitaEmailMarketing || false,
+        aceitaEmailMarketing: sanitizedData.aceitaEmailMarketing || false,
         ipCadastro: ipAddress,
         userAgentCadastro: userAgent,
       })
@@ -76,14 +87,15 @@ export async function POST(request: NextRequest) {
       userAgent,
     });
 
-    // Gera código de verificação
+    // Gera código de verificação (código original para email, hash para banco)
     const codigo = gerarCodigoVerificacao();
+    const codigoHash = hashVerificationCode(codigo);
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
 
     await db.insert(verificationCodes).values({
       userId: newUser.id,
       email: newUser.email,
-      code: codigo,
+      code: codigoHash, // Armazena hash, não o código original
       type: "email_verification",
       expiresAt,
       ipAddress,
@@ -101,7 +113,7 @@ export async function POST(request: NextRequest) {
         }),
       });
     } catch (emailError) {
-      console.error("Erro ao enviar email:", emailError);
+      logger.error("Erro ao enviar email de verificação", emailError);
       // Não falha o cadastro se o email não for enviado
     }
 
@@ -121,7 +133,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Erro no cadastro:", error);
+    logger.error("Erro no cadastro", error);
 
     // Erros de validação do Zod
     if (error && typeof error === 'object' && 'issues' in error) {

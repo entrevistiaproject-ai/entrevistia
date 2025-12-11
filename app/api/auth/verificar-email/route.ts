@@ -3,6 +3,15 @@ import { db } from "@/lib/db";
 import { verificationCodes, users } from "@/lib/db/schema";
 import { eq, and, gt } from "drizzle-orm";
 import { z } from "zod";
+import {
+  logger,
+  sanitizeEmail,
+  isValidCodeFormat,
+  verifyCodeHash,
+  checkRateLimit,
+  getClientIP,
+  createRateLimitKey,
+} from "@/lib/security";
 
 const verifyEmailSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -11,6 +20,21 @@ const verifyEmailSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting por IP
+    const clientIP = getClientIP(request);
+    const rateLimitKey = createRateLimitKey("verificar-email", clientIP);
+    const rateLimitResult = checkRateLimit(rateLimitKey, "verification");
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          error: "Muitas tentativas. Por favor, aguarde antes de tentar novamente.",
+          retryAfter: rateLimitResult.retryAfter,
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
 
     // Valida os dados
@@ -22,7 +46,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email, code } = validation.data;
+    const { email: rawEmail, code } = validation.data;
+    const email = sanitizeEmail(rawEmail);
+
+    // Valida formato do código
+    if (!isValidCodeFormat(code)) {
+      return NextResponse.json(
+        { error: "Formato de código inválido" },
+        { status: 400 }
+      );
+    }
 
     // Busca o usuário
     const [user] = await db
@@ -32,9 +65,10 @@ export async function POST(request: NextRequest) {
       .limit(1);
 
     if (!user) {
+      // Não revelar se o usuário existe ou não (previne enumeração)
       return NextResponse.json(
-        { error: "Usuário não encontrado" },
-        { status: 404 }
+        { error: "Código inválido ou expirado" },
+        { status: 400 }
       );
     }
 
@@ -78,17 +112,24 @@ export async function POST(request: NextRequest) {
     }
 
     // Verifica se o código está correto
-    if (verificationCode.code !== code) {
+    // Suporta tanto códigos em texto plano (legado) quanto hashes
+    const isValidCode = verificationCode.code.length === 64
+      ? verifyCodeHash(code, verificationCode.code) // Hash SHA-256
+      : verificationCode.code === code; // Texto plano (legado)
+
+    if (!isValidCode) {
       // Incrementa tentativas
       await db
         .update(verificationCodes)
         .set({ attempts: verificationCode.attempts + 1 })
         .where(eq(verificationCodes.id, verificationCode.id));
 
+      const tentativasRestantes = 5 - (verificationCode.attempts + 1);
+
       return NextResponse.json(
         {
           error: "Código incorreto",
-          tentativasRestantes: 5 - (verificationCode.attempts + 1)
+          tentativasRestantes: tentativasRestantes > 0 ? tentativasRestantes : 0,
         },
         { status: 400 }
       );
@@ -121,7 +162,7 @@ export async function POST(request: NextRequest) {
     );
 
   } catch (error) {
-    console.error("Erro ao verificar email:", error);
+    logger.error("Erro ao verificar email", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
       { status: 500 }

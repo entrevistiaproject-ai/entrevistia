@@ -130,10 +130,14 @@ export function emailVerificacaoTemplate(params: {
 }
 
 /**
- * Gera código de 6 dígitos
+ * Gera código de 6 dígitos criptograficamente seguro
  */
 export function gerarCodigoVerificacao(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  // Usa crypto.getRandomValues para geração segura
+  const array = new Uint32Array(1);
+  crypto.getRandomValues(array);
+  // Garante 6 dígitos (100000-999999)
+  return (100000 + (array[0] % 900000)).toString();
 }
 
 /**

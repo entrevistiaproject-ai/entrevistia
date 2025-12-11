@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { analyzeInterview } from '@/lib/ai/agent';
 import { getDB } from '@/lib/db';
-import { candidatos, candidatoEntrevistas } from '@/lib/db/schema';
+import { candidatos, candidatoEntrevistas, entrevistas } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { auth } from '@/auth';
+import { checkRateLimit, getClientIP, createRateLimitKey, getRateLimitHeaders } from '@/lib/security';
+import { sanitizeUUID } from '@/lib/security/sanitize';
 
 export const maxDuration = 300; // 5 minutos - permite análises mais longas
 
@@ -10,6 +13,7 @@ export const maxDuration = 300; // 5 minutos - permite análises mais longas
  * POST /api/analise-entrevista
  *
  * Analisa uma entrevista de candidato usando IA
+ * IMPORTANTE: Verifica se o usuário autenticado é o dono da entrevista
  *
  * Body:
  * {
@@ -19,6 +23,36 @@ export const maxDuration = 300; // 5 minutos - permite análises mais longas
  */
 export async function POST(request: NextRequest) {
   try {
+    // Verifica autenticação
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Não autenticado' },
+        { status: 401 }
+      );
+    }
+
+    const userId = session.user.id;
+
+    // Rate limiting por usuário para análises (recurso caro de IA)
+    const clientIP = getClientIP(request);
+    const rateLimitKey = createRateLimitKey('analysis', userId, clientIP);
+    const rateLimitResult = checkRateLimit(rateLimitKey, 'analysis');
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          error: 'Limite de análises excedido. Por favor, aguarde antes de tentar novamente.',
+          retryAfter: rateLimitResult.retryAfter,
+          resetAt: rateLimitResult.resetAt.toISOString(),
+        },
+        {
+          status: 429,
+          headers: getRateLimitHeaders(rateLimitResult),
+        }
+      );
+    }
+
     const body = await request.json();
     const { candidatoId, entrevistaId } = body;
 
@@ -26,6 +60,17 @@ export async function POST(request: NextRequest) {
     if (!candidatoId || !entrevistaId) {
       return NextResponse.json(
         { error: 'candidatoId e entrevistaId são obrigatórios' },
+        { status: 400 }
+      );
+    }
+
+    // Sanitiza UUIDs
+    const sanitizedCandidatoId = sanitizeUUID(candidatoId);
+    const sanitizedEntrevistaId = sanitizeUUID(entrevistaId);
+
+    if (!sanitizedCandidatoId || !sanitizedEntrevistaId) {
+      return NextResponse.json(
+        { error: 'IDs inválidos' },
         { status: 400 }
       );
     }
@@ -38,20 +83,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Busca informações do candidato e da entrevista
+    // Busca informações do candidato e da entrevista COM VERIFICAÇÃO DE OWNERSHIP
     const db = getDB();
     const [resultado] = await db
       .select({
         candidatoId: candidatos.id,
         candidatoNome: candidatos.nome,
+        candidatoUserId: candidatos.userId,
         status: candidatoEntrevistas.status,
+        entrevistaUserId: entrevistas.userId,
       })
       .from(candidatos)
       .innerJoin(candidatoEntrevistas, eq(candidatos.id, candidatoEntrevistas.candidatoId))
+      .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
       .where(
         and(
-          eq(candidatos.id, candidatoId),
-          eq(candidatoEntrevistas.entrevistaId, entrevistaId)
+          eq(candidatos.id, sanitizedCandidatoId),
+          eq(candidatoEntrevistas.entrevistaId, sanitizedEntrevistaId)
         )
       )
       .limit(1);
@@ -60,6 +108,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Candidato ou entrevista não encontrado' },
         { status: 404 }
+      );
+    }
+
+    // VERIFICAÇÃO DE OWNERSHIP - O usuário deve ser dono da entrevista
+    if (resultado.entrevistaUserId !== userId) {
+      return NextResponse.json(
+        { error: 'Acesso não autorizado a esta entrevista' },
+        { status: 403 }
+      );
+    }
+
+    // Verifica se o candidato pertence ao mesmo usuário
+    if (resultado.candidatoUserId !== userId) {
+      return NextResponse.json(
+        { error: 'Acesso não autorizado a este candidato' },
+        { status: 403 }
       );
     }
 
@@ -73,8 +137,8 @@ export async function POST(request: NextRequest) {
 
     // Executa a análise
     const result = await analyzeInterview(
-      candidatoId,
-      entrevistaId,
+      sanitizedCandidatoId,
+      sanitizedEntrevistaId,
       resultado.candidatoNome
     );
 
@@ -94,11 +158,14 @@ export async function POST(request: NextRequest) {
       message: 'Análise concluída com sucesso',
     });
   } catch (error) {
-    console.error('Erro na API de análise:', error);
+    // Log sem expor detalhes sensíveis em produção
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Erro na API de análise:', error);
+    }
+
     return NextResponse.json(
       {
         error: 'Erro interno do servidor',
-        details: error instanceof Error ? error.message : 'Erro desconhecido',
       },
       { status: 500 }
     );
@@ -109,9 +176,20 @@ export async function POST(request: NextRequest) {
  * GET /api/analise-entrevista?candidatoId=xxx&entrevistaId=yyy
  *
  * Verifica o status de uma análise
+ * IMPORTANTE: Verifica se o usuário autenticado é o dono da entrevista
  */
 export async function GET(request: NextRequest) {
   try {
+    // Verifica autenticação
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Não autenticado' },
+        { status: 401 }
+      );
+    }
+
+    const userId = session.user.id;
     const searchParams = request.nextUrl.searchParams;
     const candidatoId = searchParams.get('candidatoId');
     const entrevistaId = searchParams.get('entrevistaId');
@@ -123,18 +201,52 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Sanitiza UUIDs
+    const sanitizedCandidatoId = sanitizeUUID(candidatoId);
+    const sanitizedEntrevistaId = sanitizeUUID(entrevistaId);
+
+    if (!sanitizedCandidatoId || !sanitizedEntrevistaId) {
+      return NextResponse.json(
+        { error: 'IDs inválidos' },
+        { status: 400 }
+      );
+    }
+
+    // Verifica ownership antes de retornar dados
+    const db = getDB();
+    const [entrevista] = await db
+      .select({ userId: entrevistas.userId })
+      .from(entrevistas)
+      .where(eq(entrevistas.id, sanitizedEntrevistaId))
+      .limit(1);
+
+    if (!entrevista) {
+      return NextResponse.json(
+        { error: 'Entrevista não encontrada' },
+        { status: 404 }
+      );
+    }
+
+    if (entrevista.userId !== userId) {
+      return NextResponse.json(
+        { error: 'Acesso não autorizado a esta entrevista' },
+        { status: 403 }
+      );
+    }
+
     // TODO: Implementar busca de avaliação quando o schema avaliacoes for criado
-    // Por enquanto, retorna que não existe avaliação
     return NextResponse.json({
       exists: false,
       message: 'Sistema de avaliações ainda não implementado',
     });
   } catch (error) {
-    console.error('Erro ao buscar avaliação:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Erro ao buscar avaliação:', error);
+    }
+
     return NextResponse.json(
       {
         error: 'Erro interno do servidor',
-        details: error instanceof Error ? error.message : 'Erro desconhecido',
       },
       { status: 500 }
     );

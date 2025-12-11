@@ -1,8 +1,38 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { jwtVerify } from "jose";
+import { getSecurityHeaders } from "@/lib/security/headers";
+import { checkRateLimit, getClientIP, createRateLimitKey, getRateLimitHeaders } from "@/lib/security/rate-limit";
 
-export function middleware(request: NextRequest) {
+// Secret para verificação do JWT admin
+const ADMIN_JWT_SECRET = new TextEncoder().encode(
+  process.env.ADMIN_JWT_SECRET || process.env.AUTH_SECRET || "admin-secret-key-change-in-production"
+);
+
+/**
+ * Verifica se o token JWT admin é válido
+ */
+async function verifyAdminToken(token: string): Promise<boolean> {
+  try {
+    await jwtVerify(token, ADMIN_JWT_SECRET);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const response = NextResponse.next();
+
+  // Aplica headers de segurança em todas as respostas
+  const securityHeaders = getSecurityHeaders({
+    isDevelopment: process.env.NODE_ENV === "development",
+  });
+
+  for (const [key, value] of Object.entries(securityHeaders)) {
+    response.headers.set(key, value);
+  }
 
   // Rotas públicas que não precisam de autenticação
   const publicRoutes = [
@@ -24,22 +54,96 @@ export function middleware(request: NextRequest) {
     "/api/entrevista-publica/",
   ];
 
+  // Rotas de autenticação com rate limiting mais rigoroso
+  const authRoutes = [
+    "/api/auth/login",
+    "/api/auth/cadastro",
+    "/api/auth/verificar-codigo",
+    "/api/auth/reenviar-codigo",
+    "/api/admin/auth/login",
+  ];
+
+  // Aplica rate limiting em rotas de autenticação
+  if (authRoutes.some(route => pathname.startsWith(route))) {
+    const clientIP = getClientIP(request);
+    let rateLimitKey: string;
+    let configKey: "login" | "signup" | "verification" | "adminLogin";
+
+    if (pathname.includes("/admin/")) {
+      rateLimitKey = createRateLimitKey("admin-auth", clientIP);
+      configKey = "adminLogin";
+    } else if (pathname.includes("/cadastro")) {
+      rateLimitKey = createRateLimitKey("signup", clientIP);
+      configKey = "signup";
+    } else if (pathname.includes("/verificar") || pathname.includes("/reenviar")) {
+      rateLimitKey = createRateLimitKey("verification", clientIP);
+      configKey = "verification";
+    } else {
+      rateLimitKey = createRateLimitKey("login", clientIP);
+      configKey = "login";
+    }
+
+    const rateLimitResult = checkRateLimit(rateLimitKey, configKey);
+
+    // Adiciona headers de rate limit
+    const rateLimitHeaders = getRateLimitHeaders(rateLimitResult);
+    for (const [key, value] of Object.entries(rateLimitHeaders)) {
+      response.headers.set(key, value);
+    }
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          error: "Muitas tentativas. Por favor, aguarde antes de tentar novamente.",
+          retryAfter: rateLimitResult.retryAfter,
+          resetAt: rateLimitResult.resetAt.toISOString(),
+        },
+        {
+          status: 429,
+          headers: {
+            ...Object.fromEntries(response.headers),
+            "Retry-After": String(rateLimitResult.retryAfter),
+          },
+        }
+      );
+    }
+  }
+
   // Verifica se é rota do painel admin
   const isAdminRoute = pathname.startsWith("/admin") && !pathname.startsWith("/admin-login");
   const isAdminApiRoute = pathname.startsWith("/api/admin") && !pathname.startsWith("/api/admin/auth");
 
-  // Trata rotas do admin separadamente
+  // Trata rotas do admin separadamente com validação de JWT
   if (isAdminRoute || isAdminApiRoute) {
     const adminSession = request.cookies.get("admin-session");
 
-    if (!adminSession) {
+    if (!adminSession?.value) {
       if (isAdminApiRoute) {
-        return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+        return NextResponse.json(
+          { error: "Não autorizado" },
+          { status: 401, headers: Object.fromEntries(response.headers) }
+        );
       }
       return NextResponse.redirect(new URL("/admin-login", request.url));
     }
 
-    return NextResponse.next();
+    // Valida o token JWT
+    const isValidToken = await verifyAdminToken(adminSession.value);
+
+    if (!isValidToken) {
+      // Token inválido - limpa o cookie e redireciona
+      const redirectResponse = isAdminApiRoute
+        ? NextResponse.json(
+            { error: "Sessão expirada ou inválida" },
+            { status: 401, headers: Object.fromEntries(response.headers) }
+          )
+        : NextResponse.redirect(new URL("/admin-login", request.url));
+
+      redirectResponse.cookies.delete("admin-session");
+      return redirectResponse;
+    }
+
+    return response;
   }
 
   const isPublicRoute =
@@ -50,7 +154,7 @@ export function middleware(request: NextRequest) {
 
   // Se for rota pública, permite acesso
   if (isPublicRoute) {
-    return NextResponse.next();
+    return response;
   }
 
   // Verifica se tem sessão através do cookie
@@ -69,7 +173,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {

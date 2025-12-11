@@ -4,6 +4,7 @@ import { users, auditLogs } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import { logger, sanitizeEmail } from "@/lib/security";
 
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -23,7 +24,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email, senha } = validation.data;
+    const { email: rawEmail, senha } = validation.data;
+    const email = sanitizeEmail(rawEmail);
 
     // Busca o usuário
     const [user] = await db
@@ -130,7 +132,7 @@ export async function POST(request: NextRequest) {
     return response;
 
   } catch (error) {
-    console.error("Erro ao fazer login:", error);
+    logger.error("Erro ao fazer login", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
       { status: 500 }

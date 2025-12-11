@@ -3,12 +3,22 @@ import { getDB } from "@/lib/db";
 import { entrevistas, candidatos, candidatoEntrevistas } from "@/lib/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { z } from "zod";
+import {
+  logger,
+  sanitizeEmail,
+  sanitizeName,
+  sanitizeCPF,
+  sanitizeSlug,
+  checkRateLimit,
+  getClientIP,
+  createRateLimitKey,
+} from "@/lib/security";
 
 const iniciarEntrevistaSchema = z.object({
-  nome: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
-  email: z.string().email("Email inválido"),
-  emailConfirmacao: z.string().email("Email de confirmação inválido"),
-  documento: z.string().optional(),
+  nome: z.string().min(3, "Nome deve ter pelo menos 3 caracteres").max(100),
+  email: z.string().email("Email inválido").max(255),
+  emailConfirmacao: z.string().email("Email de confirmação inválido").max(255),
+  documento: z.string().max(20).optional(),
   sexo: z.enum(["masculino", "feminino", "outro", "prefiro_nao_informar"]).optional(),
 }).refine((data) => data.email === data.emailConfirmacao, {
   message: "Os emails não coincidem",
@@ -18,13 +28,40 @@ const iniciarEntrevistaSchema = z.object({
 /**
  * POST /api/entrevista-publica/[slug]/iniciar
  * Cria/atualiza candidato e inicia a entrevista
+ *
+ * Validações de segurança:
+ * - Rate limiting por IP
+ * - Sanitização de inputs
+ * - Validação de status da entrevista
+ * - Verificação de expiração do link
  */
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = await params;
+    const { slug: rawSlug } = await params;
+    const slug = sanitizeSlug(rawSlug);
+
+    if (!slug) {
+      return NextResponse.json(
+        { error: "Slug inválido" },
+        { status: 400 }
+      );
+    }
+
+    // Rate limiting por IP para evitar abuso
+    const clientIP = getClientIP(request);
+    const rateLimitKey = createRateLimitKey("entrevista-iniciar", clientIP);
+    const rateLimitResult = checkRateLimit(rateLimitKey, "api");
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Muitas tentativas. Aguarde alguns minutos." },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
 
     // Validar dados
@@ -36,7 +73,26 @@ export async function POST(
       );
     }
 
-    const { nome, email, documento, sexo } = validacao.data;
+    // Sanitiza os dados de entrada
+    const nome = sanitizeName(validacao.data.nome);
+    const email = sanitizeEmail(validacao.data.email);
+    const documento = validacao.data.documento ? sanitizeCPF(validacao.data.documento) : undefined;
+    const sexo = validacao.data.sexo;
+
+    if (!nome || nome.length < 3) {
+      return NextResponse.json(
+        { error: "Nome inválido" },
+        { status: 400 }
+      );
+    }
+
+    if (!email) {
+      return NextResponse.json(
+        { error: "Email inválido" },
+        { status: 400 }
+      );
+    }
+
     const db = getDB();
 
     // Buscar entrevista pelo slug
@@ -54,6 +110,14 @@ export async function POST(
       return NextResponse.json(
         { error: "Entrevista não encontrada ou não está disponível" },
         { status: 404 }
+      );
+    }
+
+    // Verificar se a entrevista está ativa
+    if (entrevista.status !== "active") {
+      return NextResponse.json(
+        { error: "Esta entrevista não está mais disponível" },
+        { status: 410 }
       );
     }
 
@@ -80,6 +144,26 @@ export async function POST(
     let candidatoId: string;
 
     if (candidatoExistente) {
+      // Verificar se já existe uma entrevista concluída para este candidato
+      const [entrevistaExistente] = await db
+        .select()
+        .from(candidatoEntrevistas)
+        .where(
+          and(
+            eq(candidatoEntrevistas.candidatoId, candidatoExistente.id),
+            eq(candidatoEntrevistas.entrevistaId, entrevista.id),
+            eq(candidatoEntrevistas.status, "concluida")
+          )
+        );
+
+      // Se já concluiu e não pode refazer, bloqueia
+      if (entrevistaExistente && !entrevistaExistente.podeRefazer) {
+        return NextResponse.json(
+          { error: "Você já completou esta entrevista" },
+          { status: 403 }
+        );
+      }
+
       // Atualizar dados do candidato
       const [candidatoAtualizado] = await db
         .update(candidatos)
@@ -107,7 +191,7 @@ export async function POST(
           dataAceiteTermos: new Date(),
           consentimentoTratamentoDados: true,
           finalidadeTratamento: `Processo seletivo: ${entrevista.titulo}`,
-          ipCadastro: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+          ipCadastro: clientIP,
           origemCadastro: "link_entrevista",
         })
         .returning();
@@ -129,8 +213,34 @@ export async function POST(
     let sessaoId: string;
 
     if (sessaoExistente) {
-      sessaoId = sessaoExistente.id;
+      // Se a sessão já foi concluída e pode refazer, cria uma nova
+      if (sessaoExistente.status === "concluida" && sessaoExistente.podeRefazer) {
+        // Atualiza a sessão existente para permitir refazer
+        const [sessaoAtualizada] = await db
+          .update(candidatoEntrevistas)
+          .set({
+            status: "em_andamento",
+            iniciadaEm: new Date(),
+            concluidaEm: null,
+            notaGeral: null,
+            recomendacao: null,
+            resumoGeral: null,
+            avaliadoEm: null,
+            updatedAt: new Date(),
+          })
+          .where(eq(candidatoEntrevistas.id, sessaoExistente.id))
+          .returning();
+
+        sessaoId = sessaoAtualizada.id;
+      } else {
+        sessaoId = sessaoExistente.id;
+      }
     } else {
+      // Calcular prazo de resposta baseado nas configurações
+      let prazoResposta: Date | undefined;
+      const prazoHoras = entrevista.configuracoes?.prazoRespostaHoras ?? 48;
+      prazoResposta = new Date(Date.now() + prazoHoras * 60 * 60 * 1000);
+
       // Criar nova sessão de entrevista
       const [novaSessao] = await db
         .insert(candidatoEntrevistas)
@@ -139,6 +249,7 @@ export async function POST(
           entrevistaId: entrevista.id,
           status: "em_andamento",
           iniciadaEm: new Date(),
+          prazoResposta,
         })
         .returning();
 
@@ -151,7 +262,7 @@ export async function POST(
       entrevistaId: entrevista.id,
     });
   } catch (error) {
-    console.error("Erro ao iniciar entrevista:", error);
+    logger.error("Erro ao iniciar entrevista", error);
     return NextResponse.json(
       { error: "Erro ao processar cadastro" },
       { status: 500 }
