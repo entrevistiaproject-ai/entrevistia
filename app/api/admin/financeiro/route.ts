@@ -239,24 +239,37 @@ export async function GET(request: Request) {
       .where(gte(transacoes.createdAt, dataInicio))
       .groupBy(transacoes.tipo);
 
-    // Receita por Mês
+    // Receita por Mês (excluindo contas de teste)
     const receitaPorMes = await db
       .select({
         mes: sql<string>`to_char(date_trunc('month', ${faturas.dataAbertura}), 'Mon/YY')`,
         receita: sql<number>`sum(cast(${faturas.valorTotal} as decimal))`,
       })
       .from(faturas)
-      .where(gte(faturas.dataAbertura, dataInicio))
+      .innerJoin(users, eq(faturas.userId, users.id))
+      .where(
+        and(
+          gte(faturas.dataAbertura, dataInicio),
+          eq(users.isTestAccount, false)
+        )
+      )
       .groupBy(sql`date_trunc('month', ${faturas.dataAbertura})`)
       .orderBy(sql`date_trunc('month', ${faturas.dataAbertura})`);
 
+    // Custo por Mês (excluindo contas de teste)
     const custoPorMes = await db
       .select({
         mes: sql<string>`to_char(date_trunc('month', ${transacoes.createdAt}), 'Mon/YY')`,
         custo: sql<number>`sum(cast(${transacoes.custoBase} as decimal))`,
       })
       .from(transacoes)
-      .where(gte(transacoes.createdAt, dataInicio))
+      .innerJoin(users, eq(transacoes.userId, users.id))
+      .where(
+        and(
+          gte(transacoes.createdAt, dataInicio),
+          eq(users.isTestAccount, false)
+        )
+      )
       .groupBy(sql`date_trunc('month', ${transacoes.createdAt})`)
       .orderBy(sql`date_trunc('month', ${transacoes.createdAt})`);
 
