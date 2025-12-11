@@ -52,8 +52,10 @@ import {
   Filter,
   Trophy,
   UserCheck,
+  Target,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   getPipelineData,
   PipelineData,
@@ -82,6 +84,7 @@ export default function PainelPage() {
   const [activeTab, setActiveTab] = useState<TabValue>("pendentes");
   const [filtroEntrevista, setFiltroEntrevista] = useState<string>("todas");
   const { toast } = useToast();
+  const router = useRouter();
 
   const fetchData = useCallback(async (entrevistaId?: string) => {
     setLoading(true);
@@ -279,92 +282,137 @@ export default function PainelPage() {
     candidate: PipelineCandidate;
     showActions?: boolean;
     showArchiveRestore?: boolean;
-  }) => (
-    <div
-      className={cn(
-        "group flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-xl border bg-card transition-all",
-        selectedIds.has(candidate.id) && "border-primary bg-primary/5 ring-1 ring-primary/20",
-        "hover:shadow-md hover:border-primary/30"
-      )}
-    >
-      {/* Checkbox + Avatar + Info */}
-      <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
-        <Checkbox
-          checked={selectedIds.has(candidate.id)}
-          onCheckedChange={() => toggleSelect(candidate.id)}
-          className="mt-1 sm:mt-0"
-        />
-        <div className="relative">
+  }) => {
+    const handleRowClick = (e: React.MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('button') || target.closest('a') || target.closest('[role="checkbox"]')) {
+        return;
+      }
+      router.push(`/candidatos/${candidate.candidatoId}/resultado?entrevistaId=${candidate.entrevistaId}`);
+    };
+
+    return (
+      <div
+        onClick={handleRowClick}
+        className={cn(
+          "group flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-xl border bg-card transition-all cursor-pointer",
+          selectedIds.has(candidate.id) && "border-primary bg-primary/5 ring-1 ring-primary/20",
+          "hover:shadow-md hover:border-primary/30"
+        )}
+      >
+        {/* Checkbox + Avatar + Info */}
+        <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+          <Checkbox
+            checked={selectedIds.has(candidate.id)}
+            onCheckedChange={() => toggleSelect(candidate.id)}
+            className="mt-1 sm:mt-0"
+          />
           <Avatar className="h-11 w-11 shrink-0">
             <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
               {getInitials(candidate.nome)}
             </AvatarFallback>
           </Avatar>
-          {/* Score badge no avatar */}
-          {candidate.notaGeral !== null && (
-            <div className={cn(
-              "absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 border-card",
-              getScoreBg(candidate.notaGeral),
-              getScoreColor(candidate.notaGeral)
-            )}>
-              {Math.round(candidate.notaGeral)}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-medium truncate group-hover:text-primary transition-colors">
+                {candidate.nome}
+              </span>
+              {getRecomendacaoBadge(candidate.recomendacao)}
             </div>
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Link
-              href={`/candidatos/${candidate.candidatoId}/resultado?entrevistaId=${candidate.entrevistaId}`}
-              className="font-medium truncate hover:text-primary hover:underline"
-            >
-              {candidate.nome}
-            </Link>
-            {getRecomendacaoBadge(candidate.recomendacao)}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Briefcase className="h-3 w-3 shrink-0" />
+              <span className="truncate">
+                {candidate.entrevistaTitulo}
+              </span>
+            </div>
+            {/* Data no mobile */}
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1 sm:hidden">
+              <Clock className="h-3 w-3" />
+              {formatDate(candidate.concluidaEm)}
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Briefcase className="h-3 w-3 shrink-0" />
-            <span className="truncate">
-              {candidate.entrevistaTitulo}
-            </span>
-          </div>
-          {/* Data no mobile */}
-          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1 sm:hidden">
-            <Clock className="h-3 w-3" />
-            {formatDate(candidate.concluidaEm)}
-          </div>
-        </div>
-      </div>
-
-      {/* Data + Acoes */}
-      <div className="flex items-center justify-end gap-3 sm:gap-4 pl-11 sm:pl-0">
-        {/* Data (desktop) */}
-        <div className="text-right hidden sm:block">
-          <p className="text-sm font-medium">{formatDate(candidate.concluidaEm)}</p>
-          <p className="text-xs text-muted-foreground">Concluida</p>
         </div>
 
-        {/* Acoes */}
-        <div className="flex items-center gap-1">
-          {showActions && (
-            <>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-8 px-2 text-green-600 hover:text-green-700 hover:bg-green-50"
-                onClick={() => setConfirmAction({ type: "aprovar", ids: [candidate.id] })}
-              >
-                <ThumbsUp className="h-4 w-4" />
-                <span className="hidden sm:inline ml-1">Aprovar</span>
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-                onClick={() => setConfirmAction({ type: "reprovar", ids: [candidate.id] })}
-              >
-                <ThumbsDown className="h-4 w-4" />
-                <span className="hidden sm:inline ml-1">Reprovar</span>
-              </Button>
+        {/* Score + Compatibilidade + Data + Acoes */}
+        <div className="flex items-center justify-end gap-3 sm:gap-4 pl-11 sm:pl-0">
+          {/* Score e Compatibilidade */}
+          <div className="flex items-center gap-3">
+            {candidate.notaGeral !== null && (
+              <div className="text-center" title="Score geral">
+                <p className={cn("text-lg font-bold tabular-nums", getScoreColor(candidate.notaGeral))}>
+                  {Math.round(candidate.notaGeral)}
+                </p>
+                <p className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                  <Star className="h-2.5 w-2.5" />
+                  Score
+                </p>
+              </div>
+            )}
+            {candidate.compatibilidadeVaga !== null && (
+              <div className="text-center" title="Compatibilidade com a vaga">
+                <p className={cn("text-lg font-bold tabular-nums", getScoreColor(candidate.compatibilidadeVaga))}>
+                  {Math.round(candidate.compatibilidadeVaga)}%
+                </p>
+                <p className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                  <Target className="h-2.5 w-2.5" />
+                  Match
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Data (desktop) */}
+          <div className="text-right hidden sm:block">
+            <p className="text-sm font-medium">{formatDate(candidate.concluidaEm)}</p>
+            <p className="text-xs text-muted-foreground">Concluida</p>
+          </div>
+
+          {/* Acoes */}
+          <div className="flex items-center gap-1">
+            {showActions && (
+              <>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 px-2 text-green-600 hover:text-green-700 hover:bg-green-50"
+                  onClick={() => setConfirmAction({ type: "aprovar", ids: [candidate.id] })}
+                >
+                  <ThumbsUp className="h-4 w-4" />
+                  <span className="hidden sm:inline ml-1">Aprovar</span>
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  onClick={() => setConfirmAction({ type: "reprovar", ids: [candidate.id] })}
+                >
+                  <ThumbsDown className="h-4 w-4" />
+                  <span className="hidden sm:inline ml-1">Reprovar</span>
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link href={`/candidatos/${candidate.candidatoId}/resultado?entrevistaId=${candidate.entrevistaId}`}>
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Ver detalhes
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setConfirmAction({ type: "arquivar", ids: [candidate.id] })}>
+                      <Archive className="h-4 w-4 mr-2" />
+                      Arquivar
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            )}
+
+            {showArchiveRestore && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -379,136 +427,137 @@ export default function PainelPage() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setConfirmAction({ type: "arquivar", ids: [candidate.id] })}>
-                    <Archive className="h-4 w-4 mr-2" />
-                    Arquivar
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </>
-          )}
-
-          {showArchiveRestore && (
-            <>
-              <Button asChild variant="ghost" size="icon" className="h-8 w-8">
-                <Link href={`/candidatos/${candidate.candidatoId}/resultado?entrevistaId=${candidate.entrevistaId}`}>
-                  <ExternalLink className="h-4 w-4" />
-                </Link>
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => setConfirmAction({ type: "desarquivar", ids: [candidate.id] })}>
                     <ArchiveRestore className="h-4 w-4 mr-2" />
                     Restaurar
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </>
-          )}
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Card de finalista (aprovados)
-  const FinalistaCard = ({ candidate }: { candidate: PipelineCandidate }) => (
-    <div
-      className={cn(
-        "group flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-xl border transition-all",
-        selectedIds.has(candidate.id)
-          ? "border-green-500 bg-green-50/80 ring-1 ring-green-200"
-          : "border-green-200 bg-green-50/30",
-        "hover:shadow-md hover:border-green-400"
-      )}
-    >
-      {/* Checkbox + Avatar + Info */}
-      <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
-        <Checkbox
-          checked={selectedIds.has(candidate.id)}
-          onCheckedChange={() => toggleSelect(candidate.id)}
-          className="mt-1 sm:mt-0"
-        />
-        <div className="relative">
-          <Avatar className="h-11 w-11 shrink-0 ring-2 ring-green-300">
-            <AvatarFallback className="bg-green-100 text-green-700 text-sm font-medium">
-              {getInitials(candidate.nome)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
-            <CheckCircle2 className="h-3 w-3 text-white" />
+  const FinalistaCard = ({ candidate }: { candidate: PipelineCandidate }) => {
+    const handleRowClick = (e: React.MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('button') || target.closest('a') || target.closest('[role="checkbox"]')) {
+        return;
+      }
+      router.push(`/candidatos/${candidate.candidatoId}/resultado?entrevistaId=${candidate.entrevistaId}`);
+    };
+
+    return (
+      <div
+        onClick={handleRowClick}
+        className={cn(
+          "group flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-xl border transition-all cursor-pointer",
+          selectedIds.has(candidate.id)
+            ? "border-green-500 bg-green-50/80 ring-1 ring-green-200"
+            : "border-green-200 bg-green-50/30",
+          "hover:shadow-md hover:border-green-400"
+        )}
+      >
+        {/* Checkbox + Avatar + Info */}
+        <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+          <Checkbox
+            checked={selectedIds.has(candidate.id)}
+            onCheckedChange={() => toggleSelect(candidate.id)}
+            className="mt-1 sm:mt-0"
+          />
+          <div className="relative">
+            <Avatar className="h-11 w-11 shrink-0 ring-2 ring-green-300">
+              <AvatarFallback className="bg-green-100 text-green-700 text-sm font-medium">
+                {getInitials(candidate.nome)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+              <CheckCircle2 className="h-3 w-3 text-white" />
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-medium truncate group-hover:text-green-700 transition-colors">
+                {candidate.nome}
+              </span>
+              <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-white">
+                <Trophy className="h-3 w-3 mr-1" />
+                Finalista
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Briefcase className="h-3 w-3 shrink-0" />
+              <span className="truncate">
+                {candidate.entrevistaTitulo}
+              </span>
+            </div>
           </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Link
-              href={`/candidatos/${candidate.candidatoId}/resultado?entrevistaId=${candidate.entrevistaId}`}
-              className="font-medium truncate hover:text-green-700 hover:underline"
+
+        {/* Score + Compatibilidade + Acoes */}
+        <div className="flex items-center justify-end gap-3 sm:gap-4 pl-11 sm:pl-0">
+          <div className="flex items-center gap-3">
+            <div className="text-center" title="Score geral">
+              <p className={cn("text-lg font-bold tabular-nums", getScoreColor(candidate.notaGeral))}>
+                {candidate.notaGeral !== null ? Math.round(candidate.notaGeral) : "-"}
+              </p>
+              <p className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                <Star className="h-2.5 w-2.5" />
+                Score
+              </p>
+            </div>
+            {candidate.compatibilidadeVaga !== null && (
+              <div className="text-center" title="Compatibilidade com a vaga">
+                <p className={cn("text-lg font-bold tabular-nums", getScoreColor(candidate.compatibilidadeVaga))}>
+                  {Math.round(candidate.compatibilidadeVaga)}%
+                </p>
+                <p className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                  <Target className="h-2.5 w-2.5" />
+                  Match
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 border-green-300 text-green-700 hover:bg-green-100"
+              onClick={() => setConfirmAction({ type: "finalizar", ids: [candidate.id] })}
             >
-              {candidate.nome}
-            </Link>
-            <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-white">
-              <Trophy className="h-3 w-3 mr-1" />
-              Finalista
-            </Badge>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Briefcase className="h-3 w-3 shrink-0" />
-            <span className="truncate">
-              {candidate.entrevistaTitulo}
-            </span>
+              <UserCheck className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Contratar</span>
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link href={`/candidatos/${candidate.candidatoId}/resultado?entrevistaId=${candidate.entrevistaId}`}>
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Ver detalhes
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setConfirmAction({ type: "arquivar", ids: [candidate.id] })}>
+                  <Archive className="h-4 w-4 mr-2" />
+                  Arquivar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
-
-      {/* Score + Acoes */}
-      <div className="flex items-center justify-end gap-3 sm:gap-4 pl-11 sm:pl-0">
-        <div className="text-center">
-          <p className={cn("text-2xl font-bold tabular-nums", getScoreColor(candidate.notaGeral))}>
-            {candidate.notaGeral !== null ? Math.round(candidate.notaGeral) : "-"}
-          </p>
-          <p className="text-xs text-muted-foreground">Score</p>
-        </div>
-
-        <div className="flex items-center gap-1">
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-8 border-green-300 text-green-700 hover:bg-green-100"
-            onClick={() => setConfirmAction({ type: "finalizar", ids: [candidate.id] })}
-          >
-            <UserCheck className="h-4 w-4 mr-1" />
-            <span className="hidden sm:inline">Contratar</span>
-          </Button>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href={`/candidatos/${candidate.candidatoId}/resultado?entrevistaId=${candidate.entrevistaId}`}>
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Ver detalhes
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setConfirmAction({ type: "arquivar", ids: [candidate.id] })}>
-                <Archive className="h-4 w-4 mr-2" />
-                Arquivar
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-    </div>
-  );
+    );
+  };
 
   if (loading) {
     return (
