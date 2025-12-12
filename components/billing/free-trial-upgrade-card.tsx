@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CreditCard, Sparkles, Zap, TrendingUp, CheckCircle2, Calculator, Users } from "lucide-react";
+import { CreditCard, Sparkles, Zap, TrendingUp, CheckCircle2, Calculator } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export function FreeTrialUpgradeCard() {
@@ -57,74 +57,31 @@ export function FreeTrialUpgradeCard() {
           </div>
         </div>
 
-        {/* Simulador de Custo */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Calculator className="h-4 w-4 text-primary" />
-            <p className="text-sm font-semibold">Simule seu custo</p>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            {/* Card 1 candidato */}
-            <div className="group relative overflow-hidden rounded-xl border bg-gradient-to-br from-background to-muted/30 p-4 transition-all hover:shadow-md hover:border-primary/30">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                  <Users className="h-4 w-4 text-primary" />
-                </div>
-                <span className="text-xs font-medium text-muted-foreground">1 candidato</span>
+        {/* Exemplo de Custo */}
+        <div className="rounded-xl border bg-gradient-to-br from-background to-muted/20 p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                <Calculator className="h-4 w-4 text-primary" />
               </div>
-
-              <div className="mb-3">
-                <span className="text-2xl font-bold text-foreground">R$ 3,50</span>
-                <span className="text-xs text-muted-foreground ml-1">total</span>
-              </div>
-
-              <div className="space-y-1.5 text-xs">
-                <div className="flex items-center justify-between py-1 border-b border-dashed border-muted-foreground/20">
-                  <span className="text-muted-foreground">Taxa por candidato</span>
-                  <span className="font-medium">R$ 1,00</span>
-                </div>
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-muted-foreground">10 perguntas × R$ 0,25</span>
-                  <span className="font-medium">R$ 2,50</span>
-                </div>
+              <div>
+                <p className="text-sm font-semibold">Exemplo de custo</p>
+                <p className="text-xs text-muted-foreground">1 candidato com 10 perguntas</p>
               </div>
             </div>
+            <div className="text-right">
+              <span className="text-2xl font-bold text-foreground">R$ 3,50</span>
+            </div>
+          </div>
 
-            {/* Card 20 candidatos */}
-            <div className="group relative overflow-hidden rounded-xl border-2 border-primary/50 bg-gradient-to-br from-primary/5 to-primary/10 p-4 transition-all hover:shadow-md">
-              <Badge className="absolute -top-0 -right-0 rounded-none rounded-bl-lg text-[10px] px-2 py-0.5">
-                Popular
-              </Badge>
-
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20">
-                  <Users className="h-4 w-4 text-primary" />
-                </div>
-                <span className="text-xs font-medium text-muted-foreground">20 candidatos</span>
-              </div>
-
-              <div className="mb-3">
-                <span className="text-2xl font-bold text-foreground">R$ 70,00</span>
-                <span className="text-xs text-muted-foreground ml-1">total</span>
-              </div>
-
-              <div className="space-y-1.5 text-xs">
-                <div className="flex items-center justify-between py-1 border-b border-dashed border-primary/20">
-                  <span className="text-muted-foreground">Taxa por candidato</span>
-                  <span className="font-medium">R$ 20,00</span>
-                </div>
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-muted-foreground">200 perguntas × R$ 0,25</span>
-                  <span className="font-medium">R$ 50,00</span>
-                </div>
-              </div>
-
-              <div className="mt-3 pt-2 border-t border-primary/20">
-                <p className="text-[10px] text-primary font-medium flex items-center gap-1">
-                  <span>≈ R$ 3,50 por candidato</span>
-                </p>
-              </div>
+          <div className="space-y-2 text-xs">
+            <div className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-muted/50">
+              <span className="text-muted-foreground">Taxa por candidato</span>
+              <span className="font-medium">R$ 1,00</span>
+            </div>
+            <div className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-muted/50">
+              <span className="text-muted-foreground">10 perguntas × R$ 0,25</span>
+              <span className="font-medium">R$ 2,50</span>
             </div>
           </div>
         </div>
