@@ -169,7 +169,7 @@ export default function LandingPage() {
           </div>
 
           {/* Product Preview - Simplified */}
-          <div className="max-w-5xl mx-auto -mb-[58%] sm:-mb-[20%] md:-mb-[8%] lg:mb-0 mt-6 sm:mt-10 md:mt-16 lg:mt-20">
+          <div className="max-w-5xl mx-auto -mb-[72%] sm:-mb-[20%] md:-mb-[8%] lg:mb-0 mt-6 sm:mt-10 md:mt-16 lg:mt-20">
             {/* Container com escala fixa para mobile - mostra miniatura da versão desktop */}
             <div className="flex justify-center">
               <div className="relative origin-top scale-[0.38] sm:scale-75 md:scale-90 lg:scale-100">
@@ -309,28 +309,24 @@ export default function LandingPage() {
               {[
                 {
                   icon: FileText,
-                  step: "01",
                   title: "Crie a entrevista",
                   desc: "Escolha perguntas do banco ou crie as suas. Configure em minutos."
                 },
                 {
                   icon: Users,
-                  step: "02",
                   title: "Convide candidatos",
                   desc: "Envie o link. Cada candidato responde quando puder, 24/7."
                 },
                 {
                   icon: BarChart3,
-                  step: "03",
                   title: "Analise resultados",
                   desc: "Receba transcrições, análises e scores. Decida com confiança."
                 },
               ].map((item, i) => (
                 <div key={i} className="relative text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-primary-foreground mb-6">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-primary-foreground mb-4">
                     <item.icon className="h-7 w-7" />
                   </div>
-                  <p className="text-xs font-mono text-muted-foreground mb-2">{item.step}</p>
                   <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">{item.desc}</p>
                 </div>
@@ -664,13 +660,13 @@ export default function LandingPage() {
             Crie sua conta, ganhe R$ 50 em créditos e faça sua primeira entrevista hoje
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary" className="h-12 px-8" asChild>
+            <Button size="lg" className="h-12 px-8 bg-white text-primary hover:bg-white/90 font-semibold" asChild>
               <Link href="/cadastro">
                 Criar conta gratuita
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="h-12 px-8 bg-transparent border-white/30 hover:bg-white/10" asChild>
+            <Button size="lg" variant="outline" className="h-12 px-8 bg-white/10 border-white/50 text-white hover:bg-white/20 hover:border-white" asChild>
               <Link href="/login">
                 Já tenho conta
               </Link>
