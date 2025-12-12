@@ -169,7 +169,7 @@ export default function LandingPage() {
           </div>
 
           {/* Product Preview - Simplified */}
-          <div className="max-w-5xl mx-auto -mb-[40%] sm:-mb-[25%] md:-mb-[10%] lg:mb-0 mt-6 sm:mt-10 md:mt-16 lg:mt-20">
+          <div className="max-w-5xl mx-auto -mb-[58%] sm:-mb-[20%] md:-mb-[8%] lg:mb-0 mt-6 sm:mt-10 md:mt-16 lg:mt-20">
             {/* Container com escala fixa para mobile - mostra miniatura da versão desktop */}
             <div className="flex justify-center">
               <div className="relative origin-top scale-[0.38] sm:scale-75 md:scale-90 lg:scale-100">
