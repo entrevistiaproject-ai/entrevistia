@@ -33,6 +33,7 @@ import { CompartilharLinkDialog } from "@/components/entrevistas/compartilhar-li
 import { DecisaoCandidato } from "@/components/entrevistas/decisao-candidato";
 import { EditarEntrevistaDialog } from "@/components/entrevistas/editar-entrevista-dialog";
 import { EditarPerguntasDialog } from "@/components/entrevistas/editar-perguntas-dialog";
+import { AutoDecisionConfig } from "@/components/entrevistas/auto-decision-config";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
