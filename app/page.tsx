@@ -170,97 +170,100 @@ export default function LandingPage() {
 
           {/* Product Preview - Simplified */}
           <div className="max-w-5xl mx-auto -mb-[35%] sm:-mb-[25%] md:-mb-[10%] lg:mb-0 mt-6 sm:mt-10 md:mt-16 lg:mt-20">
-            <div className="relative rounded-xl sm:rounded-2xl border bg-card shadow-2xl shadow-primary/5 overflow-hidden origin-top scale-[0.65] sm:scale-75 md:scale-90 lg:scale-100">
-              {/* Browser chrome */}
-              <div className="flex items-center gap-2 px-4 py-3 border-b bg-muted/50">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-400/80" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-400/80" />
-                  <div className="w-3 h-3 rounded-full bg-green-400/80" />
-                </div>
-                <div className="flex-1 flex justify-center">
-                  <div className="bg-background rounded px-3 py-1 text-xs text-muted-foreground">
-                    app.entrevistia.com.br
+            {/* Container com escala fixa para mobile - mostra miniatura da versão desktop */}
+            <div className="relative origin-top scale-[0.5] sm:scale-75 md:scale-90 lg:scale-100">
+              <div className="relative rounded-2xl border bg-card shadow-2xl shadow-primary/5 overflow-hidden w-[900px]">
+                {/* Browser chrome */}
+                <div className="flex items-center gap-2 px-4 py-3 border-b bg-muted/50">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-red-400/80" />
+                    <div className="w-3 h-3 rounded-full bg-yellow-400/80" />
+                    <div className="w-3 h-3 rounded-full bg-green-400/80" />
                   </div>
-                </div>
-              </div>
-
-              {/* Dashboard mockup - Lista de candidatos da entrevista */}
-              <div className="p-4 sm:p-6 bg-muted/30">
-                {/* Header da entrevista */}
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="font-semibold text-sm">Analista de Suporte Jr</h3>
-                    <p className="text-xs text-muted-foreground">12 candidatos • 8 perguntas</p>
-                  </div>
-                  <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">Ativa</Badge>
-                </div>
-
-                {/* Cards resumo */}
-                <div className="grid grid-cols-4 gap-3 mb-4">
-                  {[
-                    { label: "Candidatos", value: "12", icon: Users },
-                    { label: "Perguntas", value: "8", icon: FileText },
-                    { label: "Duração média", value: "15m", icon: Clock },
-                    { label: "Concluídas", value: "9", icon: CheckCircle2 },
-                  ].map((stat, i) => (
-                    <div key={i} className="bg-background rounded-lg p-3 border">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-xs text-muted-foreground">{stat.label}</p>
-                        <stat.icon className="h-3.5 w-3.5 text-muted-foreground" />
-                      </div>
-                      <p className="text-lg font-bold">{stat.value}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Lista de candidatos */}
-                <div className="bg-background rounded-lg border overflow-hidden">
-                  <div className="px-4 py-3 border-b bg-muted/30 flex items-center justify-between">
-                    <p className="text-sm font-medium">Candidatos</p>
-                    <div className="flex gap-2">
-                      <Badge variant="outline" className="text-xs">Todos</Badge>
+                  <div className="flex-1 flex justify-center">
+                    <div className="bg-background rounded px-3 py-1 text-xs text-muted-foreground">
+                      app.entrevistia.com.br
                     </div>
                   </div>
-                  <div className="divide-y">
+                </div>
+
+                {/* Dashboard mockup - Lista de candidatos da entrevista - Layout fixo desktop */}
+                <div className="p-6 bg-muted/30">
+                  {/* Header da entrevista */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="font-semibold text-sm">Analista de Suporte Jr</h3>
+                      <p className="text-xs text-muted-foreground">12 candidatos • 8 perguntas</p>
+                    </div>
+                    <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">Ativa</Badge>
+                  </div>
+
+                  {/* Cards resumo */}
+                  <div className="grid grid-cols-4 gap-3 mb-4">
                     {[
-                      { name: "Maria Silva", email: "maria@email.com", score: 92, status: "Concluída", decision: "aprovado" },
-                      { name: "João Santos", email: "joao@email.com", score: 78, status: "Concluída", decision: "reprovado" },
-                      { name: "Ana Costa", email: "ana@email.com", score: 85, status: "Concluída", decision: null },
-                      { name: "Pedro Lima", email: "pedro@email.com", score: null, status: "Em andamento", decision: null },
-                    ].map((candidate, i) => (
-                      <div key={i} className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                            <span className="text-xs font-semibold text-primary">
-                              {candidate.name.split(' ').map(n => n[0]).join('')}
-                            </span>
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium truncate">{candidate.name}</p>
-                            <p className="text-xs text-muted-foreground truncate">{candidate.email}</p>
-                          </div>
+                      { label: "Candidatos", value: "12", icon: Users },
+                      { label: "Perguntas", value: "8", icon: FileText },
+                      { label: "Duração média", value: "15m", icon: Clock },
+                      { label: "Concluídas", value: "9", icon: CheckCircle2 },
+                    ].map((stat, i) => (
+                      <div key={i} className="bg-background rounded-lg p-3 border">
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="text-xs text-muted-foreground">{stat.label}</p>
+                          <stat.icon className="h-3.5 w-3.5 text-muted-foreground" />
                         </div>
-                        <div className="flex items-center gap-3">
-                          {candidate.score !== null && (
-                            <div className="flex items-center gap-1">
-                              <BarChart3 className="h-3.5 w-3.5 text-yellow-500" />
-                              <span className={`text-sm font-bold ${candidate.score >= 85 ? 'text-emerald-600' : candidate.score >= 70 ? 'text-amber-600' : 'text-red-600'}`}>
-                                {candidate.score}
-                              </span>
-                            </div>
-                          )}
-                          {candidate.decision && (
-                            <Badge variant={candidate.decision === "aprovado" ? "default" : "destructive"} className={candidate.decision === "aprovado" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" : "bg-red-100 text-red-700 hover:bg-red-100"}>
-                              {candidate.decision === "aprovado" ? "Aprovado" : "Reprovado"}
-                            </Badge>
-                          )}
-                          <Badge variant={candidate.status === "Concluída" ? "secondary" : "outline"}>
-                            {candidate.status}
-                          </Badge>
-                        </div>
+                        <p className="text-lg font-bold">{stat.value}</p>
                       </div>
                     ))}
+                  </div>
+
+                  {/* Lista de candidatos */}
+                  <div className="bg-background rounded-lg border overflow-hidden">
+                    <div className="px-4 py-3 border-b bg-muted/30 flex items-center justify-between">
+                      <p className="text-sm font-medium">Candidatos</p>
+                      <div className="flex gap-2">
+                        <Badge variant="outline" className="text-xs">Todos</Badge>
+                      </div>
+                    </div>
+                    <div className="divide-y">
+                      {[
+                        { name: "Maria Silva", email: "maria@email.com", score: 92, status: "Concluída", decision: "aprovado" },
+                        { name: "João Santos", email: "joao@email.com", score: 78, status: "Concluída", decision: "reprovado" },
+                        { name: "Ana Costa", email: "ana@email.com", score: 85, status: "Concluída", decision: null },
+                        { name: "Pedro Lima", email: "pedro@email.com", score: null, status: "Em andamento", decision: null },
+                      ].map((candidate, i) => (
+                        <div key={i} className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors">
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                              <span className="text-xs font-semibold text-primary">
+                                {candidate.name.split(' ').map(n => n[0]).join('')}
+                              </span>
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium truncate">{candidate.name}</p>
+                              <p className="text-xs text-muted-foreground truncate">{candidate.email}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            {candidate.score !== null && (
+                              <div className="flex items-center gap-1">
+                                <BarChart3 className="h-3.5 w-3.5 text-yellow-500" />
+                                <span className={`text-sm font-bold ${candidate.score >= 85 ? 'text-emerald-600' : candidate.score >= 70 ? 'text-amber-600' : 'text-red-600'}`}>
+                                  {candidate.score}
+                                </span>
+                              </div>
+                            )}
+                            {candidate.decision && (
+                              <Badge variant={candidate.decision === "aprovado" ? "default" : "destructive"} className={candidate.decision === "aprovado" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" : "bg-red-100 text-red-700 hover:bg-red-100"}>
+                                {candidate.decision === "aprovado" ? "Aprovado" : "Reprovado"}
+                              </Badge>
+                            )}
+                            <Badge variant={candidate.status === "Concluída" ? "secondary" : "outline"}>
+                              {candidate.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
