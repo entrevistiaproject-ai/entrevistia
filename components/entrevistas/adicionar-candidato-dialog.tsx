@@ -19,11 +19,13 @@ import { useRouter } from "next/navigation";
 interface AdicionarCandidatoDialogProps {
   entrevistaId: string;
   onSuccess?: () => void;
+  className?: string;
 }
 
 export function AdicionarCandidatoDialog({
   entrevistaId,
   onSuccess,
+  className,
 }: AdicionarCandidatoDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -86,7 +88,7 @@ export function AdicionarCandidatoDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button className={className}>
           <UserPlus className="mr-2 h-4 w-4" />
           Convidar candidato
         </Button>

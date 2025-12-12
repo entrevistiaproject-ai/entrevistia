@@ -19,11 +19,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 interface UploadCandidatosDialogProps {
   entrevistaId: string;
   onSuccess?: () => void;
+  className?: string;
 }
 
 export function UploadCandidatosDialog({
   entrevistaId,
   onSuccess,
+  className,
 }: UploadCandidatosDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -174,7 +176,7 @@ Maria Santos,maria@example.com`;
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button variant="outline" className={className}>
           <Upload className="mr-2 h-4 w-4" />
           Importar lista
         </Button>

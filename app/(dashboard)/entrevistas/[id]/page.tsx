@@ -541,9 +541,9 @@ export default function EntrevistaDetalhesPage() {
                     entrevista
                   </CardDescription>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-col w-full gap-2 sm:flex-row sm:w-auto sm:flex-wrap">
                   <Select value={filtroDecisao} onValueChange={setFiltroDecisao}>
-                    <SelectTrigger className="w-40">
+                    <SelectTrigger className="w-full sm:w-40">
                       <SelectValue placeholder="Filtrar por" />
                     </SelectTrigger>
                     <SelectContent>
@@ -556,14 +556,17 @@ export default function EntrevistaDetalhesPage() {
                   <CompartilharLinkDialog
                     entrevistaId={entrevista.id}
                     slug={entrevista.slug}
+                    className="w-full sm:w-auto"
                   />
                   <UploadCandidatosDialog
                     entrevistaId={entrevista.id}
                     onSuccess={fetchData}
+                    className="w-full sm:w-auto"
                   />
                   <AdicionarCandidatoDialog
                     entrevistaId={entrevista.id}
                     onSuccess={fetchData}
+                    className="w-full sm:w-auto"
                   />
                 </div>
               </div>

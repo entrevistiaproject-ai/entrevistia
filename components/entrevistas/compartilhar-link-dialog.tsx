@@ -18,11 +18,13 @@ import { useRouter } from "next/navigation";
 interface CompartilharLinkDialogProps {
   entrevistaId: string;
   slug?: string | null;
+  className?: string;
 }
 
 export function CompartilharLinkDialog({
   entrevistaId,
   slug: slugInicial,
+  className,
 }: CompartilharLinkDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -81,7 +83,7 @@ export function CompartilharLinkDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button variant="outline" className={className}>
           <Share2 className="mr-2 h-4 w-4" />
           Compartilhar Link
         </Button>
