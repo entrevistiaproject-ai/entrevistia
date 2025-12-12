@@ -35,13 +35,13 @@ export default function LandingPage() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#como-funciona" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <a href="#como-funciona" className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
               Como Funciona
             </a>
-            <a href="#recursos" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <a href="#recursos" className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
               Recursos
             </a>
-            <a href="#precos" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <a href="#precos" className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
               Preços
             </a>
           </nav>
@@ -76,21 +76,21 @@ export default function LandingPage() {
                     <div className="space-y-1">
                       <a
                         href="#como-funciona"
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors cursor-pointer"
                       >
                         <Play className="h-4 w-4" />
                         Como Funciona
                       </a>
                       <a
                         href="#recursos"
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors cursor-pointer"
                       >
                         <Zap className="h-4 w-4" />
                         Recursos
                       </a>
                       <a
                         href="#precos"
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors cursor-pointer"
                       >
                         <BarChart3 className="h-4 w-4" />
                         Preços
@@ -693,11 +693,11 @@ export default function LandingPage() {
             </div>
 
             <nav className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm">
-              <a href="#como-funciona" className="text-muted-foreground hover:text-foreground transition-colors">Como Funciona</a>
-              <a href="#recursos" className="text-muted-foreground hover:text-foreground transition-colors">Recursos</a>
-              <a href="#precos" className="text-muted-foreground hover:text-foreground transition-colors">Preços</a>
-              <Link href="/privacidade" className="text-muted-foreground hover:text-foreground transition-colors">Privacidade</Link>
-              <Link href="/termos" className="text-muted-foreground hover:text-foreground transition-colors">Termos</Link>
+              <a href="#como-funciona" className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer">Como Funciona</a>
+              <a href="#recursos" className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer">Recursos</a>
+              <a href="#precos" className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer">Preços</a>
+              <Link href="/privacidade" className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer">Privacidade</Link>
+              <Link href="/termos" className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer">Termos</Link>
             </nav>
           </div>
 

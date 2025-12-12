@@ -174,10 +174,10 @@ export default function CadastroPage() {
 
             {/* Links de navegação */}
             <nav className="hidden md:flex items-center gap-6">
-              <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                 Início
               </Link>
-              <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                 Login
               </Link>
             </nav>
@@ -195,7 +195,7 @@ export default function CadastroPage() {
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link href="/" className="hover:text-foreground flex items-center gap-1 transition-colors">
+          <Link href="/" className="hover:text-foreground flex items-center gap-1 transition-colors cursor-pointer">
             <Home className="w-4 h-4" />
             Início
           </Link>
@@ -412,7 +412,7 @@ export default function CadastroPage() {
                   />
                   <label htmlFor="aceitouTermos" className="text-sm leading-relaxed cursor-pointer">
                     Concordo com os{" "}
-                    <Link href="/termos" className="text-primary hover:underline" target="_blank">
+                    <Link href="/termos" className="text-primary hover:underline cursor-pointer" target="_blank">
                       Termos de Uso
                     </Link>
                   </label>
@@ -432,7 +432,7 @@ export default function CadastroPage() {
                   />
                   <label htmlFor="aceitouPrivacidade" className="text-sm leading-relaxed cursor-pointer">
                     Concordo com a{" "}
-                    <Link href="/privacidade" className="text-primary hover:underline" target="_blank">
+                    <Link href="/privacidade" className="text-primary hover:underline cursor-pointer" target="_blank">
                       Política de Privacidade
                     </Link>
                   </label>
@@ -482,7 +482,7 @@ export default function CadastroPage() {
                 Já tem uma conta?{" "}
                 <Link
                   href="/login"
-                  className="text-primary hover:underline font-semibold"
+                  className="text-primary hover:underline font-semibold cursor-pointer"
                 >
                   Fazer login
                 </Link>

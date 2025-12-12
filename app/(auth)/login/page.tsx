@@ -98,7 +98,7 @@ function LoginForm() {
 
             {/* Links de navegação */}
             <nav className="hidden md:flex items-center gap-6">
-              <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                 Início
               </Link>
               <Link href="/cadastro">
@@ -121,7 +121,7 @@ function LoginForm() {
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link href="/" className="hover:text-foreground flex items-center gap-1 transition-colors">
+          <Link href="/" className="hover:text-foreground flex items-center gap-1 transition-colors cursor-pointer">
             <Home className="w-4 h-4" />
             Início
           </Link>
@@ -195,7 +195,7 @@ function LoginForm() {
                   </Label>
                   <Link
                     href="/recuperar-senha"
-                    className="text-sm text-primary hover:underline"
+                    className="text-sm text-primary hover:underline cursor-pointer"
                   >
                     Esqueci minha senha
                   </Link>
@@ -252,7 +252,7 @@ function LoginForm() {
                 Ainda não tem conta?{" "}
                 <Link
                   href="/cadastro"
-                  className="text-primary hover:underline font-semibold"
+                  className="text-primary hover:underline font-semibold cursor-pointer"
                 >
                   Criar conta gratuita
                 </Link>
