@@ -336,34 +336,34 @@ export default function ResultadoCandidatoPage() {
   return (
     <div className="space-y-6 pb-8">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{candidato.nome}</h1>
-          <p className="text-muted-foreground mt-1">{candidato.email}</p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant={temAvaliacao ? "outline" : "default"}
-            size="sm"
-            onClick={handleAnalisar}
-            disabled={analyzing || participacao?.status !== 'concluida'}
-          >
-            {analyzing ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Analisando...
-              </>
-            ) : (
-              <>
-                {temAvaliacao ? <RefreshCw className="h-4 w-4 mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
-                {temAvaliacao ? "Reanalisar" : "Analisar com IA"}
-              </>
-            )}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <Button variant="outline" size="touch-icon" onClick={() => router.back()} className="shrink-0">
+            <ArrowLeft className="h-4 w-4" />
           </Button>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight truncate">{candidato.nome}</h1>
+            <p className="text-sm text-muted-foreground truncate">{candidato.email}</p>
+          </div>
         </div>
+        <Button
+          variant={temAvaliacao ? "outline" : "default"}
+          onClick={handleAnalisar}
+          disabled={analyzing || participacao?.status !== 'concluida'}
+          className="w-full sm:w-auto shrink-0"
+        >
+          {analyzing ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Analisando...
+            </>
+          ) : (
+            <>
+              {temAvaliacao ? <RefreshCw className="h-4 w-4 mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+              {temAvaliacao ? "Reanalisar" : "Analisar com IA"}
+            </>
+          )}
+        </Button>
       </div>
 
       {/* Aviso se não concluiu */}
