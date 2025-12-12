@@ -6,9 +6,9 @@ import { eq, and, isNull, desc } from "drizzle-orm";
 import { enviarEmail } from "@/lib/email/resend";
 import { emailConviteEntrevistaTemplate } from "@/lib/email/templates";
 
-// URL base do app
+// URL base do app - NEXT_PUBLIC_APP_URL tem prioridade sobre VERCEL_URL
+// pois VERCEL_URL contém URLs de deployment específicos (ex: xxx.vercel.app)
 const getBaseUrl = () => {
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
   if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
   return "https://entrevistia.com.br";
 };
