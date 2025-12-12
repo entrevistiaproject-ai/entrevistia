@@ -1,32 +1,12 @@
 import { NextResponse } from "next/server";
 import { getUserId } from "@/lib/auth/get-user";
-import { z } from "zod";
-import {
-  getOrCreateTeamSettings,
-  updateAutoApprovalSettings,
-  canUserPerformAction,
-} from "@/lib/services/team-service";
-
-const settingsSchema = z.object({
-  // Aprovação automática
-  autoApprovalEnabled: z.boolean().optional(),
-  autoApprovalMinScore: z.number().min(0).max(100).optional(),
-  autoApprovalUseCompatibility: z.boolean().optional(),
-  autoApprovalMinCompatibility: z.number().min(0).max(100).optional(),
-  autoApprovalNotifyTeam: z.boolean().optional(),
-  autoApprovalNotifyCandidate: z.boolean().optional(),
-  autoApprovalCandidateMessage: z.string().max(1000).nullable().optional(),
-
-  // Reprovação automática
-  autoRejectEnabled: z.boolean().optional(),
-  autoRejectMaxScore: z.number().min(0).max(100).optional(),
-  autoRejectNotifyCandidate: z.boolean().optional(),
-  autoRejectCandidateMessage: z.string().max(1000).nullable().optional(),
-});
 
 /**
  * GET /api/time/configuracoes
  * Retorna as configurações do time
+ *
+ * NOTA: As configurações de aprovação automática foram movidas para o nível de vaga individual.
+ * Este endpoint agora retorna apenas configurações gerais do time (se houver no futuro).
  */
 export async function GET() {
   try {
@@ -39,9 +19,11 @@ export async function GET() {
       );
     }
 
-    const settings = await getOrCreateTeamSettings(userId);
-
-    return NextResponse.json(settings);
+    // Retorna objeto vazio para manter compatibilidade
+    // Configurações futuras do time podem ser adicionadas aqui
+    return NextResponse.json({
+      message: "As configurações de aprovação automática agora são configuradas por vaga"
+    });
   } catch (error) {
     console.error("Erro ao buscar configurações:", error);
     return NextResponse.json(
@@ -53,7 +35,7 @@ export async function GET() {
 
 /**
  * PUT /api/time/configuracoes
- * Atualiza as configurações de aprovação automática do time
+ * Endpoint deprecado - configurações de aprovação automática agora são por vaga
  */
 export async function PUT(request: Request) {
   try {
@@ -66,58 +48,13 @@ export async function PUT(request: Request) {
       );
     }
 
-    // Verifica permissão
-    const canEdit = await canUserPerformAction(userId, userId, "edit_settings");
-    if (!canEdit) {
-      return NextResponse.json(
-        { error: "Você não tem permissão para editar configurações" },
-        { status: 403 }
-      );
-    }
-
-    const body = await request.json();
-    const validation = settingsSchema.safeParse(body);
-
-    if (!validation.success) {
-      return NextResponse.json(
-        { error: validation.error.issues[0]?.message || "Dados inválidos" },
-        { status: 400 }
-      );
-    }
-
-    // Validações adicionais de lógica
-    const data = validation.data;
-
-    // Score de aprovação deve ser maior que score de reprovação
-    if (
-      data.autoApprovalEnabled &&
-      data.autoRejectEnabled &&
-      data.autoApprovalMinScore !== undefined &&
-      data.autoRejectMaxScore !== undefined
-    ) {
-      if (data.autoApprovalMinScore <= data.autoRejectMaxScore) {
-        return NextResponse.json(
-          { error: "O score mínimo de aprovação deve ser maior que o score máximo de reprovação" },
-          { status: 400 }
-        );
-      }
-    }
-
-    const settings = await updateAutoApprovalSettings(userId, {
-      autoApprovalEnabled: data.autoApprovalEnabled,
-      autoApprovalMinScore: data.autoApprovalMinScore,
-      autoApprovalUseCompatibility: data.autoApprovalUseCompatibility,
-      autoApprovalMinCompatibility: data.autoApprovalMinCompatibility,
-      autoApprovalNotifyTeam: data.autoApprovalNotifyTeam,
-      autoApprovalNotifyCandidate: data.autoApprovalNotifyCandidate,
-      autoApprovalCandidateMessage: data.autoApprovalCandidateMessage ?? undefined,
-      autoRejectEnabled: data.autoRejectEnabled,
-      autoRejectMaxScore: data.autoRejectMaxScore,
-      autoRejectNotifyCandidate: data.autoRejectNotifyCandidate,
-      autoRejectCandidateMessage: data.autoRejectCandidateMessage ?? undefined,
-    });
-
-    return NextResponse.json(settings);
+    return NextResponse.json(
+      {
+        error: "As configurações de aprovação automática agora são configuradas individualmente por vaga. Acesse a vaga desejada em Entrevistas > Configurações.",
+        deprecated: true
+      },
+      { status: 410 } // Gone - recurso não está mais disponível
+    );
   } catch (error) {
     console.error("Erro ao atualizar configurações:", error);
     return NextResponse.json(
