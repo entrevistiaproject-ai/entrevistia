@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/cron/process-auto-decisions",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }
