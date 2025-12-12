@@ -659,7 +659,7 @@ export default function LandingPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="relative py-24 sm:py-32 overflow-hidden">
+      <section className="relative py-16 sm:py-20 overflow-hidden">
         {/* Background com gradiente */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-blue-700" />
 
@@ -669,16 +669,16 @@ export default function LandingPage() {
 
         <div className="container mx-auto px-4 text-center relative z-10">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-8">
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
             <Sparkles className="h-4 w-4 text-yellow-300" />
             <span className="text-sm font-medium text-white/90">Comece grátis hoje</span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 max-w-3xl mx-auto text-white leading-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 max-w-3xl mx-auto text-white leading-tight">
             Pronto para transformar seu processo seletivo?
           </h2>
 
-          <p className="text-lg sm:text-xl text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl text-white/80 mb-10 max-w-2xl mx-auto leading-relaxed">
             Ganhe R$ 50 em créditos para testar. Sem cartão, sem compromisso.
           </p>
 
@@ -700,7 +700,7 @@ export default function LandingPage() {
           </div>
 
           {/* Trust badges */}
-          <div className="flex flex-wrap items-center justify-center gap-6 mt-12 text-sm text-white/60">
+          <div className="flex flex-wrap items-center justify-center gap-6 mt-10 text-sm text-white/60">
             <span className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
               Dados protegidos
