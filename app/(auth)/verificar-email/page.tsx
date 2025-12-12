@@ -179,7 +179,7 @@ function VerificarEmailContent() {
           <div className="px-6 sm:px-8 pb-8">
             {/* Alerta de sucesso ao reenviar */}
             {resendSuccess && (
-              <div className="mb-6 p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg flex items-start gap-4">
+              <div className="mb-6 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg flex items-start gap-4">
                 <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
                 <p className="text-sm text-green-600 dark:text-green-400">
                   Pronto! Enviamos um novo código para seu email.

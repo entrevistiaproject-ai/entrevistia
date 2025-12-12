@@ -139,9 +139,9 @@ export default function CadastroPage() {
         <Card className="w-full max-w-md text-center">
           <CardContent className="pt-8 pb-8">
             <div className="relative mx-auto w-20 h-20 mb-6">
-              <div className="absolute inset-0 rounded-full bg-green-500/20 animate-ping" />
-              <div className="relative w-full h-full rounded-full bg-green-500/10 flex items-center justify-center">
-                <CheckCircle2 className="h-10 w-10 text-green-500" />
+              <div className="absolute inset-0 rounded-full bg-green-200 dark:bg-green-800 animate-ping" />
+              <div className="relative w-full h-full rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                <CheckCircle2 className="h-10 w-10 text-green-600 dark:text-green-400" />
               </div>
             </div>
             <div className="flex items-center justify-center gap-2 mb-2">

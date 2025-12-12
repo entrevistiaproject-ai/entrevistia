@@ -242,7 +242,7 @@ export default function CustosPage() {
 
       {/* Alerta de Fatura */}
       {alertaFatura && saldoAPagar > 0 && (
-        <Card className="border-orange-500 bg-orange-50 dark:bg-orange-950/20">
+        <Card className="border-orange-500 bg-orange-50 dark:bg-orange-950">
           <CardContent className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-6">
             <AlertCircle className="h-5 w-5 text-orange-600 shrink-0" />
             <div className="flex-1">

@@ -66,14 +66,14 @@ const actionIcons: Record<string, React.ElementType> = {
 };
 
 const actionColors: Record<string, string> = {
-  create: "text-emerald-400 bg-emerald-500/20",
-  update: "text-blue-400 bg-blue-500/20",
-  delete: "text-red-400 bg-red-500/20",
-  view: "text-purple-400 bg-purple-500/20",
-  login: "text-cyan-400 bg-cyan-500/20",
-  logout: "text-amber-400 bg-amber-500/20",
-  export: "text-pink-400 bg-pink-500/20",
-  settings: "text-slate-400 bg-slate-500/20",
+  create: "text-emerald-400 bg-emerald-900",
+  update: "text-blue-400 bg-blue-900",
+  delete: "text-red-400 bg-red-900",
+  view: "text-purple-400 bg-purple-900",
+  login: "text-cyan-400 bg-cyan-900",
+  logout: "text-amber-400 bg-amber-900",
+  export: "text-pink-400 bg-pink-900",
+  settings: "text-slate-400 bg-slate-800",
 };
 
 export default function LogsPage() {

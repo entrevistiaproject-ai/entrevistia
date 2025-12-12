@@ -726,7 +726,7 @@ export default function ResultadoCandidatoPage() {
               {perguntasRespostas.map((item, index) => (
                 <div key={item.pergunta.id} className="group">
                   {/* Pergunta - Estilo entrevistador */}
-                  <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-900/20">
+                  <div className="px-6 py-4 bg-slate-50 dark:bg-slate-900">
                     <div className="flex items-start gap-4">
                       <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-semibold shrink-0 shadow-sm">
                         {item.pergunta.ordem || index + 1}

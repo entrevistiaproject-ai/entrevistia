@@ -238,8 +238,8 @@ export default function VisaoGeralPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Entrevistas Ativas</CardTitle>
-            <div className="rounded-lg bg-green-500/10 p-2">
-              <Briefcase className="h-4 w-4 text-green-500" />
+            <div className="rounded-lg bg-green-100 dark:bg-green-900 p-2">
+              <Briefcase className="h-4 w-4 text-green-600 dark:text-green-400" />
             </div>
           </CardHeader>
           <CardContent>
@@ -253,11 +253,11 @@ export default function VisaoGeralPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Taxa de Conclusão</CardTitle>
-            <div className="rounded-lg bg-blue-500/10 p-2">
+            <div className="rounded-lg bg-blue-100 dark:bg-blue-900 p-2">
               {metrics.taxaConclusao >= 50 ? (
-                <TrendingUp className="h-4 w-4 text-blue-500" />
+                <TrendingUp className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               ) : (
-                <TrendingDown className="h-4 w-4 text-blue-500" />
+                <TrendingDown className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               )}
             </div>
           </CardHeader>
@@ -270,8 +270,8 @@ export default function VisaoGeralPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Taxa de Aprovação</CardTitle>
-            <div className="rounded-lg bg-emerald-500/10 p-2">
-              <Target className="h-4 w-4 text-emerald-500" />
+            <div className="rounded-lg bg-emerald-100 dark:bg-emerald-900 p-2">
+              <Target className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             </div>
           </CardHeader>
           <CardContent>

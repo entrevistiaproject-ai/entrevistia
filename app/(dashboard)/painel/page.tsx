@@ -137,21 +137,21 @@ export default function PainelPage() {
     switch (recomendacao) {
       case "recomendado":
         return (
-          <Badge variant="default" className="bg-green-500/10 text-green-700 hover:bg-green-500/20 border-green-200">
+          <Badge variant="default" className="bg-green-100 text-green-700 hover:bg-green-200 border-green-200 dark:bg-green-900 dark:text-green-300 dark:border-green-700 dark:hover:bg-green-800">
             <ThumbsUp className="h-3 w-3 mr-1" />
             Recomendado
           </Badge>
         );
       case "recomendado_com_ressalvas":
         return (
-          <Badge variant="default" className="bg-amber-500/10 text-amber-700 hover:bg-amber-500/20 border-amber-200">
+          <Badge variant="default" className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-200 dark:bg-amber-900 dark:text-amber-300 dark:border-amber-700 dark:hover:bg-amber-800">
             <Star className="h-3 w-3 mr-1" />
             Com ressalvas
           </Badge>
         );
       case "nao_recomendado":
         return (
-          <Badge variant="default" className="bg-red-500/10 text-red-700 hover:bg-red-500/20 border-red-200">
+          <Badge variant="default" className="bg-red-100 text-red-700 hover:bg-red-200 border-red-200 dark:bg-red-900 dark:text-red-300 dark:border-red-700 dark:hover:bg-red-800">
             <ThumbsDown className="h-3 w-3 mr-1" />
             Nao recomendado
           </Badge>
@@ -663,8 +663,8 @@ export default function PainelPage() {
         >
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-amber-500/10 p-2.5">
-                <Clock className="h-5 w-5 text-amber-600" />
+              <div className="rounded-lg bg-amber-100 dark:bg-amber-900 p-2.5">
+                <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{data.counts.pendentes}</p>
@@ -683,8 +683,8 @@ export default function PainelPage() {
         >
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-green-500/10 p-2.5">
-                <Trophy className="h-5 w-5 text-green-600" />
+              <div className="rounded-lg bg-green-100 dark:bg-green-900 p-2.5">
+                <Trophy className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{data.counts.finalistas}</p>
@@ -697,8 +697,8 @@ export default function PainelPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-blue-500/10 p-2.5">
-                <Sparkles className="h-5 w-5 text-blue-600" />
+              <div className="rounded-lg bg-blue-100 dark:bg-blue-900 p-2.5">
+                <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{data.counts.emAndamento}</p>

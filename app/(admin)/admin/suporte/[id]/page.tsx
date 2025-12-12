@@ -108,20 +108,20 @@ const PRIORITY_OPTIONS = [
 ];
 
 const STATUS_COLORS: Record<string, string> = {
-  aberto: "bg-blue-500/20 text-blue-400",
-  em_analise: "bg-amber-500/20 text-amber-400",
-  aguardando_usuario: "bg-purple-500/20 text-purple-400",
-  aguardando_tecnico: "bg-orange-500/20 text-orange-400",
-  resolvido: "bg-emerald-500/20 text-emerald-400",
-  fechado: "bg-slate-500/20 text-slate-400",
-  cancelado: "bg-red-500/20 text-red-400",
+  aberto: "bg-blue-900 text-blue-400",
+  em_analise: "bg-amber-900 text-amber-400",
+  aguardando_usuario: "bg-purple-900 text-purple-400",
+  aguardando_tecnico: "bg-orange-900 text-orange-400",
+  resolvido: "bg-emerald-900 text-emerald-400",
+  fechado: "bg-slate-800 text-slate-400",
+  cancelado: "bg-red-900 text-red-400",
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  baixa: "bg-slate-500/20 text-slate-400",
-  media: "bg-blue-500/20 text-blue-400",
-  alta: "bg-amber-500/20 text-amber-400",
-  critica: "bg-red-500/20 text-red-400",
+  baixa: "bg-slate-800 text-slate-400",
+  media: "bg-blue-900 text-blue-400",
+  alta: "bg-amber-900 text-amber-400",
+  critica: "bg-red-900 text-red-400",
 };
 
 export default function TicketDetailPage({ params }: { params: Promise<{ id: string }> }) {

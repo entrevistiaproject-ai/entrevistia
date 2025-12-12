@@ -143,35 +143,35 @@ export default function FaturaPage() {
     switch (status) {
       case "paga":
         return (
-          <Badge className={cn("bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30", sizeClasses)}>
+          <Badge className={cn("bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700", sizeClasses)}>
             <CheckCircle className="h-3 w-3 mr-1" />
             Paga
           </Badge>
         );
       case "aberta":
         return (
-          <Badge className={cn("bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400 border-blue-200 dark:border-blue-500/30", sizeClasses)}>
+          <Badge className={cn("bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 border-blue-200 dark:border-blue-700", sizeClasses)}>
             <Clock className="h-3 w-3 mr-1" />
             Aberta
           </Badge>
         );
       case "fechada":
         return (
-          <Badge className={cn("bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 border-amber-200 dark:border-amber-500/30", sizeClasses)}>
+          <Badge className={cn("bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300 border-amber-200 dark:border-amber-700", sizeClasses)}>
             <FileText className="h-3 w-3 mr-1" />
             Fechada
           </Badge>
         );
       case "vencida":
         return (
-          <Badge className={cn("bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 border-red-200 dark:border-red-500/30", sizeClasses)}>
+          <Badge className={cn("bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 border-red-200 dark:border-red-700", sizeClasses)}>
             <AlertCircle className="h-3 w-3 mr-1" />
             Vencida
           </Badge>
         );
       case "cancelada":
         return (
-          <Badge className={cn("bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-400 border-slate-200 dark:border-slate-500/30", sizeClasses)}>
+          <Badge className={cn("bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-600", sizeClasses)}>
             <Ban className="h-3 w-3 mr-1" />
             Cancelada
           </Badge>
@@ -221,25 +221,25 @@ export default function FaturaPage() {
     switch (status) {
       case "concluida":
         return (
-          <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 text-xs">
+          <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 text-xs">
             Concluída
           </Badge>
         );
       case "pendente":
         return (
-          <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 text-xs">
+          <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300 text-xs">
             Pendente
           </Badge>
         );
       case "falha":
         return (
-          <Badge className="bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 text-xs">
+          <Badge className="bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 text-xs">
             Falha
           </Badge>
         );
       case "reembolsada":
         return (
-          <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400 text-xs">
+          <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 text-xs">
             Reembolsada
           </Badge>
         );
@@ -429,7 +429,7 @@ export default function FaturaPage() {
             </Card>
 
             {totais.faturasVencidas > 0 && (
-              <Card className="min-w-[160px] sm:min-w-0 shrink-0 border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20">
+              <Card className="min-w-[160px] sm:min-w-0 shrink-0 border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-red-700 dark:text-red-400">Vencidas</CardTitle>
                   <AlertCircle className="h-4 w-4 text-red-600" />
@@ -490,11 +490,11 @@ export default function FaturaPage() {
                       <p className="text-sm text-muted-foreground">Valor Total</p>
                       <p className="text-2xl font-bold">{formatCurrency(selectedFatura.valorTotal)}</p>
                     </div>
-                    <div className="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/20">
+                    <div className="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950">
                       <p className="text-sm text-emerald-600 dark:text-emerald-400">Valor Pago</p>
                       <p className="text-2xl font-bold text-emerald-600">{formatCurrency(selectedFatura.valorPago)}</p>
                     </div>
-                    <div className={cn("p-4 rounded-lg", selectedFatura.valorPendente > 0 ? "bg-amber-50 dark:bg-amber-950/20" : "bg-muted/50")}>
+                    <div className={cn("p-4 rounded-lg", selectedFatura.valorPendente > 0 ? "bg-amber-50 dark:bg-amber-950" : "bg-muted/50")}>
                       <p className={cn("text-sm", selectedFatura.valorPendente > 0 ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground")}>Pendente</p>
                       <p className={cn("text-2xl font-bold", selectedFatura.valorPendente > 0 ? "text-amber-600" : "text-muted-foreground")}>
                         {formatCurrency(selectedFatura.valorPendente)}
@@ -603,7 +603,7 @@ export default function FaturaPage() {
                     <div className="space-y-4">
                       {/* Cards de resumo */}
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
+                        <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800">
                           <div className="flex items-center gap-2 mb-1">
                             <Users className="h-4 w-4 text-blue-600" />
                             <p className="text-sm font-medium text-blue-700 dark:text-blue-400">Candidatos Avaliados</p>
@@ -613,7 +613,7 @@ export default function FaturaPage() {
                             {formatCurrency(totalTaxaBase)} em taxas base
                           </p>
                         </div>
-                        <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
+                        <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800">
                           <div className="flex items-center gap-2 mb-1">
                             <ClipboardList className="h-4 w-4 text-purple-600" />
                             <p className="text-sm font-medium text-purple-700 dark:text-purple-400">Perguntas Analisadas</p>
@@ -623,7 +623,7 @@ export default function FaturaPage() {
                             {formatCurrency(totalValorPerguntas)} em análises
                           </p>
                         </div>
-                        <div className="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800">
+                        <div className="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800">
                           <div className="flex items-center gap-2 mb-1">
                             <DollarSign className="h-4 w-4 text-emerald-600" />
                             <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">Custo Médio</p>

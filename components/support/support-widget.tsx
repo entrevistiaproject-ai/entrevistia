@@ -300,7 +300,7 @@ export function SupportWidget({
 
               {/* Info de erro (se houver) */}
               {errorInfo?.message && (
-                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800">
                   <p className="text-xs text-red-600 dark:text-red-400 font-medium mb-1">
                     Informações do erro (serão anexadas automaticamente):
                   </p>
@@ -312,7 +312,7 @@ export function SupportWidget({
 
               {/* Erro de submissão */}
               {error && (
-                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-center gap-2">
+                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 text-red-500" />
                   <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
                 </div>

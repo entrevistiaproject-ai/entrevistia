@@ -11,7 +11,7 @@ export function EntrevistasEmptyState() {
           <div className="flex flex-col items-center text-center space-y-8">
             {/* Ícone */}
             <div className="relative">
-              <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-2xl" />
+              <div className="absolute inset-0 bg-blue-200 dark:bg-blue-900 rounded-full blur-2xl" />
               <div className="relative bg-linear-to-br from-blue-500 to-blue-600 p-7 rounded-2xl shadow-lg">
                 <Briefcase className="h-12 w-12 text-white" />
               </div>

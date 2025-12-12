@@ -180,13 +180,13 @@ export function AdminSidebar() {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case "super_admin":
-        return "bg-red-500/20 text-red-400 border-red-500/30";
+        return "bg-red-900 text-red-400 border-red-700";
       case "admin":
-        return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+        return "bg-blue-900 text-blue-400 border-blue-700";
       case "viewer":
-        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+        return "bg-gray-800 text-gray-400 border-gray-600";
       default:
-        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+        return "bg-gray-800 text-gray-400 border-gray-600";
     }
   };
 

@@ -134,7 +134,7 @@ function LoginForm() {
       <div className="max-w-md mx-auto px-4 sm:px-6 py-10 sm:py-12">
         {/* Mensagem de sucesso */}
         {showSuccessMessage && (
-          <div className="mb-8 p-5 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-xl flex items-start gap-4">
+          <div className="mb-8 p-5 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-xl flex items-start gap-4">
             <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-green-900 dark:text-green-100">Email confirmado!</p>

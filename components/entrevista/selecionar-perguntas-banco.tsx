@@ -41,10 +41,10 @@ const categoriaLabels: Record<string, string> = {
 };
 
 const categoriaColors: Record<string, string> = {
-  tecnica: "bg-blue-500/10 text-blue-500",
-  experiencia: "bg-purple-500/10 text-purple-500",
-  comportamental: "bg-green-500/10 text-green-500",
-  situacional: "bg-amber-500/10 text-amber-500",
+  tecnica: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
+  experiencia: "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
+  comportamental: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
+  situacional: "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
 };
 
 export function SelecionarPerguntasBanco({
@@ -329,7 +329,7 @@ function ListaPerguntas({
                   </Badge>
                 )}
                 {pergunta.isPadrao && (
-                  <Badge variant="default" className="text-xs bg-yellow-500/10 text-yellow-600">
+                  <Badge variant="default" className="text-xs bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300">
                     <Star className="h-3 w-3 mr-1" />
                     Padrão
                   </Badge>

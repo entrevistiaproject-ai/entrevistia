@@ -141,21 +141,21 @@ export default function AdministradoresPage() {
     switch (role) {
       case "super_admin":
         return (
-          <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
+          <Badge className="bg-red-900 text-red-400 border-red-700">
             <ShieldAlert className="h-3 w-3 mr-1" />
             Super Admin
           </Badge>
         );
       case "admin":
         return (
-          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+          <Badge className="bg-blue-900 text-blue-400 border-blue-700">
             <ShieldCheck className="h-3 w-3 mr-1" />
             Admin
           </Badge>
         );
       case "viewer":
         return (
-          <Badge className="bg-slate-500/20 text-slate-400 border-slate-500/30">
+          <Badge className="bg-slate-800 text-slate-400 border-slate-600">
             <Eye className="h-3 w-3 mr-1" />
             Viewer
           </Badge>

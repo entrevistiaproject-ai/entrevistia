@@ -69,20 +69,20 @@ interface TicketStats {
 }
 
 const STATUS_CONFIG = {
-  aberto: { label: "Aberto", color: "bg-blue-500/20 text-blue-400 border-blue-500/30", icon: Clock },
-  em_analise: { label: "Em Análise", color: "bg-amber-500/20 text-amber-400 border-amber-500/30", icon: AlertCircle },
-  aguardando_usuario: { label: "Aguardando Usuário", color: "bg-purple-500/20 text-purple-400 border-purple-500/30", icon: Users },
-  aguardando_tecnico: { label: "Aguardando Técnico", color: "bg-orange-500/20 text-orange-400 border-orange-500/30", icon: MessageSquare },
-  resolvido: { label: "Resolvido", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30", icon: CheckCircle },
-  fechado: { label: "Fechado", color: "bg-slate-500/20 text-slate-400 border-slate-500/30", icon: XCircle },
-  cancelado: { label: "Cancelado", color: "bg-red-500/20 text-red-400 border-red-500/30", icon: XCircle },
+  aberto: { label: "Aberto", color: "bg-blue-900 text-blue-400 border-blue-700", icon: Clock },
+  em_analise: { label: "Em Análise", color: "bg-amber-900 text-amber-400 border-amber-700", icon: AlertCircle },
+  aguardando_usuario: { label: "Aguardando Usuário", color: "bg-purple-900 text-purple-400 border-purple-700", icon: Users },
+  aguardando_tecnico: { label: "Aguardando Técnico", color: "bg-orange-900 text-orange-400 border-orange-700", icon: MessageSquare },
+  resolvido: { label: "Resolvido", color: "bg-emerald-900 text-emerald-400 border-emerald-700", icon: CheckCircle },
+  fechado: { label: "Fechado", color: "bg-slate-800 text-slate-400 border-slate-600", icon: XCircle },
+  cancelado: { label: "Cancelado", color: "bg-red-900 text-red-400 border-red-700", icon: XCircle },
 };
 
 const PRIORITY_CONFIG = {
-  baixa: { label: "Baixa", color: "bg-slate-500/20 text-slate-400" },
-  media: { label: "Média", color: "bg-blue-500/20 text-blue-400" },
-  alta: { label: "Alta", color: "bg-amber-500/20 text-amber-400" },
-  critica: { label: "Crítica", color: "bg-red-500/20 text-red-400" },
+  baixa: { label: "Baixa", color: "bg-slate-800 text-slate-400" },
+  media: { label: "Média", color: "bg-blue-900 text-blue-400" },
+  alta: { label: "Alta", color: "bg-amber-900 text-amber-400" },
+  critica: { label: "Crítica", color: "bg-red-900 text-red-400" },
 };
 
 const CATEGORY_CONFIG = {

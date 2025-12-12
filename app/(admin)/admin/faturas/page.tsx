@@ -240,35 +240,35 @@ export default function FaturasPage() {
     switch (status) {
       case "paga":
         return (
-          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+          <Badge className="bg-emerald-900 text-emerald-400 border-emerald-700">
             <CheckCircle className="h-3 w-3 mr-1" />
             Paga
           </Badge>
         );
       case "aberta":
         return (
-          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+          <Badge className="bg-blue-900 text-blue-400 border-blue-700">
             <Clock className="h-3 w-3 mr-1" />
             Aberta
           </Badge>
         );
       case "fechada":
         return (
-          <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+          <Badge className="bg-amber-900 text-amber-400 border-amber-700">
             <FileText className="h-3 w-3 mr-1" />
             Fechada
           </Badge>
         );
       case "vencida":
         return (
-          <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
+          <Badge className="bg-red-900 text-red-400 border-red-700">
             <AlertCircle className="h-3 w-3 mr-1" />
             Vencida
           </Badge>
         );
       case "cancelada":
         return (
-          <Badge className="bg-slate-500/20 text-slate-400 border-slate-500/30">
+          <Badge className="bg-slate-800 text-slate-400 border-slate-600">
             <Ban className="h-3 w-3 mr-1" />
             Cancelada
           </Badge>

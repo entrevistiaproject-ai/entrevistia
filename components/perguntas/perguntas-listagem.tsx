@@ -32,10 +32,10 @@ interface PerguntasListagemProps {
 }
 
 const categoriaColors: Record<string, string> = {
-  tecnica: "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20",
-  experiencia: "bg-purple-500/10 text-purple-500 hover:bg-purple-500/20",
-  comportamental: "bg-green-500/10 text-green-500 hover:bg-green-500/20",
-  situacional: "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20",
+  tecnica: "bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800",
+  experiencia: "bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-800",
+  comportamental: "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800",
+  situacional: "bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900 dark:text-amber-300 dark:hover:bg-amber-800",
 };
 
 const categoriaLabels: Record<string, string> = {
@@ -186,13 +186,13 @@ export function PerguntasListagem({
                       <Badge variant="outline">{pergunta.cargo}</Badge>
                       <Badge variant="outline">{getLabelNivel(pergunta.nivel)}</Badge>
                       {pergunta.isPadrao && (
-                        <Badge variant="default" className="bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20">
+                        <Badge variant="default" className="bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-300 dark:hover:bg-yellow-800">
                           <Star className="mr-1 h-3 w-3" />
                           Padrão
                         </Badge>
                       )}
                       {isOculta && (
-                        <Badge variant="secondary" className="bg-gray-500/10 text-gray-500">
+                        <Badge variant="secondary" className="bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
                           <EyeOff className="mr-1 h-3 w-3" />
                           Oculta
                         </Badge>

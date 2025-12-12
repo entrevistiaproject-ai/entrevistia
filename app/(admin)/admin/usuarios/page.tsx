@@ -566,7 +566,7 @@ export default function UsuariosPage() {
                             e.stopPropagation();
                             openCreditosModal(usuario);
                           }}
-                          className="p-1.5 rounded-lg bg-emerald-600/20 text-emerald-400"
+                          className="p-1.5 rounded-lg bg-emerald-900 text-emerald-400"
                         >
                           <Coins className="h-3.5 w-3.5" />
                         </button>
@@ -799,7 +799,7 @@ export default function UsuariosPage() {
                             e.stopPropagation();
                             openCreditosModal(usuario);
                           }}
-                          className="p-2 rounded-lg bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white transition-colors"
+                          className="p-2 rounded-lg bg-emerald-900 text-emerald-400 hover:bg-emerald-600 hover:text-white transition-colors"
                           title="Adicionar créditos extras"
                         >
                           <Coins className="h-4 w-4" />
@@ -1000,10 +1000,10 @@ export default function UsuariosPage() {
                             <Badge
                               className={cn(
                                 fatura.status === "paga"
-                                  ? "bg-emerald-500/20 text-emerald-400"
+                                  ? "bg-emerald-900 text-emerald-400"
                                   : fatura.status === "vencida"
-                                  ? "bg-red-500/20 text-red-400"
-                                  : "bg-amber-500/20 text-amber-400"
+                                  ? "bg-red-900 text-red-400"
+                                  : "bg-amber-900 text-amber-400"
                               )}
                             >
                               {fatura.status}
@@ -1182,7 +1182,7 @@ export default function UsuariosPage() {
               </div>
 
               {/* Conta de Teste (QA) */}
-              <div className="flex items-center justify-between p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-amber-950 border border-amber-800">
                 <div className="flex items-center gap-2">
                   <FlaskConical className="h-4 w-4 text-amber-400" />
                   <div>
