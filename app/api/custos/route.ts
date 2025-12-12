@@ -146,28 +146,42 @@ export async function GET(request: Request) {
       .groupBy(transacoes.entrevistaId, entrevistas.titulo)
       .orderBy(desc(sql`SUM(${transacoes.valorCobrado})`));
 
-    // 4. Custo médio por candidato (baseado em respostas)
-    const respostasStats = await db
+    // 4. Custo médio por candidato
+    // Conta quantas taxas base foram cobradas (1 por candidato avaliado)
+    const candidatosStats = await db
       .select({
-        totalRespostas: sql<number>`COUNT(DISTINCT ${transacoes.respostaId})::int`,
-        custoRespostas: sql<number>`SUM(CASE
-          WHEN ${transacoes.tipo} IN ('transcricao_audio', 'analise_ia', 'analise_pergunta')
-          THEN ${transacoes.valorCobrado}
-          ELSE 0
-        END)::numeric`,
+        totalCandidatos: sql<number>`COUNT(*)::int`,
+        custoTaxaBase: sql<number>`COALESCE(SUM(${transacoes.valorCobrado}), 0)::numeric`,
       })
       .from(transacoes)
       .where(
         and(
           eq(transacoes.userId, userId),
+          eq(transacoes.tipo, "taxa_base_candidato"),
           gte(transacoes.createdAt, dataInicio)
         )
       );
 
-    const custoMedioPorCandidato =
-      respostasStats[0].totalRespostas > 0
-        ? Number(respostasStats[0].custoRespostas) / respostasStats[0].totalRespostas
-        : 0;
+    // Custo total das análises de perguntas
+    const analisesStats = await db
+      .select({
+        custoAnalises: sql<number>`COALESCE(SUM(${transacoes.valorCobrado}), 0)::numeric`,
+      })
+      .from(transacoes)
+      .where(
+        and(
+          eq(transacoes.userId, userId),
+          eq(transacoes.tipo, "analise_pergunta"),
+          gte(transacoes.createdAt, dataInicio)
+        )
+      );
+
+    const totalCandidatos = candidatosStats[0]?.totalCandidatos || 0;
+    const custoTotalCandidatos = Number(candidatosStats[0]?.custoTaxaBase || 0) + Number(analisesStats[0]?.custoAnalises || 0);
+
+    const custoMedioPorCandidato = totalCandidatos > 0
+      ? custoTotalCandidatos / totalCandidatos
+      : 0;
 
     // 5. Evolução mensal (últimos 6 meses)
     const seismesesAtras = new Date();
@@ -330,7 +344,7 @@ export async function GET(request: Request) {
       },
       medias: {
         custoPorCandidato: Number(custoMedioPorCandidato.toFixed(2)),
-        totalCandidatos: respostasStats[0].totalRespostas,
+        totalCandidatos: totalCandidatos,
       },
       entrevistas: {
         total: custosPorEntrevista.length,
