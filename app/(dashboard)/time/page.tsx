@@ -48,7 +48,6 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import Link from "next/link";
 
 interface TeamMember {
   id: string;
@@ -717,22 +716,6 @@ export default function TimePage() {
         </Card>
       )}
 
-      {/* Link para configurações de aprovação automática */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Aprovação Automática</CardTitle>
-          <CardDescription>
-            Configure a aprovação ou reprovação automática de candidatos com base no score
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Link href="/time/configuracoes">
-            <Button variant="outline">
-              Configurar Aprovação Automática
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
     </div>
   );
 }
