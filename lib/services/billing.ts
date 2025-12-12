@@ -238,6 +238,10 @@ export async function registrarTransacao(params: {
 }): Promise<{ success: boolean; transacaoId?: string; error?: string }> {
   const db = getDB();
 
+  // Calcula custo base e valor cobrado baseado no tipo (declarados fora do try para log de erro)
+  let custoBase: number = 0;
+  let valorCobrado: number = 0;
+
   // Log início da tentativa de registro
   logger.debug("[BILLING] Iniciando registro de transação", {
     userId: params.userId,
@@ -247,9 +251,6 @@ export async function registrarTransacao(params: {
   });
 
   try {
-    // Calcula custo base e valor cobrado baseado no tipo
-    let custoBase: number;
-    let valorCobrado: number;
 
     switch (params.tipo) {
       case "taxa_base_candidato":

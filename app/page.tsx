@@ -169,10 +169,11 @@ export default function LandingPage() {
           </div>
 
           {/* Product Preview - Simplified */}
-          <div className="max-w-5xl mx-auto -mb-[35%] sm:-mb-[25%] md:-mb-[10%] lg:mb-0 mt-6 sm:mt-10 md:mt-16 lg:mt-20">
+          <div className="max-w-5xl mx-auto -mb-[40%] sm:-mb-[25%] md:-mb-[10%] lg:mb-0 mt-6 sm:mt-10 md:mt-16 lg:mt-20">
             {/* Container com escala fixa para mobile - mostra miniatura da versão desktop */}
-            <div className="relative origin-top scale-[0.5] sm:scale-75 md:scale-90 lg:scale-100">
-              <div className="relative rounded-2xl border bg-card shadow-2xl shadow-primary/5 overflow-hidden w-[900px]">
+            <div className="flex justify-center">
+              <div className="relative origin-top scale-[0.38] sm:scale-75 md:scale-90 lg:scale-100">
+                <div className="relative rounded-2xl border bg-card shadow-2xl shadow-primary/5 overflow-hidden w-[900px]">
                 {/* Browser chrome */}
                 <div className="flex items-center gap-2 px-4 py-3 border-b bg-muted/50">
                   <div className="flex gap-1.5">
@@ -267,6 +268,7 @@ export default function LandingPage() {
                   </div>
                 </div>
               </div>
+            </div>
             </div>
           </div>
         </div>
