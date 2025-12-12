@@ -14,6 +14,7 @@ export function VerificacaoMicrofone({ onMicrofoneVerificado }: VerificacaoMicro
   const [nivelAudio, setNivelAudio] = useState(0);
   const [erro, setErro] = useState<string | null>(null);
   const [temPermissao, setTemPermissao] = useState(false);
+  const [microfoneTestado, setMicrofoneTestado] = useState(false);
 
   const streamRef = useRef<MediaStream | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -85,6 +86,11 @@ export function VerificacaoMicrofone({ onMicrofoneVerificado }: VerificacaoMicro
         const nivelNormalizado = Math.min(100, (media / 128) * 100);
 
         setNivelAudio(nivelNormalizado);
+
+        // Marcar como testado quando detectar áudio suficiente
+        if (nivelNormalizado >= 15) {
+          setMicrofoneTestado(true);
+        }
 
         animationFrameRef.current = requestAnimationFrame(atualizarNivel);
       };
@@ -189,20 +195,20 @@ export function VerificacaoMicrofone({ onMicrofoneVerificado }: VerificacaoMicro
             <span>Nível de captação: {Math.round(nivelAudio)}%</span>
           </div>
 
-          {nivelAudio < 5 && (
+          {!microfoneTestado && nivelAudio < 5 && (
             <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700 text-center">
               <AlertCircle className="h-4 w-4 inline mr-2" />
               Não estamos captando som. Fale algo para testar seu microfone.
             </div>
           )}
 
-          {nivelAudio >= 5 && nivelAudio < 20 && (
+          {!microfoneTestado && nivelAudio >= 5 && nivelAudio < 15 && (
             <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 text-center">
               Volume baixo detectado. Aproxime-se do microfone ou aumente o volume.
             </div>
           )}
 
-          {nivelAudio >= 20 && (
+          {microfoneTestado && (
             <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 text-center">
               <CheckCircle2 className="h-4 w-4 inline mr-2" />
               Seu microfone está funcionando perfeitamente!
@@ -232,7 +238,7 @@ export function VerificacaoMicrofone({ onMicrofoneVerificado }: VerificacaoMicro
             onClick={confirmarEContinuar}
             size="lg"
             className="w-full"
-            disabled={nivelAudio < 5}
+            disabled={!microfoneTestado}
           >
             <CheckCircle2 className="h-5 w-5 mr-2" />
             Continuar para o Tutorial
