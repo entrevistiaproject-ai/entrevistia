@@ -2,7 +2,8 @@ import { analyzeInterview } from './agent';
 
 /**
  * Executa a análise de entrevista em background
- * Não bloqueia a resposta ao candidato
+ * IMPORTANTE: Esta função é chamada dentro do after() do Next.js
+ * e DEVE aguardar a conclusão da análise para manter o runtime ativo
  */
 export async function onCandidatoFinalizouEntrevista(
   candidatoId: string,
@@ -18,21 +19,15 @@ export async function onCandidatoFinalizouEntrevista(
   console.log(`[Auto-Analyze] Candidato ${candidatoNome} finalizou a entrevista. Iniciando análise automática...`);
 
   try {
-    // Executa a análise (não await para não bloquear)
-    analyzeInterview(candidatoId, entrevistaId, candidatoNome)
-      .then((result) => {
-        if (result.success) {
-          console.log(`[Auto-Analyze] ✅ Análise do candidato ${candidatoNome} concluída com sucesso. ID: ${result.avaliacaoId}`);
-        } else {
-          console.error(`[Auto-Analyze] ❌ Falha na análise do candidato ${candidatoNome}:`, result.error);
-        }
-      })
-      .catch((error) => {
-        console.error(`[Auto-Analyze] ❌ Erro na análise do candidato ${candidatoNome}:`, error);
-      });
+    // IMPORTANTE: Usa await para manter o runtime do after() ativo até a análise completar
+    const result = await analyzeInterview(candidatoId, entrevistaId, candidatoNome);
 
-    console.log(`[Auto-Analyze] Análise iniciada em background para ${candidatoNome}`);
+    if (result.success) {
+      console.log(`[Auto-Analyze] ✅ Análise do candidato ${candidatoNome} concluída com sucesso. ID: ${result.avaliacaoId}`);
+    } else {
+      console.error(`[Auto-Analyze] ❌ Falha na análise do candidato ${candidatoNome}:`, result.error);
+    }
   } catch (error) {
-    console.error(`[Auto-Analyze] ❌ Erro ao iniciar análise para ${candidatoNome}:`, error);
+    console.error(`[Auto-Analyze] ❌ Erro na análise do candidato ${candidatoNome}:`, error);
   }
 }
