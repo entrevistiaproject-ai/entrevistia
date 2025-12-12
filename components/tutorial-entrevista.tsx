@@ -6,12 +6,14 @@ import {
   Mic,
   Square,
   Play,
+  Pause,
   CheckCircle2,
   ArrowRight,
   Volume2,
   RotateCcw,
   Lightbulb,
-  Clock
+  Clock,
+  Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +57,12 @@ export function TutorialEntrevista({ onTutorialCompleto }: TutorialEntrevistaPro
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [perguntasCompletas, setPerguntasCompletas] = useState<Set<number>>(new Set());
 
+  // Estados do player de áudio customizado (necessário para iOS)
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isAudioLoading, setIsAudioLoading] = useState(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
+  const [playbackProgress, setPlaybackProgress] = useState(0);
+
   const streamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -63,6 +71,8 @@ export function TutorialEntrevista({ onTutorialCompleto }: TutorialEntrevistaPro
   const audioContextRef = useRef<AudioContext | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const mimeTypeRef = useRef<string>("audio/webm");
+  const audioElementRef = useRef<HTMLAudioElement | null>(null);
+  const playbackTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const pararMonitoramento = useCallback(() => {
     if (animationFrameRef.current) {
@@ -84,14 +94,121 @@ export function TutorialEntrevista({ onTutorialCompleto }: TutorialEntrevistaPro
     analyserRef.current = null;
   }, []);
 
+  // Cleanup do player de áudio
+  const pararPlayback = useCallback(() => {
+    if (playbackTimerRef.current) {
+      clearInterval(playbackTimerRef.current);
+      playbackTimerRef.current = null;
+    }
+    if (audioElementRef.current) {
+      audioElementRef.current.pause();
+      audioElementRef.current.currentTime = 0;
+    }
+    setIsPlaying(false);
+    setPlaybackProgress(0);
+  }, []);
+
   useEffect(() => {
     return () => {
       pararMonitoramento();
+      pararPlayback();
       if (audioUrl) {
         URL.revokeObjectURL(audioUrl);
       }
     };
-  }, [pararMonitoramento, audioUrl]);
+  }, [pararMonitoramento, pararPlayback, audioUrl]);
+
+  // Inicializar elemento de áudio quando URL mudar
+  useEffect(() => {
+    // Se não há URL, limpar referência e retornar
+    if (!audioUrl) {
+      audioElementRef.current = null;
+      return;
+    }
+
+    // Criar novo elemento de áudio
+    const audio = new Audio();
+    audio.preload = "auto";
+
+    // Handlers de eventos
+    const handleCanPlay = () => {
+      setIsAudioLoading(false);
+      console.log("[Tutorial] Áudio pronto para reproduzir");
+    };
+
+    const handleLoadStart = () => {
+      setIsAudioLoading(true);
+      setAudioError(null);
+      setPlaybackProgress(0);
+      setIsPlaying(false);
+    };
+
+    const handleError = () => {
+      console.error("[Tutorial] Erro ao carregar áudio");
+      setIsAudioLoading(false);
+      setAudioError("Não foi possível carregar o áudio. Tente regravar.");
+    };
+
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setPlaybackProgress(100);
+      if (playbackTimerRef.current) {
+        clearInterval(playbackTimerRef.current);
+        playbackTimerRef.current = null;
+      }
+    };
+
+    const handleTimeUpdate = () => {
+      if (audio.duration > 0) {
+        const progress = (audio.currentTime / audio.duration) * 100;
+        setPlaybackProgress(progress);
+      }
+    };
+
+    audio.addEventListener("loadstart", handleLoadStart);
+    audio.addEventListener("canplay", handleCanPlay);
+    audio.addEventListener("error", handleError);
+    audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+
+    // Definir src e carregar
+    audio.src = audioUrl;
+    audio.load();
+    audioElementRef.current = audio;
+
+    return () => {
+      audio.removeEventListener("loadstart", handleLoadStart);
+      audio.removeEventListener("canplay", handleCanPlay);
+      audio.removeEventListener("error", handleError);
+      audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.pause();
+      audio.src = "";
+    };
+  }, [audioUrl]);
+
+  // Função para tocar/pausar áudio
+  const togglePlayback = async () => {
+    if (!audioElementRef.current || !audioUrl) return;
+
+    try {
+      if (isPlaying) {
+        audioElementRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        // Reset para o início se chegou ao fim
+        if (playbackProgress >= 100) {
+          audioElementRef.current.currentTime = 0;
+          setPlaybackProgress(0);
+        }
+        await audioElementRef.current.play();
+        setIsPlaying(true);
+      }
+    } catch (error) {
+      console.error("[Tutorial] Erro ao reproduzir áudio:", error);
+      setAudioError("Erro ao reproduzir. Toque novamente.");
+    }
+  };
 
   const iniciarGravacao = async () => {
     try {
@@ -130,35 +247,70 @@ export function TutorialEntrevista({ onTutorialCompleto }: TutorialEntrevistaPro
       atualizarNivel();
 
       // Detectar formato de áudio suportado pelo navegador
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-        ? 'audio/webm;codecs=opus'
-        : MediaRecorder.isTypeSupported('audio/webm')
-          ? 'audio/webm'
-          : MediaRecorder.isTypeSupported('audio/mp4')
-            ? 'audio/mp4'
-            : 'audio/wav';
+      // Ordem de preferência: webm com opus > webm > mp4 > ogg > sem especificar
+      const formatsToTry = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/mp4',
+        'audio/ogg;codecs=opus',
+        'audio/ogg',
+        '', // Sem especificar - deixa o navegador escolher
+      ];
 
-      mimeTypeRef.current = mimeType;
+      let selectedMimeType = '';
+      for (const format of formatsToTry) {
+        if (format === '' || MediaRecorder.isTypeSupported(format)) {
+          selectedMimeType = format;
+          break;
+        }
+      }
+
+      console.log('[Tutorial] Formato de áudio selecionado:', selectedMimeType || 'padrão do navegador');
+      mimeTypeRef.current = selectedMimeType;
 
       // Configurar MediaRecorder
-      const mediaRecorder = new MediaRecorder(stream, { mimeType });
+      const mediaRecorderOptions: MediaRecorderOptions = {};
+      if (selectedMimeType) {
+        mediaRecorderOptions.mimeType = selectedMimeType;
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, mediaRecorderOptions);
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
+
+      console.log('[Tutorial] MediaRecorder criado. mimeType real:', mediaRecorder.mimeType);
+
+      // Atualiza o mimeType real usado pelo MediaRecorder
+      if (mediaRecorder.mimeType) {
+        mimeTypeRef.current = mediaRecorder.mimeType;
+      }
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           chunksRef.current.push(event.data);
+          console.log('[Tutorial] Chunk de áudio recebido:', event.data.size, 'bytes');
         }
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(chunksRef.current, { type: mimeTypeRef.current });
+        const totalSize = chunksRef.current.reduce((acc, chunk) => acc + chunk.size, 0);
+        console.log('[Tutorial] Gravação finalizada. Total:', totalSize, 'bytes, chunks:', chunksRef.current.length);
+
+        // Usa o mimeType real do MediaRecorder para o blob
+        const blobType = mimeTypeRef.current || 'audio/webm';
+        const audioBlob = new Blob(chunksRef.current, { type: blobType });
+        console.log('[Tutorial] Blob criado. Tamanho:', audioBlob.size, 'tipo:', audioBlob.type);
+
         const url = URL.createObjectURL(audioBlob);
+        console.log('[Tutorial] URL do blob:', url);
+
         setAudioUrl(url);
         setFase("revisao");
       };
 
-      mediaRecorder.start();
+      // Usa timeslice de 1000ms para garantir que os dados são salvos em intervalos regulares
+      // Isso ajuda em alguns dispositivos móveis
+      mediaRecorder.start(1000);
       setFase("gravando");
       setTempoGravacao(0);
 
@@ -179,15 +331,18 @@ export function TutorialEntrevista({ onTutorialCompleto }: TutorialEntrevistaPro
   };
 
   const regravarResposta = () => {
+    pararPlayback();
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
     }
+    setAudioError(null);
     setTempoGravacao(0);
     setFase("pergunta");
   };
 
   const confirmarResposta = () => {
+    pararPlayback();
     const novasCompletas = new Set(perguntasCompletas);
     novasCompletas.add(perguntaAtual);
     setPerguntasCompletas(novasCompletas);
@@ -198,6 +353,7 @@ export function TutorialEntrevista({ onTutorialCompleto }: TutorialEntrevistaPro
         URL.revokeObjectURL(audioUrl);
         setAudioUrl(null);
       }
+      setAudioError(null);
       setPerguntaAtual(prev => prev + 1);
       setTempoGravacao(0);
       setFase("pergunta");
@@ -209,6 +365,7 @@ export function TutorialEntrevista({ onTutorialCompleto }: TutorialEntrevistaPro
 
   const pularTutorial = () => {
     pararMonitoramento();
+    pararPlayback();
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -445,7 +602,49 @@ export function TutorialEntrevista({ onTutorialCompleto }: TutorialEntrevistaPro
             Ouça sua gravação ({formatarTempo(tempoGravacao)}):
           </p>
 
-          <audio controls src={audioUrl} className="mx-auto mb-6 w-full max-w-md" />
+          {/* Player de áudio customizado - funciona melhor em dispositivos móveis */}
+          <div className="bg-gray-50 rounded-lg p-4 mb-6 max-w-md mx-auto">
+            {/* Barra de progresso */}
+            <div className="w-full h-2 bg-gray-200 rounded-full mb-4 overflow-hidden">
+              <div
+                className="h-full bg-blue-500 rounded-full transition-all duration-100"
+                style={{ width: `${playbackProgress}%` }}
+              />
+            </div>
+
+            {/* Controles */}
+            <div className="flex items-center justify-center gap-4">
+              <Button
+                onClick={togglePlayback}
+                variant="outline"
+                size="lg"
+                className="gap-2 min-w-[140px]"
+                disabled={isAudioLoading}
+              >
+                {isAudioLoading ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Carregando...
+                  </>
+                ) : isPlaying ? (
+                  <>
+                    <Pause className="h-5 w-5" />
+                    Pausar
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-5 w-5" />
+                    {playbackProgress > 0 && playbackProgress < 100 ? "Continuar" : "Ouvir"}
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {/* Mensagem de erro */}
+            {audioError && (
+              <p className="text-red-500 text-sm mt-3">{audioError}</p>
+            )}
+          </div>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button onClick={regravarResposta} variant="outline" className="gap-2">
