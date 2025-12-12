@@ -6,10 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { User, Mail, Phone, Building, Lock, Eye, EyeOff, Bell, Loader2 } from "lucide-react";
+import { User, Mail, Phone, Building, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/ui/page-header";
-import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 
 interface UserData {
@@ -43,9 +42,6 @@ export default function ContaPage() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  // Preferências
-  const [emailNotifications, setEmailNotifications] = useState(true);
 
   // Carregar dados do usuário
   useEffect(() => {
@@ -397,36 +393,6 @@ export default function ContaPage() {
               {savingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Alterar Senha
             </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Preferências */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Preferências</CardTitle>
-          <CardDescription>
-            Configure suas preferências de notificações
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-primary/10 shrink-0">
-                <Bell className="h-5 w-5 text-primary" />
-              </div>
-              <div className="space-y-0.5">
-                <Label className="text-base">Notificações por Email</Label>
-                <p className="text-sm text-muted-foreground">
-                  Receber emails sobre novos candidatos e atualizações
-                </p>
-              </div>
-            </div>
-            <Switch
-              checked={emailNotifications}
-              onCheckedChange={setEmailNotifications}
-              className="shrink-0"
-            />
           </div>
         </CardContent>
       </Card>
