@@ -356,9 +356,9 @@ export default function LandingPage() {
             {/* Feature 1 */}
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
               <div className="order-2 lg:order-1">
-                <div className="flex items-center gap-2 text-primary mb-4">
-                  <Mic className="h-5 w-5" />
-                  <span className="text-sm font-medium">Entrevistas por áudio</span>
+                <div className="inline-flex items-center gap-2.5 bg-primary/10 text-primary px-4 py-2 rounded-full mb-6">
+                  <Mic className="h-6 w-6" />
+                  <span className="text-base font-semibold">Entrevistas por áudio</span>
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-bold mb-4">
                   Candidatos respondem de qualquer lugar
@@ -532,9 +532,9 @@ export default function LandingPage() {
                 </div>
               </div>
               <div>
-                <div className="flex items-center gap-2 text-primary mb-4">
-                  <Brain className="h-5 w-5" />
-                  <span className="text-sm font-medium">Análise com IA</span>
+                <div className="inline-flex items-center gap-2.5 bg-primary/10 text-primary px-4 py-2 rounded-full mb-6">
+                  <Brain className="h-6 w-6" />
+                  <span className="text-base font-semibold">Análise com IA</span>
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-bold mb-4">
                   Decisões baseadas em dados
