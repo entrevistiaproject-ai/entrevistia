@@ -660,13 +660,22 @@ export default function LandingPage() {
             Crie sua conta, ganhe R$ 50 em créditos e faça sua primeira entrevista hoje
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="h-12 px-8 bg-white text-primary hover:bg-white/90 font-semibold" asChild>
+            <Button
+              size="lg"
+              className="h-14 px-10 bg-white text-primary font-bold text-base shadow-xl shadow-black/20 hover:bg-gray-50 hover:shadow-2xl hover:shadow-black/30 hover:-translate-y-0.5 transition-all duration-200"
+              asChild
+            >
               <Link href="/cadastro">
                 Criar conta gratuita
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="h-12 px-8 bg-white/10 border-white/50 text-white hover:bg-white/20 hover:border-white" asChild>
+            <Button
+              size="lg"
+              variant="outline"
+              className="h-14 px-10 bg-white/15 backdrop-blur-sm border-2 border-white/70 text-white font-semibold text-base shadow-lg shadow-black/10 hover:bg-white hover:text-primary hover:shadow-xl hover:shadow-black/20 hover:-translate-y-0.5 transition-all duration-200"
+              asChild
+            >
               <Link href="/login">
                 Já tenho conta
               </Link>
