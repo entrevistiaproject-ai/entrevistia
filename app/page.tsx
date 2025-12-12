@@ -297,7 +297,7 @@ export default function LandingPage() {
       <section id="como-funciona" className="py-20 sm:py-28">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-8">Simples de usar</Badge>
+            <Badge variant="outline" className="mb-4">Simples de usar</Badge>
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">Como funciona</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Da criação da entrevista aos resultados em poucos minutos
@@ -344,7 +344,7 @@ export default function LandingPage() {
       <section id="recursos" className="py-20 sm:py-28 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-8">Recursos</Badge>
+            <Badge variant="outline" className="mb-4">Recursos</Badge>
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">Tudo que você precisa</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Uma plataforma completa para triagem inteligente
@@ -562,7 +562,7 @@ export default function LandingPage() {
       <section id="precos" className="py-20 sm:py-28">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-8">Preços</Badge>
+            <Badge variant="outline" className="mb-4">Preços</Badge>
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">Pague só pelo que usar</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Sem mensalidade. Você só paga quando um candidato completar a entrevista.
@@ -573,7 +573,7 @@ export default function LandingPage() {
             <Card className="border-2 border-primary">
               <CardContent className="p-8">
                 <div className="text-center mb-8">
-                  <Badge className="mb-8">Pay-per-use</Badge>
+                  <Badge className="mb-4">Pay-per-use</Badge>
                   <h3 className="text-2xl font-bold mb-2">Modelo simples</h3>
                   <p className="text-muted-foreground">Sem surpresas, sem taxas escondidas</p>
                 </div>
