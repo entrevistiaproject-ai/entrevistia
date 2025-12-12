@@ -164,18 +164,8 @@ export default function CriarEntrevistaPage() {
     }
   };
 
-  // Calcula progresso do formulário
-  const progressSteps = [
-    { label: "Título", done: titulo.length > 0 },
-    { label: "Descrição", done: descricao.length >= 200 },
-    { label: "Cargo", done: cargo.length > 0 },
-    { label: "Nível", done: nivel.length > 0 },
-    { label: "Perguntas", done: perguntas.length > 0 },
-  ];
-  const completedSteps = progressSteps.filter((s) => s.done).length;
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-10 pb-8">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link href="/entrevistas">
@@ -191,42 +181,16 @@ export default function CriarEntrevistaPage() {
         </div>
       </div>
 
-      {/* Indicador de Progresso */}
-      <div className="flex items-center gap-3 overflow-x-auto scroll-x-hidden pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-        {progressSteps.map((step, index) => (
-          <div
-            key={step.label}
-            className={`flex items-center gap-2.5 px-3.5 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-              step.done
-                ? "bg-primary/10 text-primary"
-                : "bg-muted text-muted-foreground"
-            }`}
-          >
-            <span className={`flex items-center justify-center w-5 h-5 rounded-full text-[10px] ${
-              step.done
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted-foreground/20 text-muted-foreground"
-            }`}>
-              {step.done ? "✓" : index + 1}
-            </span>
-            <span className="hidden sm:inline">{step.label}</span>
-          </div>
-        ))}
-        <span className="ml-auto text-xs text-muted-foreground whitespace-nowrap">
-          {completedSteps}/{progressSteps.length} completo
-        </span>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-10">
         {/* Informações da Vaga */}
         <Card>
-          <CardHeader className="pb-4">
+          <CardHeader className="pb-6">
             <CardTitle>Sobre a vaga</CardTitle>
-            <CardDescription className="mt-1.5">
+            <CardDescription className="mt-2">
               Essas informações ajudam a IA a avaliar melhor os candidatos
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-7">
+          <CardContent className="space-y-8">
             <div className="space-y-2.5">
               <Label htmlFor="titulo">Nome da entrevista</Label>
               <Input
@@ -361,13 +325,13 @@ Breve contexto sobre a posição e equipe...
 
         {/* Configurações */}
         <Card>
-          <CardHeader className="pb-4">
+          <CardHeader className="pb-6">
             <CardTitle>Configurações</CardTitle>
-            <CardDescription className="mt-1.5">
+            <CardDescription className="mt-2">
               Personalize a experiência do candidato
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-5">
+          <CardContent className="space-y-6">
             <div className="flex items-start sm:items-center justify-between gap-5">
               <div className="space-y-1 flex-1">
                 <Label htmlFor="compartilhar-resultados" className="text-sm sm:text-base">
@@ -389,9 +353,9 @@ Breve contexto sobre a posição e equipe...
 
         {/* Perguntas */}
         <Card>
-          <CardHeader className="pb-4">
+          <CardHeader className="pb-6">
             <CardTitle>Perguntas</CardTitle>
-            <CardDescription className="mt-1.5">
+            <CardDescription className="mt-2">
               Escolha do banco ou crie suas próprias ({perguntas.length} {perguntas.length === 1 ? "selecionada" : "selecionadas"})
             </CardDescription>
           </CardHeader>
@@ -402,7 +366,7 @@ Breve contexto sobre a posição e equipe...
                 <TabsTrigger value="nova" className="text-sm">Criar pergunta</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="banco" className="mt-5">
+              <TabsContent value="banco" className="mt-6">
                 <SelecionarPerguntasBanco
                   cargo={cargo}
                   nivel={nivel}
@@ -411,7 +375,7 @@ Breve contexto sobre a posição e equipe...
                 />
               </TabsContent>
 
-              <TabsContent value="nova" className="mt-5">
+              <TabsContent value="nova" className="mt-6">
                 <CriarPerguntaNova
                   cargo={cargo}
                   nivel={nivel}
@@ -422,7 +386,7 @@ Breve contexto sobre a posição e equipe...
 
             {/* Lista de Perguntas Selecionadas */}
             {perguntas.length > 0 && (
-              <div className="mt-8">
+              <div className="mt-10">
                 <ListaPerguntasSelecionadas
                   perguntas={perguntas}
                   onRemover={handleRemoverPergunta}
