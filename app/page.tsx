@@ -172,8 +172,8 @@ export default function LandingPage() {
           <div className="max-w-5xl mx-auto mt-6 sm:mt-10 md:mt-16 lg:mt-20">
             {/* Container com escala fixa para mobile - mostra miniatura da versão desktop */}
             {/* Mobile: altura fixa com overflow hidden para centralizar visualmente */}
-            <div className="flex justify-center sm:block">
-              <div className="relative h-[340px] sm:h-auto overflow-hidden sm:overflow-visible flex items-center justify-center sm:block">
+            <div className="flex justify-center">
+              <div className="relative h-[340px] sm:h-auto overflow-hidden sm:overflow-visible flex items-center justify-center">
                 <div className="relative origin-center sm:origin-top scale-[0.38] sm:scale-75 md:scale-90 lg:scale-100">
                 <div className="relative rounded-2xl border bg-card shadow-2xl shadow-primary/5 overflow-hidden w-[900px]">
                 {/* Browser chrome */}
