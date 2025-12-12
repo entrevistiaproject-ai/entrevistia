@@ -236,7 +236,7 @@ export default function ConfiguracoesPage() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-slate-400">Carregando configurações...</p>
+          <p className="text-slate-300">Carregando configurações...</p>
         </div>
       </div>
     );
@@ -248,7 +248,7 @@ export default function ConfiguracoesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Configurações do Sistema</h1>
-          <p className="text-slate-400">
+          <p className="text-slate-300">
             Gerencie preços, limites de trial e pacotes de crédito
           </p>
         </div>
@@ -310,7 +310,7 @@ export default function ConfiguracoesPage() {
                 <DollarSign className="h-5 w-5 text-primary" />
                 Configurações de Preço
               </CardTitle>
-              <CardDescription className="text-slate-400">
+              <CardDescription className="text-slate-300">
                 Configure os valores cobrados por cada operação
               </CardDescription>
             </CardHeader>
@@ -320,7 +320,7 @@ export default function ConfiguracoesPage() {
                   <Label className="text-white">{field.label}</Label>
                   <div className="flex items-center gap-3">
                     {field.unit && field.unit !== "" && (
-                      <span className="text-slate-400 text-sm w-8">{field.unit}</span>
+                      <span className="text-slate-300 text-sm w-8">{field.unit}</span>
                     )}
                     <Input
                       type="number"
@@ -331,13 +331,13 @@ export default function ConfiguracoesPage() {
                       className="bg-slate-800/50 border-slate-700 text-white max-w-xs"
                     />
                     {configState?.configs[field.key]?.fromDatabase && (
-                      <Badge variant="outline" className="text-emerald-400 border-emerald-500/30">
+                      <Badge variant="outline" className="text-emerald-300 border-emerald-400/40">
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Personalizado
                       </Badge>
                     )}
                   </div>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-400">
                     {configState?.configs[field.key]?.description}
                   </p>
                 </div>
@@ -352,32 +352,32 @@ export default function ConfiguracoesPage() {
                 <Calculator className="h-5 w-5 text-blue-400" />
                 Simulador de Custos
               </CardTitle>
-              <CardDescription className="text-slate-400">
+              <CardDescription className="text-slate-300">
                 Veja como os preços afetam o custo por candidato
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid sm:grid-cols-3 gap-4">
                 <div className="p-4 rounded-lg bg-slate-800/50 text-center">
-                  <p className="text-xs text-slate-400 mb-1">5 perguntas</p>
+                  <p className="text-xs text-slate-300 mb-1">5 perguntas</p>
                   <p className="text-2xl font-bold text-white">
                     {formatCurrency(calcularExemplo(5, 1).custoPorCandidato)}
                   </p>
-                  <p className="text-xs text-slate-500">por candidato</p>
+                  <p className="text-xs text-slate-400">por candidato</p>
                 </div>
                 <div className="p-4 rounded-lg bg-slate-800/50 text-center">
-                  <p className="text-xs text-slate-400 mb-1">10 perguntas</p>
+                  <p className="text-xs text-slate-300 mb-1">10 perguntas</p>
                   <p className="text-2xl font-bold text-white">
                     {formatCurrency(calcularExemplo(10, 1).custoPorCandidato)}
                   </p>
-                  <p className="text-xs text-slate-500">por candidato</p>
+                  <p className="text-xs text-slate-400">por candidato</p>
                 </div>
                 <div className="p-4 rounded-lg bg-slate-800/50 text-center">
-                  <p className="text-xs text-slate-400 mb-1">15 perguntas</p>
+                  <p className="text-xs text-slate-300 mb-1">15 perguntas</p>
                   <p className="text-2xl font-bold text-white">
                     {formatCurrency(calcularExemplo(15, 1).custoPorCandidato)}
                   </p>
-                  <p className="text-xs text-slate-500">por candidato</p>
+                  <p className="text-xs text-slate-400">por candidato</p>
                 </div>
               </div>
 
@@ -401,7 +401,7 @@ export default function ConfiguracoesPage() {
                 <Gift className="h-5 w-5 text-emerald-400" />
                 Configurações do Plano Gratuito
               </CardTitle>
-              <CardDescription className="text-slate-400">
+              <CardDescription className="text-slate-300">
                 Configure os limites e duração do período de avaliação gratuita
               </CardDescription>
             </CardHeader>
@@ -410,7 +410,7 @@ export default function ConfiguracoesPage() {
               <div className="flex items-center justify-between p-4 rounded-lg bg-slate-800/50">
                 <div className="space-y-0.5">
                   <Label className="text-white">Trial Ativo</Label>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-400">
                     Novos usuários receberão crédito de trial ao se cadastrar
                   </p>
                 </div>
@@ -434,7 +434,7 @@ export default function ConfiguracoesPage() {
                     className="bg-slate-800/50 border-slate-700 text-white max-w-xs"
                   />
                 </div>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-400">
                   Valor em créditos que cada novo usuário recebe gratuitamente
                 </p>
               </div>
@@ -453,7 +453,7 @@ export default function ConfiguracoesPage() {
                   />
                   <span className="text-slate-400 text-sm">dias</span>
                 </div>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-400">
                   Número de dias que o período de trial dura (0 = sem limite de tempo)
                 </p>
               </div>
@@ -466,19 +466,19 @@ export default function ConfiguracoesPage() {
                   </h4>
                   <div className="grid sm:grid-cols-3 gap-4 text-sm">
                     <div>
-                      <p className="text-slate-400">10 perguntas/candidato</p>
+                      <p className="text-slate-300">10 perguntas/candidato</p>
                       <p className="text-white font-medium">
                         ~{Math.floor(Number(editedValues["trial.limite_financeiro"] || 50) / calcularExemplo(10, 1).custoPorCandidato)} candidatos
                       </p>
                     </div>
                     <div>
-                      <p className="text-slate-400">8 perguntas/candidato</p>
+                      <p className="text-slate-300">8 perguntas/candidato</p>
                       <p className="text-white font-medium">
                         ~{Math.floor(Number(editedValues["trial.limite_financeiro"] || 50) / calcularExemplo(8, 1).custoPorCandidato)} candidatos
                       </p>
                     </div>
                     <div>
-                      <p className="text-slate-400">5 perguntas/candidato</p>
+                      <p className="text-slate-300">5 perguntas/candidato</p>
                       <p className="text-white font-medium">
                         ~{Math.floor(Number(editedValues["trial.limite_financeiro"] || 50) / calcularExemplo(5, 1).custoPorCandidato)} candidatos
                       </p>
@@ -514,7 +514,7 @@ export default function ConfiguracoesPage() {
                       <Label className="text-slate-400 text-sm">{field.label}</Label>
                       <div className="flex items-center gap-2">
                         {field.unit && (
-                          <span className="text-slate-500 text-sm w-8">{field.unit}</span>
+                          <span className="text-slate-400 text-sm w-8">{field.unit}</span>
                         )}
                         <Input
                           type="number"
@@ -531,7 +531,7 @@ export default function ConfiguracoesPage() {
                   {/* Resumo do pacote */}
                   <div className="pt-4 border-t border-slate-700">
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-slate-400">Valor por crédito:</span>
+                      <span className="text-slate-300">Valor por crédito:</span>
                       <span className="text-white font-medium">
                         {formatCurrency(
                           (Number(editedValues[`pacote.${group.name.toLowerCase()}.valor`] || 0)) /
@@ -552,7 +552,7 @@ export default function ConfiguracoesPage() {
         <DialogContent className="bg-slate-900 border-slate-700">
           <DialogHeader>
             <DialogTitle className="text-white">Confirmar Alterações</DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogDescription className="text-slate-300">
               Você está prestes a alterar as seguintes configurações:
             </DialogDescription>
           </DialogHeader>
@@ -566,7 +566,7 @@ export default function ConfiguracoesPage() {
                 <p className="text-white font-medium">{change.key}</p>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-red-400">{String(change.oldValue)}</span>
-                  <span className="text-slate-500">→</span>
+                  <span className="text-slate-400">→</span>
                   <span className="text-emerald-400">{String(change.newValue)}</span>
                 </div>
               </div>
@@ -574,7 +574,7 @@ export default function ConfiguracoesPage() {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-slate-400">Motivo da alteração (opcional)</Label>
+            <Label className="text-slate-300">Motivo da alteração (opcional)</Label>
             <Textarea
               value={changeReason}
               onChange={(e) => setChangeReason(e.target.value)}

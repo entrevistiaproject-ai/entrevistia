@@ -320,10 +320,11 @@ export default function AdminDashboardPage() {
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#1e293b",
-                      border: "1px solid #334155",
+                      border: "1px solid #475569",
                       borderRadius: "8px",
                     }}
                     labelStyle={{ color: "#fff" }}
+                    itemStyle={{ color: "#e2e8f0" }}
                     formatter={(value: number) => [`R$ ${value.toFixed(2)}`, ""]}
                   />
                   <Legend />
@@ -386,9 +387,11 @@ export default function AdminDashboardPage() {
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#1e293b",
-                      border: "1px solid #334155",
+                      border: "1px solid #475569",
                       borderRadius: "8px",
                     }}
+                    labelStyle={{ color: "#fff" }}
+                    itemStyle={{ color: "#e2e8f0" }}
                     formatter={(value: number, name: string) => [value, name]}
                   />
                 </PieChart>
@@ -441,10 +444,11 @@ export default function AdminDashboardPage() {
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#1e293b",
-                      border: "1px solid #334155",
+                      border: "1px solid #475569",
                       borderRadius: "8px",
                     }}
                     labelStyle={{ color: "#fff" }}
+                    itemStyle={{ color: "#e2e8f0" }}
                   />
                   <Legend />
                   <Bar dataKey="novos" name="Novos" fill="#3b82f6" radius={[4, 4, 0, 0]} />

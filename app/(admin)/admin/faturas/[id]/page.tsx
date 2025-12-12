@@ -192,7 +192,7 @@ export default function FaturaDetalhePage({
         return (
           <Badge
             className={cn(
-              "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+              "bg-emerald-500/30 text-emerald-200 border-emerald-400/40",
               sizeClasses
             )}
           >
@@ -204,7 +204,7 @@ export default function FaturaDetalhePage({
         return (
           <Badge
             className={cn(
-              "bg-blue-500/20 text-blue-400 border-blue-500/30",
+              "bg-blue-500/30 text-blue-200 border-blue-400/40",
               sizeClasses
             )}
           >
@@ -216,7 +216,7 @@ export default function FaturaDetalhePage({
         return (
           <Badge
             className={cn(
-              "bg-amber-500/20 text-amber-400 border-amber-500/30",
+              "bg-amber-500/30 text-amber-200 border-amber-400/40",
               sizeClasses
             )}
           >
@@ -228,7 +228,7 @@ export default function FaturaDetalhePage({
         return (
           <Badge
             className={cn(
-              "bg-red-500/20 text-red-400 border-red-500/30",
+              "bg-red-500/30 text-red-200 border-red-400/40",
               sizeClasses
             )}
           >
@@ -240,7 +240,7 @@ export default function FaturaDetalhePage({
         return (
           <Badge
             className={cn(
-              "bg-slate-500/20 text-slate-400 border-slate-500/30",
+              "bg-slate-500/30 text-slate-200 border-slate-400/40",
               sizeClasses
             )}
           >
@@ -250,7 +250,7 @@ export default function FaturaDetalhePage({
         );
       default:
         return (
-          <Badge variant="outline" className="text-slate-400 border-slate-600">
+          <Badge variant="outline" className="text-slate-300 border-slate-500">
             {status}
           </Badge>
         );
@@ -288,31 +288,31 @@ export default function FaturaDetalhePage({
     switch (planType) {
       case "free_trial":
         return (
-          <Badge className="bg-slate-500/20 text-slate-400 border-slate-500/30">
+          <Badge className="bg-slate-500/30 text-slate-200 border-slate-400/40">
             Gratuito
           </Badge>
         );
       case "basic":
         return (
-          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+          <Badge className="bg-blue-500/30 text-blue-200 border-blue-400/40">
             Basic
           </Badge>
         );
       case "professional":
         return (
-          <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+          <Badge className="bg-purple-500/30 text-purple-200 border-purple-400/40">
             Profissional
           </Badge>
         );
       case "enterprise":
         return (
-          <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+          <Badge className="bg-amber-500/30 text-amber-200 border-amber-400/40">
             Profissional
           </Badge>
         );
       default:
         return (
-          <Badge variant="outline" className="text-slate-400 border-slate-600">
+          <Badge variant="outline" className="text-slate-300 border-slate-500">
             {planType || "N/A"}
           </Badge>
         );
@@ -323,31 +323,31 @@ export default function FaturaDetalhePage({
     switch (status) {
       case "concluida":
         return (
-          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+          <Badge className="bg-emerald-500/30 text-emerald-200 border-emerald-400/40 text-xs">
             Concluída
           </Badge>
         );
       case "pendente":
         return (
-          <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">
+          <Badge className="bg-amber-500/30 text-amber-200 border-amber-400/40 text-xs">
             Pendente
           </Badge>
         );
       case "falha":
         return (
-          <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">
+          <Badge className="bg-red-500/30 text-red-200 border-red-400/40 text-xs">
             Falha
           </Badge>
         );
       case "reembolsada":
         return (
-          <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
+          <Badge className="bg-purple-500/30 text-purple-200 border-purple-400/40 text-xs">
             Reembolsada
           </Badge>
         );
       default:
         return (
-          <Badge variant="outline" className="text-slate-400 border-slate-600 text-xs">
+          <Badge variant="outline" className="text-slate-300 border-slate-500 text-xs">
             {status}
           </Badge>
         );
@@ -383,7 +383,7 @@ export default function FaturaDetalhePage({
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
+          <AlertCircle className="h-12 w-12 text-red-300 mx-auto mb-4" />
           <p className="text-slate-400">Fatura não encontrada</p>
           <Button
             variant="outline"
@@ -615,7 +615,7 @@ export default function FaturaDetalhePage({
               <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/30">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-red-500/10">
-                    <AlertCircle className="h-4 w-4 text-red-400" />
+                    <AlertCircle className="h-4 w-4 text-red-300" />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-white">Vencimento</p>
@@ -628,7 +628,7 @@ export default function FaturaDetalhePage({
                   className={cn(
                     "font-medium",
                     fatura.status === "vencida"
-                      ? "text-red-400"
+                      ? "text-red-300"
                       : "text-white"
                   )}
                 >

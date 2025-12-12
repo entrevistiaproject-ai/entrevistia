@@ -186,11 +186,11 @@ export default function LogsPage() {
         <Card className="bg-slate-900/50 border-slate-700">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-blue-500/20">
-              <Database className="h-5 w-5 text-blue-400" />
+              <Database className="h-5 w-5 text-blue-300" />
             </div>
             <div>
               <p className="text-2xl font-bold text-white">{stats.total}</p>
-              <p className="text-xs text-slate-400">Total de Logs</p>
+              <p className="text-xs text-slate-300">Total de Logs</p>
             </div>
           </CardContent>
         </Card>
@@ -198,11 +198,11 @@ export default function LogsPage() {
         <Card className="bg-slate-900/50 border-slate-700">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-emerald-500/20">
-              <CheckCircle className="h-5 w-5 text-emerald-400" />
+              <CheckCircle className="h-5 w-5 text-emerald-300" />
             </div>
             <div>
               <p className="text-2xl font-bold text-white">{stats.success}</p>
-              <p className="text-xs text-slate-400">Sucesso</p>
+              <p className="text-xs text-slate-300">Sucesso</p>
             </div>
           </CardContent>
         </Card>
@@ -210,11 +210,11 @@ export default function LogsPage() {
         <Card className="bg-slate-900/50 border-slate-700">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-amber-500/20">
-              <AlertTriangle className="h-5 w-5 text-amber-400" />
+              <AlertTriangle className="h-5 w-5 text-amber-300" />
             </div>
             <div>
               <p className="text-2xl font-bold text-white">{stats.warning}</p>
-              <p className="text-xs text-slate-400">Avisos</p>
+              <p className="text-xs text-slate-300">Avisos</p>
             </div>
           </CardContent>
         </Card>
@@ -222,11 +222,11 @@ export default function LogsPage() {
         <Card className="bg-slate-900/50 border-slate-700">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-red-500/20">
-              <XCircle className="h-5 w-5 text-red-400" />
+              <XCircle className="h-5 w-5 text-red-300" />
             </div>
             <div>
               <p className="text-2xl font-bold text-white">{stats.error}</p>
-              <p className="text-xs text-slate-400">Erros</p>
+              <p className="text-xs text-slate-300">Erros</p>
             </div>
           </CardContent>
         </Card>

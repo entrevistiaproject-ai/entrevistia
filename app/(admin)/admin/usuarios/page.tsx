@@ -367,31 +367,31 @@ export default function UsuariosPage() {
     switch (planType) {
       case "free_trial":
         return (
-          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+          <Badge className="bg-blue-500/30 text-blue-200 border-blue-400/40">
             Gratuito
           </Badge>
         );
       case "basic":
         return (
-          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+          <Badge className="bg-emerald-500/30 text-emerald-200 border-emerald-400/40">
             Basic
           </Badge>
         );
       case "professional":
         return (
-          <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+          <Badge className="bg-amber-500/30 text-amber-200 border-amber-400/40">
             Profissional
           </Badge>
         );
       case "enterprise":
         return (
-          <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+          <Badge className="bg-purple-500/30 text-purple-200 border-purple-400/40">
             Profissional
           </Badge>
         );
       default:
         return (
-          <Badge className="bg-slate-500/20 text-slate-400 border-slate-500/30">
+          <Badge className="bg-slate-500/30 text-slate-200 border-slate-400/40">
             {planType}
           </Badge>
         );
@@ -401,7 +401,7 @@ export default function UsuariosPage() {
   const getPaymentStatus = (usuario: Usuario) => {
     if (!usuario.ultimaFatura) {
       return (
-        <Badge variant="outline" className="text-slate-400 border-slate-600">
+        <Badge variant="outline" className="text-slate-300 border-slate-500">
           Sem faturas
         </Badge>
       );
@@ -410,28 +410,28 @@ export default function UsuariosPage() {
     switch (usuario.ultimaFatura.status) {
       case "paga":
         return (
-          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+          <Badge className="bg-emerald-500/30 text-emerald-200 border-emerald-400/40">
             <CheckCircle className="h-3 w-3 mr-1" />
             Em dia
           </Badge>
         );
       case "aberta":
         return (
-          <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+          <Badge className="bg-amber-500/30 text-amber-200 border-amber-400/40">
             <Clock className="h-3 w-3 mr-1" />
             Pendente
           </Badge>
         );
       case "vencida":
         return (
-          <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
+          <Badge className="bg-red-500/30 text-red-200 border-red-400/40">
             <AlertCircle className="h-3 w-3 mr-1" />
             Atrasado
           </Badge>
         );
       default:
         return (
-          <Badge variant="outline" className="text-slate-400 border-slate-600">
+          <Badge variant="outline" className="text-slate-300 border-slate-500">
             {usuario.ultimaFatura.status}
           </Badge>
         );
@@ -585,38 +585,38 @@ export default function UsuariosPage() {
                   <div className="flex flex-wrap items-center gap-2 mt-2">
                     {getPlanBadge(usuario.planType)}
                     {usuario.isTeste && (
-                      <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">
+                      <Badge className="bg-amber-500/30 text-amber-200 border-amber-400/40 text-xs">
                         <FlaskConical className="h-3 w-3 mr-1" />
                         Teste
                       </Badge>
                     )}
                     {usuario.isActive ? (
-                      <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                      <Badge className="bg-emerald-500/30 text-emerald-200 border-emerald-400/40 text-xs">
                         Ativo
                       </Badge>
                     ) : (
-                      <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">
+                      <Badge className="bg-red-500/30 text-red-200 border-red-400/40 text-xs">
                         Inativo
                       </Badge>
                     )}
                   </div>
                   {usuario.planType === "free_trial" ? (
                     <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-700/50">
-                      <div className="text-xs text-slate-400">
+                      <div className="text-xs text-slate-300">
                         Usado: <span className="text-white font-medium">R$ {(usuario.gastoTotal || 0).toFixed(2)}</span>
                       </div>
-                      <div className="text-xs text-slate-400">
-                        Saldo: <span className={cn("font-medium", usuario.saldoRestante > 0 ? "text-emerald-400" : "text-red-400")}>R$ {(usuario.saldoRestante || 0).toFixed(2)}</span>
+                      <div className="text-xs text-slate-300">
+                        Saldo: <span className={cn("font-medium", usuario.saldoRestante > 0 ? "text-emerald-300" : "text-red-300")}>R$ {(usuario.saldoRestante || 0).toFixed(2)}</span>
                       </div>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-700/50">
-                      <div className="text-xs text-slate-400">
-                        Recebido: <span className="text-emerald-400 font-medium">R$ {(usuario.totalRecebido || 0).toFixed(2)}</span>
+                      <div className="text-xs text-slate-300">
+                        Recebido: <span className="text-emerald-300 font-medium">R$ {(usuario.totalRecebido || 0).toFixed(2)}</span>
                       </div>
                       {usuario.totalDevido > 0 && (
-                        <div className="text-xs text-slate-400">
-                          Devido: <span className="text-amber-400 font-medium">R$ {(usuario.totalDevido || 0).toFixed(2)}</span>
+                        <div className="text-xs text-slate-300">
+                          Devido: <span className="text-amber-300 font-medium">R$ {(usuario.totalDevido || 0).toFixed(2)}</span>
                         </div>
                       )}
                     </div>
@@ -719,12 +719,12 @@ export default function UsuariosPage() {
                   {/* Status */}
                   <td className="px-4 py-4">
                     {usuario.isActive ? (
-                      <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 w-fit">
+                      <Badge className="bg-emerald-500/30 text-emerald-200 border-emerald-400/40 w-fit">
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Ativo
                       </Badge>
                     ) : (
-                      <Badge className="bg-red-500/20 text-red-400 border-red-500/30 w-fit">
+                      <Badge className="bg-red-500/30 text-red-200 border-red-400/40 w-fit">
                         <XCircle className="h-3 w-3 mr-1" />
                         Inativo
                       </Badge>
@@ -736,7 +736,7 @@ export default function UsuariosPage() {
                     <div className="flex items-center gap-2">
                       {getPlanBadge(usuario.planType)}
                       {usuario.isTeste && (
-                        <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">
+                        <Badge className="bg-amber-500/30 text-amber-200 border-amber-400/40 text-xs">
                           <FlaskConical className="h-3 w-3 mr-1" />
                           QA
                         </Badge>
@@ -748,11 +748,11 @@ export default function UsuariosPage() {
                   <td className="px-4 py-4 hidden xl:table-cell">
                     {usuario.planType === "free_trial" ? (
                       <div className="text-sm">
-                        <p className="text-slate-400">
+                        <p className="text-slate-300">
                           Usado: <span className="text-white">R$ {(usuario.gastoTotal || 0).toFixed(2)}</span>
                         </p>
-                        <p className="text-slate-400">
-                          Limite: <span className="text-slate-300">R$ {(usuario.limiteTotal || 0).toFixed(2)}</span>
+                        <p className="text-slate-300">
+                          Limite: <span className="text-slate-200">R$ {(usuario.limiteTotal || 0).toFixed(2)}</span>
                         </p>
                       </div>
                     ) : (
@@ -763,11 +763,11 @@ export default function UsuariosPage() {
                   {/* Saldo/Devido */}
                   <td className="px-4 py-4 text-right hidden lg:table-cell">
                     {usuario.planType === "free_trial" ? (
-                      <p className={cn("text-sm font-medium", usuario.saldoRestante > 0 ? "text-emerald-400" : "text-red-400")}>
+                      <p className={cn("text-sm font-medium", usuario.saldoRestante > 0 ? "text-emerald-300" : "text-red-300")}>
                         R$ {(usuario.saldoRestante || 0).toFixed(2)}
                       </p>
                     ) : (
-                      <p className="text-sm text-amber-400">
+                      <p className="text-sm text-amber-300">
                         R$ {(usuario.totalDevido || 0).toFixed(2)}
                       </p>
                     )}
@@ -775,7 +775,7 @@ export default function UsuariosPage() {
 
                   {/* Total Recebido */}
                   <td className="px-4 py-4 text-right">
-                    <p className="text-sm font-semibold text-emerald-400">
+                    <p className="text-sm font-semibold text-emerald-300">
                       R$ {(usuario.totalRecebido || 0).toFixed(2)}
                     </p>
                   </td>
@@ -948,29 +948,29 @@ export default function UsuariosPage() {
                     <h4 className="text-sm font-medium text-white">Status</h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between items-center">
-                        <span className="text-slate-400">Plano</span>
+                        <span className="text-slate-300">Plano</span>
                         {getPlanBadge(selectedUser.planType)}
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-slate-400">Conta</span>
+                        <span className="text-slate-300">Conta</span>
                         {selectedUser.isActive ? (
-                          <Badge className="bg-emerald-500/20 text-emerald-400">
+                          <Badge className="bg-emerald-500/30 text-emerald-200 border-emerald-400/40">
                             Ativa
                           </Badge>
                         ) : (
-                          <Badge className="bg-red-500/20 text-red-400">
+                          <Badge className="bg-red-500/30 text-red-200 border-red-400/40">
                             Inativa
                           </Badge>
                         )}
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-slate-400">Tipo</span>
+                        <span className="text-slate-300">Tipo</span>
                         {selectedUser.isTeste ? (
-                          <Badge variant="outline" className="text-amber-400">
+                          <Badge variant="outline" className="text-amber-300 border-amber-400/40">
                             Teste
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="text-slate-400">
+                          <Badge variant="outline" className="text-slate-300 border-slate-400/40">
                             Normal
                           </Badge>
                         )}

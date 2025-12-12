@@ -332,14 +332,14 @@ export default function FinanceiroPage() {
           <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="p-2 rounded-lg bg-emerald-500/20">
-                <DollarSign className="h-5 w-5 text-emerald-400" />
+                <DollarSign className="h-5 w-5 text-emerald-300" />
               </div>
               <Badge
                 className={`${
                   resumo.variacao.receita >= 0
-                    ? "bg-emerald-500/20 text-emerald-400"
-                    : "bg-red-500/20 text-red-400"
-                } border-0`}
+                    ? "bg-emerald-500/30 text-emerald-200 border-emerald-400/30"
+                    : "bg-red-500/30 text-red-200 border-red-400/30"
+                }`}
               >
                 {resumo.variacao.receita >= 0 ? (
                   <ArrowUpRight className="h-3 w-3 mr-1" />
@@ -352,8 +352,8 @@ export default function FinanceiroPage() {
             <p className="text-2xl sm:text-3xl font-bold text-white">
               R$ {resumo.receitaMesAtual.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
             </p>
-            <p className="text-sm text-slate-400 mt-1">Receita Mês Atual</p>
-            <p className="text-xs text-slate-500 mt-2">
+            <p className="text-sm text-slate-300 mt-1">Receita Mês Atual</p>
+            <p className="text-xs text-slate-400 mt-2">
               Total: R$ {resumo.receitaTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
             </p>
           </CardContent>
@@ -364,14 +364,14 @@ export default function FinanceiroPage() {
           <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="p-2 rounded-lg bg-red-500/20">
-                <Receipt className="h-5 w-5 text-red-400" />
+                <Receipt className="h-5 w-5 text-red-300" />
               </div>
               <Badge
                 className={`${
                   resumo.variacao.custo <= 0
-                    ? "bg-emerald-500/20 text-emerald-400"
-                    : "bg-red-500/20 text-red-400"
-                } border-0`}
+                    ? "bg-emerald-500/30 text-emerald-200 border-emerald-400/30"
+                    : "bg-red-500/30 text-red-200 border-red-400/30"
+                }`}
               >
                 {resumo.variacao.custo <= 0 ? (
                   <ArrowDownRight className="h-3 w-3 mr-1" />
@@ -384,8 +384,8 @@ export default function FinanceiroPage() {
             <p className="text-2xl sm:text-3xl font-bold text-white">
               R$ {resumo.custoMesAtual.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
             </p>
-            <p className="text-sm text-slate-400 mt-1">Custo Mês Atual</p>
-            <p className="text-xs text-slate-500 mt-2">
+            <p className="text-sm text-slate-300 mt-1">Custo Mês Atual</p>
+            <p className="text-xs text-slate-400 mt-2">
               Total: R$ {resumo.custoTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
             </p>
           </CardContent>
@@ -396,14 +396,14 @@ export default function FinanceiroPage() {
           <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="p-2 rounded-lg bg-blue-500/20">
-                <PiggyBank className="h-5 w-5 text-blue-400" />
+                <PiggyBank className="h-5 w-5 text-blue-300" />
               </div>
               <Badge
                 className={`${
                   resumo.variacao.lucro >= 0
-                    ? "bg-emerald-500/20 text-emerald-400"
-                    : "bg-red-500/20 text-red-400"
-                } border-0`}
+                    ? "bg-emerald-500/30 text-emerald-200 border-emerald-400/30"
+                    : "bg-red-500/30 text-red-200 border-red-400/30"
+                }`}
               >
                 {resumo.variacao.lucro >= 0 ? (
                   <ArrowUpRight className="h-3 w-3 mr-1" />
@@ -416,8 +416,8 @@ export default function FinanceiroPage() {
             <p className="text-2xl sm:text-3xl font-bold text-white">
               R$ {resumo.lucroMesAtual.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
             </p>
-            <p className="text-sm text-slate-400 mt-1">Lucro Mês Atual</p>
-            <p className="text-xs text-slate-500 mt-2">
+            <p className="text-sm text-slate-300 mt-1">Lucro Mês Atual</p>
+            <p className="text-xs text-slate-400 mt-2">
               Total: R$ {resumo.lucroTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
             </p>
           </CardContent>
@@ -428,17 +428,17 @@ export default function FinanceiroPage() {
           <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="p-2 rounded-lg bg-purple-500/20">
-                <TrendingUp className="h-5 w-5 text-purple-400" />
+                <TrendingUp className="h-5 w-5 text-purple-300" />
               </div>
-              <Badge className="bg-purple-500/20 text-purple-400 border-0">
+              <Badge className="bg-purple-500/30 text-purple-200 border-purple-400/30">
                 Markup 2.5x
               </Badge>
             </div>
             <p className="text-2xl sm:text-3xl font-bold text-white">
               {resumo.margemMesAtual.toFixed(1)}%
             </p>
-            <p className="text-sm text-slate-400 mt-1">Margem Mês Atual</p>
-            <p className="text-xs text-slate-500 mt-2">
+            <p className="text-sm text-slate-300 mt-1">Margem Mês Atual</p>
+            <p className="text-xs text-slate-400 mt-2">
               Média histórica: {resumo.margemMedia.toFixed(1)}%
             </p>
           </CardContent>
@@ -488,10 +488,11 @@ export default function FinanceiroPage() {
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#1e293b",
-                      border: "1px solid #334155",
+                      border: "1px solid #475569",
                       borderRadius: "8px",
                     }}
                     labelStyle={{ color: "#fff" }}
+                    itemStyle={{ color: "#e2e8f0" }}
                     formatter={(value: number) => [`R$ ${value.toFixed(2)}`, ""]}
                   />
                   <Legend />
@@ -557,9 +558,11 @@ export default function FinanceiroPage() {
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#1e293b",
-                      border: "1px solid #334155",
+                      border: "1px solid #475569",
                       borderRadius: "8px",
                     }}
+                    labelStyle={{ color: "#fff" }}
+                    itemStyle={{ color: "#e2e8f0" }}
                     formatter={(value: number) => [`R$ ${value.toFixed(2)}`, "Custo"]}
                   />
                 </PieChart>

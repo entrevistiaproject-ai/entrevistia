@@ -275,30 +275,30 @@ export default function AdministradoresPage() {
 
               {/* Permissions */}
               <div className="mt-4 pt-4 border-t border-slate-700">
-                <p className="text-xs text-slate-400 mb-2">Permissões</p>
+                <p className="text-xs text-slate-300 mb-2">Permissões</p>
                 <div className="flex flex-wrap gap-1">
                   {admin.permissions.canManageUsers && (
-                    <Badge variant="outline" className="text-xs text-blue-400 border-blue-500/30">
+                    <Badge variant="outline" className="text-xs text-blue-300 border-blue-400/40">
                       Usuários
                     </Badge>
                   )}
                   {admin.permissions.canManageFinances && (
-                    <Badge variant="outline" className="text-xs text-emerald-400 border-emerald-500/30">
+                    <Badge variant="outline" className="text-xs text-emerald-300 border-emerald-400/40">
                       Financeiro
                     </Badge>
                   )}
                   {admin.permissions.canViewAnalytics && (
-                    <Badge variant="outline" className="text-xs text-purple-400 border-purple-500/30">
+                    <Badge variant="outline" className="text-xs text-purple-300 border-purple-400/40">
                       Analytics
                     </Badge>
                   )}
                   {admin.permissions.canAccessLogs && (
-                    <Badge variant="outline" className="text-xs text-amber-400 border-amber-500/30">
+                    <Badge variant="outline" className="text-xs text-amber-300 border-amber-400/40">
                       Logs
                     </Badge>
                   )}
                   {admin.permissions.canManageAdmins && (
-                    <Badge variant="outline" className="text-xs text-red-400 border-red-500/30">
+                    <Badge variant="outline" className="text-xs text-red-300 border-red-400/40">
                       Admins
                     </Badge>
                   )}

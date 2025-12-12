@@ -29,7 +29,7 @@ export function FreeTrialUpgradeCard() {
         {/* Benefícios do Upgrade */}
         <div className="grid gap-3">
           <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40">
-            <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+            <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
             <div>
               <p className="font-medium text-sm">Uso Ilimitado</p>
               <p className="text-xs text-muted-foreground">
@@ -38,7 +38,7 @@ export function FreeTrialUpgradeCard() {
             </div>
           </div>
           <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40">
-            <Zap className="h-5 w-5 text-yellow-600 shrink-0 mt-0.5" />
+            <Zap className="h-5 w-5 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" />
             <div>
               <p className="font-medium text-sm">Pay-per-Use Transparente</p>
               <p className="text-xs text-muted-foreground">
@@ -47,7 +47,7 @@ export function FreeTrialUpgradeCard() {
             </div>
           </div>
           <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40">
-            <TrendingUp className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+            <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
             <div>
               <p className="font-medium text-sm">Plano Professional</p>
               <p className="text-xs text-muted-foreground">

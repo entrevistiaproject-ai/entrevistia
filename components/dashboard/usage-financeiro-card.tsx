@@ -81,14 +81,14 @@ export function UsageFinanceiroCard({
 
           <div className="space-y-1">
             <div className="text-sm text-muted-foreground">Saldo Restante</div>
-            <div className={`text-2xl font-bold ${limiteAtingido ? "text-red-500" : "text-green-600"}`}>
+            <div className={`text-2xl font-bold ${limiteAtingido ? "text-red-400 dark:text-red-300" : "text-green-600 dark:text-green-400"}`}>
               R$ {saldoRestante.toFixed(2)}
             </div>
           </div>
 
           <div className="space-y-1">
             <div className="text-sm text-muted-foreground">Limite Total</div>
-            <div className="text-2xl font-bold text-muted-foreground">
+            <div className="text-2xl font-bold text-slate-700 dark:text-slate-300">
               R$ {limiteFinanceiro.toFixed(2)}
             </div>
           </div>
