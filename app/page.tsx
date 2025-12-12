@@ -509,10 +509,13 @@ export default function LandingPage() {
                     {[
                       { name: "Comunicação", score: 95 },
                       { name: "Resolução de Problemas", score: 88 },
-                      { name: "Experiência", score: 82 },
+                      { name: "Trabalho em Equipe", score: 90 },
+                      { name: "Proatividade", score: 87 },
+                      { name: "Conhecimento Técnico", score: 82 },
+                      { name: "Adaptabilidade", score: 78 },
                     ].map((comp, i) => (
                       <div key={i} className="flex items-center gap-3">
-                        <span className="text-xs text-muted-foreground w-28 truncate">{comp.name}</span>
+                        <span className="text-xs text-muted-foreground w-32 truncate">{comp.name}</span>
                         <div className="flex-1 h-2 bg-muted rounded-full">
                           <div
                             className={`h-2 rounded-full ${comp.score >= 85 ? 'bg-emerald-500' : comp.score >= 70 ? 'bg-amber-500' : 'bg-red-500'}`}
