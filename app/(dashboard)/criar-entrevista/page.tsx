@@ -29,7 +29,6 @@ import { ArrowLeft, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { NIVEIS_HIERARQUICOS } from "@/lib/constants/niveis";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const TEMPLATE_DESCRICAO = `📋 SOBRE A VAGA
 [Descreva brevemente o contexto da posição, equipe e momento da empresa]
@@ -289,13 +288,13 @@ Breve contexto sobre a posição e equipe...
                   />
                 </div>
               </div>
-              <Alert className="mt-6 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
-                <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                <AlertDescription className="text-sm text-blue-800 dark:text-blue-200">
+              <div className="mt-6 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/50">
+                <AlertCircle className="h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
+                <p className="text-sm text-blue-800 dark:text-blue-200">
                   <strong className="font-semibold">Dica importante:</strong> A IA usa esta descrição para calcular o score de cada candidato.
                   Quanto mais detalhes você incluir, mais precisa será a análise.
-                </AlertDescription>
-              </Alert>
+                </p>
+              </div>
             </div>
 
             <div className="grid gap-5 sm:gap-6 sm:grid-cols-2">
