@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { getDB } from "@/lib/db";
-import { transacoes, faturas, entrevistas, candidatoEntrevistas } from "@/lib/db/schema";
+import { transacoes, faturas, entrevistas, candidatoEntrevistas, users } from "@/lib/db/schema";
 import { eq, and, gte, desc, sql } from "drizzle-orm";
 import { getUserId } from "@/lib/auth/get-user";
+import { getUsageFinanceiro } from "@/lib/services/billing";
+import { PlanType } from "@/lib/config/free-trial";
 
 export async function GET(request: Request) {
   try {
@@ -21,6 +23,20 @@ export async function GET(request: Request) {
     }
 
     const db = getDB();
+
+    // Buscar planType do usuário
+    const [usuario] = await db
+      .select({ planType: users.planType })
+      .from(users)
+      .where(eq(users.id, userId));
+
+    const planType = usuario?.planType || PlanType.FREE_TRIAL;
+
+    // Se for free trial, buscar usage financeiro
+    let usageFinanceiro = null;
+    if (planType === PlanType.FREE_TRIAL) {
+      usageFinanceiro = await getUsageFinanceiro(userId);
+    }
 
     // Calcular data de início baseado no período
     const hoje = new Date();
@@ -291,6 +307,8 @@ export async function GET(request: Request) {
       .orderBy(sql`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY')`);
 
     return NextResponse.json({
+      planType,
+      usageFinanceiro,
       faturaAtual: {
         id: faturaAtual.id,
         mesReferencia: faturaAtual.mesReferencia,

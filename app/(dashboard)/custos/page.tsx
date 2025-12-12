@@ -20,6 +20,8 @@ import { Progress } from "@/components/ui/progress";
 import { PageHeader } from "@/components/ui/page-header";
 import Link from "next/link";
 import { SkeletonStats, SkeletonCard } from "@/components/ui/skeleton-card";
+import { UsageFinanceiroCard } from "@/components/dashboard/usage-financeiro-card";
+import { FreeTrialUpgradeCard } from "@/components/billing/free-trial-upgrade-card";
 import {
   BarChart,
   Bar,
@@ -32,6 +34,16 @@ import {
 } from "recharts";
 
 interface DadosCustos {
+  planType: string;
+  usageFinanceiro?: {
+    totalGasto: number;
+    limiteFinanceiro: number;
+    saldoRestante: number;
+    percentualUsado: number;
+    limiteAtingido: boolean;
+    totalTransacoes: number;
+    isTestAccount: boolean;
+  } | null;
   faturaAtual: {
     id: string;
     mesReferencia: number;
@@ -137,6 +149,77 @@ export default function CustosPage() {
     );
   }
 
+  // Layout para Free Trial
+  if (dados.planType === "free_trial" && dados.usageFinanceiro) {
+    const usage = dados.usageFinanceiro;
+
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Uso e Saldo"
+          description="Acompanhe o uso do seu crédito gratuito"
+        />
+
+        {/* Card de Uso Financeiro */}
+        <UsageFinanceiroCard
+          totalGasto={usage.totalGasto}
+          limiteFinanceiro={usage.limiteFinanceiro}
+          saldoRestante={usage.saldoRestante}
+          percentualUsado={usage.percentualUsado}
+          limiteAtingido={usage.limiteAtingido}
+          totalTransacoes={usage.totalTransacoes}
+        />
+
+        {/* Card de Upgrade */}
+        <FreeTrialUpgradeCard />
+
+        {/* Histórico Recente - mini versão */}
+        {dados.evolucao.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Histórico de Uso</CardTitle>
+              <CardDescription>
+                Acompanhe como você tem utilizado seus créditos
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {dados.evolucao.slice(0, 3).map((item) => {
+                  const [ano, mes] = item.mes.split("-");
+                  const mesNome = new Date(parseInt(ano), parseInt(mes) - 1).toLocaleDateString(
+                    "pt-BR",
+                    { month: "short", year: "numeric" }
+                  );
+
+                  return (
+                    <div key={item.mes} className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium capitalize">{mesNome}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">
+                            R$ {item.custo.toFixed(2)}
+                          </span>
+                          <Badge variant="outline" className="text-xs">
+                            {item.transacoes} {item.transacoes === 1 ? "transação" : "transações"}
+                          </Badge>
+                        </div>
+                      </div>
+                      <Progress
+                        value={(item.custo / usage.limiteFinanceiro) * 100}
+                        className="h-2"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    );
+  }
+
+  // Layout para Planos Pagos
   const { faturaAtual, periodo: periodoData, medias, entrevistas, evolucao, metricas, graficos } = dados;
   const saldoAPagar = faturaAtual.valorTotal - faturaAtual.valorPago;
   const mesNome = new Date(faturaAtual.anoReferencia, faturaAtual.mesReferencia - 1).toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
