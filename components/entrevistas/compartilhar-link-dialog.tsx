@@ -39,14 +39,10 @@ export function CompartilharLinkDialog({
   const gerarLink = async () => {
     setLoading(true);
     try {
-      // TODO: Substituir por sessão real
-      const userId = "123e4567-e89b-12d3-a456-426614174000";
-
       const response = await fetch(`/api/entrevistas/${entrevistaId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "x-user-id": userId,
         },
         body: JSON.stringify({
           gerarLink: true,

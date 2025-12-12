@@ -5,8 +5,13 @@ import { getDB } from "@/lib/db";
 import { adminUsers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
+// Secret para JWT admin - DEVE estar configurado em produção
+const adminSecret = process.env.ADMIN_JWT_SECRET || process.env.AUTH_SECRET;
+if (!adminSecret && process.env.NODE_ENV === "production") {
+  throw new Error("ADMIN_JWT_SECRET ou AUTH_SECRET deve estar configurado em produção");
+}
 const ADMIN_JWT_SECRET = new TextEncoder().encode(
-  process.env.ADMIN_JWT_SECRET || process.env.AUTH_SECRET || "admin-secret-key-change-in-production"
+  adminSecret || "dev-only-secret-not-for-production"
 );
 
 const ADMIN_COOKIE_NAME = "admin-session";

@@ -8,9 +8,13 @@ import { checkRateLimit, getClientIP, createRateLimitKey, getRateLimitHeaders } 
 // Necessário para funcionalidades como Map, setInterval no rate-limit
 export const runtime = "nodejs";
 
-// Secret para verificação do JWT admin
+// Secret para verificação do JWT admin - DEVE estar configurado em produção
+const adminSecret = process.env.ADMIN_JWT_SECRET || process.env.AUTH_SECRET;
+if (!adminSecret && process.env.NODE_ENV === "production") {
+  throw new Error("ADMIN_JWT_SECRET ou AUTH_SECRET deve estar configurado em produção");
+}
 const ADMIN_JWT_SECRET = new TextEncoder().encode(
-  process.env.ADMIN_JWT_SECRET || process.env.AUTH_SECRET || "admin-secret-key-change-in-production"
+  adminSecret || "dev-only-secret-not-for-production"
 );
 
 /**

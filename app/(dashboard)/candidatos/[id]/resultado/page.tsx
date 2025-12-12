@@ -393,8 +393,11 @@ export default function ResultadoCandidatoPage() {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-center py-6">
-                  <div className="relative">
-                    <svg className="w-40 h-40 transform -rotate-90">
+                  <div className="relative w-32 h-32 sm:w-40 sm:h-40">
+                    <svg
+                      viewBox="0 0 160 160"
+                      className="w-full h-full transform -rotate-90"
+                    >
                       <circle
                         cx="80"
                         cy="80"
@@ -418,7 +421,7 @@ export default function ResultadoCandidatoPage() {
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className={`text-4xl font-bold ${getScoreColor100(participacao?.notaGeral || 0)}`}>
+                      <span className={`text-3xl sm:text-4xl font-bold ${getScoreColor100(participacao?.notaGeral || 0)}`}>
                         {Math.round(participacao?.notaGeral || 0)}
                       </span>
                       <span className="text-xs text-muted-foreground mt-1">
@@ -438,8 +441,11 @@ export default function ResultadoCandidatoPage() {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-center py-6">
-                  <div className="relative">
-                    <svg className="w-40 h-40 transform -rotate-90">
+                  <div className="relative w-32 h-32 sm:w-40 sm:h-40">
+                    <svg
+                      viewBox="0 0 160 160"
+                      className="w-full h-full transform -rotate-90"
+                    >
                       <circle
                         cx="80"
                         cy="80"
@@ -463,7 +469,7 @@ export default function ResultadoCandidatoPage() {
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className={`text-4xl font-bold ${getScoreColor(participacao?.compatibilidadeVaga || 0)}`}>
+                      <span className={`text-3xl sm:text-4xl font-bold ${getScoreColor(participacao?.compatibilidadeVaga || 0)}`}>
                         {Math.round(participacao?.compatibilidadeVaga || 0)}
                       </span>
                       <span className="text-xs text-muted-foreground mt-1">

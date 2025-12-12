@@ -9,9 +9,10 @@ import {
   recordFailedAttempt,
 } from "@/lib/security";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || "placeholder-for-build",
-});
+// Cliente OpenAI - será inicializado apenas se a API key estiver configurada
+const openai = process.env.OPENAI_API_KEY
+  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  : null;
 
 // Tipos de arquivo de áudio permitidos
 const ALLOWED_AUDIO_TYPES = [
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Verifica se API key está configurada
-    if (!process.env.OPENAI_API_KEY) {
+    if (!openai) {
       return NextResponse.json(
         { error: "OPENAI_API_KEY não configurada" },
         { status: 500 }
