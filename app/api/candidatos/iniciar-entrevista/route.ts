@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
       await db
         .update(candidatoEntrevistas)
         .set({
-          status: "in_progress",
+          status: "em_andamento",
           iniciadaEm: new Date(),
           updatedAt: new Date(),
         })
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
       await db.insert(candidatoEntrevistas).values({
         candidatoId: candidato.id,
         entrevistaId: entrevista.id,
-        status: "in_progress",
+        status: "em_andamento",
         iniciadaEm: new Date(),
         podeRefazer: false,
       });

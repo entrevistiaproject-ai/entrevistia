@@ -22,6 +22,7 @@ const iniciarEntrevistaSchema = z.object({
   emailConfirmacao: z.string().email("Email de confirmação inválido").max(255),
   documento: z.string().max(20).optional(),
   sexo: z.enum(["masculino", "feminino", "outro", "prefiro_nao_informar"]).optional(),
+  candidatoExistenteId: z.string().optional(), // ID do candidato se já existir
 }).refine((data) => data.email === data.emailConfirmacao, {
   message: "Os emails não coincidem",
   path: ["emailConfirmacao"],
@@ -188,19 +189,10 @@ export async function POST(
         );
       }
 
-      // Atualizar dados do candidato
-      const [candidatoAtualizado] = await db
-        .update(candidatos)
-        .set({
-          nome,
-          documento,
-          sexo,
-          updatedAt: new Date(),
-        })
-        .where(eq(candidatos.id, candidatoExistente.id))
-        .returning();
-
-      candidatoId = candidatoAtualizado.id;
+      // NÃO atualizar dados do candidato - usar dados existentes
+      // Isso evita sobrescrever o nome/documento/sexo quando o candidato
+      // acessa múltiplas entrevistas
+      candidatoId = candidatoExistente.id;
     } else {
       // Criar novo candidato
       const [novoCandidato] = await db

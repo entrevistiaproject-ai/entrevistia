@@ -158,7 +158,7 @@ export async function POST(request: Request) {
             candidatosParaVincular.map((candidatoId) => ({
               candidatoId,
               entrevistaId,
-              status: "pending", // Aguardando convite/início
+              status: "pendente", // Aguardando convite/início
               podeRefazer: false,
             }))
           )

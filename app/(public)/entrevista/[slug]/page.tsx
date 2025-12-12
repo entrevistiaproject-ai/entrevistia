@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, AlertCircle, Briefcase, Users, Building2, Shield } from "lucide-react";
+import { Loader2, AlertCircle, Briefcase, Users, Building2, Shield, ArrowLeft, Check } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -25,6 +25,14 @@ interface EntrevistaPublica {
   empresa?: string;
 }
 
+interface CandidatoExistente {
+  id: string;
+  nome: string;
+  email: string;
+  documento?: string;
+  sexo?: string;
+}
+
 export default function CadastroEntrevistaPage() {
   const params = useParams();
   const router = useRouter();
@@ -33,7 +41,12 @@ export default function CadastroEntrevistaPage() {
   const [entrevista, setEntrevista] = useState<EntrevistaPublica | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [enviando, setEnviando] = useState(false);
+  const [verificandoEmail, setVerificandoEmail] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+
+  // Controle de etapas: "email" -> "dados"
+  const [etapa, setEtapa] = useState<"email" | "dados">("email");
+  const [candidatoExistente, setCandidatoExistente] = useState<CandidatoExistente | null>(null);
 
   const [formData, setFormData] = useState({
     nome: "",
@@ -75,20 +88,67 @@ export default function CadastroEntrevistaPage() {
     }
   };
 
+  const verificarEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setErrosForm({ email: "Email inválido" });
+      return;
+    }
+
+    if (formData.email !== formData.emailConfirmacao) {
+      setErrosForm({ emailConfirmacao: "Os emails não coincidem" });
+      return;
+    }
+
+    try {
+      setVerificandoEmail(true);
+      setErro(null);
+      setErrosForm({});
+
+      const response = await fetch(`/api/entrevista-publica/${slug}/verificar-candidato`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: formData.email }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        if (data.existe) {
+          // Candidato existe - preencher dados
+          setCandidatoExistente(data.candidato);
+          setFormData({
+            ...formData,
+            nome: data.candidato.nome || "",
+            documento: data.candidato.documento || "",
+            sexo: data.candidato.sexo || "",
+          });
+        }
+
+        // Avançar para próxima etapa
+        setEtapa("dados");
+      } else {
+        const errorData = await response.json();
+        setErro(errorData.error || "Erro ao verificar email");
+      }
+    } catch (error) {
+      console.error("Erro ao verificar email:", error);
+      setErro("Erro ao verificar email. Tente novamente.");
+    } finally {
+      setVerificandoEmail(false);
+    }
+  };
+
   const validarFormulario = () => {
     const novosErros: Record<string, string> = {};
 
     if (!formData.nome.trim() || formData.nome.length < 3) {
       novosErros.nome = "Nome deve ter pelo menos 3 caracteres";
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      novosErros.email = "Email inválido";
-    }
-
-    if (formData.email !== formData.emailConfirmacao) {
-      novosErros.emailConfirmacao = "Os emails não coincidem";
     }
 
     setErrosForm(novosErros);
@@ -111,7 +171,10 @@ export default function CadastroEntrevistaPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          candidatoExistenteId: candidatoExistente?.id,
+        }),
       });
 
       if (!response.ok) {
@@ -119,9 +182,8 @@ export default function CadastroEntrevistaPage() {
         throw new Error(errorData.error || "Erro ao iniciar entrevista");
       }
 
-      const { candidatoId, sessaoId, entrevistaId } = await response.json();
+      const { candidatoId, sessaoId } = await response.json();
 
-      // Redirecionar para a página da entrevista
       router.push(
         `/entrevista/${slug}/responder?candidatoId=${candidatoId}&sessaoId=${sessaoId}`
       );
@@ -135,6 +197,17 @@ export default function CadastroEntrevistaPage() {
     } finally {
       setEnviando(false);
     }
+  };
+
+  const voltarParaEmail = () => {
+    setEtapa("email");
+    setCandidatoExistente(null);
+    setFormData({
+      ...formData,
+      nome: "",
+      documento: "",
+      sexo: "",
+    });
   };
 
   if (carregando) {
@@ -209,140 +282,210 @@ export default function CadastroEntrevistaPage() {
         {/* Formulário */}
         <Card>
           <CardHeader>
-            <CardTitle>Cadastro do Candidato</CardTitle>
+            <CardTitle>
+              {etapa === "email" ? "Confirme seu Email" : "Complete seu Cadastro"}
+            </CardTitle>
             <CardDescription>
-              Preencha seus dados para iniciar a entrevista
+              {etapa === "email"
+                ? "Digite seu email para iniciar a entrevista"
+                : candidatoExistente
+                ? "Seus dados estão preenchidos. Confirme para continuar."
+                : "Preencha seus dados para iniciar a entrevista"}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Nome */}
-              <div className="space-y-2">
-                <Label htmlFor="nome">Nome Completo *</Label>
-                <Input
-                  id="nome"
-                  type="text"
-                  value={formData.nome}
-                  onChange={(e) =>
-                    setFormData({ ...formData, nome: e.target.value })
-                  }
-                  placeholder="Seu nome completo"
-                  error={!!errosForm.nome}
-                />
-                {errosForm.nome && (
-                  <p className="text-sm text-destructive flex items-center gap-1">
-                    <AlertCircle className="h-3.5 w-3.5" />
-                    {errosForm.nome}
-                  </p>
-                )}
-              </div>
-
-              {/* Email */}
-              <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  placeholder="seu@email.com"
-                  error={!!errosForm.email}
-                />
-                {errosForm.email && (
-                  <p className="text-sm text-destructive flex items-center gap-1">
-                    <AlertCircle className="h-3.5 w-3.5" />
-                    {errosForm.email}
-                  </p>
-                )}
-              </div>
-
-              {/* Confirmar Email */}
-              <div className="space-y-2">
-                <Label htmlFor="emailConfirmacao">Confirmar Email *</Label>
-                <Input
-                  id="emailConfirmacao"
-                  type="email"
-                  value={formData.emailConfirmacao}
-                  onChange={(e) =>
-                    setFormData({ ...formData, emailConfirmacao: e.target.value })
-                  }
-                  placeholder="Confirme seu email"
-                  error={!!errosForm.emailConfirmacao}
-                />
-                {errosForm.emailConfirmacao && (
-                  <p className="text-sm text-destructive flex items-center gap-1">
-                    <AlertCircle className="h-3.5 w-3.5" />
-                    {errosForm.emailConfirmacao}
-                  </p>
-                )}
-              </div>
-
-              {/* Documento */}
-              <div className="space-y-2">
-                <Label htmlFor="documento">Documento (CPF, RG, etc.)</Label>
-                <Input
-                  id="documento"
-                  type="text"
-                  value={formData.documento}
-                  onChange={(e) =>
-                    setFormData({ ...formData, documento: e.target.value })
-                  }
-                  placeholder="000.000.000-00"
-                />
-              </div>
-
-              {/* Sexo */}
-              <div className="space-y-2">
-                <Label htmlFor="sexo">Sexo</Label>
-                <Select
-                  value={formData.sexo}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, sexo: value })
-                  }
-                >
-                  <SelectTrigger className="h-11">
-                    <SelectValue placeholder="Selecione..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="masculino">Masculino</SelectItem>
-                    <SelectItem value="feminino">Feminino</SelectItem>
-                    <SelectItem value="outro">Outro</SelectItem>
-                    <SelectItem value="prefiro_nao_informar">
-                      Prefiro não informar
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Erro geral */}
-              {erro && (
-                <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg flex items-start gap-3">
-                  <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
-                  <span>{erro}</span>
+            {etapa === "email" ? (
+              <form onSubmit={verificarEmail} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value.trim().toLowerCase() })
+                    }
+                    placeholder="seu@email.com"
+                    error={!!errosForm.email}
+                    autoFocus
+                  />
+                  {errosForm.email && (
+                    <p className="text-sm text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3.5 w-3.5" />
+                      {errosForm.email}
+                    </p>
+                  )}
                 </div>
-              )}
 
-              {/* Botão */}
-              <Button
-                type="submit"
-                className="w-full"
-                size="touch"
-                disabled={enviando}
-              >
-                {enviando ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processando...
-                  </>
-                ) : (
-                  "Iniciar Entrevista"
+                <div className="space-y-2">
+                  <Label htmlFor="emailConfirmacao">Confirmar Email *</Label>
+                  <Input
+                    id="emailConfirmacao"
+                    type="email"
+                    value={formData.emailConfirmacao}
+                    onChange={(e) =>
+                      setFormData({ ...formData, emailConfirmacao: e.target.value.trim().toLowerCase() })
+                    }
+                    placeholder="Confirme seu email"
+                    error={!!errosForm.emailConfirmacao}
+                  />
+                  {errosForm.emailConfirmacao && (
+                    <p className="text-sm text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3.5 w-3.5" />
+                      {errosForm.emailConfirmacao}
+                    </p>
+                  )}
+                </div>
+
+                {erro && (
+                  <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                    <span>{erro}</span>
+                  </div>
                 )}
-              </Button>
-            </form>
 
-            {/* Aviso LGPD */}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  size="touch"
+                  disabled={verificandoEmail}
+                >
+                  {verificandoEmail ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Verificando...
+                    </>
+                  ) : (
+                    "Continuar"
+                  )}
+                </Button>
+              </form>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="email-readonly">Email</Label>
+                  <div className="relative">
+                    <Input
+                      id="email-readonly"
+                      type="email"
+                      value={formData.email}
+                      readOnly
+                      className="bg-muted"
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <Check className="h-4 w-4 text-green-600" />
+                    </div>
+                  </div>
+                </div>
+
+                {candidatoExistente && (
+                  <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-medium">Bem-vindo de volta!</p>
+                      <p className="mt-1">Encontramos seu cadastro. Confira seus dados abaixo.</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="nome">Nome Completo *</Label>
+                  <Input
+                    id="nome"
+                    type="text"
+                    value={formData.nome}
+                    onChange={(e) =>
+                      setFormData({ ...formData, nome: e.target.value })
+                    }
+                    placeholder="Seu nome completo"
+                    error={!!errosForm.nome}
+                    readOnly={!!candidatoExistente}
+                    className={candidatoExistente ? "bg-muted" : ""}
+                  />
+                  {errosForm.nome && (
+                    <p className="text-sm text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3.5 w-3.5" />
+                      {errosForm.nome}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="documento">Documento (CPF, RG, etc.)</Label>
+                  <Input
+                    id="documento"
+                    type="text"
+                    value={formData.documento}
+                    onChange={(e) =>
+                      setFormData({ ...formData, documento: e.target.value })
+                    }
+                    placeholder="000.000.000-00"
+                    readOnly={!!candidatoExistente}
+                    className={candidatoExistente ? "bg-muted" : ""}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="sexo">Sexo</Label>
+                  <Select
+                    value={formData.sexo}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, sexo: value })
+                    }
+                    disabled={!!candidatoExistente}
+                  >
+                    <SelectTrigger className={`h-11 ${candidatoExistente ? "bg-muted" : ""}`}>
+                      <SelectValue placeholder="Selecione..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="masculino">Masculino</SelectItem>
+                      <SelectItem value="feminino">Feminino</SelectItem>
+                      <SelectItem value="outro">Outro</SelectItem>
+                      <SelectItem value="prefiro_nao_informar">
+                        Prefiro não informar
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {erro && (
+                  <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                    <span>{erro}</span>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="touch"
+                    onClick={voltarParaEmail}
+                    disabled={enviando}
+                    className="w-32"
+                  >
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Voltar
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="flex-1"
+                    size="touch"
+                    disabled={enviando}
+                  >
+                    {enviando ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processando...
+                      </>
+                    ) : (
+                      "Iniciar Entrevista"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            )}
+
             <div className="mt-6 pt-6 border-t">
               <div className="flex items-start gap-3 text-muted-foreground">
                 <Shield className="h-5 w-5 shrink-0 mt-0.5" />
