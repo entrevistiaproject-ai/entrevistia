@@ -116,6 +116,16 @@ export async function analyzeInterview(
     // Prompt direto com todos os dados
     const prompt = `Analise esta entrevista e retorne APENAS um JSON válido.
 
+## IMPORTANTE: Contexto das Respostas
+As respostas abaixo foram **gravadas em áudio pelo candidato** e **transcritas automaticamente** por um sistema de reconhecimento de voz (Whisper).
+Por isso, podem conter:
+- Palavras trocadas por homófonas (ex: "leia" em vez de "leio", "enfare" em vez de "encare")
+- Pequenos erros de transcrição que NÃO são erros do candidato
+- Falta de pontuação ou formatação
+
+**NUNCA penalize o candidato por "erros de digitação" ou ortografia** - esses são artefatos da transcrição automática.
+Avalie APENAS o CONTEÚDO, a qualidade das ideias e a capacidade de comunicação demonstrada.
+
 ## Vaga
 - Título: ${data.entrevista.titulo}
 - Cargo: ${data.entrevista.cargo}
@@ -124,7 +134,7 @@ export async function analyzeInterview(
 
 ## Candidato: ${candidatoNome}
 
-## Respostas da Entrevista
+## Respostas da Entrevista (transcritas de áudio)
 ${respostasFormatadas}
 
 ## Instruções
