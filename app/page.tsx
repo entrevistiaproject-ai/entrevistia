@@ -656,35 +656,56 @@ export default function LandingPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-20 sm:py-28 bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-6 max-w-2xl mx-auto">
-            Comece a entrevistar de forma mais inteligente
+      <section className="relative py-24 sm:py-32 overflow-hidden">
+        {/* Background com gradiente */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-blue-700" />
+
+        {/* Elementos decorativos */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl" />
+
+        <div className="container mx-auto px-4 text-center relative z-10">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-8">
+            <Sparkles className="h-4 w-4 text-yellow-300" />
+            <span className="text-sm font-medium text-white/90">Comece grátis hoje</span>
+          </div>
+
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 max-w-3xl mx-auto text-white leading-tight">
+            Pronto para transformar seu processo seletivo?
           </h2>
-          <p className="text-lg opacity-90 mb-10 max-w-xl mx-auto">
-            Crie sua conta, ganhe R$ 50 em créditos e faça sua primeira entrevista hoje
+
+          <p className="text-lg sm:text-xl text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Ganhe R$ 50 em créditos para testar. Sem cartão, sem compromisso.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              size="lg"
-              className="h-14 px-10 bg-white text-primary font-bold text-base shadow-xl shadow-black/20 hover:bg-gray-50 hover:shadow-2xl hover:shadow-black/30 hover:-translate-y-0.5 transition-all duration-200"
-              asChild
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Link
+              href="/cadastro"
+              className="group inline-flex items-center justify-center h-14 px-8 bg-white text-primary font-semibold text-base rounded-xl shadow-2xl shadow-black/25 hover:shadow-black/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
             >
-              <Link href="/cadastro">
-                Criar conta gratuita
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="h-14 px-10 bg-white/15 backdrop-blur-sm border-2 border-white/70 text-white font-semibold text-base shadow-lg shadow-black/10 hover:bg-white hover:text-primary hover:shadow-xl hover:shadow-black/20 hover:-translate-y-0.5 transition-all duration-200"
-              asChild
+              Começar agora
+              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center h-14 px-8 text-white font-medium text-base rounded-xl border border-white/30 hover:bg-white/10 transition-all duration-200"
             >
-              <Link href="/login">
-                Já tenho conta
-              </Link>
-            </Button>
+              Já tenho uma conta
+            </Link>
+          </div>
+
+          {/* Trust badges */}
+          <div className="flex flex-wrap items-center justify-center gap-6 mt-12 text-sm text-white/60">
+            <span className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              Dados protegidos
+            </span>
+            <span className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4" />
+              Cancele quando quiser
+            </span>
           </div>
         </div>
       </section>
