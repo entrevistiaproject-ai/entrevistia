@@ -39,7 +39,7 @@ export function UsageFinanceiroCard({
           <div>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5" />
-              Uso do Free Trial
+              Uso do Plano Gratuito
             </CardTitle>
             <CardDescription>
               Acompanhe quanto você já utilizou do seu crédito gratuito

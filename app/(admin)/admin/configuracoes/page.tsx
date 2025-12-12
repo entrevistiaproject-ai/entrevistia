@@ -67,7 +67,7 @@ const CONFIG_SECTIONS = {
     ],
   },
   trial: {
-    title: "Free Trial",
+    title: "Plano Gratuito",
     description: "Configure os limites e duração do período de avaliação gratuita",
     icon: Gift,
     fields: [
@@ -294,7 +294,7 @@ export default function ConfiguracoesPage() {
           </TabsTrigger>
           <TabsTrigger value="trial" className="data-[state=active]:bg-primary">
             <Gift className="h-4 w-4 mr-2" />
-            Free Trial
+            Plano Gratuito
           </TabsTrigger>
           <TabsTrigger value="pacotes" className="data-[state=active]:bg-primary">
             <Package className="h-4 w-4 mr-2" />
@@ -393,13 +393,13 @@ export default function ConfiguracoesPage() {
           </Card>
         </TabsContent>
 
-        {/* Tab: Free Trial */}
+        {/* Tab: Plano Gratuito */}
         <TabsContent value="trial" className="space-y-6">
           <Card className="bg-slate-900/50 border-slate-700">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <Gift className="h-5 w-5 text-emerald-400" />
-                Configurações do Free Trial
+                Configurações do Plano Gratuito
               </CardTitle>
               <CardDescription className="text-slate-400">
                 Configure os limites e duração do período de avaliação gratuita

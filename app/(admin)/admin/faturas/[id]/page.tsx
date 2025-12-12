@@ -289,7 +289,7 @@ export default function FaturaDetalhePage({
       case "free_trial":
         return (
           <Badge className="bg-slate-500/20 text-slate-400 border-slate-500/30">
-            Trial Gratuito
+            Gratuito
           </Badge>
         );
       case "basic":
@@ -301,13 +301,13 @@ export default function FaturaDetalhePage({
       case "professional":
         return (
           <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
-            Professional
+            Profissional
           </Badge>
         );
       case "enterprise":
         return (
           <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
-            Enterprise
+            Profissional
           </Badge>
         );
       default:

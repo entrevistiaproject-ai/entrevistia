@@ -17,7 +17,7 @@ export function FreeTrialUpgradeCard() {
         <div className="flex justify-center mb-2">
           <Badge variant="secondary" className="text-xs px-3 py-1">
             <Sparkles className="h-3 w-3 mr-1" />
-            Plano Free Trial
+            Plano Gratuito
           </Badge>
         </div>
         <CardTitle className="text-2xl">Upgrade para Continuar Crescendo</CardTitle>
@@ -49,7 +49,7 @@ export function FreeTrialUpgradeCard() {
           <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40">
             <TrendingUp className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
             <div>
-              <p className="font-medium text-sm">Escale seu Recrutamento</p>
+              <p className="font-medium text-sm">Plano Professional</p>
               <p className="text-xs text-muted-foreground">
                 Adequado para empresas em crescimento e alto volume de contratações
               </p>
@@ -60,18 +60,39 @@ export function FreeTrialUpgradeCard() {
         {/* Exemplo de Custo */}
         <div className="rounded-lg border bg-card p-4">
           <p className="text-sm font-medium mb-3">Exemplo de Custo</p>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">20 candidatos com 10 perguntas</span>
-              <span className="font-mono">R$ 70,00</span>
+          <div className="space-y-3 text-sm">
+            {/* Custo individual */}
+            <div className="space-y-1">
+              <div className="flex justify-between font-medium">
+                <span className="text-muted-foreground">1 candidato com 10 perguntas</span>
+                <span className="font-mono">R$ 3,50</span>
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>• Taxa base: 1 × R$ 1,00</span>
+                <span>R$ 1,00</span>
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>• Análises: 10 × R$ 0,25</span>
+                <span>R$ 2,50</span>
+              </div>
             </div>
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>• Taxa base: 20 × R$ 1,00</span>
-              <span>R$ 20,00</span>
-            </div>
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>• Análises: 200 × R$ 0,25</span>
-              <span>R$ 50,00</span>
+
+            <div className="border-t pt-2" />
+
+            {/* Custo em volume */}
+            <div className="space-y-1">
+              <div className="flex justify-between font-medium">
+                <span className="text-muted-foreground">20 candidatos com 10 perguntas</span>
+                <span className="font-mono">R$ 70,00</span>
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>• Taxa base: 20 × R$ 1,00</span>
+                <span>R$ 20,00</span>
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>• Análises: 200 × R$ 0,25</span>
+                <span>R$ 50,00</span>
+              </div>
             </div>
           </div>
         </div>

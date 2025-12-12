@@ -368,7 +368,7 @@ export default function UsuariosPage() {
       case "free_trial":
         return (
           <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-            Free Trial
+            Gratuito
           </Badge>
         );
       case "basic":
@@ -380,13 +380,13 @@ export default function UsuariosPage() {
       case "professional":
         return (
           <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
-            Professional
+            Profissional
           </Badge>
         );
       case "enterprise":
         return (
           <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
-            Enterprise
+            Profissional
           </Badge>
         );
       default:
@@ -494,10 +494,10 @@ export default function UsuariosPage() {
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700">
                 <SelectItem value="todos">Todos os planos</SelectItem>
-                <SelectItem value="free_trial">Free Trial</SelectItem>
+                <SelectItem value="free_trial">Gratuito</SelectItem>
                 <SelectItem value="basic">Basic</SelectItem>
-                <SelectItem value="professional">Professional</SelectItem>
-                <SelectItem value="enterprise">Enterprise</SelectItem>
+                <SelectItem value="professional">Profissional</SelectItem>
+                <SelectItem value="enterprise">Profissional</SelectItem>
               </SelectContent>
             </Select>
 
@@ -1151,10 +1151,10 @@ export default function UsuariosPage() {
                     <SelectValue placeholder="Selecione o plano" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="free_trial">Free Trial</SelectItem>
+                    <SelectItem value="free_trial">Gratuito</SelectItem>
                     <SelectItem value="basic">Basic</SelectItem>
-                    <SelectItem value="professional">Professional</SelectItem>
-                    <SelectItem value="enterprise">Enterprise</SelectItem>
+                    <SelectItem value="professional">Profissional</SelectItem>
+                    <SelectItem value="enterprise">Profissional</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
