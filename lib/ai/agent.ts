@@ -5,6 +5,8 @@ import { eq, and } from 'drizzle-orm';
 import { z } from 'zod';
 import { registrarAnalisePerguntas } from '@/lib/services/billing';
 import { processAutoDecision } from '@/lib/services/team-service';
+import { logSystemError } from '@/lib/support/ticket-service';
+import { logger } from '@/lib/logger';
 
 /**
  * Schema para competência individual
@@ -218,15 +220,103 @@ Retorne APENAS o JSON, sem texto adicional, sem markdown, sem explicações.`;
 
     // Registra transações de cobrança por pergunta analisada
     if (data.entrevista.userId) {
-      await registrarAnalisePerguntas({
+      logger.info('[AI_AGENT] Iniciando cobrança de análise', {
         userId: data.entrevista.userId,
         entrevistaId: entrevistaId,
-        perguntas: data.respostas.map(r => ({
-          perguntaId: r.perguntaId,
-          perguntaTexto: r.perguntaTexto,
-          respostaId: r.respostaId,
-        })),
+        candidatoId: candidatoId,
+        totalPerguntas: data.respostas.length,
       });
+
+      try {
+        const billingResult = await registrarAnalisePerguntas({
+          userId: data.entrevista.userId,
+          entrevistaId: entrevistaId,
+          perguntas: data.respostas.map(r => ({
+            perguntaId: r.perguntaId,
+            perguntaTexto: r.perguntaTexto,
+            respostaId: r.respostaId,
+          })),
+        });
+
+        if (billingResult.success) {
+          logger.info('[AI_AGENT] ✅ Cobrança registrada com sucesso', {
+            userId: data.entrevista.userId,
+            entrevistaId: entrevistaId,
+            totalCobrado: billingResult.totalCobrado.toFixed(2),
+          });
+        } else {
+          logger.error('[AI_AGENT] ⚠️ Cobrança concluída com falhas', {
+            userId: data.entrevista.userId,
+            entrevistaId: entrevistaId,
+            error: billingResult.error,
+            totalCobrado: billingResult.totalCobrado.toFixed(2),
+          });
+
+          // Registra erro se a cobrança falhou
+          await logSystemError({
+            level: 'critical',
+            component: 'ai:billing',
+            message: 'Falha parcial/total ao cobrar análise de candidato',
+            errorMessage: billingResult.error,
+            userId: data.entrevista.userId,
+            context: {
+              entrevistaId,
+              candidatoId,
+              candidatoNome,
+              totalPerguntas: data.respostas.length,
+              totalCobrado: billingResult.totalCobrado,
+            },
+            createTicket: true,
+          }).catch(console.error);
+        }
+      } catch (billingError) {
+        const errorMsg = billingError instanceof Error ? billingError.message : 'Erro desconhecido';
+
+        logger.error('[AI_AGENT] ❌ ERRO CRÍTICO ao processar billing', {
+          error: errorMsg,
+          userId: data.entrevista.userId,
+          entrevistaId: entrevistaId,
+          candidatoId: candidatoId,
+        });
+
+        // Registra erro crítico no sistema
+        await logSystemError({
+          level: 'critical',
+          component: 'ai:billing',
+          message: 'Exceção ao tentar cobrar análise de candidato',
+          errorMessage: errorMsg,
+          errorStack: billingError instanceof Error ? billingError.stack : undefined,
+          userId: data.entrevista.userId,
+          context: {
+            entrevistaId,
+            candidatoId,
+            candidatoNome,
+            totalPerguntas: data.respostas.length,
+          },
+          createTicket: true,
+        }).catch(console.error);
+      }
+    } else {
+      // CRÍTICO: userId não encontrado
+      logger.error('[AI_AGENT] ❌ CRÍTICO: entrevista.userId não encontrado!', {
+        entrevistaId: entrevistaId,
+        candidatoId: candidatoId,
+        candidatoNome,
+      });
+
+      await logSystemError({
+        level: 'critical',
+        component: 'ai:billing',
+        message: 'Análise realizada mas userId não encontrado - COBRANÇA NÃO REGISTRADA',
+        context: {
+          entrevistaId,
+          candidatoId,
+          candidatoNome,
+          totalPerguntas: data.respostas.length,
+          entrevistaData: data.entrevista,
+        },
+        createTicket: true,
+      }).catch(console.error);
     }
 
     // Processa aprovação/reprovação automática se configurado

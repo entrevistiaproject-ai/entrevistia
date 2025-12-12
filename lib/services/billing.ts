@@ -4,6 +4,8 @@ import { users } from "@/lib/db/schema/users";
 import { eq, sql, and } from "drizzle-orm";
 import { FREE_TRIAL_LIMITS } from "@/lib/config/free-trial";
 import { PRECOS_USUARIO, calcularCustoAnalise, USAGE_ESTIMATES_ANALISE_PERGUNTA } from "@/lib/config/pricing";
+import { logSystemError } from "@/lib/support/ticket-service";
+import { logger } from "@/lib/logger";
 
 /**
  * Verifica se o usuário é uma conta de teste
@@ -236,6 +238,14 @@ export async function registrarTransacao(params: {
 }): Promise<{ success: boolean; transacaoId?: string; error?: string }> {
   const db = getDB();
 
+  // Log início da tentativa de registro
+  logger.debug("[BILLING] Iniciando registro de transação", {
+    userId: params.userId,
+    tipo: params.tipo,
+    entrevistaId: params.entrevistaId,
+    respostaId: params.respostaId,
+  });
+
   try {
     // Calcula custo base e valor cobrado baseado no tipo
     let custoBase: number;
@@ -282,8 +292,23 @@ export async function registrarTransacao(params: {
 
     // Se o valor cobrado for 0, não registra transação
     if (valorCobrado === 0) {
+      logger.debug("[BILLING] Transação com valor R$ 0,00 - não será registrada", {
+        userId: params.userId,
+        tipo: params.tipo,
+        entrevistaId: params.entrevistaId,
+      });
       return { success: true, transacaoId: undefined };
     }
+
+    // Log do valor que será cobrado
+    logger.info("[BILLING] Registrando cobrança", {
+      userId: params.userId,
+      tipo: params.tipo,
+      valorCobrado: valorCobrado.toFixed(2),
+      custoBase: custoBase.toFixed(6),
+      entrevistaId: params.entrevistaId,
+      descricao: params.descricao,
+    });
 
     // Busca ou cria a fatura do mês atual
     const now = new Date();
@@ -347,12 +372,55 @@ export async function registrarTransacao(params: {
       })
       .where(eq(faturas.id, faturaAtual.id));
 
+    logger.info("[BILLING] ✅ Transação registrada com sucesso", {
+      transacaoId: transacao.id,
+      faturaId: faturaAtual.id,
+      userId: params.userId,
+      valorCobrado: valorCobrado.toFixed(2),
+      tipo: params.tipo,
+    });
+
     return { success: true, transacaoId: transacao.id };
   } catch (error) {
-    console.error("Erro ao registrar transação:", error);
+    const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+    const errorStack = error instanceof Error ? error.stack : undefined;
+
+    // Log crítico com todos os detalhes
+    logger.error("[BILLING] ❌ ERRO CRÍTICO ao registrar transação", {
+      error: errorMessage,
+      userId: params.userId,
+      tipo: params.tipo,
+      valorCobrado,
+      entrevistaId: params.entrevistaId,
+      respostaId: params.respostaId,
+    });
+
+    // Registra no sistema de erros do admin
+    await logSystemError({
+      level: "critical",
+      component: "billing:registrarTransacao",
+      message: `Falha ao registrar transação de billing - Usuário: ${params.userId}`,
+      errorMessage: errorMessage,
+      errorStack: errorStack,
+      userId: params.userId,
+      context: {
+        tipo: params.tipo,
+        valorCobrado,
+        custoBase,
+        entrevistaId: params.entrevistaId,
+        respostaId: params.respostaId,
+        descricao: params.descricao,
+        metadados: params.metadados,
+      },
+      createTicket: true, // Cria ticket automaticamente pois é crítico
+    }).catch((logError) => {
+      // Se falhar ao logar o erro, pelo menos registra no console
+      console.error("[BILLING] Falha ao registrar erro no sistema:", logError);
+    });
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Erro desconhecido",
+      error: errorMessage,
     };
   }
 }
@@ -370,7 +438,16 @@ export async function registrarAnalisePerguntas(params: {
     respostaId?: string;
   }>;
 }): Promise<{ success: boolean; totalCobrado: number; error?: string }> {
+  // Log início do processo de cobrança
+  logger.info("[BILLING] Iniciando cobrança de análise de candidato", {
+    userId: params.userId,
+    entrevistaId: params.entrevistaId,
+    totalPerguntas: params.perguntas.length,
+  });
+
   let totalCobrado = 0;
+  let transacoesRegistradas = 0;
+  let falhasRegistro = 0;
 
   // 1. Cobra taxa base por candidato (R$ 1,00)
   const taxaBaseResult = await registrarTransacao({
@@ -385,6 +462,32 @@ export async function registrarAnalisePerguntas(params: {
 
   if (taxaBaseResult.success) {
     totalCobrado += PRECOS_USUARIO.taxaBasePorCandidato;
+    transacoesRegistradas++;
+    logger.debug("[BILLING] Taxa base registrada com sucesso", {
+      transacaoId: taxaBaseResult.transacaoId,
+      valor: PRECOS_USUARIO.taxaBasePorCandidato,
+    });
+  } else {
+    falhasRegistro++;
+    logger.error("[BILLING] ❌ Falha ao registrar taxa base", {
+      error: taxaBaseResult.error,
+      userId: params.userId,
+      entrevistaId: params.entrevistaId,
+    });
+
+    // Log erro crítico se falhar a taxa base
+    await logSystemError({
+      level: "critical",
+      component: "billing:registrarAnalisePerguntas",
+      message: "Falha ao registrar taxa base de candidato",
+      errorMessage: taxaBaseResult.error,
+      userId: params.userId,
+      context: {
+        entrevistaId: params.entrevistaId,
+        etapa: "taxa_base",
+      },
+      createTicket: true,
+    }).catch(console.error);
   }
 
   // 2. Cobra por cada pergunta analisada (R$ 0,25 cada)
@@ -406,8 +509,54 @@ export async function registrarAnalisePerguntas(params: {
 
     if (result.success) {
       totalCobrado += PRECOS_USUARIO.analisePorPergunta;
+      transacoesRegistradas++;
+    } else {
+      falhasRegistro++;
+      logger.error("[BILLING] ❌ Falha ao registrar cobrança de pergunta", {
+        error: result.error,
+        perguntaId: pergunta.perguntaId,
+        userId: params.userId,
+        entrevistaId: params.entrevistaId,
+      });
     }
   }
 
-  return { success: true, totalCobrado };
+  // Log final do processo
+  const totalEsperado = PRECOS_USUARIO.taxaBasePorCandidato + (PRECOS_USUARIO.analisePorPergunta * params.perguntas.length);
+
+  logger.info("[BILLING] ✅ Processo de cobrança concluído", {
+    userId: params.userId,
+    entrevistaId: params.entrevistaId,
+    totalCobrado: totalCobrado.toFixed(2),
+    totalEsperado: totalEsperado.toFixed(2),
+    transacoesRegistradas,
+    falhasRegistro,
+    totalPerguntas: params.perguntas.length,
+  });
+
+  // Se houve falhas, registra erro crítico
+  if (falhasRegistro > 0) {
+    await logSystemError({
+      level: "critical",
+      component: "billing:registrarAnalisePerguntas",
+      message: `${falhasRegistro} transação(ões) de billing falharam durante análise`,
+      userId: params.userId,
+      context: {
+        entrevistaId: params.entrevistaId,
+        totalPerguntas: params.perguntas.length,
+        transacoesRegistradas,
+        falhasRegistro,
+        totalCobrado,
+        totalEsperado,
+        diferencaValor: totalEsperado - totalCobrado,
+      },
+      createTicket: true,
+    }).catch(console.error);
+  }
+
+  return {
+    success: falhasRegistro === 0,
+    totalCobrado,
+    error: falhasRegistro > 0 ? `${falhasRegistro} transação(ões) falharam` : undefined,
+  };
 }
