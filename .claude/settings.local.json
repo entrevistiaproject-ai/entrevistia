@@ -85,7 +85,11 @@
       "Bash(dir scripts:*)",
       "Bash(findstr:*)",
       "Bash(timeout 5 bash:*)",
-      "Bash(timeout 60 bash -c \"while true; do vercel ls 2>&1 | head -8; sleep 10; done\")"
+      "Bash(timeout 60 bash -c \"while true; do vercel ls 2>&1 | head -8; sleep 10; done\")",
+      "Bash(cd:*)",
+      "Bash(node scripts/check-invalid-status.js:*)",
+      "Bash(node scripts/check-candidato-entrevistas.js:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []
