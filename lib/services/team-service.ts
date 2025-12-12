@@ -356,7 +356,13 @@ export async function createTeamInvitation(params: {
 
   if (owner) {
     // Envia email de convite
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    // Em produção na Vercel, usa VERCEL_URL ou NEXT_PUBLIC_APP_URL
+    // Em desenvolvimento, usa localhost
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+      (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null) ||
+      "https://entrevistia.com.br";
     const linkConvite = `${baseUrl}/convite-time/${token}`;
 
     await enviarEmail({
