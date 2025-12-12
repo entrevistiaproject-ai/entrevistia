@@ -62,6 +62,7 @@ export function TutorialEntrevista({ onTutorialCompleto }: TutorialEntrevistaPro
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const mimeTypeRef = useRef<string>("audio/webm");
 
   const pararMonitoramento = useCallback(() => {
     if (animationFrameRef.current) {
@@ -128,8 +129,19 @@ export function TutorialEntrevista({ onTutorialCompleto }: TutorialEntrevistaPro
       };
       atualizarNivel();
 
+      // Detectar formato de áudio suportado pelo navegador
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : MediaRecorder.isTypeSupported('audio/mp4')
+            ? 'audio/mp4'
+            : 'audio/wav';
+
+      mimeTypeRef.current = mimeType;
+
       // Configurar MediaRecorder
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
 
@@ -140,7 +152,7 @@ export function TutorialEntrevista({ onTutorialCompleto }: TutorialEntrevistaPro
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const audioBlob = new Blob(chunksRef.current, { type: mimeTypeRef.current });
         const url = URL.createObjectURL(audioBlob);
         setAudioUrl(url);
         setFase("revisao");
