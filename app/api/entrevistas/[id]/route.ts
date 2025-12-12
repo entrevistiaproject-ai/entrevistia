@@ -84,17 +84,49 @@ export async function PATCH(
       );
     }
 
+    // Whitelist de campos permitidos para atualização (previne Mass Assignment)
+    const allowedFields = [
+      "titulo",
+      "descricao",
+      "cargo",
+      "nivel",
+      "empresa",
+      "duracao",
+      "status",
+      "configuracoes",
+      // Aprovação automática
+      "autoApprovalEnabled",
+      "autoApprovalMinScore",
+      "autoApprovalUseCompatibility",
+      "autoApprovalMinCompatibility",
+      "autoApprovalNotifyCandidate",
+      "autoApprovalCandidateMessage",
+      // Reprovação automática
+      "autoRejectEnabled",
+      "autoRejectMaxScore",
+      "autoRejectNotifyCandidate",
+      "autoRejectCandidateMessage",
+    ] as const;
+
+    // Filtra apenas campos permitidos
+    const updateData: Record<string, unknown> = {};
+    for (const field of allowedFields) {
+      if (body[field] !== undefined) {
+        updateData[field] = body[field];
+      }
+    }
+
     // Gerar slug se solicitado
     if (body.gerarLink && !entrevista.slug) {
-      body.slug = nanoid(10);
-      body.linkPublico = `/entrevista/${body.slug}`;
+      updateData.slug = nanoid(10);
+      updateData.linkPublico = `/entrevista/${updateData.slug}`;
     }
 
     // Atualizar entrevista
     const [entrevistaAtualizada] = await db
       .update(entrevistas)
       .set({
-        ...body,
+        ...updateData,
         updatedAt: new Date(),
       })
       .where(eq(entrevistas.id, id))

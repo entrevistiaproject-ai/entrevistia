@@ -15,6 +15,7 @@ import { eq, and, desc } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { enviarEmail } from "@/lib/email/resend";
 import { emailConviteTimeTemplate, emailAprovacaoAutomaticaTemplate, emailReprovacaoAutomaticaTemplate } from "@/lib/email/templates";
+import { logger } from "@/lib/logger";
 
 export type TeamRole = "owner" | "admin" | "recruiter" | "financial" | "viewer";
 
@@ -671,6 +672,8 @@ export async function processAutoDecision(candidatoEntrevistaId: string): Promis
   decision?: "aprovado" | "reprovado";
   reason?: string;
 }> {
+  logger.info('[AUTO_DECISION] Iniciando processamento', { candidatoEntrevistaId });
+
   const db = getDB();
 
   // Busca a candidatura
@@ -681,11 +684,20 @@ export async function processAutoDecision(candidatoEntrevistaId: string): Promis
     .limit(1);
 
   if (!candidatura || !candidatura.notaGeral) {
+    logger.warn('[AUTO_DECISION] Candidatura não encontrada ou sem avaliação', {
+      candidatoEntrevistaId,
+      candidaturaExists: !!candidatura,
+      notaGeral: candidatura?.notaGeral,
+    });
     return { processed: false, reason: "Candidatura não encontrada ou sem avaliação" };
   }
 
   // Se já tem decisão do recrutador, não processa
   if (candidatura.decisaoRecrutador) {
+    logger.info('[AUTO_DECISION] Candidatura já tem decisão manual', {
+      candidatoEntrevistaId,
+      decisaoExistente: candidatura.decisaoRecrutador,
+    });
     return { processed: false, reason: "Já existe decisão manual" };
   }
 
@@ -697,21 +709,55 @@ export async function processAutoDecision(candidatoEntrevistaId: string): Promis
     .limit(1);
 
   if (!entrevista) {
+    logger.error('[AUTO_DECISION] Entrevista não encontrada', {
+      candidatoEntrevistaId,
+      entrevistaId: candidatura.entrevistaId,
+    });
     return { processed: false, reason: "Entrevista não encontrada" };
   }
 
   const score = candidatura.notaGeral;
   const compatibility = candidatura.compatibilidadeVaga || 0;
 
+  logger.info('[AUTO_DECISION] Configurações da vaga', {
+    candidatoEntrevistaId,
+    entrevistaId: entrevista.id,
+    cargo: entrevista.cargo,
+    score,
+    compatibility,
+    autoApprovalEnabled: entrevista.autoApprovalEnabled,
+    autoApprovalMinScore: entrevista.autoApprovalMinScore,
+    autoApprovalUseCompatibility: entrevista.autoApprovalUseCompatibility,
+    autoApprovalMinCompatibility: entrevista.autoApprovalMinCompatibility,
+    autoRejectEnabled: entrevista.autoRejectEnabled,
+    autoRejectMaxScore: entrevista.autoRejectMaxScore,
+  });
+
   // Verifica aprovação automática usando configurações da vaga
   if (entrevista.autoApprovalEnabled) {
     let shouldApprove = score >= entrevista.autoApprovalMinScore;
+    logger.info('[AUTO_DECISION] Verificação de aprovação', {
+      candidatoEntrevistaId,
+      scoreCheck: `${score} >= ${entrevista.autoApprovalMinScore}`,
+      shouldApproveByScore: shouldApprove,
+    });
 
     if (shouldApprove && entrevista.autoApprovalUseCompatibility) {
       shouldApprove = compatibility >= entrevista.autoApprovalMinCompatibility;
+      logger.info('[AUTO_DECISION] Verificação de compatibilidade', {
+        candidatoEntrevistaId,
+        compatibilityCheck: `${compatibility} >= ${entrevista.autoApprovalMinCompatibility}`,
+        shouldApproveByCompatibility: shouldApprove,
+      });
     }
 
     if (shouldApprove) {
+      logger.info('[AUTO_DECISION] ✅ Aprovando candidato automaticamente', {
+        candidatoEntrevistaId,
+        score,
+        compatibility,
+      });
+
       // Aprova automaticamente
       await db
         .update(candidatoEntrevistas)
@@ -757,7 +803,19 @@ export async function processAutoDecision(candidatoEntrevistaId: string): Promis
 
   // Verifica reprovação automática usando configurações da vaga
   if (entrevista.autoRejectEnabled) {
-    if (score <= entrevista.autoRejectMaxScore) {
+    const shouldReject = score <= entrevista.autoRejectMaxScore;
+    logger.info('[AUTO_DECISION] Verificação de reprovação', {
+      candidatoEntrevistaId,
+      scoreCheck: `${score} <= ${entrevista.autoRejectMaxScore}`,
+      shouldReject,
+    });
+
+    if (shouldReject) {
+      logger.info('[AUTO_DECISION] ❌ Reprovando candidato automaticamente', {
+        candidatoEntrevistaId,
+        score,
+      });
+
       // Reprova automaticamente
       await db
         .update(candidatoEntrevistas)
@@ -800,6 +858,13 @@ export async function processAutoDecision(candidatoEntrevistaId: string): Promis
       return { processed: true, decision: "reprovado" };
     }
   }
+
+  logger.info('[AUTO_DECISION] Nenhuma decisão automática aplicada', {
+    candidatoEntrevistaId,
+    score,
+    autoApprovalEnabled: entrevista.autoApprovalEnabled,
+    autoRejectEnabled: entrevista.autoRejectEnabled,
+  });
 
   return { processed: false, reason: "Score não atingiu critérios automáticos ou aprovação automática desabilitada para esta vaga" };
 }
