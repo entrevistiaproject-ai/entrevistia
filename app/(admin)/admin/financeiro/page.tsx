@@ -629,7 +629,7 @@ export default function FinanceiroPage() {
                 </p>
               </div>
               <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
-                <p className="text-xs text-slate-500 mb-1">Tokens de Saida</p>
+                <p className="text-xs text-slate-500 mb-1">Tokens de Saída</p>
                 <p className="text-xl font-bold text-cyan-400">
                   {((custosClaudeDetalhado?.tokensSaida || 0) / 1000).toFixed(1)}K
                 </p>
@@ -648,7 +648,7 @@ export default function FinanceiroPage() {
                 </span>
               </div>
               <div className="flex justify-between py-2 border-b border-slate-700">
-                <span className="text-slate-400">Total de Analises</span>
+                <span className="text-slate-400">Total de Análises</span>
                 <span className="text-white font-medium">
                   {custosClaudeDetalhado?.totalAnalises || 0}
                 </span>
@@ -703,7 +703,7 @@ export default function FinanceiroPage() {
             {/* Indicadores principais */}
             <div className="grid grid-cols-2 gap-4">
               <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
-                <p className="text-xs text-slate-500 mb-1">Minutos de Audio</p>
+                <p className="text-xs text-slate-500 mb-1">Minutos de Áudio</p>
                 <p className="text-xl font-bold text-orange-400">
                   {(custosWhisperDetalhado?.totalMinutos || 0).toFixed(1)}
                 </p>
@@ -712,7 +712,7 @@ export default function FinanceiroPage() {
                 </p>
               </div>
               <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
-                <p className="text-xs text-slate-500 mb-1">Transcricoes</p>
+                <p className="text-xs text-slate-500 mb-1">Transcrições</p>
                 <p className="text-xl font-bold text-blue-400">
                   {custosWhisperDetalhado?.totalTranscricoes || 0}
                 </p>
@@ -731,7 +731,7 @@ export default function FinanceiroPage() {
                 </span>
               </div>
               <div className="flex justify-between py-2 border-b border-slate-700">
-                <span className="text-slate-400">Preco por Minuto</span>
+                <span className="text-slate-400">Preço por Minuto</span>
                 <span className="text-white">
                   ${custosWhisperDetalhado?.precos?.porMinutoUSD || 0.006}
                 </span>
@@ -753,7 +753,7 @@ export default function FinanceiroPage() {
             {/* Info */}
             <div className="flex items-start gap-2 p-2 rounded bg-slate-800/30 text-xs text-slate-400">
               <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
-              <span>Transcricao de audio e gratuita para o usuario - custo absorvido na taxa de analise</span>
+              <span>Transcrição de áudio é gratuita para o usuário - custo absorvido na taxa de análise</span>
             </div>
           </CardContent>
         </Card>
@@ -814,7 +814,7 @@ export default function FinanceiroPage() {
             {/* Info */}
             <div className="flex items-start gap-2 p-2 rounded bg-slate-800/30 text-xs text-slate-400">
               <Info className="h-4 w-4 mt-0.5 shrink-0" />
-              <span>Este custo nao e cobrado separadamente - ja esta incluido no custo teorico de cada analise</span>
+              <span>Este custo não é cobrado separadamente - já está incluído no custo teórico de cada análise</span>
             </div>
           </CardContent>
         </Card>
@@ -827,7 +827,7 @@ export default function FinanceiroPage() {
               Custos por Categoria
             </CardTitle>
             <CardDescription className="text-slate-400">
-              Distribuicao de custos teoricos por servico
+              Distribuição de custos teóricos por serviço
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -887,7 +887,7 @@ export default function FinanceiroPage() {
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Calculator className="h-5 w-5 text-emerald-400" />
-              Margem Teorica
+              Margem Teórica
             </CardTitle>
             <CardDescription className="text-slate-400">
               Considerando todos os custos (APIs + Infra absorvida)
@@ -914,7 +914,7 @@ export default function FinanceiroPage() {
                 </span>
               </div>
               <div className="flex justify-between py-2 border-b border-slate-700">
-                <span className="text-slate-400">(=) Custo Total Teorico</span>
+                <span className="text-slate-400">(=) Custo Total Teórico</span>
                 <span className="text-amber-400 font-medium">
                   R$ {(margemTeorica?.custoTotalTeorico || 0).toFixed(2)}
                 </span>
@@ -924,13 +924,13 @@ export default function FinanceiroPage() {
             {/* Lucro e Margem */}
             <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 space-y-3">
               <div className="flex justify-between">
-                <span className="text-emerald-300">Lucro Teorico</span>
+                <span className="text-emerald-300">Lucro Teórico</span>
                 <span className="text-2xl font-bold text-emerald-400">
                   R$ {(margemTeorica?.lucroTeorico || 0).toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-emerald-300">Margem Teorica</span>
+                <span className="text-emerald-300">Margem Teórica</span>
                 <Badge
                   className={`text-lg px-3 py-1 ${
                     (margemTeorica?.margemTeorica || 0) >= 60
@@ -948,7 +948,7 @@ export default function FinanceiroPage() {
             {/* Info */}
             <div className="flex items-start gap-2 p-2 rounded bg-slate-800/30 text-xs text-slate-400">
               <Info className="h-4 w-4 mt-0.5 shrink-0" />
-              <span>Custo teorico = Whisper + Claude + {infraestruturaAbsorvida?.percentual || 15}% de infraestrutura</span>
+              <span>Custo teórico = Whisper + Claude + {infraestruturaAbsorvida?.percentual || 15}% de infraestrutura</span>
             </div>
           </CardContent>
         </Card>

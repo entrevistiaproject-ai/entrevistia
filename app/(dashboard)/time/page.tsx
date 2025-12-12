@@ -301,23 +301,23 @@ export default function TimePage() {
 
       if (res.ok) {
         toast({
-          title: "Permissao alterada",
-          description: "A funcao do membro foi atualizada",
+          title: "Permissão alterada",
+          description: "A função do membro foi atualizada",
         });
         fetchTeamData();
       } else {
         const data = await res.json();
         toast({
           title: "Erro",
-          description: data.error || "Erro ao alterar funcao",
+          description: data.error || "Erro ao alterar função",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error("Erro ao alterar funcao:", error);
+      console.error("Erro ao alterar função:", error);
       toast({
         title: "Erro",
-        description: "Erro ao alterar funcao",
+        description: "Erro ao alterar função",
         variant: "destructive",
       });
     }
@@ -401,10 +401,10 @@ export default function TimePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="invite-role">Funcao no Time</Label>
+                <Label htmlFor="invite-role">Função no Time</Label>
                 <Select value={inviteRole} onValueChange={setInviteRole}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma funcao" />
+                    <SelectValue placeholder="Selecione uma função" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="admin">
@@ -435,12 +435,12 @@ export default function TimePage() {
                 </Select>
                 <p className="text-xs text-muted-foreground">
                   {inviteRole === "admin" &&
-                    "Pode gerenciar membros e configuracoes"}
+                    "Pode gerenciar membros e configurações"}
                   {inviteRole === "recruiter" &&
-                    "Pode criar entrevistas, avaliar candidatos e configurar aprovacao automatica"}
+                    "Pode criar entrevistas, avaliar candidatos e configurar aprovação automática"}
                   {inviteRole === "financial" &&
-                    "Acesso apenas as paginas financeiras (custos e fatura)"}
-                  {inviteRole === "viewer" && "Apenas visualizacao"}
+                    "Acesso apenas às páginas financeiras (custos e fatura)"}
+                  {inviteRole === "viewer" && "Apenas visualização"}
                 </p>
               </div>
 
@@ -485,7 +485,7 @@ export default function TimePage() {
               Times que Participo
             </CardTitle>
             <CardDescription>
-              Voce tambem faz parte destes times como membro
+              Você também faz parte destes times como membro
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -531,13 +531,13 @@ export default function TimePage() {
           </CardTitle>
           <CardDescription>
             {teamData?.members.length === 0
-              ? "Voce ainda nao tem membros no time. Convide alguem!"
+              ? "Você ainda não tem membros no time. Convide alguém!"
               : `${(teamData?.members.length || 0) + 1} membros no time`}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {/* Owner (voce) */}
+            {/* Owner (você) */}
             {teamData?.owner && (
               <div className="flex items-center justify-between gap-3 p-4 rounded-lg border bg-primary/5 border-primary/20">
                 <div className="flex items-center gap-4 min-w-0 flex-1">
@@ -549,7 +549,7 @@ export default function TimePage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-medium truncate">{teamData.owner.nome}</p>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">(voce)</span>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">(você)</span>
                     </div>
                     <p className="text-sm text-muted-foreground truncate">
                       {teamData.owner.email}
@@ -717,18 +717,18 @@ export default function TimePage() {
         </Card>
       )}
 
-      {/* Link para configuracoes de aprovacao automatica */}
+      {/* Link para configurações de aprovação automática */}
       <Card>
         <CardHeader>
-          <CardTitle>Aprovacao Automatica</CardTitle>
+          <CardTitle>Aprovação Automática</CardTitle>
           <CardDescription>
-            Configure a aprovacao ou reprovacao automatica de candidatos com base no score
+            Configure a aprovação ou reprovação automática de candidatos com base no score
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Link href="/time/configuracoes">
             <Button variant="outline">
-              Configurar Aprovacao Automatica
+              Configurar Aprovação Automática
             </Button>
           </Link>
         </CardContent>

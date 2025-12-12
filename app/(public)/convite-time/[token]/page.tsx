@@ -54,9 +54,9 @@ const roleLabels: Record<string, string> = {
 };
 
 const roleDescriptions: Record<string, string> = {
-  admin: "Pode gerenciar membros, configuracoes e todas as funcionalidades",
+  admin: "Pode gerenciar membros, configurações e todas as funcionalidades",
   recruiter: "Pode criar entrevistas, avaliar candidatos e aprovar/reprovar",
-  viewer: "Apenas visualizacao de dados, sem poder de edicao",
+  viewer: "Apenas visualização de dados, sem poder de edição",
 };
 
 const roleIcons: Record<string, React.ElementType> = {
@@ -99,7 +99,7 @@ export default function ConviteTimePage({
       if (res.ok) {
         setData(responseData);
       } else {
-        setError(responseData.error || "Convite nao encontrado");
+        setError(responseData.error || "Convite não encontrado");
       }
     } catch (err) {
       console.error("Erro ao carregar convite:", err);
@@ -218,8 +218,8 @@ export default function ConviteTimePage({
               </h1>
               <p className="text-muted-foreground">
                 {success.accepted
-                  ? "Voce agora faz parte do time. Acesse o dashboard para comecar."
-                  : "Voce recusou o convite. O time foi notificado."}
+                  ? "Você agora faz parte do time. Acesse o dashboard para começar."
+                  : "Você recusou o convite. O time foi notificado."}
               </p>
             </div>
 
@@ -245,10 +245,10 @@ export default function ConviteTimePage({
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-2xl font-bold">Faca Login para Continuar</h1>
+              <h1 className="text-2xl font-bold">Faça Login para Continuar</h1>
               <p className="text-muted-foreground">
-                Voce precisa estar logado para aceitar este convite. Se voce
-                ainda nao tem uma conta, crie uma com o mesmo email do convite.
+                Você precisa estar logado para aceitar este convite. Se você
+                ainda não tem uma conta, crie uma com o mesmo email do convite.
               </p>
             </div>
 
@@ -287,15 +287,15 @@ export default function ConviteTimePage({
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-2xl font-bold">Convite Invalido</h1>
+              <h1 className="text-2xl font-bold">Convite Inválido</h1>
               <p className="text-muted-foreground">
-                {error || "Este convite nao existe ou ja foi utilizado."}
+                {error || "Este convite não existe ou já foi utilizado."}
               </p>
             </div>
 
             <Link href="/">
               <Button variant="outline" className="w-full">
-                Voltar ao Inicio
+                Voltar ao Início
               </Button>
             </Link>
           </CardContent>
@@ -316,12 +316,12 @@ export default function ConviteTimePage({
 
             <div className="space-y-2">
               <h1 className="text-2xl font-bold">
-                {data.isExpired ? "Convite Expirado" : "Convite Ja Utilizado"}
+                {data.isExpired ? "Convite Expirado" : "Convite Já Utilizado"}
               </h1>
               <p className="text-muted-foreground">
                 {data.isExpired
                   ? "Este convite expirou. Solicite um novo convite ao administrador do time."
-                  : `Este convite ja foi ${
+                  : `Este convite já foi ${
                       data.invitation.status === "accepted"
                         ? "aceito"
                         : "recusado"
@@ -331,7 +331,7 @@ export default function ConviteTimePage({
 
             <Link href="/">
               <Button variant="outline" className="w-full">
-                Voltar ao Inicio
+                Voltar ao Início
               </Button>
             </Link>
           </CardContent>
@@ -352,7 +352,7 @@ export default function ConviteTimePage({
           </div>
           <CardTitle className="text-2xl">Convite para Time</CardTitle>
           <CardDescription>
-            Voce foi convidado(a) para fazer parte de um time na EntrevistIA
+            Você foi convidado(a) para fazer parte de um time na EntrevistIA
           </CardDescription>
         </CardHeader>
 
@@ -386,7 +386,7 @@ export default function ConviteTimePage({
           {/* Role */}
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">
-              Sua funcao no time:
+              Sua função no time:
             </p>
             <div className="flex items-center gap-3 p-4 rounded-lg border">
               <div className="p-2 rounded-lg bg-indigo-100">

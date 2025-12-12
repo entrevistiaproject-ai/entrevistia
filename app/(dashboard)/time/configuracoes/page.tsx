@@ -27,30 +27,30 @@ export default function ConfiguracoesTimePage() {
           </Button>
         </Link>
         <PageHeader
-          title="Configuracoes do Time"
-          description="Gerencie as configuracoes gerais do seu time"
+          title="Configurações do Time"
+          description="Gerencie as configurações gerais do seu time"
         />
       </div>
 
-      {/* Card informativo sobre aprovacao automatica */}
+      {/* Card informativo sobre aprovação automática */}
       <Card className="bg-blue-50 border-blue-200">
         <CardContent className="pt-6">
           <div className="flex gap-3">
             <Info className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
             <div className="text-sm text-blue-900">
-              <p className="font-medium mb-2">Configuracoes de Aprovacao Automatica</p>
+              <p className="font-medium mb-2">Configurações de Aprovação Automática</p>
               <p className="text-blue-800 mb-2">
-                A aprovacao e reprovacao automatica de candidatos agora e configurada individualmente para cada vaga.
+                A aprovação e reprovação automática de candidatos agora é configurada individualmente para cada vaga.
               </p>
               <p className="text-blue-800">
-                Para configurar a aprovacao automatica, acesse a vaga desejada em <strong>Entrevistas</strong> e va na aba <strong>Configuracoes</strong>.
+                Para configurar a aprovação automática, acesse a vaga desejada em <strong>Entrevistas</strong> e vá na aba <strong>Configurações</strong>.
               </p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Card de configuracoes gerais (placeholder para futuras configuracoes) */}
+      {/* Card de configurações gerais (placeholder para futuras configurações) */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-3">
@@ -58,9 +58,9 @@ export default function ConfiguracoesTimePage() {
               <Settings className="h-5 w-5 text-gray-600" />
             </div>
             <div>
-              <CardTitle>Configuracoes Gerais</CardTitle>
+              <CardTitle>Configurações Gerais</CardTitle>
               <CardDescription>
-                Configure as preferencias gerais do time
+                Configure as preferências gerais do time
               </CardDescription>
             </div>
           </div>
@@ -68,9 +68,9 @@ export default function ConfiguracoesTimePage() {
         <CardContent>
           <div className="text-center py-12">
             <Settings className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-            <p className="text-lg font-semibold">Nenhuma configuracao disponivel</p>
+            <p className="text-lg font-semibold">Nenhuma configuração disponível</p>
             <p className="text-muted-foreground">
-              As configuracoes do time aparecerão aqui
+              As configurações do time aparecerão aqui
             </p>
           </div>
         </CardContent>
