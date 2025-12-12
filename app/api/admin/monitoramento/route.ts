@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { verifyAdminSession } from "@/lib/auth/admin-auth";
 import { getDB } from "@/lib/db";
+import { db } from "@/lib/db";
 import { auditLogs } from "@/lib/db/schema";
+import { systemLogs } from "@/lib/db/schema/tickets";
 import { sql, gte, count, desc, and } from "drizzle-orm";
 
 export async function GET() {
@@ -48,19 +50,21 @@ export async function GET() {
       .from(auditLogs)
       .where(gte(auditLogs.timestamp, umDiaAtras));
 
-    // Calcular taxa de erro baseada em logs com status de erro
+    // Calcular taxa de erro baseada em systemLogs reais
     const [errosLastHour] = await db
       .select({ count: count() })
-      .from(auditLogs)
+      .from(systemLogs)
       .where(
         and(
-          gte(auditLogs.timestamp, umaHoraAtras),
-          sql`${auditLogs.acao} like '%error%' or ${auditLogs.acao} like '%fail%'`
+          gte(systemLogs.timestamp, umaHoraAtras),
+          sql`level IN ('error', 'critical')`
         )
       );
 
+    // Taxa de erro baseada em proporção de requisições com erro
+    // Se não houver requests, taxa é 0
     const errorRate = requestsLastHour.count > 0
-      ? (errosLastHour.count / requestsLastHour.count) * 100
+      ? Math.min((errosLastHour.count / requestsLastHour.count) * 100, 100)
       : 0;
 
     // Calcular uptime baseado na primeira atividade registrada
@@ -111,12 +115,12 @@ export async function GET() {
 
       const [errosHora] = await db
         .select({ count: count() })
-        .from(auditLogs)
+        .from(systemLogs)
         .where(
           and(
-            gte(auditLogs.timestamp, horaInicio),
-            sql`${auditLogs.timestamp} < ${horaFim}`,
-            sql`${auditLogs.acao} like '%error%' or ${auditLogs.acao} like '%fail%'`
+            gte(systemLogs.timestamp, horaInicio),
+            sql`${systemLogs.timestamp} < ${horaFim}`,
+            sql`level IN ('error', 'critical')`
           )
         );
 
@@ -128,23 +132,25 @@ export async function GET() {
       });
     }
 
-    // Erros recentes (dados reais dos audit logs)
+    // Erros recentes (dados reais dos system logs)
     const errosRecentes = await db
       .select({
-        id: auditLogs.id,
-        acao: auditLogs.acao,
-        entidade: auditLogs.entidade,
-        descricao: auditLogs.descricao,
-        timestamp: auditLogs.timestamp,
+        id: systemLogs.id,
+        message: systemLogs.message,
+        errorMessage: systemLogs.errorMessage,
+        component: systemLogs.component,
+        endpoint: systemLogs.endpoint,
+        timestamp: systemLogs.timestamp,
+        fingerprint: systemLogs.fingerprint,
       })
-      .from(auditLogs)
+      .from(systemLogs)
       .where(
         and(
-          gte(auditLogs.timestamp, umDiaAtras),
-          sql`${auditLogs.acao} like '%error%' or ${auditLogs.acao} like '%fail%'`
+          gte(systemLogs.timestamp, umDiaAtras),
+          sql`level IN ('error', 'critical')`
         )
       )
-      .orderBy(desc(auditLogs.timestamp))
+      .orderBy(desc(systemLogs.timestamp))
       .limit(10);
 
     const formatarTempoRelativo = (data: Date) => {
@@ -159,10 +165,10 @@ export async function GET() {
 
     const recentErrors = errosRecentes.map((erro) => ({
       id: erro.id,
-      message: erro.descricao || `${erro.acao} em ${erro.entidade}`,
+      message: erro.errorMessage || erro.message,
       timestamp: formatarTempoRelativo(erro.timestamp),
       count: 1,
-      endpoint: erro.entidade,
+      endpoint: `${erro.component || 'unknown'}${erro.endpoint ? ` - ${erro.endpoint}` : ''}`,
     }));
 
     // Alertas ativos (baseados em métricas reais)
