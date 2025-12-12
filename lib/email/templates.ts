@@ -1,4 +1,74 @@
 /**
+ * Estilos responsivos compartilhados para todos os templates de email
+ */
+function getResponsiveStyles(): string {
+  return `
+    <style type="text/css">
+      /* Reset e base */
+      body, table, td, p, a, li { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+
+      /* Responsivo */
+      @media only screen and (max-width: 620px) {
+        .email-container {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+        .mobile-padding {
+          padding-left: 20px !important;
+          padding-right: 20px !important;
+        }
+        .mobile-padding-header {
+          padding: 32px 20px !important;
+        }
+        .mobile-stack {
+          display: block !important;
+          width: 100% !important;
+        }
+        .mobile-center {
+          text-align: center !important;
+        }
+        .mobile-font-large {
+          font-size: 26px !important;
+        }
+        .mobile-font-title {
+          font-size: 20px !important;
+        }
+        .mobile-font-code {
+          font-size: 32px !important;
+          letter-spacing: 4px !important;
+        }
+        .mobile-button {
+          padding: 16px 32px !important;
+          font-size: 15px !important;
+        }
+        .mobile-hide {
+          display: none !important;
+        }
+        .mobile-full-width {
+          width: 100% !important;
+        }
+        .mobile-img {
+          width: 100% !important;
+          height: auto !important;
+        }
+      }
+
+      /* Para clientes que suportam dark mode */
+      @media (prefers-color-scheme: dark) {
+        .email-bg { background-color: #1f2937 !important; }
+      }
+    </style>
+    <!--[if mso]>
+    <style type="text/css">
+      body, table, td, p, a, li { font-family: Arial, sans-serif !important; }
+    </style>
+    <![endif]-->
+  `;
+}
+
+/**
  * Template de email de verificação
  * Design moderno e responsivo
  */
@@ -15,19 +85,26 @@ export function emailVerificacaoTemplate(params: {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Verificação de Email - EntrevistIA</title>
+  ${getResponsiveStyles()}
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 20px;">
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6;">
     <tr>
-      <td align="center">
+      <td align="center" style="padding: 40px 16px;">
+        <!--[if mso]>
+        <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="600">
+        <tr>
+        <td>
+        <![endif]-->
         <!-- Container Principal -->
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <table role="presentation" class="email-container" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); max-width: 600px; width: 100%;">
 
           <!-- Header com gradiente -->
           <tr>
-            <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 40px 30px; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: 700;">
+            <td class="mobile-padding-header" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 40px 30px; text-align: center;">
+              <h1 class="mobile-font-large" style="margin: 0; color: #ffffff; font-size: 32px; font-weight: 700;">
                 EntrevistIA
               </h1>
               <p style="margin: 10px 0 0 0; color: #e0e7ff; font-size: 16px;">
@@ -38,8 +115,8 @@ export function emailVerificacaoTemplate(params: {
 
           <!-- Conteúdo -->
           <tr>
-            <td style="padding: 40px 30px;">
-              <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 24px; font-weight: 600;">
+            <td class="mobile-padding" style="padding: 40px 30px;">
+              <h2 class="mobile-font-title" style="margin: 0 0 20px 0; color: #111827; font-size: 24px; font-weight: 600;">
                 Olá, ${nome}!
               </h2>
 
@@ -52,10 +129,10 @@ export function emailVerificacaoTemplate(params: {
               </p>
 
               <!-- Código de Verificação -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 30px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 30px 0;">
                 <tr>
-                  <td align="center" style="background-color: #f9fafb; border: 2px dashed #d1d5db; border-radius: 8px; padding: 30px;">
-                    <div style="font-size: 42px; font-weight: 700; color: #3b82f6; letter-spacing: 8px; font-family: 'Courier New', monospace;">
+                  <td align="center" style="background-color: #f9fafb; border: 2px dashed #d1d5db; border-radius: 8px; padding: 24px 16px;">
+                    <div class="mobile-font-code" style="font-size: 42px; font-weight: 700; color: #3b82f6; letter-spacing: 8px; font-family: 'Courier New', monospace;">
                       ${codigo}
                     </div>
                     <p style="margin: 15px 0 0 0; color: #6b7280; font-size: 14px;">
@@ -72,11 +149,11 @@ export function emailVerificacaoTemplate(params: {
               </div>
 
               <!-- Informações adicionais -->
-              <div style="background-color: #eff6ff; border-radius: 8px; padding: 20px; margin: 0 0 20px 0;">
+              <div style="background-color: #eff6ff; border-radius: 8px; padding: 16px; margin: 0 0 20px 0;">
                 <p style="margin: 0 0 10px 0; color: #1e40af; font-size: 14px; font-weight: 600;">
                   Conta criada para:
                 </p>
-                <p style="margin: 0; color: #3730a3; font-size: 14px;">
+                <p style="margin: 0; color: #3730a3; font-size: 14px; word-break: break-all;">
                   ${email}
                 </p>
               </div>
@@ -94,7 +171,7 @@ export function emailVerificacaoTemplate(params: {
 
           <!-- Footer -->
           <tr>
-            <td style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+            <td class="mobile-padding" style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
               <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">
                 Este email foi enviado pela <strong>EntrevistIA</strong>
               </p>
@@ -110,9 +187,9 @@ export function emailVerificacaoTemplate(params: {
         </table>
 
         <!-- Texto adicional abaixo do card -->
-        <table width="600" cellpadding="0" cellspacing="0" style="margin-top: 20px;">
+        <table role="presentation" class="email-container" cellpadding="0" cellspacing="0" style="margin-top: 20px; max-width: 600px; width: 100%;">
           <tr>
-            <td style="text-align: center; padding: 0 30px;">
+            <td style="text-align: center; padding: 0 20px;">
               <p style="margin: 0; color: #9ca3af; font-size: 12px; line-height: 1.6;">
                 Precisa de ajuda? Fale com a gente em
                 <a href="mailto:contato@entrevistia.com.br" style="color: #3b82f6; text-decoration: none;">contato@entrevistia.com.br</a>
@@ -120,7 +197,11 @@ export function emailVerificacaoTemplate(params: {
             </td>
           </tr>
         </table>
-
+        <!--[if mso]>
+        </td>
+        </tr>
+        </table>
+        <![endif]-->
       </td>
     </tr>
   </table>
@@ -168,19 +249,26 @@ Desejamos sucesso na sua busca!`;
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Atualização sobre sua candidatura - ${empresa}</title>
+  ${getResponsiveStyles()}
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 20px;">
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6;">
     <tr>
-      <td align="center">
+      <td align="center" style="padding: 40px 16px;">
+        <!--[if mso]>
+        <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="600">
+        <tr>
+        <td>
+        <![endif]-->
         <!-- Container Principal -->
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <table role="presentation" class="email-container" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); max-width: 600px; width: 100%;">
 
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 40px 30px; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">
+            <td class="mobile-padding-header" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 40px 30px; text-align: center;">
+              <h1 class="mobile-font-large" style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">
                 ${empresa}
               </h1>
               <p style="margin: 10px 0 0 0; color: #e0e7ff; font-size: 16px;">
@@ -191,8 +279,8 @@ Desejamos sucesso na sua busca!`;
 
           <!-- Conteúdo -->
           <tr>
-            <td style="padding: 40px 30px;">
-              <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 600;">
+            <td class="mobile-padding" style="padding: 40px 30px;">
+              <h2 class="mobile-font-title" style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 600;">
                 Olá, ${nomeCandidato}!
               </h2>
 
@@ -217,7 +305,7 @@ Desejamos sucesso na sua busca!`;
 
           <!-- Footer -->
           <tr>
-            <td style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+            <td class="mobile-padding" style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
               <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">
                 Este email foi enviado via <strong>EntrevistIA</strong>
               </p>
@@ -228,7 +316,11 @@ Desejamos sucesso na sua busca!`;
           </tr>
 
         </table>
-
+        <!--[if mso]>
+        </td>
+        </tr>
+        </table>
+        <![endif]-->
       </td>
     </tr>
   </table>
@@ -310,27 +402,34 @@ export function emailConviteEntrevistaTemplate(params: {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Convite para Entrevista - ${empresa}</title>
+  ${getResponsiveStyles()}
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 40px 20px;">
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc; -webkit-font-smoothing: antialiased;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc;">
     <tr>
-      <td align="center">
+      <td align="center" style="padding: 40px 16px;">
+        <!--[if mso]>
+        <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="600">
+        <tr>
+        <td>
+        <![endif]-->
         <!-- Container Principal -->
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);">
+        <table role="presentation" class="email-container" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08); max-width: 600px; width: 100%;">
 
           <!-- Header com gradiente vibrante -->
           <tr>
-            <td style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); padding: 48px 40px; text-align: center;">
+            <td class="mobile-padding-header" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); padding: 48px 40px; text-align: center;">
               <div style="margin-bottom: 16px;">
                 <span style="display: inline-block; background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; color: #ffffff; font-size: 13px; font-weight: 600; letter-spacing: 0.5px;">
                   CONVITE ESPECIAL
                 </span>
               </div>
-              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; line-height: 1.3;">
+              <h1 class="mobile-font-title" style="margin: 0; color: #ffffff; font-size: 26px; font-weight: 700; line-height: 1.3;">
                 Você foi selecionado(a) para uma entrevista!
               </h1>
-              <p style="margin: 12px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">
+              <p style="margin: 12px 0 0 0; color: rgba(255,255,255,0.9); font-size: 15px;">
                 ${empresa} quer conhecer você melhor
               </p>
             </td>
@@ -338,8 +437,8 @@ export function emailConviteEntrevistaTemplate(params: {
 
           <!-- Conteúdo Principal -->
           <tr>
-            <td style="padding: 40px;">
-              <h2 style="margin: 0 0 20px 0; color: #1e293b; font-size: 22px; font-weight: 600;">
+            <td class="mobile-padding" style="padding: 40px 30px;">
+              <h2 class="mobile-font-title" style="margin: 0 0 20px 0; color: #1e293b; font-size: 22px; font-weight: 600;">
                 Olá, ${nomeCandidato}! 👋
               </h2>
 
@@ -348,20 +447,24 @@ export function emailConviteEntrevistaTemplate(params: {
               </p>
 
               <!-- Card da Vaga -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 28px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 28px 0;">
                 <tr>
-                  <td style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; padding: 24px; border-left: 4px solid #0ea5e9;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                      <span style="font-size: 32px;">💼</span>
-                      <div>
-                        <p style="margin: 0 0 4px 0; color: #0369a1; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                          Vaga
-                        </p>
-                        <p style="margin: 0; color: #0c4a6e; font-size: 20px; font-weight: 700;">
-                          ${cargo}
-                        </p>
-                      </div>
-                    </div>
+                  <td style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; padding: 20px; border-left: 4px solid #0ea5e9;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td style="vertical-align: middle; padding-right: 12px;" width="40">
+                          <span style="font-size: 28px;">💼</span>
+                        </td>
+                        <td style="vertical-align: middle;">
+                          <p style="margin: 0 0 4px 0; color: #0369a1; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Vaga
+                          </p>
+                          <p style="margin: 0; color: #0c4a6e; font-size: 18px; font-weight: 700;">
+                            ${cargo}
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
                     ${descricaoVaga ? `
                     <p style="margin: 16px 0 0 0; color: #475569; font-size: 14px; line-height: 1.6; border-top: 1px solid #bae6fd; padding-top: 16px;">
                       ${descricaoVaga}
@@ -376,10 +479,10 @@ export function emailConviteEntrevistaTemplate(params: {
                 <p style="margin: 0 0 16px 0; color: #1e293b; font-size: 16px; font-weight: 600;">
                   Como funciona a entrevista:
                 </p>
-                <table width="100%" cellpadding="0" cellspacing="0">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9;">
-                      <table cellpadding="0" cellspacing="0">
+                      <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                         <tr>
                           <td style="width: 36px; vertical-align: top;">
                             <div style="width: 28px; height: 28px; background: #ddd6fe; border-radius: 8px; text-align: center; line-height: 28px; font-size: 14px;">
@@ -397,7 +500,7 @@ export function emailConviteEntrevistaTemplate(params: {
                   </tr>
                   <tr>
                     <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9;">
-                      <table cellpadding="0" cellspacing="0">
+                      <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                         <tr>
                           <td style="width: 36px; vertical-align: top;">
                             <div style="width: 28px; height: 28px; background: #ddd6fe; border-radius: 8px; text-align: center; line-height: 28px; font-size: 14px;">
@@ -415,7 +518,7 @@ export function emailConviteEntrevistaTemplate(params: {
                   </tr>
                   <tr>
                     <td style="padding: 12px 0;">
-                      <table cellpadding="0" cellspacing="0">
+                      <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                         <tr>
                           <td style="width: 36px; vertical-align: top;">
                             <div style="width: 28px; height: 28px; background: #ddd6fe; border-radius: 8px; text-align: center; line-height: 28px; font-size: 14px;">
@@ -435,7 +538,7 @@ export function emailConviteEntrevistaTemplate(params: {
               </div>
 
               <!-- Prazo com destaque -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 32px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 32px 0;">
                 <tr>
                   <td style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; text-align: center;">
                     <div style="margin-bottom: 8px;">
@@ -455,12 +558,20 @@ export function emailConviteEntrevistaTemplate(params: {
               </table>
 
               <!-- CTA Button -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 32px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 32px 0;">
                 <tr>
                   <td align="center">
-                    <a href="${linkEntrevista}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #ffffff; text-decoration: none; padding: 18px 48px; border-radius: 12px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);">
+                    <!--[if mso]>
+                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${linkEntrevista}" style="height:54px;v-text-anchor:middle;width:280px;" arcsize="22%" strokecolor="#6366f1" fillcolor="#6366f1">
+                    <w:anchorlock/>
+                    <center style="color:#ffffff;font-family:sans-serif;font-size:16px;font-weight:bold;">Iniciar Minha Entrevista →</center>
+                    </v:roundrect>
+                    <![endif]-->
+                    <!--[if !mso]><!-->
+                    <a href="${linkEntrevista}" class="mobile-button" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #ffffff; text-decoration: none; padding: 18px 40px; border-radius: 12px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);">
                       Iniciar Minha Entrevista →
                     </a>
+                    <!--<![endif]-->
                   </td>
                 </tr>
               </table>
@@ -470,13 +581,13 @@ export function emailConviteEntrevistaTemplate(params: {
                 <p style="margin: 0 0 8px 0; color: #64748b; font-size: 12px; text-align: center;">
                   Se o botão não funcionar, copie e cole este link no navegador:
                 </p>
-                <p style="margin: 0; color: #6366f1; font-size: 12px; word-break: break-all; text-align: center;">
+                <p style="margin: 0; color: #6366f1; font-size: 11px; word-break: break-all; text-align: center;">
                   ${linkEntrevista}
                 </p>
               </div>
 
               <!-- Dicas -->
-              <div style="background-color: #f0fdf4; border-radius: 12px; padding: 20px; border-left: 4px solid #22c55e;">
+              <div style="background-color: #f0fdf4; border-radius: 12px; padding: 16px; border-left: 4px solid #22c55e;">
                 <p style="margin: 0 0 12px 0; color: #166534; font-size: 14px; font-weight: 600;">
                   💡 Dicas para arrasar na entrevista:
                 </p>
@@ -492,7 +603,7 @@ export function emailConviteEntrevistaTemplate(params: {
 
           <!-- Footer -->
           <tr>
-            <td style="background-color: #f8fafc; padding: 32px 40px; text-align: center; border-top: 1px solid #e2e8f0;">
+            <td class="mobile-padding" style="background-color: #f8fafc; padding: 32px 30px; text-align: center; border-top: 1px solid #e2e8f0;">
               <p style="margin: 0 0 8px 0; color: #475569; font-size: 14px;">
                 Boa sorte! Estamos torcendo por você! 🍀
               </p>
@@ -510,9 +621,9 @@ export function emailConviteEntrevistaTemplate(params: {
         </table>
 
         <!-- Texto de segurança -->
-        <table width="600" cellpadding="0" cellspacing="0" style="margin-top: 24px;">
+        <table role="presentation" class="email-container" cellpadding="0" cellspacing="0" style="margin-top: 24px; max-width: 600px; width: 100%;">
           <tr>
-            <td style="text-align: center; padding: 0 40px;">
+            <td style="text-align: center; padding: 0 20px;">
               <p style="margin: 0; color: #94a3b8; font-size: 11px; line-height: 1.6;">
                 Se você não se candidatou para esta vaga ou não reconhece este email, por favor ignore-o.<br>
                 Seus dados estão seguros e protegidos conforme a LGPD.
@@ -520,7 +631,11 @@ export function emailConviteEntrevistaTemplate(params: {
             </td>
           </tr>
         </table>
-
+        <!--[if mso]>
+        </td>
+        </tr>
+        </table>
+        <![endif]-->
       </td>
     </tr>
   </table>
@@ -556,18 +671,25 @@ export function emailConviteTimeTemplate(params: {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Convite para Time - EntrevistIA</title>
+  ${getResponsiveStyles()}
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 20px;">
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6;">
     <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+      <td align="center" style="padding: 40px 16px;">
+        <!--[if mso]>
+        <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="600">
+        <tr>
+        <td>
+        <![endif]-->
+        <table role="presentation" class="email-container" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); max-width: 600px; width: 100%;">
 
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 40px 30px; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">
+            <td class="mobile-padding-header" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 40px 30px; text-align: center;">
+              <h1 class="mobile-font-large" style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">
                 EntrevistIA
               </h1>
               <p style="margin: 10px 0 0 0; color: #e0e7ff; font-size: 16px;">
@@ -578,8 +700,8 @@ export function emailConviteTimeTemplate(params: {
 
           <!-- Conteudo -->
           <tr>
-            <td style="padding: 40px 30px;">
-              <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 24px; font-weight: 600;">
+            <td class="mobile-padding" style="padding: 40px 30px;">
+              <h2 class="mobile-font-title" style="margin: 0 0 20px 0; color: #111827; font-size: 24px; font-weight: 600;">
                 Olá, ${nomeConvidado}!
               </h2>
 
@@ -599,7 +721,7 @@ export function emailConviteTimeTemplate(params: {
               ` : ''}
 
               <!-- Role -->
-              <div style="background-color: #f9fafb; border-radius: 8px; padding: 20px; margin: 0 0 24px 0;">
+              <div style="background-color: #f9fafb; border-radius: 8px; padding: 16px; margin: 0 0 24px 0;">
                 <p style="margin: 0 0 8px 0; color: #374151; font-size: 14px; font-weight: 600;">
                   Sua função no time:
                 </p>
@@ -620,12 +742,20 @@ export function emailConviteTimeTemplate(params: {
               </ul>
 
               <!-- CTA Button -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 24px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 24px 0;">
                 <tr>
                   <td align="center">
-                    <a href="${linkConvite}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600;">
+                    <!--[if mso]>
+                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${linkConvite}" style="height:50px;v-text-anchor:middle;width:200px;" arcsize="16%" strokecolor="#6366f1" fillcolor="#6366f1">
+                    <w:anchorlock/>
+                    <center style="color:#ffffff;font-family:sans-serif;font-size:16px;font-weight:bold;">Aceitar Convite</center>
+                    </v:roundrect>
+                    <![endif]-->
+                    <!--[if !mso]><!-->
+                    <a href="${linkConvite}" class="mobile-button" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600;">
                       Aceitar Convite
                     </a>
+                    <!--<![endif]-->
                   </td>
                 </tr>
               </table>
@@ -635,7 +765,7 @@ export function emailConviteTimeTemplate(params: {
                 <p style="margin: 0 0 8px 0; color: #64748b; font-size: 12px; text-align: center;">
                   Se o botão não funcionar, copie e cole este link:
                 </p>
-                <p style="margin: 0; color: #6366f1; font-size: 12px; word-break: break-all; text-align: center;">
+                <p style="margin: 0; color: #6366f1; font-size: 11px; word-break: break-all; text-align: center;">
                   ${linkConvite}
                 </p>
               </div>
@@ -650,7 +780,7 @@ export function emailConviteTimeTemplate(params: {
 
           <!-- Footer -->
           <tr>
-            <td style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+            <td class="mobile-padding" style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
               <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">
                 Este email foi enviado pela <strong>EntrevistIA</strong>
               </p>
@@ -661,6 +791,11 @@ export function emailConviteTimeTemplate(params: {
           </tr>
 
         </table>
+        <!--[if mso]>
+        </td>
+        </tr>
+        </table>
+        <![endif]-->
       </td>
     </tr>
   </table>
@@ -694,19 +829,26 @@ Parabéns pelo excelente desempenho!`;
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Parabéns! Você foi aprovado(a) - ${empresa}</title>
+  ${getResponsiveStyles()}
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 20px;">
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6;">
     <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+      <td align="center" style="padding: 40px 16px;">
+        <!--[if mso]>
+        <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="600">
+        <tr>
+        <td>
+        <![endif]-->
+        <table role="presentation" class="email-container" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); max-width: 600px; width: 100%;">
 
           <!-- Header com gradiente verde -->
           <tr>
-            <td style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); padding: 40px 30px; text-align: center;">
+            <td class="mobile-padding-header" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); padding: 40px 30px; text-align: center;">
               <div style="font-size: 48px; margin-bottom: 16px;">&#127881;</div>
-              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">
+              <h1 class="mobile-font-large" style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">
                 Parabéns!
               </h1>
               <p style="margin: 10px 0 0 0; color: #dcfce7; font-size: 16px;">
@@ -717,8 +859,8 @@ Parabéns pelo excelente desempenho!`;
 
           <!-- Conteudo -->
           <tr>
-            <td style="padding: 40px 30px;">
-              <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 600;">
+            <td class="mobile-padding" style="padding: 40px 30px;">
+              <h2 class="mobile-font-title" style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 600;">
                 Olá, ${nomeCandidato}!
               </h2>
 
@@ -743,7 +885,7 @@ Parabéns pelo excelente desempenho!`;
 
           <!-- Footer -->
           <tr>
-            <td style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+            <td class="mobile-padding" style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
               <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">
                 Este email foi enviado via <strong>EntrevistIA</strong>
               </p>
@@ -754,6 +896,11 @@ Parabéns pelo excelente desempenho!`;
           </tr>
 
         </table>
+        <!--[if mso]>
+        </td>
+        </tr>
+        </table>
+        <![endif]-->
       </td>
     </tr>
   </table>
@@ -789,18 +936,25 @@ Desejamos muito sucesso em sua jornada profissional!`;
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Atualização sobre sua candidatura - ${empresa}</title>
+  ${getResponsiveStyles()}
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 20px;">
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6;">
     <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+      <td align="center" style="padding: 40px 16px;">
+        <!--[if mso]>
+        <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="600">
+        <tr>
+        <td>
+        <![endif]-->
+        <table role="presentation" class="email-container" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); max-width: 600px; width: 100%;">
 
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 40px 30px; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">
+            <td class="mobile-padding-header" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 40px 30px; text-align: center;">
+              <h1 class="mobile-font-large" style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">
                 ${empresa}
               </h1>
               <p style="margin: 10px 0 0 0; color: #e0e7ff; font-size: 16px;">
@@ -811,8 +965,8 @@ Desejamos muito sucesso em sua jornada profissional!`;
 
           <!-- Conteudo -->
           <tr>
-            <td style="padding: 40px 30px;">
-              <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 600;">
+            <td class="mobile-padding" style="padding: 40px 30px;">
+              <h2 class="mobile-font-title" style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 600;">
                 Olá, ${nomeCandidato}!
               </h2>
 
@@ -837,7 +991,7 @@ Desejamos muito sucesso em sua jornada profissional!`;
 
           <!-- Footer -->
           <tr>
-            <td style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+            <td class="mobile-padding" style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
               <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">
                 Este email foi enviado via <strong>EntrevistIA</strong>
               </p>
@@ -848,6 +1002,11 @@ Desejamos muito sucesso em sua jornada profissional!`;
           </tr>
 
         </table>
+        <!--[if mso]>
+        </td>
+        </tr>
+        </table>
+        <![endif]-->
       </td>
     </tr>
   </table>
