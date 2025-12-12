@@ -25,7 +25,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, AlertCircle } from "lucide-react";
+import { ArrowLeft, Lightbulb } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { NIVEIS_HIERARQUICOS } from "@/lib/constants/niveis";
@@ -288,13 +289,13 @@ Breve contexto sobre a posição e equipe...
                   />
                 </div>
               </div>
-              <div className="mt-6 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/50">
-                <AlertCircle className="h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
-                <p className="text-sm text-blue-800 dark:text-blue-200">
+              <Alert variant="info" className="mt-6">
+                <Lightbulb className="h-4 w-4" />
+                <AlertDescription>
                   <strong className="font-semibold">Dica importante:</strong> A IA usa esta descrição para calcular o score de cada candidato.
                   Quanto mais detalhes você incluir, mais precisa será a análise.
-                </p>
-              </div>
+                </AlertDescription>
+              </Alert>
             </div>
 
             <div className="grid gap-5 sm:gap-6 sm:grid-cols-2">

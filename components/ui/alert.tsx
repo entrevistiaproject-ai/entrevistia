@@ -11,6 +11,7 @@ const alertVariants = cva(
         default: "bg-card text-card-foreground",
         destructive:
           "text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90",
+        info: "border-0 [&_[data-slot=alert-description]]:text-white/90 [&_[data-slot=alert-title]]:text-white",
       },
     },
     defaultVariants: {
@@ -19,16 +20,25 @@ const alertVariants = cva(
   }
 )
 
+// Estilos fixos para variante info - cores sólidas universais
+const infoStyles: React.CSSProperties = {
+  backgroundColor: "#2563EB", // blue-600 sólido
+  color: "#FFFFFF",
+}
+
 function Alert({
   className,
   variant,
+  style,
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
+  const isInfo = variant === "info"
   return (
     <div
       data-slot="alert"
       role="alert"
       className={cn(alertVariants({ variant }), className)}
+      style={isInfo ? { ...infoStyles, ...style } : style}
       {...props}
     />
   )
