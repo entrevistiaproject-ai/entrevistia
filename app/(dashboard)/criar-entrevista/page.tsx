@@ -82,6 +82,8 @@ export default function CriarEntrevistaPage() {
   const [cargo, setCargo] = useState("");
   const [nivel, setNivel] = useState("");
   const [compartilharResultados, setCompartilharResultados] = useState(false);
+  const [autoApprovalEnabled, setAutoApprovalEnabled] = useState(false);
+  const [autoApprovalMinScore, setAutoApprovalMinScore] = useState(70);
   const [perguntas, setPerguntas] = useState<PerguntaSelecionada[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -144,6 +146,8 @@ export default function CriarEntrevistaPage() {
           nivel,
           perguntas,
           compartilharResultados,
+          autoApprovalEnabled,
+          autoApprovalMinScore,
         }),
       });
 
@@ -332,7 +336,8 @@ Breve contexto sobre a posição e equipe...
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex items-start sm:items-center justify-between gap-5">
+            {/* Mostrar resultado para o candidato */}
+            <div className="flex items-center justify-between gap-4">
               <div className="space-y-1 flex-1">
                 <Label htmlFor="compartilhar-resultados" className="text-sm sm:text-base">
                   Mostrar resultado para o candidato
@@ -348,6 +353,50 @@ Breve contexto sobre a posição e equipe...
                 className="shrink-0"
               />
             </div>
+
+            {/* Aprovação automática */}
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-1 flex-1">
+                <Label htmlFor="auto-approval" className="text-sm sm:text-base">
+                  Aprovação automática
+                </Label>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Candidatos com nota acima do mínimo são aprovados automaticamente
+                </p>
+              </div>
+              <Switch
+                id="auto-approval"
+                checked={autoApprovalEnabled}
+                onCheckedChange={setAutoApprovalEnabled}
+                className="shrink-0"
+              />
+            </div>
+
+            {/* Score mínimo para aprovação (só aparece se aprovação automática estiver ativa) */}
+            {autoApprovalEnabled && (
+              <div className="ml-0 sm:ml-4 p-4 bg-muted/50 rounded-lg space-y-3">
+                <div className="flex items-center justify-between gap-4">
+                  <Label htmlFor="min-score" className="text-sm">
+                    Nota mínima para aprovação
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="min-score"
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={autoApprovalMinScore}
+                      onChange={(e) => setAutoApprovalMinScore(Number(e.target.value))}
+                      className="w-20 text-center"
+                    />
+                    <span className="text-sm text-muted-foreground">/ 100</span>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Candidatos com nota igual ou superior serão aprovados automaticamente
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

@@ -23,6 +23,8 @@ interface CreateEntrevistaRequest {
   duracao?: number;
   perguntas: PerguntaRequest[];
   compartilharResultados?: boolean;
+  autoApprovalEnabled?: boolean;
+  autoApprovalMinScore?: number;
 }
 
 export async function POST(request: NextRequest) {
@@ -103,6 +105,9 @@ export async function POST(request: NextRequest) {
         configuracoes: {
           compartilharResultados: body.compartilharResultados || false,
         },
+        // Aprovação automática
+        autoApprovalEnabled: body.autoApprovalEnabled || false,
+        autoApprovalMinScore: body.autoApprovalMinScore || 70,
       })
       .returning();
 
