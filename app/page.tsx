@@ -143,12 +143,14 @@ export default function LandingPage() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
+              {/* TODO: Descomentar quando tiver vídeo de marketing
               <Button size="lg" variant="outline" className="h-12 px-8 text-base" asChild>
                 <Link href="#como-funciona">
                   <Play className="mr-2 h-4 w-4" />
                   Ver demonstração
                 </Link>
               </Button>
+              */}
             </div>
 
             {/* Trust indicators */}
