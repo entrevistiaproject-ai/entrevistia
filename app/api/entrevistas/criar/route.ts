@@ -25,6 +25,8 @@ interface CreateEntrevistaRequest {
   compartilharResultados?: boolean;
   autoApprovalEnabled?: boolean;
   autoApprovalMinScore?: number;
+  autoRejectEnabled?: boolean;
+  autoRejectMaxScore?: number;
 }
 
 export async function POST(request: NextRequest) {
@@ -108,6 +110,9 @@ export async function POST(request: NextRequest) {
         // Aprovação automática
         autoApprovalEnabled: body.autoApprovalEnabled || false,
         autoApprovalMinScore: body.autoApprovalMinScore || 70,
+        // Reprovação automática
+        autoRejectEnabled: body.autoRejectEnabled || false,
+        autoRejectMaxScore: body.autoRejectMaxScore || 30,
       })
       .returning();
 

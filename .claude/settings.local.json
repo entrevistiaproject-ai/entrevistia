@@ -91,7 +91,8 @@
       "Bash(node scripts/check-candidato-entrevistas.js:*)",
       "Bash(node:*)",
       "Bash(timeout 60 npm run build:*)",
-      "Bash(timeout 120 npm run build:*)"
+      "Bash(timeout 120 npm run build:*)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []
