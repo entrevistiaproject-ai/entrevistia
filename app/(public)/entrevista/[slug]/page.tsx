@@ -15,6 +15,7 @@ import {
 import { Loader2, AlertCircle, Briefcase, Users, Building2, Shield, ArrowLeft, Check } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { getLabelNivel } from "@/lib/constants/niveis";
 
 interface EntrevistaPublica {
   id: string;
@@ -265,7 +266,7 @@ export default function CadastroEntrevistaPage() {
                 {entrevista?.nivel && (
                   <Badge variant="outline" className="gap-1.5 py-1.5 px-3">
                     <Users className="h-3.5 w-3.5" />
-                    {entrevista.nivel}
+                    {getLabelNivel(entrevista.nivel)}
                   </Badge>
                 )}
                 {entrevista?.empresa && (

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { after } from "next/server";
 import { getDB } from "@/lib/db";
 import { candidatoEntrevistas } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -117,7 +118,8 @@ export async function POST(
       .returning();
 
     // Dispara análise automática em background (se configurada)
-    // Não aguarda o resultado para não bloquear a resposta ao candidato
+    // Usa after() do Next.js para executar após a resposta ser enviada
+    // mas mantendo o runtime ativo na Vercel
     if (sessao.candidatoId && sessao.entrevistaId) {
       // Busca o nome do candidato
       const { candidatos } = await import("@/lib/db/schema");
@@ -128,14 +130,22 @@ export async function POST(
         .limit(1);
 
       if (candidato) {
-        // Executa em background sem aguardar
-        onCandidatoFinalizouEntrevista(
-          sessao.candidatoId,
-          sessao.entrevistaId,
-          candidato.nome
-        ).catch((error) => {
-          if (process.env.NODE_ENV === "development") {
-            console.error("Erro ao disparar análise automática:", error);
+        // Captura os dados necessários para o callback
+        const candidatoIdCapture = sessao.candidatoId;
+        const entrevistaIdCapture = sessao.entrevistaId;
+        const candidatoNomeCapture = candidato.nome;
+
+        // Usa after() para executar após a resposta - mantém o runtime ativo na Vercel
+        after(async () => {
+          try {
+            console.log(`[Auto-Analyze] Iniciando análise via after() para ${candidatoNomeCapture}`);
+            await onCandidatoFinalizouEntrevista(
+              candidatoIdCapture,
+              entrevistaIdCapture,
+              candidatoNomeCapture
+            );
+          } catch (error) {
+            console.error("Erro ao disparar análise automática via after():", error);
           }
         });
       }
