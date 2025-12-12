@@ -404,7 +404,7 @@ export default function LandingPage() {
                       {/* Timer circular de reflexão */}
                       <div className="flex-1 flex flex-col items-center justify-center">
                         <div className="relative w-24 h-24 mb-4">
-                          <svg className="w-full h-full transform -rotate-90">
+                          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 96 96">
                             <circle cx="48" cy="48" r="42" stroke="currentColor" strokeWidth="4" fill="none" className="text-muted/30" />
                             <circle cx="48" cy="48" r="42" stroke="currentColor" strokeWidth="4" fill="none" strokeDasharray="264" strokeDashoffset="88" className="text-primary" strokeLinecap="round" />
                           </svg>
@@ -449,7 +449,7 @@ export default function LandingPage() {
                   <div className="grid grid-cols-2 gap-4 mb-5">
                     <div className="bg-muted/30 rounded-lg p-4 text-center">
                       <div className="relative w-20 h-20 mx-auto mb-2">
-                        <svg className="w-full h-full transform -rotate-90">
+                        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
                           <circle cx="40" cy="40" r="34" stroke="currentColor" strokeWidth="6" fill="none" className="text-muted" />
                           <circle cx="40" cy="40" r="34" stroke="currentColor" strokeWidth="6" fill="none" strokeDasharray="214" strokeDashoffset="17" className="text-emerald-500" strokeLinecap="round" />
                         </svg>
@@ -461,7 +461,7 @@ export default function LandingPage() {
                     </div>
                     <div className="bg-muted/30 rounded-lg p-4 text-center">
                       <div className="relative w-20 h-20 mx-auto mb-2">
-                        <svg className="w-full h-full transform -rotate-90">
+                        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
                           <circle cx="40" cy="40" r="34" stroke="currentColor" strokeWidth="6" fill="none" className="text-muted" />
                           <circle cx="40" cy="40" r="34" stroke="currentColor" strokeWidth="6" fill="none" strokeDasharray="214" strokeDashoffset="32" className="text-emerald-500" strokeLinecap="round" />
                         </svg>
