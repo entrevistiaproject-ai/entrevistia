@@ -321,9 +321,9 @@ Breve contexto sobre a posição e equipe...
                   />
                 </div>
               </div>
-              <Alert className="mt-6 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/50">
-                <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                <AlertDescription className="text-sm text-blue-700 dark:text-blue-300">
+              <Alert className="mt-6 border-blue-600/20 bg-blue-600/10 dark:border-blue-500/30 dark:bg-blue-500/10">
+                <AlertCircle className="h-4 w-4 text-blue-700 dark:text-blue-400" />
+                <AlertDescription className="text-sm text-blue-900 dark:text-blue-100">
                   <strong>Dica importante:</strong> A IA usa esta descrição para calcular o score de cada candidato.
                   Quanto mais detalhes você incluir, mais precisa será a análise.
                 </AlertDescription>
