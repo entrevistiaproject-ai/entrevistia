@@ -539,24 +539,24 @@ export default function TimePage() {
           <div className="space-y-3">
             {/* Owner (voce) */}
             {teamData?.owner && (
-              <div className="flex items-center justify-between p-4 rounded-lg border bg-primary/5 border-primary/20">
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-10 w-10">
+              <div className="flex items-center justify-between gap-3 p-4 rounded-lg border bg-primary/5 border-primary/20">
+                <div className="flex items-center gap-4 min-w-0 flex-1">
+                  <Avatar className="h-10 w-10 shrink-0">
                     <AvatarFallback className="bg-primary text-primary-foreground">
                       {getInitials(teamData.owner.nome)}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium">{teamData.owner.nome}</p>
-                      <span className="text-xs text-muted-foreground">(voce)</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-medium truncate">{teamData.owner.nome}</p>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">(voce)</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground truncate">
                       {teamData.owner.email}
                     </p>
                   </div>
                 </div>
-                <Badge variant="outline" className={roleColors.owner}>
+                <Badge variant="outline" className={`${roleColors.owner} shrink-0`}>
                   <Crown className="mr-1 h-3 w-3" />
                   Dono
                 </Badge>
