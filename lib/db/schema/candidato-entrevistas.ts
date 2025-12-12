@@ -60,6 +60,11 @@ export const candidatoEntrevistas = pgTable("candidato_entrevistas", {
   // Arquivamento (para limpeza visual e workflow concluído)
   arquivadoEm: timestamp("arquivado_em", { mode: "date" }),
 
+  // Controle de processamento automático (anti-duplicação)
+  autoDecisionLockUntil: timestamp("auto_decision_lock_until", { mode: "date" }), // Lock temporário para evitar race conditions
+  autoDecisionTentativas: real("auto_decision_tentativas").default(0), // Contador de tentativas de processamento
+  autoDecisionErro: text("auto_decision_erro"), // Último erro de processamento (para debugging)
+
   // Auditoria
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
