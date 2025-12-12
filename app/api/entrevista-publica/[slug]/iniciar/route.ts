@@ -8,7 +8,6 @@ import {
   sanitizeEmail,
   sanitizeName,
   sanitizeCPF,
-  sanitizeSlug,
   checkCombinedRateLimit,
   getClientIP,
   getRateLimitHeaders,
@@ -46,15 +45,7 @@ export async function POST(
   const clientIP = getClientIP(request);
 
   try {
-    const { slug: rawSlug } = await params;
-    const slug = sanitizeSlug(rawSlug);
-
-    if (!slug) {
-      return NextResponse.json(
-        { error: "Slug inválido" },
-        { status: 400 }
-      );
-    }
+    const { slug } = await params;
 
     // Proteção contra bots
     const botCheck = withBotProtection(request, "public-interview-start", {

@@ -3,10 +3,7 @@ import { getDB } from "@/lib/db";
 import { entrevistas, candidatos } from "@/lib/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { z } from "zod";
-import {
-  sanitizeEmail,
-  sanitizeSlug,
-} from "@/lib/security";
+import { sanitizeEmail } from "@/lib/security";
 
 const verificarCandidatoSchema = z.object({
   email: z.string().email("Email inválido").max(255),
@@ -21,15 +18,7 @@ export async function POST(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug: rawSlug } = await params;
-    const slug = sanitizeSlug(rawSlug);
-
-    if (!slug) {
-      return NextResponse.json(
-        { error: "Slug inválido" },
-        { status: 400 }
-      );
-    }
+    const { slug } = await params;
 
     const body = await request.json();
 
