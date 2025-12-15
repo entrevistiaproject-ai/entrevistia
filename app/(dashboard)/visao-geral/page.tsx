@@ -332,15 +332,15 @@ export default function VisaoGeralPage() {
               <CardDescription>Distribuição atual dos candidatos</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[250px]">
+              <div className="h-[280px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RechartsPieChart>
+                  <RechartsPieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                     <Pie
                       data={metrics.candidatosPorStatus}
                       cx="50%"
                       cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
+                      innerRadius={50}
+                      outerRadius={70}
                       paddingAngle={5}
                       dataKey="count"
                       nameKey="label"
