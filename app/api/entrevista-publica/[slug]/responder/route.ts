@@ -158,6 +158,28 @@ export async function POST(
       );
     }
 
+    // Verificar se a sessão já expirou (prazo ultrapassado)
+    if (sessao.status === "expirada") {
+      return NextResponse.json(
+        { error: "O prazo para responder esta entrevista expirou" },
+        { status: 403 }
+      );
+    }
+
+    // Verificar se o prazo foi ultrapassado (mesmo que status não tenha sido atualizado)
+    if (sessao.prazoResposta && new Date(sessao.prazoResposta) < new Date()) {
+      // Atualiza o status para expirada
+      await db
+        .update(candidatoEntrevistas)
+        .set({ status: "expirada", updatedAt: new Date() })
+        .where(eq(candidatoEntrevistas.id, sessaoId));
+
+      return NextResponse.json(
+        { error: "O prazo para responder esta entrevista expirou" },
+        { status: 403 }
+      );
+    }
+
     // Verificar se a pergunta pertence à entrevista
     const [pergunta] = await db
       .select()
