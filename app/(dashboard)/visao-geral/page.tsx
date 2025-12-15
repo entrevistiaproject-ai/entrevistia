@@ -40,6 +40,7 @@ import {
   LineChart,
   Line,
   Legend,
+  ReferenceLine,
 } from "recharts";
 import { getDashboardMetrics, DashboardMetrics } from "./actions";
 
@@ -463,32 +464,97 @@ export default function VisaoGeralPage() {
                 <BarChart3 className="h-5 w-5" />
                 Score Médio por Vaga
               </CardTitle>
-              <CardDescription>Top 5 entrevistas com maior score</CardDescription>
+              <CardDescription>
+                Top 3 maiores e menores scores
+                {metrics.scoreMediaGeral > 0 && (
+                  <span className="ml-2 text-muted-foreground">
+                    (Média geral: {metrics.scoreMediaGeral} pts)
+                  </span>
+                )}
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[250px]">
+              <div className="h-[280px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={metrics.scoresPorEntrevista} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis type="number" domain={[0, 100]} />
-                    <YAxis
+                  <BarChart
+                    data={[
+                      ...metrics.scoresPorEntrevista
+                        .filter(s => s.tipo === 'maior')
+                        .sort((a, b) => b.mediaScore - a.mediaScore),
+                      ...metrics.scoresPorEntrevista
+                        .filter(s => s.tipo === 'menor')
+                        .sort((a, b) => b.mediaScore - a.mediaScore),
+                    ]}
+                    margin={{ top: 20, right: 20, bottom: 60, left: 20 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
+                    <XAxis
                       dataKey="titulo"
-                      type="category"
-                      width={120}
-                      tick={{ fontSize: 12 }}
+                      tick={{ fontSize: 11 }}
+                      angle={-35}
+                      textAnchor="end"
+                      height={60}
                       tickFormatter={(value) =>
-                        value.length > 15 ? `${value.slice(0, 15)}...` : value
+                        value.length > 12 ? `${value.slice(0, 12)}...` : value
                       }
                     />
+                    <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
                     <Tooltip
                       formatter={(value: number, name: string) => [
-                        name === "mediaScore" ? `${value} pontos` : `${value} candidatos`,
-                        name === "mediaScore" ? "Score Médio" : "Candidatos",
+                        `${value} pontos`,
+                        "Score Médio",
                       ]}
+                      labelFormatter={(label) => label}
                     />
-                    <Bar dataKey="mediaScore" fill={COLORS.primary} radius={[0, 4, 4, 0]} />
+                    {metrics.scoreMediaGeral > 0 && (
+                      <ReferenceLine
+                        y={metrics.scoreMediaGeral}
+                        stroke={COLORS.warning}
+                        strokeDasharray="5 5"
+                        strokeWidth={2}
+                        label={{
+                          value: `Média: ${metrics.scoreMediaGeral}`,
+                          position: 'right',
+                          fill: COLORS.warning,
+                          fontSize: 11,
+                        }}
+                      />
+                    )}
+                    <Bar
+                      dataKey="mediaScore"
+                      radius={[4, 4, 0, 0]}
+                      fill={COLORS.primary}
+                    >
+                      {[
+                        ...metrics.scoresPorEntrevista
+                          .filter(s => s.tipo === 'maior')
+                          .sort((a, b) => b.mediaScore - a.mediaScore),
+                        ...metrics.scoresPorEntrevista
+                          .filter(s => s.tipo === 'menor')
+                          .sort((a, b) => b.mediaScore - a.mediaScore),
+                      ].map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.tipo === 'maior' ? COLORS.success : COLORS.danger}
+                        />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
+              </div>
+              <div className="flex justify-center gap-6 mt-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded" style={{ backgroundColor: COLORS.success }} />
+                  <span className="text-xs text-muted-foreground">Maiores scores</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded" style={{ backgroundColor: COLORS.danger }} />
+                  <span className="text-xs text-muted-foreground">Menores scores</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 border-t-2 border-dashed" style={{ borderColor: COLORS.warning }} />
+                  <span className="text-xs text-muted-foreground">Média geral</span>
+                </div>
               </div>
             </CardContent>
           </Card>

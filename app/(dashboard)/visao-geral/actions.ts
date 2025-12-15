@@ -40,6 +40,7 @@ export interface DashboardMetrics {
     titulo: string;
     mediaScore: number;
     totalCandidatos: number;
+    tipo: 'maior' | 'menor';
   }[];
 
   funil: {
@@ -166,8 +167,8 @@ export async function getDashboardMetrics(): Promise<{
       concluidas: item.concluidas,
     }));
 
-    // 4. Score médio por entrevista (top 5)
-    const scoresPorEntrevista = await db
+    // 4. Score médio por entrevista (top 3 maiores e top 3 menores)
+    const scoresMaiores = await db
       .select({
         titulo: entrevistas.titulo,
         mediaScore: sql<number>`ROUND(AVG(${candidatoEntrevistas.notaGeral})::numeric, 0)::int`,
@@ -184,7 +185,35 @@ export async function getDashboardMetrics(): Promise<{
       )
       .groupBy(entrevistas.id, entrevistas.titulo)
       .orderBy(desc(sql`AVG(${candidatoEntrevistas.notaGeral})`))
-      .limit(5);
+      .limit(3);
+
+    const scoresMenores = await db
+      .select({
+        titulo: entrevistas.titulo,
+        mediaScore: sql<number>`ROUND(AVG(${candidatoEntrevistas.notaGeral})::numeric, 0)::int`,
+        totalCandidatos: sql<number>`COUNT(*)::int`,
+      })
+      .from(candidatoEntrevistas)
+      .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
+      .where(
+        and(
+          eq(entrevistas.userId, userId),
+          isNull(entrevistas.deletedAt),
+          sql`${candidatoEntrevistas.notaGeral} IS NOT NULL`
+        )
+      )
+      .groupBy(entrevistas.id, entrevistas.titulo)
+      .orderBy(sql`AVG(${candidatoEntrevistas.notaGeral})`)
+      .limit(3);
+
+    // Combinar e remover duplicatas (caso uma entrevista esteja em ambas as listas)
+    const scoresMaioresIds = new Set(scoresMaiores.map(s => s.titulo));
+    const scoresMenoresFiltrados = scoresMenores.filter(s => !scoresMaioresIds.has(s.titulo));
+
+    const scoresPorEntrevista = [
+      ...scoresMaiores.map(s => ({ ...s, tipo: 'maior' as const })),
+      ...scoresMenoresFiltrados.map(s => ({ ...s, tipo: 'menor' as const })),
+    ];
 
     // 5. Funil de conversão
     const totalConvites = candidatoEntrevistasStats?.total || 0;
@@ -341,6 +370,7 @@ export async function getDashboardMetrics(): Promise<{
           titulo: s.titulo,
           mediaScore: s.mediaScore || 0,
           totalCandidatos: s.totalCandidatos,
+          tipo: s.tipo,
         })),
         funil,
         candidatosPendentesAvaliacao: candidatosPendentesAvaliacao.map(c => ({
