@@ -119,12 +119,14 @@ export async function analyzeInterview(
 ## IMPORTANTE: Contexto das Respostas
 As respostas abaixo foram **gravadas em áudio pelo candidato** e **transcritas automaticamente** por um sistema de reconhecimento de voz (Whisper).
 Por isso, podem conter:
-- Palavras trocadas por homófonas (ex: "leia" em vez de "leio", "enfare" em vez de "encare")
+- Palavras trocadas por homófonas (ex: "leia" em vez de "leio", "enfare" em vez de "encare", "envolver" em vez de "desenvolver")
+- Conjugação verbal incorreta devido à transcrição (ex: "eu trabalha" em vez de "eu trabalho")
 - Pequenos erros de transcrição que NÃO são erros do candidato
 - Falta de pontuação ou formatação
 
-**NUNCA penalize o candidato por "erros de digitação" ou ortografia** - esses são artefatos da transcrição automática.
-Avalie APENAS o CONTEÚDO, a qualidade das ideias e a capacidade de comunicação demonstrada.
+**CRÍTICO: NUNCA penalize o candidato por erros ortográficos, gramaticais ou de digitação** - esses são 100% artefatos da transcrição automática do Whisper, NÃO refletem a capacidade real do candidato.
+NÃO mencione "erros gramaticais", "erros de ortografia" ou "revisão textual" nos pontos de melhoria.
+Avalie APENAS o CONTEÚDO, a qualidade das ideias e a capacidade de comunicação VERBAL demonstrada.
 
 ## Vaga
 - Título: ${data.entrevista.titulo}
@@ -143,8 +145,8 @@ Analise as respostas acima e retorne APENAS um objeto JSON com esta estrutura ex
   "notaGeral": <número de 0 a 100 - avaliação geral do candidato>,
   "compatibilidadeVaga": <número de 0 a 100 - compatibilidade específica com esta vaga>,
   "resumoGeral": "<resumo da performance do candidato>",
-  "pontosFortes": ["<ponto forte 1>", "<ponto forte 2>", "<ponto forte 3>"],
-  "pontosMelhoria": ["<ponto melhoria 1>", "<ponto melhoria 2>", "<ponto melhoria 3>"],
+  "pontosFortes": ["<ponto forte 1>", "<ponto forte 2>", "<ponto forte 3>"],  // Foque em: habilidades técnicas, comportamentais, soft skills, experiência
+  "pontosMelhoria": ["<ponto melhoria 1>", "<ponto melhoria 2>", "<ponto melhoria 3>"],  // Foque em: gaps técnicos, comportamentais, experiência. NUNCA gramática/ortografia!
   "recomendacao": "<recomendado | recomendado_com_ressalvas | nao_recomendado>",
   "competencias": [
     // EXPERIÊNCIA E CONHECIMENTO
@@ -171,6 +173,7 @@ IMPORTANTE:
 - Avalie TODAS as 10 competências listadas acima (notas de 0 a 100)
 - Base sua avaliação nas respostas da entrevista
 - Se não houver evidências suficientes para avaliar uma competência, atribua nota 50 (neutra)
+- pontosMelhoria: Foque APENAS em aspectos TÉCNICOS (gaps de conhecimento, experiência), COMPORTAMENTAIS (postura, atitude) e PSICOLÓGICOS (motivação, autoconhecimento). JAMAIS mencione gramática, ortografia ou erros de escrita.
 
 Retorne APENAS o JSON, sem texto adicional, sem markdown, sem explicações.`;
 
