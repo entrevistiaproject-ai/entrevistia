@@ -29,7 +29,7 @@ export default function EntrevistasPage() {
   const [entrevistas, setEntrevistas] = useState<Entrevista[]>([]);
   const [filteredEntrevistas, setFilteredEntrevistas] = useState<Entrevista[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>("todas");
+  const [statusFilter, setStatusFilter] = useState<string>("ativas");
   const [searchQuery, setSearchQuery] = useState("");
 
   // Buscar entrevistas do backend
@@ -183,8 +183,8 @@ export default function EntrevistasPage() {
         {/* Filtro por status */}
         <div className="flex p-1 bg-muted rounded-lg w-full">
           {[
-            { value: "todas", label: "Todas", count: counts.todas },
             { value: "ativas", label: "Ativas", count: counts.ativas },
+            { value: "todas", label: "Todas", count: counts.todas },
             { value: "encerradas", label: "Encerradas", count: counts.encerradas },
             { value: "arquivadas", label: "Arquivadas", count: counts.arquivadas },
           ].map((filter) => (
