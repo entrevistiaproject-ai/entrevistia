@@ -239,10 +239,10 @@ export default function VisaoGeralPage() {
         title="Visão Geral"
         description="Acompanhe o desempenho do seu processo seletivo"
       >
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+        <div className="flex flex-row gap-2 w-full sm:w-auto">
           <Select value={periodo} onValueChange={(v) => handlePeriodoChange(v as PeriodoFiltro)}>
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <Calendar className="h-4 w-4 mr-2" />
+            <SelectTrigger className="h-10 w-[140px] sm:w-[160px] bg-background border-input">
+              <Calendar className="h-4 w-4 mr-2 shrink-0 text-muted-foreground" />
               <SelectValue placeholder="Período" />
             </SelectTrigger>
             <SelectContent>
@@ -255,10 +255,10 @@ export default function VisaoGeralPage() {
               <SelectItem value="este_ano">Este Ano</SelectItem>
             </SelectContent>
           </Select>
-          <Button asChild size="touch" className="w-full sm:w-auto">
+          <Button asChild size="touch" className="flex-1 sm:flex-none min-w-0">
             <Link href="/criar-entrevista">
-              <PlusCircle className="h-4 w-4" />
-              Nova Entrevista
+              <PlusCircle className="h-4 w-4 shrink-0" />
+              <span className="truncate">Nova Entrevista</span>
             </Link>
           </Button>
         </div>
