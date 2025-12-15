@@ -639,23 +639,35 @@ export default function VisaoGeralPage() {
                 <p className="text-sm text-muted-foreground">Nenhuma atividade recente</p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {metrics.atividadeRecente.map((atividade, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <div className="mt-1">{getActivityIcon(atividade.tipo)}</div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm">{atividade.descricao}</p>
-                      <p className="text-xs text-muted-foreground">{formatDate(atividade.data)}</p>
+              <div className="space-y-1">
+                {metrics.atividadeRecente.map((atividade, index) => {
+                  const content = (
+                    <>
+                      <div className="mt-1">{getActivityIcon(atividade.tipo)}</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm">{atividade.descricao}</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(atividade.data)}</p>
+                      </div>
+                      {atividade.link && (
+                        <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </>
+                  );
+
+                  return atividade.link ? (
+                    <Link
+                      key={index}
+                      href={atividade.link}
+                      className="flex items-start gap-3 p-2 -mx-2 rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      {content}
+                    </Link>
+                  ) : (
+                    <div key={index} className="flex items-start gap-3 p-2 -mx-2">
+                      {content}
                     </div>
-                    {atividade.link && (
-                      <Button asChild variant="ghost" size="sm">
-                        <Link href={atividade.link}>
-                          <ArrowRight className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>
