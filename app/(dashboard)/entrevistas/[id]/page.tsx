@@ -389,137 +389,125 @@ export default function EntrevistaDetalhesPage() {
         </div>
       </div>
 
-      {/* Cards de Resumo - scroll horizontal no mobile */}
-      <div className="scroll-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
-        <div className="inline-flex gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-5 sm:gap-4">
-          <Card className="min-w-[140px] sm:min-w-0 shrink-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Candidatos</CardTitle>
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Users className="h-5 w-5 text-blue-600" />
+      {/* Cards de Resumo - grid responsivo */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 sm:gap-4">
+        <Card>
+          <CardContent className="pt-5 pb-4 px-4">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="p-1.5 bg-blue-50 dark:bg-blue-950 rounded-md shrink-0">
+                <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{candidatos.length}</div>
-              <p className="text-xs text-muted-foreground">Total cadastrados</p>
-            </CardContent>
-          </Card>
+              <span className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Candidatos</span>
+            </div>
+            <div className="text-2xl font-bold">{candidatos.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">Total cadastrados</p>
+          </CardContent>
+        </Card>
 
-          <Card className="min-w-[140px] sm:min-w-0 shrink-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Perguntas</CardTitle>
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <FileQuestion className="h-5 w-5 text-purple-600" />
+        <Card>
+          <CardContent className="pt-5 pb-4 px-4">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="p-1.5 bg-purple-50 dark:bg-purple-950 rounded-md shrink-0">
+                <FileQuestion className="h-4 w-4 text-purple-600 dark:text-purple-400" />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{perguntas.length}</div>
-              <p className="text-xs text-muted-foreground">Na entrevista</p>
-            </CardContent>
-          </Card>
+              <span className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Perguntas</span>
+            </div>
+            <div className="text-2xl font-bold">{perguntas.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">Na entrevista</p>
+          </CardContent>
+        </Card>
 
-          <Card className="min-w-40 sm:min-w-0 shrink-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Duração Média</CardTitle>
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Clock className="h-5 w-5 text-green-600" />
+        <Card>
+          <CardContent className="pt-5 pb-4 px-4">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="p-1.5 bg-green-50 dark:bg-green-950 rounded-md shrink-0">
+                <Clock className="h-4 w-4 text-green-600 dark:text-green-400" />
               </div>
-            </CardHeader>
-            <CardContent>
-              {(() => {
-                // Calcular duração média das entrevistas concluídas
-                const entrevistasComDuracao = candidatos.filter(
-                  (c) => c.status === "concluida" && c.iniciadaEm && c.concluidaEm
-                );
+              <span className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Duração Média</span>
+            </div>
+            {(() => {
+              const entrevistasComDuracao = candidatos.filter(
+                (c) => c.status === "concluida" && c.iniciadaEm && c.concluidaEm
+              );
 
-                let duracaoMedia: number | null = null;
-                if (entrevistasComDuracao.length > 0) {
-                  const totalMinutos = entrevistasComDuracao.reduce((acc, c) => {
-                    const inicio = new Date(c.iniciadaEm!).getTime();
-                    const fim = new Date(c.concluidaEm!).getTime();
-                    return acc + (fim - inicio) / 1000 / 60;
-                  }, 0);
-                  duracaoMedia = Math.round(totalMinutos / entrevistasComDuracao.length);
-                }
+              let duracaoMedia: number | null = null;
+              if (entrevistasComDuracao.length > 0) {
+                const totalMinutos = entrevistasComDuracao.reduce((acc, c) => {
+                  const inicio = new Date(c.iniciadaEm!).getTime();
+                  const fim = new Date(c.concluidaEm!).getTime();
+                  return acc + (fim - inicio) / 1000 / 60;
+                }, 0);
+                duracaoMedia = Math.round(totalMinutos / entrevistasComDuracao.length);
+              }
 
-                return (
-                  <div className="space-y-1">
-                    {duracaoMedia !== null ? (
-                      <>
-                        <div className="text-2xl font-bold">{duracaoMedia}m</div>
-                        <p className="text-xs text-muted-foreground">Média realizada</p>
-                      </>
-                    ) : (
-                      <>
-                        <div className="text-2xl font-bold">-</div>
-                        <p className="text-xs text-muted-foreground">Sem dados ainda</p>
-                      </>
-                    )}
-                  </div>
-                );
-              })()}
-            </CardContent>
-          </Card>
+              return duracaoMedia !== null ? (
+                <>
+                  <div className="text-2xl font-bold">{duracaoMedia}m</div>
+                  <p className="text-xs text-muted-foreground mt-1">Média realizada</p>
+                </>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold text-muted-foreground">-</div>
+                  <p className="text-xs text-muted-foreground mt-1">Sem dados ainda</p>
+                </>
+              );
+            })()}
+          </CardContent>
+        </Card>
 
-          <Card className="min-w-40 sm:min-w-0 shrink-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Tempo Máximo</CardTitle>
-              <div className="p-2 bg-amber-100 rounded-lg">
-                <Clock className="h-5 w-5 text-amber-600" />
+        <Card>
+          <CardContent className="pt-5 pb-4 px-4">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="p-1.5 bg-amber-50 dark:bg-amber-950 rounded-md shrink-0">
+                <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               </div>
-            </CardHeader>
-            <CardContent>
-              {(() => {
-                // Tempo máximo = 45s por pergunta + 3min por resposta = 3.75min por pergunta
-                const tempoMaximoCalculado = perguntas.length > 0
-                  ? Math.ceil(perguntas.length * 3.75)
-                  : null;
-                const tempoMaximoDefinido = entrevista.duracao;
+              <span className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Tempo Máx.</span>
+            </div>
+            {(() => {
+              const tempoMaximoCalculado = perguntas.length > 0
+                ? Math.ceil(perguntas.length * 3.75)
+                : null;
+              const tempoMaximoDefinido = entrevista.duracao;
 
-                return (
-                  <div className="space-y-1">
-                    {tempoMaximoDefinido ? (
-                      <>
-                        <div className="text-2xl font-bold">{tempoMaximoDefinido}m</div>
-                        <p className="text-xs text-muted-foreground">Definido</p>
-                      </>
-                    ) : tempoMaximoCalculado ? (
-                      <>
-                        <div className="text-2xl font-bold">{tempoMaximoCalculado}m</div>
-                        <p className="text-xs text-muted-foreground">Calculado</p>
-                      </>
-                    ) : (
-                      <>
-                        <div className="text-2xl font-bold">-</div>
-                        <p className="text-xs text-muted-foreground">Não definido</p>
-                      </>
-                    )}
-                  </div>
-                );
-              })()}
-            </CardContent>
-          </Card>
+              return tempoMaximoDefinido ? (
+                <>
+                  <div className="text-2xl font-bold">{tempoMaximoDefinido}m</div>
+                  <p className="text-xs text-muted-foreground mt-1">Definido</p>
+                </>
+              ) : tempoMaximoCalculado ? (
+                <>
+                  <div className="text-2xl font-bold">{tempoMaximoCalculado}m</div>
+                  <p className="text-xs text-muted-foreground mt-1">Calculado</p>
+                </>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold text-muted-foreground">-</div>
+                  <p className="text-xs text-muted-foreground mt-1">Não definido</p>
+                </>
+              );
+            })()}
+          </CardContent>
+        </Card>
 
-          <Card className="min-w-[140px] sm:min-w-0 shrink-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Criada</CardTitle>
-              <div className="p-2 bg-gray-100 rounded-lg">
-                <Calendar className="h-5 w-5 text-gray-600" />
+        <Card className="col-span-2 sm:col-span-1">
+          <CardContent className="pt-5 pb-4 px-4">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="p-1.5 bg-slate-100 dark:bg-slate-800 rounded-md shrink-0">
+                <Calendar className="h-4 w-4 text-slate-600 dark:text-slate-400" />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-sm font-bold">
-                {formatDistanceToNow(new Date(entrevista.createdAt), {
-                  addSuffix: true,
-                  locale: ptBR,
-                })}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {new Date(entrevista.createdAt).toLocaleDateString("pt-BR")}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+              <span className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Criada</span>
+            </div>
+            <div className="text-lg font-bold">
+              {formatDistanceToNow(new Date(entrevista.createdAt), {
+                addSuffix: true,
+                locale: ptBR,
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {new Date(entrevista.createdAt).toLocaleDateString("pt-BR")}
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Tabs */}
