@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
 /**
@@ -10,22 +10,27 @@ import { useRouter, usePathname } from "next/navigation";
 export function OnboardingCheck() {
   const router = useRouter();
   const pathname = usePathname();
-  const [checked, setChecked] = useState(false);
+  const hasChecked = useRef(false);
 
   useEffect(() => {
     // Não verificar se já está na página de onboarding
     if (pathname?.startsWith("/onboarding")) {
-      setChecked(true);
+      return;
+    }
+
+    // Evita verificações duplicadas
+    if (hasChecked.current) {
       return;
     }
 
     const checkOnboarding = async () => {
+      hasChecked.current = true;
+
       try {
         const response = await fetch("/api/user/cargo-preferences");
 
         // Se não autenticado, não fazer nada (deixar o middleware lidar)
         if (response.status === 401) {
-          setChecked(true);
           return;
         }
 
@@ -35,13 +40,11 @@ export function OnboardingCheck() {
           // Verifica especificamente se onboardingCompleted é false (não apenas falsy)
           if (data.onboardingCompleted === false) {
             router.push("/onboarding/areas");
-            return;
           }
         }
       } catch (error) {
         console.error("Erro ao verificar onboarding:", error);
       }
-      setChecked(true);
     };
 
     // Pequeno delay para garantir que a sessão está carregada

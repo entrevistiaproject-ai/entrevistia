@@ -14,6 +14,7 @@ import {
   MessageSquareText,
   ClipboardCheck,
   BarChart3,
+  Receipt,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -80,6 +81,7 @@ interface DadosCustos {
     mes: string;
     custo: number;
     transacoes: number;
+    analises: number;
   }>;
   metricas: {
     perguntasAnalisadas: number;
@@ -411,7 +413,7 @@ export default function CustosPage() {
                             R$ {item.custo.toFixed(2)}
                           </span>
                           <Badge variant="outline" className="text-xs">
-                            {item.transacoes} {item.transacoes === 1 ? "análise" : "análises"}
+                            {item.analises} {item.analises === 1 ? "análise" : "análises"}
                           </Badge>
                         </div>
                       </div>
