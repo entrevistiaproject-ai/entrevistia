@@ -478,167 +478,195 @@ export default function CustosPage() {
         </Card>
       )}
 
-      {/* Filtros de Período - scroll horizontal no mobile */}
-      <div className="scroll-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
-        <Tabs value={periodo} onValueChange={setPeriodo}>
-          <TabsList className="inline-flex w-auto sm:w-full sm:grid sm:grid-cols-4 h-11 sm:h-10">
-            <TabsTrigger value="mes" className="whitespace-nowrap px-4 text-xs sm:text-sm">Último Mês</TabsTrigger>
-            <TabsTrigger value="trimestre" className="whitespace-nowrap px-4 text-xs sm:text-sm">Trimestre</TabsTrigger>
-            <TabsTrigger value="ano" className="whitespace-nowrap px-4 text-xs sm:text-sm">Ano</TabsTrigger>
-            <TabsTrigger value="total" className="whitespace-nowrap px-4 text-xs sm:text-sm">Total</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
+      {/* Filtros de Período */}
+      <Tabs value={periodo} onValueChange={setPeriodo}>
+        <TabsList className="w-full grid grid-cols-4 h-11">
+          <TabsTrigger value="mes" className="text-xs sm:text-sm">Último Mês</TabsTrigger>
+          <TabsTrigger value="trimestre" className="text-xs sm:text-sm">Trimestre</TabsTrigger>
+          <TabsTrigger value="ano" className="text-xs sm:text-sm">Ano</TabsTrigger>
+          <TabsTrigger value="total" className="text-xs sm:text-sm">Total</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
-      {/* Cards de Resumo - scroll horizontal no mobile */}
-      <div className="scroll-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
-        <div className="inline-flex gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
-          {/* Fatura Atual */}
-          <Card className="border-2 border-blue-200 dark:border-blue-800 min-w-40 sm:min-w-0 shrink-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Fatura Atual</CardTitle>
-              <CreditCard className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl sm:text-3xl font-bold text-blue-600">
-                R$ {faturaAtual.valorTotal.toFixed(2)}
+      {/* Cards de Resumo */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        {/* Gasto no Período */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Gasto no Período</CardTitle>
+              <div className="p-1.5 rounded-md bg-muted">
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {mesNome}
-              </p>
-              <Badge variant={faturaAtual.status === "aberta" ? "default" : "secondary"} className="mt-2">
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-2xl sm:text-3xl font-bold">
+              R$ {periodoData.custoTotal.toFixed(2)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {periodoData.totalTransacoes} transações
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Custo Médio por Candidato */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Custo/Candidato</CardTitle>
+              <div className="p-1.5 rounded-md bg-muted">
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-2xl sm:text-3xl font-bold">
+              R$ {medias.custoPorCandidato.toFixed(2)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {medias.totalCandidatos} candidatos avaliados
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Fatura Atual - ocupa linha inteira no mobile */}
+        <Card className="col-span-2 lg:col-span-1 border-blue-200 dark:border-blue-800">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Fatura Atual</CardTitle>
+              <div className="p-1.5 rounded-md bg-blue-100 dark:bg-blue-900">
+                <CreditCard className="h-4 w-4 text-blue-600" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-2xl sm:text-3xl font-bold text-blue-600">
+                  R$ {faturaAtual.valorTotal.toFixed(2)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {mesNome}
+                </p>
+              </div>
+              <Badge variant={faturaAtual.status === "aberta" ? "default" : "secondary"}>
                 {faturaAtual.status}
               </Badge>
-            </CardContent>
-          </Card>
-
-          {/* Gasto no Período */}
-          <Card className="min-w-40 sm:min-w-0 shrink-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Gasto no Período</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl sm:text-3xl font-bold">
-                R$ {periodoData.custoTotal.toFixed(2)}
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {periodoData.totalTransacoes} análises
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Custo Médio por Candidato */}
-          <Card className="min-w-40 sm:min-w-0 shrink-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Custo/Candidato</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl sm:text-3xl font-bold">
-                R$ {medias.custoPorCandidato.toFixed(2)}
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {medias.totalCandidatos} candidatos avaliados
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Cards de Métricas de Análise */}
-      <div className="scroll-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
-        <div className="inline-flex gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
-          {/* Perguntas Analisadas */}
-          <Card className="border-2 border-green-200 dark:border-green-800 min-w-40 sm:min-w-0 shrink-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Perguntas Analisadas</CardTitle>
-              <MessageSquareText className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl sm:text-3xl font-bold text-green-600">
-                {metricas?.perguntasAnalisadas || 0}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* Perguntas Analisadas */}
+        <Card className="border-green-200 dark:border-green-800">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Perguntas Analisadas</CardTitle>
+              <div className="p-1.5 rounded-md bg-green-100 dark:bg-green-900">
+                <MessageSquareText className="h-4 w-4 text-green-600" />
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                no período selecionado
-              </p>
-            </CardContent>
-          </Card>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-2xl sm:text-3xl font-bold text-green-600">
+              {metricas?.perguntasAnalisadas || 0}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              no período selecionado
+            </p>
+          </CardContent>
+        </Card>
 
-          {/* Entrevistas Analisadas */}
-          <Card className="border-2 border-purple-200 dark:border-purple-800 min-w-40 sm:min-w-0 shrink-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Entrevistas Analisadas</CardTitle>
-              <ClipboardCheck className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl sm:text-3xl font-bold text-purple-600">
-                {metricas?.entrevistasAnalisadas || 0}
+        {/* Entrevistas Analisadas */}
+        <Card className="border-purple-200 dark:border-purple-800">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Entrevistas Analisadas</CardTitle>
+              <div className="p-1.5 rounded-md bg-purple-100 dark:bg-purple-900">
+                <ClipboardCheck className="h-4 w-4 text-purple-600" />
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                candidatos avaliados com IA
-              </p>
-            </CardContent>
-          </Card>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-2xl sm:text-3xl font-bold text-purple-600">
+              {metricas?.entrevistasAnalisadas || 0}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              candidatos avaliados com IA
+            </p>
+          </CardContent>
+        </Card>
 
-          {/* Média de Custo por Vaga */}
-          <Card className="min-w-40 sm:min-w-0 shrink-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Custo/Vaga</CardTitle>
-              <Briefcase className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl sm:text-3xl font-bold">
-                R$ {entrevistas.total > 0 ? (periodoData.custoTotal / entrevistas.total).toFixed(2) : "0.00"}
+        {/* Média de Custo por Vaga */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Custo/Vaga</CardTitle>
+              <div className="p-1.5 rounded-md bg-muted">
+                <Briefcase className="h-4 w-4 text-muted-foreground" />
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {entrevistas.total} {entrevistas.total === 1 ? "vaga" : "vagas"} no período
-              </p>
-            </CardContent>
-          </Card>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-2xl sm:text-3xl font-bold">
+              R$ {entrevistas.total > 0 ? (periodoData.custoTotal / entrevistas.total).toFixed(2) : "0.00"}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {entrevistas.total} {entrevistas.total === 1 ? "vaga" : "vagas"} no período
+            </p>
+          </CardContent>
+        </Card>
 
-          {/* Custo por Análise */}
-          <Card className="min-w-40 sm:min-w-0 shrink-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Custo/Análise</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl sm:text-3xl font-bold">
-                R$ {(metricas?.entrevistasAnalisadas || 0) > 0
-                  ? (periodoData.custoTotal / metricas.entrevistasAnalisadas).toFixed(2)
-                  : "0.00"}
+        {/* Custo por Análise */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Custo/Análise</CardTitle>
+              <div className="p-1.5 rounded-md bg-muted">
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                média por entrevista analisada
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-2xl sm:text-3xl font-bold">
+              R$ {(metricas?.entrevistasAnalisadas || 0) > 0
+                ? (periodoData.custoTotal / metricas.entrevistasAnalisadas).toFixed(2)
+                : "0.00"}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              média por entrevista analisada
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Gráfico de Entrevistas por Período */}
       <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
+        <CardHeader className="space-y-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1">
+              <CardTitle className="flex items-center gap-3">
+                <div className="p-2 rounded-md bg-muted">
+                  <BarChart3 className="h-5 w-5 text-muted-foreground" />
+                </div>
                 Entrevistas por Período
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="pl-12">
                 Total de entrevistas e quantas foram analisadas com IA
               </CardDescription>
             </div>
-            <Tabs value={graficoTipo} onValueChange={(v) => setGraficoTipo(v as GraficoTipo)}>
-              <TabsList className="h-9">
-                <TabsTrigger value="dia" className="text-xs px-3">Dia</TabsTrigger>
-                <TabsTrigger value="semana" className="text-xs px-3">Semana</TabsTrigger>
-                <TabsTrigger value="mes" className="text-xs px-3">Mês</TabsTrigger>
-                <TabsTrigger value="ano" className="text-xs px-3">Ano</TabsTrigger>
-              </TabsList>
-            </Tabs>
           </div>
+          <Tabs value={graficoTipo} onValueChange={(v) => setGraficoTipo(v as GraficoTipo)} className="w-full">
+            <TabsList className="w-full grid grid-cols-4 h-9">
+              <TabsTrigger value="dia" className="text-xs">Dia</TabsTrigger>
+              <TabsTrigger value="semana" className="text-xs">Semana</TabsTrigger>
+              <TabsTrigger value="mes" className="text-xs">Mês</TabsTrigger>
+              <TabsTrigger value="ano" className="text-xs">Ano</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </CardHeader>
         <CardContent>
           {(() => {
@@ -778,12 +806,17 @@ export default function CustosPage() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         {/* Top 5 Entrevistas Mais Caras */}
         <Card>
           <CardHeader>
-            <CardTitle>Entrevistas Mais Caras</CardTitle>
-            <CardDescription>
+            <CardTitle className="flex items-center gap-3">
+              <div className="p-2 rounded-md bg-muted">
+                <Briefcase className="h-5 w-5 text-muted-foreground" />
+              </div>
+              Entrevistas Mais Caras
+            </CardTitle>
+            <CardDescription className="pl-12">
               Top 5 vagas que mais geraram custos no período
             </CardDescription>
           </CardHeader>
@@ -834,8 +867,13 @@ export default function CustosPage() {
         {/* Evolução Mensal */}
         <Card>
           <CardHeader>
-            <CardTitle>Evolução de Gastos</CardTitle>
-            <CardDescription>
+            <CardTitle className="flex items-center gap-3">
+              <div className="p-2 rounded-md bg-muted">
+                <TrendingUp className="h-5 w-5 text-muted-foreground" />
+              </div>
+              Evolução de Gastos
+            </CardTitle>
+            <CardDescription className="pl-12">
               Histórico dos últimos meses
             </CardDescription>
           </CardHeader>
@@ -878,16 +916,21 @@ export default function CustosPage() {
       {/* Breakdown de Custos por Tipo */}
       <Card>
         <CardHeader>
-          <CardTitle>Detalhamento de Custos</CardTitle>
-          <CardDescription>
+          <CardTitle className="flex items-center gap-3">
+            <div className="p-2 rounded-md bg-muted">
+              <Receipt className="h-5 w-5 text-muted-foreground" />
+            </div>
+            Detalhamento de Custos
+          </CardTitle>
+          <CardDescription className="pl-12">
             Custos separados por tipo de operação
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {Object.entries(periodoData.custoPorTipo || {}).map(([tipo, valor]) => {
               const tipoLabels: Record<string, { label: string; icon: React.ElementType }> = {
-                taxa_base_candidato: { label: "Taxa Base (Candidatos)", icon: Users },
+                taxa_base_candidato: { label: "Taxa Base", icon: Users },
                 analise_pergunta: { label: "Análise por Pergunta", icon: TrendingUp },
                 transcricao_audio: { label: "Transcrição de Áudio", icon: Users },
                 analise_ia: { label: "Análise com IA", icon: TrendingUp },
@@ -901,13 +944,15 @@ export default function CustosPage() {
               return (
                 <div
                   key={tipo}
-                  className="p-4 rounded-lg border bg-linear-to-br from-muted/50 to-muted/30"
+                  className="p-3 sm:p-4 rounded-lg border bg-muted/30"
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <Icon className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-sm font-medium">{info.label}</p>
+                    <div className="p-1 rounded bg-muted">
+                      <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                    </div>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">{info.label}</p>
                   </div>
-                  <p className="text-2xl font-bold">R$ {Number(valor).toFixed(2)}</p>
+                  <p className="text-xl sm:text-2xl font-bold">R$ {Number(valor).toFixed(2)}</p>
                 </div>
               );
             })}
