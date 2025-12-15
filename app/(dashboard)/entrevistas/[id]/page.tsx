@@ -25,6 +25,11 @@ import {
   XCircle,
   Info,
   Mail,
+  RefreshCw,
+  TimerReset,
+  MoreVertical,
+  Timer,
+  Ban,
 } from "lucide-react";
 import Link from "next/link";
 import { AdicionarCandidatoDialog } from "@/components/entrevistas/adicionar-candidato-dialog";
@@ -40,6 +45,31 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -83,6 +113,11 @@ interface Candidato {
   status: string;
   iniciadaEm: Date | null;
   concluidaEm: Date | null;
+  // Prazo de resposta
+  prazoResposta: Date | null;
+  conviteEnviadoEm: Date | null;
+  // ID da sessão para ações
+  candidatoEntrevistaId: string;
   // Dados da avaliação da IA
   notaGeral: number | null;
   recomendacao: "recomendado" | "recomendado_com_ressalvas" | "nao_recomendado" | null;
@@ -117,7 +152,8 @@ const candidatoStatusConfig: Record<string, { label: string; variant: "outline" 
   pendente: { label: "Pendente", variant: "outline" },
   em_andamento: { label: "Em andamento", variant: "default" },
   concluida: { label: "Concluída", variant: "secondary" },
-  cancelada: { label: "Cancelada", variant: "destructive" },
+  cancelada: { label: "Desistiu", variant: "destructive" },
+  expirada: { label: "Expirada", variant: "destructive" },
 };
 
 
@@ -156,6 +192,113 @@ export default function EntrevistaDetalhesPage() {
   const [autoRejectMaxScore, setAutoRejectMaxScore] = useState(30);
   const [autoRejectNotifyCandidate, setAutoRejectNotifyCandidate] = useState(false);
   const [autoRejectCandidateMessage, setAutoRejectCandidateMessage] = useState("");
+
+  // Estados para dialogs de ações de candidato
+  const [prorrogarDialog, setProrrogarDialog] = useState<{ open: boolean; candidato: Candidato | null }>({ open: false, candidato: null });
+  const [reenviarDialog, setReenviarDialog] = useState<{ open: boolean; candidato: Candidato | null }>({ open: false, candidato: null });
+  const [horasAdicionais, setHorasAdicionais] = useState(24);
+  const [prazoReenvio, setPrazoReenvio] = useState(48);
+  const [candidatoActionLoading, setCandidatoActionLoading] = useState<string | null>(null);
+
+  // Função para calcular tempo restante
+  const calcularTempoRestante = (prazoResposta: Date | null) => {
+    if (!prazoResposta) return null;
+    const prazo = new Date(prazoResposta);
+    const agora = new Date();
+    const diff = prazo.getTime() - agora.getTime();
+
+    if (diff <= 0) return { texto: "Expirado", expirado: true };
+
+    const horas = Math.floor(diff / (1000 * 60 * 60));
+    const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (horas >= 24) {
+      const dias = Math.floor(horas / 24);
+      return { texto: `${dias}d ${horas % 24}h`, expirado: false };
+    }
+
+    if (horas > 0) {
+      return { texto: `${horas}h ${minutos}min`, expirado: false };
+    }
+
+    return { texto: `${minutos}min`, expirado: false, urgente: true };
+  };
+
+  // Handler para prorrogar prazo
+  const handleProrrogarPrazo = async () => {
+    if (!prorrogarDialog.candidato) return;
+
+    setCandidatoActionLoading(prorrogarDialog.candidato.candidatoEntrevistaId);
+    try {
+      const res = await fetch(`/api/candidato-entrevistas/${prorrogarDialog.candidato.candidatoEntrevistaId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ horasAdicionais }),
+      });
+
+      if (res.ok) {
+        toast({
+          title: "Prazo prorrogado",
+          description: `Prazo estendido em ${horasAdicionais} horas`,
+        });
+        setProrrogarDialog({ open: false, candidato: null });
+        await fetchData();
+      } else {
+        const data = await res.json();
+        toast({
+          title: "Erro",
+          description: data.error || "Erro ao prorrogar prazo",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao prorrogar prazo",
+        variant: "destructive",
+      });
+    } finally {
+      setCandidatoActionLoading(null);
+    }
+  };
+
+  // Handler para reenviar entrevista
+  const handleReenviarEntrevista = async () => {
+    if (!reenviarDialog.candidato) return;
+
+    setCandidatoActionLoading(reenviarDialog.candidato.candidatoEntrevistaId);
+    try {
+      const res = await fetch(`/api/candidato-entrevistas/${reenviarDialog.candidato.candidatoEntrevistaId}/reenviar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prazoHoras: prazoReenvio, enviarEmailConvite: true }),
+      });
+
+      if (res.ok) {
+        toast({
+          title: "Entrevista reenviada",
+          description: `O candidato receberá um novo convite por email`,
+        });
+        setReenviarDialog({ open: false, candidato: null });
+        await fetchData();
+      } else {
+        const data = await res.json();
+        toast({
+          title: "Erro",
+          description: data.error || "Erro ao reenviar entrevista",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao reenviar entrevista",
+        variant: "destructive",
+      });
+    } finally {
+      setCandidatoActionLoading(null);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -610,7 +753,12 @@ export default function EntrevistaDetalhesPage() {
             </CardHeader>
             <CardContent>
               {(() => {
-                const candidatosFiltrados = candidatos.filter((c) => {
+                // Separar candidatos ativos de expirados/cancelados
+                const candidatosAtivos = candidatos.filter((c) => !["expirada", "cancelada"].includes(c.status));
+                const candidatosInativos = candidatos.filter((c) => ["expirada", "cancelada"].includes(c.status));
+
+                // Aplicar filtro de decisão nos candidatos ativos
+                const candidatosFiltrados = candidatosAtivos.filter((c) => {
                   if (filtroDecisao === "todos") return true;
                   if (filtroDecisao === "aprovado") return c.decisaoRecrutador === "aprovado";
                   if (filtroDecisao === "reprovado") return c.decisaoRecrutador === "reprovado";
@@ -630,125 +778,182 @@ export default function EntrevistaDetalhesPage() {
                   );
                 }
 
-                if (candidatosFiltrados.length === 0) {
+                // Componente de card do candidato
+                const CandidatoCard = ({ candidato, mostrarAcoes = true }: { candidato: Candidato; mostrarAcoes?: boolean }) => {
+                  const tempoRestante = (candidato.status === "pendente" || candidato.status === "em_andamento")
+                    ? calcularTempoRestante(candidato.prazoResposta)
+                    : null;
+
                   return (
-                    <div className="text-center py-12">
-                      <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                      <p className="text-lg font-semibold">Nenhum candidato encontrado</p>
-                      <p className="text-muted-foreground">
-                        Nenhum candidato corresponde ao filtro selecionado
-                      </p>
+                    <div
+                      key={candidato.id}
+                      className="p-4 border rounded-xl hover:bg-muted/30 hover:border-primary/20 transition-all group"
+                    >
+                      {/* Layout Desktop */}
+                      <div className="flex items-center gap-4">
+                        {/* Info do candidato - clicável */}
+                        <Link
+                          href={`/candidatos/${candidato.id}/resultado`}
+                          className="flex-1 min-w-0 hover:text-primary transition-colors"
+                        >
+                          <p className="font-semibold text-foreground truncate">
+                            {candidato.nome}
+                          </p>
+                          <p className="text-sm text-muted-foreground truncate mt-0.5">
+                            {candidato.email}
+                          </p>
+                        </Link>
+
+                        {/* Tempo restante */}
+                        {tempoRestante && (
+                          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg shrink-0 ${
+                            tempoRestante.expirado
+                              ? "bg-red-50 dark:bg-red-950/50 text-red-600"
+                              : tempoRestante.urgente
+                                ? "bg-amber-50 dark:bg-amber-950/50 text-amber-600"
+                                : "bg-blue-50 dark:bg-blue-950/50 text-blue-600"
+                          }`}>
+                            <Timer className="h-3.5 w-3.5" />
+                            <span className="text-xs font-medium">{tempoRestante.texto}</span>
+                          </div>
+                        )}
+
+                        {/* Score */}
+                        {candidato.notaGeral !== null && (
+                          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-950/50 rounded-lg shrink-0">
+                            <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                            <span className={`text-sm font-bold ${getScoreColor(candidato.notaGeral)}`}>
+                              {Math.round(candidato.notaGeral)}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Decisão */}
+                        {candidato.status === "concluida" && (
+                          <div onClick={(e) => e.stopPropagation()} className="shrink-0">
+                            <DecisaoCandidato
+                              candidatoId={candidato.id}
+                              entrevistaId={entrevista.id}
+                              candidatoNome={candidato.nome}
+                              decisaoAtual={candidato.decisaoRecrutador}
+                              recomendacaoIA={candidato.recomendacao}
+                              observacaoAtual={candidato.decisaoRecrutadorObservacao}
+                              emailEncerramentoEnviado={!!candidato.emailEncerramentoEnviadoEm}
+                              onDecisaoAtualizada={fetchData}
+                              compact
+                            />
+                          </div>
+                        )}
+
+                        {/* Status Badge */}
+                        <Badge variant={candidatoStatusConfig[candidato.status]?.variant || "outline"} className="shrink-0">
+                          {candidatoStatusConfig[candidato.status]?.label || "Pendente"}
+                        </Badge>
+
+                        {/* Menu de ações */}
+                        {mostrarAcoes && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem asChild>
+                                <Link href={`/candidatos/${candidato.id}/resultado`}>
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  Ver resultado
+                                </Link>
+                              </DropdownMenuItem>
+                              {(candidato.status === "pendente" || candidato.status === "em_andamento") && (
+                                <>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setHorasAdicionais(24);
+                                      setProrrogarDialog({ open: true, candidato });
+                                    }}
+                                  >
+                                    <TimerReset className="h-4 w-4 mr-2" />
+                                    Prorrogar prazo
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                              {(candidato.status === "expirada" || candidato.status === "cancelada") && (
+                                <>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setPrazoReenvio(48);
+                                      setReenviarDialog({ open: true, candidato });
+                                    }}
+                                  >
+                                    <RefreshCw className="h-4 w-4 mr-2" />
+                                    Reenviar entrevista
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+
+                        {/* Seta */}
+                        <Link href={`/candidatos/${candidato.id}/resultado`} className="shrink-0">
+                          <ChevronRight className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
+                        </Link>
+                      </div>
                     </div>
                   );
-                }
+                };
 
                 return (
-                  <div className="space-y-3">
-                    {candidatosFiltrados.map((candidato) => {
-                    return (
-                      <Link
-                        key={candidato.id}
-                        href={`/candidatos/${candidato.id}/resultado`}
-                        className="block p-4 border rounded-xl hover:bg-muted/30 hover:border-primary/20 transition-all group"
-                      >
-                        {/* Layout Mobile: Stack vertical */}
-                        <div className="flex flex-col gap-3 sm:hidden">
-                          {/* Linha 1: Nome e Score */}
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                                {candidato.nome}
-                              </p>
-                              <p className="text-sm text-muted-foreground truncate mt-0.5">
-                                {candidato.email}
-                              </p>
-                            </div>
-                            {candidato.notaGeral !== null && (
-                              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 dark:bg-amber-950/50 rounded-lg shrink-0">
-                                <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-                                <span className={`text-sm font-bold ${getScoreColor(candidato.notaGeral)}`}>
-                                  {Math.round(candidato.notaGeral)}
-                                </span>
-                              </div>
-                            )}
-                          </div>
+                  <div className="space-y-6">
+                    {/* Lista de candidatos ativos */}
+                    {candidatosFiltrados.length === 0 && candidatosAtivos.length > 0 ? (
+                      <div className="text-center py-8">
+                        <Users className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
+                        <p className="font-medium">Nenhum candidato encontrado</p>
+                        <p className="text-sm text-muted-foreground">
+                          Nenhum candidato ativo corresponde ao filtro selecionado
+                        </p>
+                      </div>
+                    ) : candidatosFiltrados.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Users className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
+                        <p className="font-medium">Nenhum candidato ativo</p>
+                        <p className="text-sm text-muted-foreground">
+                          Adicione candidatos usando os botões acima
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {candidatosFiltrados.map((candidato) => (
+                          <CandidatoCard key={candidato.id} candidato={candidato} />
+                        ))}
+                      </div>
+                    )}
 
-                          {/* Linha 2: Decisão, Status e Seta */}
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              {candidato.status === "concluida" && (
-                                <div onClick={(e) => e.preventDefault()}>
-                                  <DecisaoCandidato
-                                    candidatoId={candidato.id}
-                                    entrevistaId={entrevista.id}
-                                    candidatoNome={candidato.nome}
-                                    decisaoAtual={candidato.decisaoRecrutador}
-                                    recomendacaoIA={candidato.recomendacao}
-                                    observacaoAtual={candidato.decisaoRecrutadorObservacao}
-                                    emailEncerramentoEnviado={!!candidato.emailEncerramentoEnviadoEm}
-                                    onDecisaoAtualizada={fetchData}
-                                    compact
-                                  />
-                                </div>
-                              )}
-                              <Badge variant={candidatoStatusConfig[candidato.status]?.variant || "outline"} className="text-xs">
-                                {candidatoStatusConfig[candidato.status]?.label || "Pendente"}
-                              </Badge>
-                            </div>
-                            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                    {/* Seção de expiradas/desistências */}
+                    {candidatosInativos.length > 0 && (
+                      <div className="mt-8 pt-6 border-t">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="p-2 rounded-lg bg-red-50 dark:bg-red-950/50">
+                            <Ban className="h-4 w-4 text-red-500" />
                           </div>
-                        </div>
-
-                        {/* Layout Desktop: Linha horizontal otimizada */}
-                        <div className="hidden sm:flex sm:items-center sm:gap-4">
-                          {/* Info do candidato */}
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                              {candidato.nome}
-                            </p>
-                            <p className="text-sm text-muted-foreground truncate mt-0.5">
-                              {candidato.email}
+                          <div>
+                            <h4 className="font-semibold">Expiradas e Desistências</h4>
+                            <p className="text-sm text-muted-foreground">
+                              {candidatosInativos.length} candidato{candidatosInativos.length !== 1 ? "s" : ""} - você pode reenviar a entrevista para dar uma nova chance
                             </p>
                           </div>
-
-                          {/* Score */}
-                          {candidato.notaGeral !== null && (
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-950/50 rounded-lg shrink-0">
-                              <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-                              <span className={`text-sm font-bold ${getScoreColor(candidato.notaGeral)}`}>
-                                {Math.round(candidato.notaGeral)}
-                              </span>
-                            </div>
-                          )}
-
-                          {/* Decisão */}
-                          {candidato.status === "concluida" && (
-                            <div onClick={(e) => e.preventDefault()} className="shrink-0">
-                              <DecisaoCandidato
-                                candidatoId={candidato.id}
-                                entrevistaId={entrevista.id}
-                                candidatoNome={candidato.nome}
-                                decisaoAtual={candidato.decisaoRecrutador}
-                                recomendacaoIA={candidato.recomendacao}
-                                observacaoAtual={candidato.decisaoRecrutadorObservacao}
-                                emailEncerramentoEnviado={!!candidato.emailEncerramentoEnviadoEm}
-                                onDecisaoAtualizada={fetchData}
-                                compact
-                              />
-                            </div>
-                          )}
-
-                          {/* Status Badge */}
-                          <Badge variant={candidatoStatusConfig[candidato.status]?.variant || "outline"} className="shrink-0">
-                            {candidatoStatusConfig[candidato.status]?.label || "Pendente"}
-                          </Badge>
-
-                          {/* Seta */}
-                          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
                         </div>
-                      </Link>
-                    );
-                  })}
+                        <div className="space-y-3">
+                          {candidatosInativos.map((candidato) => (
+                            <CandidatoCard key={candidato.id} candidato={candidato} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })()}
@@ -1298,6 +1503,122 @@ export default function EntrevistaDetalhesPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Dialog: Prorrogar Prazo */}
+      <Dialog open={prorrogarDialog.open} onOpenChange={(open) => !open && setProrrogarDialog({ open: false, candidato: null })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Prorrogar Prazo</DialogTitle>
+            <DialogDescription>
+              Estenda o prazo de resposta para {prorrogarDialog.candidato?.nome}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Adicionar horas ao prazo</Label>
+              <Select value={horasAdicionais.toString()} onValueChange={(v) => setHorasAdicionais(parseInt(v))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="12">12 horas</SelectItem>
+                  <SelectItem value="24">24 horas (1 dia)</SelectItem>
+                  <SelectItem value="48">48 horas (2 dias)</SelectItem>
+                  <SelectItem value="72">72 horas (3 dias)</SelectItem>
+                  <SelectItem value="168">168 horas (1 semana)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {prorrogarDialog.candidato?.prazoResposta && (
+              <div className="text-sm text-muted-foreground">
+                <p>Prazo atual: {new Date(prorrogarDialog.candidato.prazoResposta).toLocaleString("pt-BR")}</p>
+                <p className="mt-1">
+                  Novo prazo: {new Date(
+                    Math.max(
+                      new Date(prorrogarDialog.candidato.prazoResposta).getTime(),
+                      Date.now()
+                    ) + horasAdicionais * 60 * 60 * 1000
+                  ).toLocaleString("pt-BR")}
+                </p>
+              </div>
+            )}
+            {prorrogarDialog.candidato?.status === "expirada" && (
+              <div className="flex gap-3 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  A entrevista deste candidato expirou. Ao prorrogar, o status será revertido para &quot;Em andamento&quot;.
+                </p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setProrrogarDialog({ open: false, candidato: null })}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleProrrogarPrazo}
+              disabled={candidatoActionLoading === prorrogarDialog.candidato?.candidatoEntrevistaId}
+            >
+              {candidatoActionLoading === prorrogarDialog.candidato?.candidatoEntrevistaId && (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              )}
+              Prorrogar Prazo
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog: Reenviar Entrevista */}
+      <AlertDialog open={reenviarDialog.open} onOpenChange={(open) => !open && setReenviarDialog({ open: false, candidato: null })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reenviar Entrevista</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p>
+                Você está prestes a dar uma nova chance para <strong>{reenviarDialog.candidato?.nome}</strong> realizar a entrevista.
+              </p>
+              <div className="flex gap-3 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="text-sm text-amber-800 dark:text-amber-200">
+                  <p className="font-medium">Atenção:</p>
+                  <ul className="list-disc list-inside mt-1 space-y-1">
+                    <li>Todas as respostas anteriores serão apagadas</li>
+                    <li>O candidato receberá um novo convite por email</li>
+                    <li>Um novo prazo será definido</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="space-y-2 pt-2">
+                <Label>Prazo para responder</Label>
+                <Select value={prazoReenvio.toString()} onValueChange={(v) => setPrazoReenvio(parseInt(v))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="24">24 horas (1 dia)</SelectItem>
+                    <SelectItem value="48">48 horas (2 dias)</SelectItem>
+                    <SelectItem value="72">72 horas (3 dias)</SelectItem>
+                    <SelectItem value="168">7 dias</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleReenviarEntrevista}
+              disabled={candidatoActionLoading === reenviarDialog.candidato?.candidatoEntrevistaId}
+              className="bg-primary"
+            >
+              {candidatoActionLoading === reenviarDialog.candidato?.candidatoEntrevistaId && (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              )}
+              Reenviar Entrevista
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

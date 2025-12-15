@@ -53,6 +53,9 @@ export async function GET(
         status: candidatoEntrevistas.status,
         iniciadaEm: candidatoEntrevistas.iniciadaEm,
         concluidaEm: candidatoEntrevistas.concluidaEm,
+        // Prazo de resposta
+        prazoResposta: candidatoEntrevistas.prazoResposta,
+        conviteEnviadoEm: candidatoEntrevistas.conviteEnviadoEm,
         // Dados da avaliação da IA
         notaGeral: candidatoEntrevistas.notaGeral,
         recomendacao: candidatoEntrevistas.recomendacao,
@@ -63,6 +66,8 @@ export async function GET(
         decisaoRecrutadorObservacao: candidatoEntrevistas.decisaoRecrutadorObservacao,
         // Email de encerramento
         emailEncerramentoEnviadoEm: candidatoEntrevistas.emailEncerramentoEnviadoEm,
+        // ID da sessão para ações
+        candidatoEntrevistaId: candidatoEntrevistas.id,
       })
       .from(candidatoEntrevistas)
       .innerJoin(candidatos, eq(candidatoEntrevistas.candidatoId, candidatos.id))
