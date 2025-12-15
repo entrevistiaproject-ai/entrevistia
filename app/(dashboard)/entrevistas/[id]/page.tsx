@@ -1094,7 +1094,7 @@ export default function EntrevistaDetalhesPage() {
 
               {/* Ação: Reativar Vaga */}
               {(entrevista.status === "completed" || entrevista.status === "archived") && (
-                <div className="flex items-start justify-between p-4 border rounded-lg border-green-200 bg-green-50/50">
+                <div className="flex items-start justify-between p-4 border rounded-lg border-green-200 bg-green-50">
                   <div className="flex items-start gap-3">
                     <div className="p-2 bg-green-100 rounded-lg">
                       <Play className="h-5 w-5 text-green-600" />

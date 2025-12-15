@@ -751,7 +751,7 @@ export default function ResultadoCandidatoPage() {
                   {/* Resposta - Estilo candidato */}
                   <div className="px-6 py-4 bg-white dark:bg-background">
                     <div className="flex items-start gap-4">
-                      <div className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 shrink-0">
+                      <div className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-400 shrink-0">
                         <span className="text-xs font-semibold">
                           {candidato?.nome?.charAt(0).toUpperCase() || 'C'}
                         </span>

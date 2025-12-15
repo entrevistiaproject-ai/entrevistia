@@ -671,7 +671,7 @@ export default function FaturaPage() {
                             <div className={cn(
                               "p-2 rounded-lg mt-0.5",
                               avaliacao.totalPerguntas > 0
-                                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600"
+                                ? "bg-blue-100 dark:bg-blue-900 text-blue-600"
                                 : "bg-muted text-muted-foreground"
                             )}>
                               {avaliacao.totalPerguntas > 0 ? (

@@ -200,7 +200,7 @@ export function SupportWidget({
       <DialogContent className="sm:max-w-[500px]">
         {success ? (
           <div className="text-center py-6">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900">
               <CheckCircle className="h-8 w-8 text-emerald-600" />
             </div>
             <DialogTitle className="text-xl mb-2">Chamado Criado!</DialogTitle>
@@ -354,7 +354,7 @@ export function SupportCard({
   ...props
 }: SupportWidgetProps & { title?: string; description?: string }) {
   return (
-    <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+    <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
       <h3 className="font-medium text-slate-900 dark:text-white mb-1">{title}</h3>
       <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">{description}</p>
       <SupportWidget {...props} variant="outline" />

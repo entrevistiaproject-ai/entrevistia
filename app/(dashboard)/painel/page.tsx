@@ -456,8 +456,8 @@ export default function PainelPage() {
         className={cn(
           "group flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-xl border transition-all cursor-pointer",
           selectedIds.has(candidate.id)
-            ? "border-green-500 bg-green-50/80 ring-1 ring-green-200"
-            : "border-green-200 bg-green-50/30",
+            ? "border-green-500 bg-green-100 ring-1 ring-green-200"
+            : "border-green-200 bg-green-50",
           "hover:shadow-md hover:border-green-400"
         )}
       >
@@ -657,7 +657,7 @@ export default function PainelPage() {
         <Card
           className={cn(
             "cursor-pointer transition-all",
-            activeTab === "pendentes" ? "border-amber-400 bg-amber-50/50 ring-1 ring-amber-200" : "hover:border-amber-300"
+            activeTab === "pendentes" ? "border-amber-400 bg-amber-100 ring-1 ring-amber-200" : "hover:border-amber-300"
           )}
           onClick={() => setActiveTab("pendentes")}
         >
@@ -677,7 +677,7 @@ export default function PainelPage() {
         <Card
           className={cn(
             "cursor-pointer transition-all",
-            activeTab === "finalistas" ? "border-green-400 bg-green-50/50 ring-1 ring-green-200" : "hover:border-green-300"
+            activeTab === "finalistas" ? "border-green-400 bg-green-100 ring-1 ring-green-200" : "hover:border-green-300"
           )}
           onClick={() => setActiveTab("finalistas")}
         >

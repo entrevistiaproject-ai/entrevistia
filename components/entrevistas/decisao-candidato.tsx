@@ -409,7 +409,7 @@ export function DecisaoCandidato({
                 "flex flex-col items-center gap-2.5 p-5 rounded-xl border-2 transition-all cursor-pointer",
                 decisaoSelecionada === "aprovado"
                   ? "border-emerald-500 bg-emerald-50"
-                  : "border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/50"
+                  : "border-slate-200 hover:border-emerald-300 hover:bg-emerald-50"
               )}
             >
               <CheckCircle2 className={cn(
@@ -434,7 +434,7 @@ export function DecisaoCandidato({
                 "flex flex-col items-center gap-2.5 p-5 rounded-xl border-2 transition-all cursor-pointer",
                 decisaoSelecionada === "reprovado"
                   ? "border-red-500 bg-red-50"
-                  : "border-slate-200 hover:border-red-300 hover:bg-red-50/50"
+                  : "border-slate-200 hover:border-red-300 hover:bg-red-50"
               )}
             >
               <XCircle className={cn(

@@ -103,12 +103,12 @@ export function EntrevistaCard({ entrevista }: EntrevistaCardProps) {
             <span className="text-base font-bold tabular-nums">{entrevista.totalConcluiram}</span>
             <span className="text-[10px] text-muted-foreground">Concluídos</span>
           </div>
-          <div className="flex flex-col items-center justify-center p-2 bg-green-50 dark:bg-green-950/30 rounded-lg">
+          <div className="flex flex-col items-center justify-center p-2 bg-green-50 dark:bg-green-900 rounded-lg">
             <UserCheck className="h-4 w-4 text-green-600 mb-1" />
             <span className="text-base font-bold tabular-nums text-green-600">{entrevista.totalAprovados}</span>
             <span className="text-[10px] text-green-600/80">Aprovados</span>
           </div>
-          <div className="flex flex-col items-center justify-center p-2 bg-amber-50 dark:bg-amber-950/30 rounded-lg">
+          <div className="flex flex-col items-center justify-center p-2 bg-amber-50 dark:bg-amber-900 rounded-lg">
             <Star className="h-4 w-4 text-amber-500 mb-1" />
             <span className="text-base font-bold tabular-nums text-amber-600">
               {entrevista.mediaScore !== null ? entrevista.mediaScore : "-"}
