@@ -103,7 +103,9 @@
       "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" secret set VERCEL_APP_URL --body \"https://entrevistia.com.br\")",
       "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" secret set CRON_SECRET --body \"zqMTkOfVNjtkMbHmQTn57YGhBLZO+eqVHSCDhuFcy0A=\")",
       "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" secret list)",
-      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" run list --limit 3)"
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" run list --limit 3)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" run list --limit 5)",
+      "Bash(timeout 300 npm run build:*)"
     ],
     "deny": [],
     "ask": []

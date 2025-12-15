@@ -1,5 +1,16 @@
-import { pgTable, text, timestamp, uuid, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid, boolean, pgEnum } from "drizzle-orm/pg-core";
 import { users } from "./users";
+
+/**
+ * Enum de áreas profissionais para organização do banco de perguntas
+ */
+export const areaProfissionalEnum = pgEnum("area_profissional", [
+  "tecnologia",
+  "juridico",
+  "comercial",
+  "varejo",
+  "administrativo",
+]);
 
 /**
  * Tabela de templates de perguntas
@@ -14,7 +25,8 @@ export const perguntasTemplates = pgTable("perguntas_templates", {
   // Dados da pergunta
   texto: text("texto").notNull(),
 
-  // Cargo e nível específicos (simplificado)
+  // Área profissional e cargo/nível específicos
+  area: areaProfissionalEnum("area"), // Área profissional: tecnologia, juridico, comercial, varejo, administrativo
   cargo: text("cargo").notNull(), // Ex: "Desenvolvedor Front-End", "Advogado Trabalhista"
   nivel: text("nivel").notNull(), // Ex: "junior", "pleno", "senior"
 

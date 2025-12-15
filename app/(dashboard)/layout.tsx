@@ -1,5 +1,6 @@
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { BottomNav } from "@/components/dashboard/bottom-nav";
+import { OnboardingCheck } from "@/components/dashboard/onboarding-check";
 
 export default function DashboardLayout({
   children,
@@ -8,6 +9,7 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="min-h-screen bg-background">
+      <OnboardingCheck />
       <Sidebar />
       <BottomNav />
       <main className="md:ml-64">

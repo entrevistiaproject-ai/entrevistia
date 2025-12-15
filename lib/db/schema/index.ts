@@ -13,13 +13,14 @@ export * from "./admin-users";
 export * from "./system-config";
 export * from "./tickets";
 export * from "./team";
+export * from "./user-cargo-preferences";
 
 // Export schema for Drizzle migrations
 import { users } from "./users";
 import { candidatos } from "./candidatos";
 import { entrevistas } from "./entrevistas";
 import { perguntas } from "./perguntas";
-import { perguntasTemplates, perguntasOcultas } from "./perguntas-templates";
+import { perguntasTemplates, perguntasOcultas, areaProfissionalEnum } from "./perguntas-templates";
 import { respostas } from "./respostas";
 import { auditLogs } from "./audit-logs";
 import { verificationCodes } from "./verification-codes";
@@ -45,6 +46,7 @@ import {
   teamRoleEnum,
   invitationStatusEnum,
 } from "./team";
+import { userCargoPreferences } from "./user-cargo-preferences";
 
 export const schema = {
   users,
@@ -53,6 +55,7 @@ export const schema = {
   perguntas,
   perguntasTemplates,
   perguntasOcultas,
+  areaProfissionalEnum,
   respostas,
   auditLogs,
   verificationCodes,
@@ -76,4 +79,5 @@ export const schema = {
   teamSettings,
   teamRoleEnum,
   invitationStatusEnum,
+  userCargoPreferences,
 };
