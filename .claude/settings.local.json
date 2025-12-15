@@ -92,7 +92,18 @@
       "Bash(node:*)",
       "Bash(timeout 60 npm run build:*)",
       "Bash(timeout 120 npm run build:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(git show:*)",
+      "Bash(gh auth status:*)",
+      "Bash(winget install:*)",
+      "Bash(choco install:*)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" --version)",
+      "Bash(\"/c/Program Files (x86)/GitHub CLI/gh.exe\" --version)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" auth status)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" secret set VERCEL_APP_URL --body \"https://entrevistia.com.br\")",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" secret set CRON_SECRET --body \"zqMTkOfVNjtkMbHmQTn57YGhBLZO+eqVHSCDhuFcy0A=\")",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" secret list)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" run list --limit 3)"
     ],
     "deny": [],
     "ask": []

@@ -732,7 +732,7 @@ export default function ResultadoCandidatoPage() {
               {perguntasRespostas.map((item, index) => (
                 <div key={item.pergunta.id} className="group">
                   {/* Pergunta - Estilo entrevistador */}
-                  <div className="px-6 py-4 bg-slate-50 dark:bg-slate-900">
+                  <div className="px-6 py-4 bg-slate-100">
                     <div className="flex items-start gap-4">
                       <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-semibold shrink-0 shadow-sm">
                         {item.pergunta.ordem || index + 1}
@@ -741,7 +741,7 @@ export default function ResultadoCandidatoPage() {
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-xs font-medium text-primary">Entrevistador</span>
                         </div>
-                        <p className="text-sm font-medium text-foreground leading-relaxed">
+                        <p className="text-sm font-medium text-slate-900 leading-relaxed">
                           {item.pergunta.texto}
                         </p>
                       </div>
@@ -749,20 +749,20 @@ export default function ResultadoCandidatoPage() {
                   </div>
 
                   {/* Resposta - Estilo candidato */}
-                  <div className="px-6 py-4 bg-white dark:bg-background">
+                  <div className="px-6 py-4 bg-white">
                     <div className="flex items-start gap-4">
-                      <div className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-400 shrink-0">
+                      <div className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 shrink-0">
                         <span className="text-xs font-semibold">
                           {candidato?.nome?.charAt(0).toUpperCase() || 'C'}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2 mb-1.5">
-                          <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                          <span className="text-xs font-medium text-emerald-600">
                             {candidato?.nome?.split(' ')[0] || 'Candidato'}
                           </span>
                           {item.resposta.tempoResposta && (
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1 text-xs text-slate-500">
                               <Clock className="h-3 w-3" />
                               <span>{item.resposta.tempoResposta}s</span>
                             </div>
@@ -770,12 +770,12 @@ export default function ResultadoCandidatoPage() {
                         </div>
                         {item.resposta.texto || item.resposta.transcricao ? (
                           <div className="relative">
-                            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                            <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
                               {item.resposta.texto || item.resposta.transcricao}
                             </p>
                           </div>
                         ) : (
-                          <p className="text-sm text-muted-foreground/60 italic">
+                          <p className="text-sm text-slate-400 italic">
                             Sem resposta registrada
                           </p>
                         )}
