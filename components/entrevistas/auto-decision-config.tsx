@@ -119,9 +119,9 @@ export function AutoDecisionConfig({
 
       {/* Aviso de faixa de análise manual */}
       {autoApprovalEnabled && autoRejectEnabled && autoApprovalMinScore > autoRejectMaxScore && (
-        <div className="p-3 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg">
+        <div className="p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
           <p className="text-xs text-blue-800 dark:text-blue-200">
-            <strong>Faixa de análise manual:</strong> Candidatos com nota entre {autoRejectMaxScore + 1}% e {autoApprovalMinScore - 1}% ficarão pendentes para sua decisão.
+            <strong className="text-blue-900 dark:text-blue-100">Faixa de análise manual:</strong> Candidatos com nota entre {autoRejectMaxScore + 1}% e {autoApprovalMinScore - 1}% ficarão pendentes para sua decisão.
           </p>
         </div>
       )}

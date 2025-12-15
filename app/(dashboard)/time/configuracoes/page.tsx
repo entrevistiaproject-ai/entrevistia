@@ -33,16 +33,16 @@ export default function ConfiguracoesTimePage() {
       </div>
 
       {/* Card informativo sobre aprovação automática */}
-      <Card className="bg-blue-50 border-blue-200">
+      <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
         <CardContent className="pt-6">
           <div className="flex gap-3">
-            <Info className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
-            <div className="text-sm text-blue-900">
+            <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+            <div className="text-sm text-blue-900 dark:text-blue-100">
               <p className="font-medium mb-2">Configurações de Aprovação Automática</p>
-              <p className="text-blue-800 mb-2">
+              <p className="text-blue-800 dark:text-blue-200 mb-2">
                 A aprovação e reprovação automática de candidatos agora é configurada individualmente para cada vaga.
               </p>
-              <p className="text-blue-800">
+              <p className="text-blue-800 dark:text-blue-200">
                 Para configurar a aprovação automática, acesse a vaga desejada em <strong>Entrevistas</strong> e vá na aba <strong>Configurações</strong>.
               </p>
             </div>

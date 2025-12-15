@@ -380,10 +380,10 @@ export default function CadastroEntrevistaPage() {
                 </div>
 
                 {candidatoExistente && (
-                  <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
-                    <div className="text-sm">
-                      <p className="font-medium">Bem-vindo de volta!</p>
+                  <div className="bg-blue-50 border border-blue-200 px-4 py-3 rounded-lg flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+                    <div className="text-sm text-blue-800">
+                      <p className="font-medium text-blue-900">Bem-vindo de volta!</p>
                       <p className="mt-1">Encontramos seu cadastro. Confira seus dados abaixo.</p>
                     </div>
                   </div>

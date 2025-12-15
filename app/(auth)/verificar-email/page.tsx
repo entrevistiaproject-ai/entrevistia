@@ -282,9 +282,9 @@ function VerificarEmailContent() {
         </Card>
 
         {/* Dica */}
-        <div className="mt-8 p-5 bg-card rounded-xl border">
-          <p className="text-sm text-muted-foreground text-center">
-            <strong>Dica:</strong> Olhe também na pasta de spam ou lixo eletrônico
+        <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+          <p className="text-sm text-blue-800 dark:text-blue-200 text-center">
+            <strong className="text-blue-900 dark:text-blue-100">Dica:</strong> Olhe também na pasta de spam ou lixo eletrônico
           </p>
         </div>
       </div>

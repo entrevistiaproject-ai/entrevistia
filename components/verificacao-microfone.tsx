@@ -203,7 +203,7 @@ export function VerificacaoMicrofone({ onMicrofoneVerificado }: VerificacaoMicro
           )}
 
           {!microfoneTestado && nivelAudio >= 5 && nivelAudio < 15 && (
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 text-center">
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800 text-center">
               Volume baixo detectado. Aproxime-se do microfone ou aumente o volume.
             </div>
           )}
@@ -247,9 +247,9 @@ export function VerificacaoMicrofone({ onMicrofoneVerificado }: VerificacaoMicro
       </div>
 
       {/* Dicas */}
-      <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-        <h3 className="font-semibold text-gray-900 mb-2">Dicas para uma boa gravação:</h3>
-        <ul className="text-sm text-gray-600 space-y-1">
+      <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+        <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">Dicas para uma boa gravação:</h3>
+        <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
           <li>• Escolha um ambiente silencioso</li>
           <li>• Posicione-se a cerca de 30cm do microfone</li>
           <li>• Use fones de ouvido para evitar eco</li>

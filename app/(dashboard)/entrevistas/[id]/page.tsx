@@ -783,11 +783,11 @@ export default function EntrevistaDetalhesPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Explicação */}
-              <div className="flex gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <Info className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
-                <div className="text-sm text-blue-900">
+              <div className="flex gap-3 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                <div className="text-sm text-blue-900 dark:text-blue-100">
                   <p className="font-medium mb-1">Como funciona?</p>
-                  <p className="text-blue-800">
+                  <p className="text-blue-800 dark:text-blue-200">
                     Após a análise da IA, o sistema pode automaticamente aprovar ou reprovar candidatos com base no score obtido. Isso agiliza o processo de triagem.
                   </p>
                 </div>

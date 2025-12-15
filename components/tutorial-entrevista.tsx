@@ -422,34 +422,34 @@ export function TutorialEntrevista({ onTutorialCompleto }: TutorialEntrevistaPro
           </p>
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-6 mb-8">
-          <h3 className="font-semibold text-gray-900 mb-4">Como funciona:</h3>
+        <div className="bg-blue-50 rounded-lg p-6 mb-8 border border-blue-200">
+          <h3 className="font-semibold text-blue-900 mb-4">Como funciona:</h3>
           <div className="space-y-3">
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold shrink-0">
+              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold shrink-0">
                 1
               </div>
               <div>
-                <p className="font-medium text-gray-900">Leia a pergunta</p>
-                <p className="text-sm text-gray-600">Você verá a pergunta e uma dica de como responder</p>
+                <p className="font-medium text-blue-900">Leia a pergunta</p>
+                <p className="text-sm text-blue-800">Você verá a pergunta e uma dica de como responder</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold shrink-0">
+              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold shrink-0">
                 2
               </div>
               <div>
-                <p className="font-medium text-gray-900">Grave sua resposta</p>
-                <p className="text-sm text-gray-600">Clique no botão e fale naturalmente</p>
+                <p className="font-medium text-blue-900">Grave sua resposta</p>
+                <p className="text-sm text-blue-800">Clique no botão e fale naturalmente</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold shrink-0">
+              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold shrink-0">
                 3
               </div>
               <div>
-                <p className="font-medium text-gray-900">Revise e continue</p>
-                <p className="text-sm text-gray-600">Ouça sua gravação e refaça se necessário</p>
+                <p className="font-medium text-blue-900">Revise e continue</p>
+                <p className="text-sm text-blue-800">Ouça sua gravação e refaça se necessário</p>
               </div>
             </div>
           </div>
@@ -544,8 +544,8 @@ export function TutorialEntrevista({ onTutorialCompleto }: TutorialEntrevistaPro
         </h2>
 
         <div className="flex items-start gap-2 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <Lightbulb className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
-          <p className="text-sm text-blue-700">{pergunta.dica}</p>
+          <Lightbulb className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+          <p className="text-sm text-blue-800">{pergunta.dica}</p>
         </div>
       </div>
 

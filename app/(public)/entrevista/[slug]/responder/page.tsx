@@ -360,15 +360,15 @@ export default function ResponderEntrevistaPage() {
         </Card>
 
         {/* Informações */}
-        <Card className="bg-muted/30">
+        <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
           <CardContent className="py-5 px-5 sm:px-6">
             <div className="flex items-start gap-4">
-              <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+              <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
               <div>
-                <h3 className="font-semibold mb-3">
+                <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-3">
                   Como funciona
                 </h3>
-                <ul className="text-sm text-muted-foreground space-y-2">
+                <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
                   <li>• Você tem 45 segundos para pensar antes de cada pergunta</li>
                   <li>• Depois, pode gravar sua resposta em áudio (até 3 min)</li>
                   <li>• Se quiser, pode pular o tempo de reflexão e responder direto</li>

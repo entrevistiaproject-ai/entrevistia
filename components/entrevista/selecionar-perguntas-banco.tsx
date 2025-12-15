@@ -12,6 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Search, Plus, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getLabelNivel } from "@/lib/constants/niveis";
@@ -59,6 +61,7 @@ export function SelecionarPerguntasBanco({
   const [filtroCategoria, setFiltroCategoria] = useState<string>("todas");
   const [filtroCargo, setFiltroCargo] = useState<string>("todos");
   const [filtroNivel, setFiltroNivel] = useState<string>("todos");
+  const [mostrarPadrao, setMostrarPadrao] = useState<boolean>(true);
   const [tab, setTab] = useState<string>("recomendadas");
 
   useEffect(() => {
@@ -92,6 +95,9 @@ export function SelecionarPerguntasBanco({
       if (cargo && p.cargo !== cargo) return false;
       if (nivel && p.nivel !== nivel) return false;
 
+      // Filtrar perguntas padrão se o toggle estiver desligado
+      if (!mostrarPadrao && p.isPadrao) return false;
+
       if (
         filtroTexto &&
         !p.texto.toLowerCase().includes(filtroTexto.toLowerCase()) &&
@@ -106,7 +112,7 @@ export function SelecionarPerguntasBanco({
 
       return true;
     });
-  }, [perguntas, cargo, nivel, filtroTexto, filtroCategoria]);
+  }, [perguntas, cargo, nivel, filtroTexto, filtroCategoria, mostrarPadrao]);
 
   // Filtrar todas as perguntas (busca expandida)
   const todasPerguntasFiltradas = useMemo(() => {
@@ -114,6 +120,9 @@ export function SelecionarPerguntasBanco({
       if (filtroCargo !== "todos" && p.cargo !== filtroCargo) return false;
       if (filtroNivel !== "todos" && p.nivel !== filtroNivel) return false;
 
+      // Filtrar perguntas padrão se o toggle estiver desligado
+      if (!mostrarPadrao && p.isPadrao) return false;
+
       if (
         filtroTexto &&
         !p.texto.toLowerCase().includes(filtroTexto.toLowerCase()) &&
@@ -128,7 +137,7 @@ export function SelecionarPerguntasBanco({
 
       return true;
     });
-  }, [perguntas, filtroCargo, filtroNivel, filtroTexto, filtroCategoria]);
+  }, [perguntas, filtroCargo, filtroNivel, filtroTexto, filtroCategoria, mostrarPadrao]);
 
   if (loading) {
     return (
@@ -185,9 +194,21 @@ export function SelecionarPerguntasBanco({
             </Select>
           </div>
 
-          <p className="text-xs text-muted-foreground">
-            Perguntas específicas para <strong>{cargo}</strong> nível <strong>{getLabelNivel(nivel)}</strong>
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">
+              Perguntas específicas para <strong>{cargo}</strong> nível <strong>{getLabelNivel(nivel)}</strong>
+            </p>
+            <div className="flex items-center gap-2">
+              <Switch
+                id="mostrar-padrao-recomendadas"
+                checked={mostrarPadrao}
+                onCheckedChange={setMostrarPadrao}
+              />
+              <Label htmlFor="mostrar-padrao-recomendadas" className="text-xs text-muted-foreground cursor-pointer">
+                Perguntas padrão
+              </Label>
+            </div>
+          </div>
 
           <ListaPerguntas
             perguntas={perguntasRecomendadas}
@@ -249,11 +270,23 @@ export function SelecionarPerguntasBanco({
             </Select>
           </div>
 
-          <p className="text-xs text-muted-foreground">
-            Busque perguntas de qualquer cargo para complementar sua entrevista.
-            <br />
-            <span className="text-primary">Dica:</span> Para um Gerente de TI, adicione perguntas de &quot;Desenvolvedor Senior&quot; para avaliar conhecimento técnico.
-          </p>
+          <div className="flex items-center justify-between gap-4">
+            <p className="text-xs text-muted-foreground">
+              Busque perguntas de qualquer cargo para complementar sua entrevista.
+              <br />
+              <span className="text-blue-600 dark:text-blue-400 font-medium">Dica:</span> Para um Gerente de TI, adicione perguntas de &quot;Desenvolvedor Senior&quot; para avaliar conhecimento técnico.
+            </p>
+            <div className="flex items-center gap-2 shrink-0">
+              <Switch
+                id="mostrar-padrao-todas"
+                checked={mostrarPadrao}
+                onCheckedChange={setMostrarPadrao}
+              />
+              <Label htmlFor="mostrar-padrao-todas" className="text-xs text-muted-foreground cursor-pointer whitespace-nowrap">
+                Perguntas padrão
+              </Label>
+            </div>
+          </div>
 
           <ListaPerguntas
             perguntas={todasPerguntasFiltradas}
