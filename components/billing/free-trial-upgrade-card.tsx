@@ -76,7 +76,7 @@ export function FreeTrialUpgradeCard() {
 
           <div className="space-y-2 text-xs">
             <div className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-muted/50">
-              <span className="text-muted-foreground">Taxa por candidato</span>
+              <span className="text-muted-foreground">Taxa por análise</span>
               <span className="font-medium">R$ 1,00</span>
             </div>
             <div className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-muted/50">
