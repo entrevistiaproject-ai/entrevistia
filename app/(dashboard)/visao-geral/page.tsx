@@ -24,6 +24,10 @@ import {
   AlertCircle,
   PlusCircle,
   RefreshCw,
+  Calendar,
+  Timer,
+  UserX,
+  Hourglass,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -42,7 +46,14 @@ import {
   Legend,
   ReferenceLine,
 } from "recharts";
-import { getDashboardMetrics, DashboardMetrics } from "./actions";
+import { getDashboardMetrics, DashboardMetrics, PeriodoFiltro, FiltroData } from "./actions";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Cores para os gráficos
 const COLORS = {
@@ -60,16 +71,29 @@ const STATUS_COLORS: Record<string, string> = {
   em_andamento: COLORS.primary,
 };
 
+// Labels para os períodos
+const PERIODO_LABELS: Record<PeriodoFiltro, string> = {
+  hoje: "Hoje",
+  esta_semana: "Esta Semana",
+  este_mes: "Este Mês",
+  ultimos_30_dias: "Últimos 30 dias",
+  ultimos_3_meses: "Últimos 3 meses",
+  ultimos_6_meses: "Últimos 6 meses",
+  este_ano: "Este Ano",
+  personalizado: "Personalizado",
+};
+
 export default function VisaoGeralPage() {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [periodo, setPeriodo] = useState<PeriodoFiltro>("ultimos_6_meses");
 
-  const fetchMetrics = async () => {
+  const fetchMetrics = async (filtro?: FiltroData) => {
     setLoading(true);
     setError(null);
     try {
-      const result = await getDashboardMetrics();
+      const result = await getDashboardMetrics(filtro);
       if (result.success && result.data) {
         setMetrics(result.data);
       } else {
@@ -83,8 +107,12 @@ export default function VisaoGeralPage() {
   };
 
   useEffect(() => {
-    fetchMetrics();
-  }, []);
+    fetchMetrics({ periodo });
+  }, [periodo]);
+
+  const handlePeriodoChange = (novoPeriodo: PeriodoFiltro) => {
+    setPeriodo(novoPeriodo);
+  };
 
   const getInitials = (nome: string) => {
     return nome
@@ -157,7 +185,7 @@ export default function VisaoGeralPage() {
             <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">Erro ao carregar dados</h3>
             <p className="text-sm text-muted-foreground mb-4">{error}</p>
-            <Button onClick={fetchMetrics} variant="outline">
+            <Button onClick={() => fetchMetrics({ periodo })} variant="outline">
               <RefreshCw className="h-4 w-4 mr-2" />
               Tentar novamente
             </Button>
@@ -211,12 +239,29 @@ export default function VisaoGeralPage() {
         title="Visão Geral"
         description="Acompanhe o desempenho do seu processo seletivo"
       >
-        <Button asChild size="touch" className="w-full sm:w-auto">
-          <Link href="/criar-entrevista">
-            <PlusCircle className="h-4 w-4" />
-            Nova Entrevista
-          </Link>
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Select value={periodo} onValueChange={(v) => handlePeriodoChange(v as PeriodoFiltro)}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <Calendar className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Período" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="hoje">Hoje</SelectItem>
+              <SelectItem value="esta_semana">Esta Semana</SelectItem>
+              <SelectItem value="este_mes">Este Mês</SelectItem>
+              <SelectItem value="ultimos_30_dias">Últimos 30 dias</SelectItem>
+              <SelectItem value="ultimos_3_meses">Últimos 3 meses</SelectItem>
+              <SelectItem value="ultimos_6_meses">Últimos 6 meses</SelectItem>
+              <SelectItem value="este_ano">Este Ano</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button asChild size="touch" className="w-full sm:w-auto">
+            <Link href="/criar-entrevista">
+              <PlusCircle className="h-4 w-4" />
+              Nova Entrevista
+            </Link>
+          </Button>
+        </div>
       </PageHeader>
 
       {/* KPIs Principais */}
@@ -320,6 +365,72 @@ export default function VisaoGeralPage() {
         </Card>
       </div>
 
+      {/* Terceira linha de KPIs - Novos indicadores de desempenho */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Tempo Médio de Resposta</CardTitle>
+            <div className="rounded-lg bg-purple-100 dark:bg-purple-900 p-2">
+              <Timer className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {metrics.tempoMedioResposta !== null ? (
+                <>
+                  {metrics.tempoMedioResposta}
+                  <span className="text-sm font-normal text-muted-foreground ml-1">dias</span>
+                </>
+              ) : (
+                <span className="text-muted-foreground">-</span>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              do convite até conclusão
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Taxa de Abandono</CardTitle>
+            <div className="rounded-lg bg-red-100 dark:bg-red-900 p-2">
+              <UserX className="h-4 w-4 text-red-600 dark:text-red-400" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">
+              {metrics.taxaAbandono}%
+            </div>
+            <Progress value={metrics.taxaAbandono} className="h-2 mt-2 [&>div]:bg-red-500" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Tempo Médio para Decisão</CardTitle>
+            <div className="rounded-lg bg-orange-100 dark:bg-orange-900 p-2">
+              <Hourglass className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {metrics.tempoMedioDecisao !== null ? (
+                <>
+                  {metrics.tempoMedioDecisao}
+                  <span className="text-sm font-normal text-muted-foreground ml-1">dias</span>
+                </>
+              ) : (
+                <span className="text-muted-foreground">-</span>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              da conclusão até avaliação
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Gráficos */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Gráfico de Status dos Candidatos */}
@@ -342,7 +453,7 @@ export default function VisaoGeralPage() {
                       cy="50%"
                       innerRadius={55}
                       outerRadius={80}
-                      paddingAngle={5}
+                      paddingAngle={metrics.candidatosPorStatus.length <= 2 ? 1 : metrics.candidatosPorStatus.length <= 3 ? 2 : 4}
                       dataKey="count"
                       nameKey="label"
                     >

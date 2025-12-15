@@ -7,9 +7,76 @@ import {
   candidatos,
   candidatoEntrevistas,
 } from "@/lib/db/schema";
-import { eq, and, isNull, isNotNull, sql, desc, gte, inArray, or, count } from "drizzle-orm";
+import { eq, and, isNull, sql, desc, gte, lte, inArray } from "drizzle-orm";
 import { perguntas, respostas } from "@/lib/db/schema";
 import { revalidatePath } from "next/cache";
+
+// Tipos de período para filtro
+export type PeriodoFiltro =
+  | "hoje"
+  | "esta_semana"
+  | "este_mes"
+  | "ultimos_30_dias"
+  | "ultimos_3_meses"
+  | "ultimos_6_meses"
+  | "este_ano"
+  | "personalizado";
+
+export interface FiltroData {
+  periodo: PeriodoFiltro;
+  dataInicio?: Date;
+  dataFim?: Date;
+}
+
+// Helper para calcular datas baseado no período
+function calcularPeriodo(filtro?: FiltroData): { dataInicio: Date | null; dataFim: Date | null } {
+  if (!filtro) {
+    return { dataInicio: null, dataFim: null };
+  }
+
+  const agora = new Date();
+  const hoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
+  let dataInicio: Date | null = null;
+  let dataFim: Date | null = new Date(hoje.getTime() + 24 * 60 * 60 * 1000 - 1); // Final do dia
+
+  switch (filtro.periodo) {
+    case "hoje":
+      dataInicio = hoje;
+      break;
+    case "esta_semana":
+      const diaSemana = hoje.getDay();
+      const diffDomingo = diaSemana === 0 ? 0 : diaSemana;
+      dataInicio = new Date(hoje);
+      dataInicio.setDate(hoje.getDate() - diffDomingo);
+      break;
+    case "este_mes":
+      dataInicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+      break;
+    case "ultimos_30_dias":
+      dataInicio = new Date(hoje);
+      dataInicio.setDate(hoje.getDate() - 30);
+      break;
+    case "ultimos_3_meses":
+      dataInicio = new Date(hoje);
+      dataInicio.setMonth(hoje.getMonth() - 3);
+      break;
+    case "ultimos_6_meses":
+      dataInicio = new Date(hoje);
+      dataInicio.setMonth(hoje.getMonth() - 6);
+      break;
+    case "este_ano":
+      dataInicio = new Date(hoje.getFullYear(), 0, 1);
+      break;
+    case "personalizado":
+      dataInicio = filtro.dataInicio || null;
+      dataFim = filtro.dataFim || null;
+      break;
+    default:
+      return { dataInicio: null, dataFim: null };
+  }
+
+  return { dataInicio, dataFim };
+}
 
 export interface DashboardMetrics {
   // KPIs principais
@@ -23,6 +90,11 @@ export interface DashboardMetrics {
   taxaConclusao: number;
   taxaAprovacao: number;
   scoreMediaGeral: number;
+
+  // Novos KPIs
+  tempoMedioResposta: number | null; // em dias
+  taxaAbandono: number; // percentual
+  tempoMedioDecisao: number | null; // em dias
 
   // Dados para gráficos
   candidatosPorStatus: {
@@ -79,7 +151,7 @@ export interface DashboardMetrics {
   }[];
 }
 
-export async function getDashboardMetrics(): Promise<{
+export async function getDashboardMetrics(filtro?: FiltroData): Promise<{
   success: boolean;
   data?: DashboardMetrics;
   error?: string;
@@ -91,6 +163,7 @@ export async function getDashboardMetrics(): Promise<{
   }
 
   const userId = session.user.id;
+  const { dataInicio, dataFim } = calcularPeriodo(filtro);
 
   try {
     const db = getDB();
@@ -111,7 +184,15 @@ export async function getDashboardMetrics(): Promise<{
       .from(entrevistas)
       .where(and(eq(entrevistas.userId, userId), isNull(entrevistas.deletedAt)));
 
-    // Estatísticas de candidato-entrevistas
+    // Estatísticas de candidato-entrevistas (com filtro de período)
+    const statsConditions = [eq(entrevistas.userId, userId), isNull(entrevistas.deletedAt)];
+    if (dataInicio) {
+      statsConditions.push(gte(candidatoEntrevistas.createdAt, dataInicio));
+    }
+    if (dataFim) {
+      statsConditions.push(lte(candidatoEntrevistas.createdAt, dataFim));
+    }
+
     const [candidatoEntrevistasStats] = await db
       .select({
         total: sql<number>`COUNT(*)::int`,
@@ -120,10 +201,23 @@ export async function getDashboardMetrics(): Promise<{
         reprovados: sql<number>`SUM(CASE WHEN ${candidatoEntrevistas.decisaoRecrutador} = 'reprovado' THEN 1 ELSE 0 END)::int`,
         pendentes: sql<number>`SUM(CASE WHEN ${candidatoEntrevistas.status} = 'concluida' AND ${candidatoEntrevistas.decisaoRecrutador} IS NULL THEN 1 ELSE 0 END)::int`,
         mediaScore: sql<number>`ROUND(AVG(${candidatoEntrevistas.notaGeral})::numeric, 0)::int`,
+        // Novos KPIs
+        emAndamento: sql<number>`SUM(CASE WHEN ${candidatoEntrevistas.status} = 'em_andamento' THEN 1 ELSE 0 END)::int`,
+        abandonados: sql<number>`SUM(CASE WHEN ${candidatoEntrevistas.status} NOT IN ('concluida', 'em_andamento', 'pendente') OR (${candidatoEntrevistas.status} = 'em_andamento' AND ${candidatoEntrevistas.prazoResposta} < NOW()) THEN 1 ELSE 0 END)::int`,
+        tempoMedioResposta: sql<number>`ROUND(AVG(
+          CASE WHEN ${candidatoEntrevistas.status} = 'concluida' AND ${candidatoEntrevistas.iniciadaEm} IS NOT NULL AND ${candidatoEntrevistas.concluidaEm} IS NOT NULL
+          THEN EXTRACT(EPOCH FROM (${candidatoEntrevistas.concluidaEm} - ${candidatoEntrevistas.iniciadaEm})) / 86400
+          ELSE NULL END
+        )::numeric, 1)`,
+        tempoMedioDecisao: sql<number>`ROUND(AVG(
+          CASE WHEN ${candidatoEntrevistas.decisaoRecrutadorEm} IS NOT NULL AND ${candidatoEntrevistas.concluidaEm} IS NOT NULL
+          THEN EXTRACT(EPOCH FROM (${candidatoEntrevistas.decisaoRecrutadorEm} - ${candidatoEntrevistas.concluidaEm})) / 86400
+          ELSE NULL END
+        )::numeric, 1)`,
       })
       .from(candidatoEntrevistas)
       .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
-      .where(and(eq(entrevistas.userId, userId), isNull(entrevistas.deletedAt)));
+      .where(and(...statsConditions));
 
     // 2. Candidatos por Status (para gráfico de pizza)
     const candidatosPorStatus = [
@@ -133,9 +227,21 @@ export async function getDashboardMetrics(): Promise<{
       { status: "em_andamento", count: (candidatoEntrevistasStats?.total || 0) - (candidatoEntrevistasStats?.concluidos || 0), label: "Em Andamento" },
     ].filter(item => item.count > 0);
 
-    // 3. Entrevistas por mês (últimos 6 meses)
-    const seisAMeses = new Date();
-    seisAMeses.setMonth(seisAMeses.getMonth() - 6);
+    // 3. Entrevistas por mês (usa filtro de período ou últimos 6 meses por padrão)
+    const dataInicioGrafico = dataInicio || (() => {
+      const d = new Date();
+      d.setMonth(d.getMonth() - 6);
+      return d;
+    })();
+
+    const graficoConditions = [
+      eq(entrevistas.userId, userId),
+      isNull(entrevistas.deletedAt),
+      gte(candidatoEntrevistas.createdAt, dataInicioGrafico)
+    ];
+    if (dataFim) {
+      graficoConditions.push(lte(candidatoEntrevistas.createdAt, dataFim));
+    }
 
     const entrevistasPorMesRaw = await db
       .select({
@@ -145,13 +251,7 @@ export async function getDashboardMetrics(): Promise<{
       })
       .from(candidatoEntrevistas)
       .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
-      .where(
-        and(
-          eq(entrevistas.userId, userId),
-          isNull(entrevistas.deletedAt),
-          gte(candidatoEntrevistas.createdAt, seisAMeses)
-        )
-      )
+      .where(and(...graficoConditions))
       .groupBy(sql`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY-MM')`)
       .orderBy(sql`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY-MM')`);
 
@@ -352,6 +452,11 @@ export async function getDashboardMetrics(): Promise<{
     const taxaConclusao = totalConvites > 0 ? Math.round((totalConcluidos / totalConvites) * 100) : 0;
     const taxaAprovacao = totalAvaliados > 0 ? Math.round((totalAprovados / totalAvaliados) * 100) : 0;
 
+    // Calcular taxa de abandono (candidatos que não concluíram e passaram do prazo ou abandonaram)
+    const totalIniciados = totalConvites - (candidatoEntrevistasStats?.emAndamento || 0);
+    const abandonados = candidatoEntrevistasStats?.abandonados || 0;
+    const taxaAbandono = totalIniciados > 0 ? Math.round((abandonados / totalIniciados) * 100) : 0;
+
     return {
       success: true,
       data: {
@@ -365,6 +470,10 @@ export async function getDashboardMetrics(): Promise<{
         taxaConclusao,
         taxaAprovacao,
         scoreMediaGeral: candidatoEntrevistasStats?.mediaScore || 0,
+        // Novos KPIs
+        tempoMedioResposta: candidatoEntrevistasStats?.tempoMedioResposta || null,
+        taxaAbandono,
+        tempoMedioDecisao: candidatoEntrevistasStats?.tempoMedioDecisao || null,
         candidatosPorStatus,
         entrevistasPorMes,
         scoresPorEntrevista: scoresPorEntrevista.map(s => ({
