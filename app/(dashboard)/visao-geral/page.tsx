@@ -332,19 +332,18 @@ export default function VisaoGeralPage() {
               <CardDescription>Distribuição atual dos candidatos</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[280px]">
+              <div className="h-[200px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RechartsPieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                  <RechartsPieChart>
                     <Pie
                       data={metrics.candidatosPorStatus}
                       cx="50%"
                       cy="50%"
-                      innerRadius={50}
-                      outerRadius={70}
+                      innerRadius={55}
+                      outerRadius={80}
                       paddingAngle={5}
                       dataKey="count"
                       nameKey="label"
-                      label={({ name, value }) => `${name}: ${value}`}
                     >
                       {metrics.candidatosPorStatus.map((entry) => (
                         <Cell
@@ -357,14 +356,16 @@ export default function VisaoGeralPage() {
                   </RechartsPieChart>
                 </ResponsiveContainer>
               </div>
-              <div className="flex flex-wrap justify-center gap-4 mt-4">
+              <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-4">
                 {metrics.candidatosPorStatus.map((item) => (
                   <div key={item.status} className="flex items-center gap-2">
                     <div
                       className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: STATUS_COLORS[item.status] || COLORS.muted }}
                     />
-                    <span className="text-sm text-muted-foreground">{item.label}</span>
+                    <span className="text-sm">
+                      {item.label} <span className="font-semibold">({item.count})</span>
+                    </span>
                   </div>
                 ))}
               </div>
