@@ -336,7 +336,7 @@ export default function ResultadoCandidatoPage() {
   return (
     <div className="space-y-6 pb-8">
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="flex items-center gap-3 sm:gap-4">
           <Button variant="outline" size="touch-icon" onClick={() => router.back()} className="shrink-0">
             <ArrowLeft className="h-4 w-4" />
