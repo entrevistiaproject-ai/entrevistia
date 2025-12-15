@@ -42,7 +42,7 @@ interface DadosCustos {
     saldoRestante: number;
     percentualUsado: number;
     limiteAtingido: boolean;
-    totalTransacoes: number;
+    totalAnalises: number;
     isTestAccount: boolean;
   } | null;
   faturaAtual: {
@@ -379,7 +379,7 @@ export default function CustosPage() {
           saldoRestante={usage.saldoRestante}
           percentualUsado={usage.percentualUsado}
           limiteAtingido={usage.limiteAtingido}
-          totalTransacoes={usage.totalTransacoes}
+          totalAnalises={usage.totalAnalises}
         />
 
         {/* Card de Upgrade */}
@@ -412,7 +412,7 @@ export default function CustosPage() {
                             R$ {item.custo.toFixed(2)}
                           </span>
                           <Badge variant="outline" className="text-xs">
-                            {item.transacoes} {item.transacoes === 1 ? "transação" : "transações"}
+                            {item.transacoes} {item.transacoes === 1 ? "análise" : "análises"}
                           </Badge>
                         </div>
                       </div>
@@ -523,7 +523,7 @@ export default function CustosPage() {
                 R$ {periodoData.custoTotal.toFixed(2)}
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                {periodoData.totalTransacoes} transações
+                {periodoData.totalTransacoes} análises
               </p>
             </CardContent>
           </Card>
@@ -817,7 +817,7 @@ export default function CustosPage() {
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">{ent.titulo || "Sem título"}</p>
                         <p className="text-xs text-muted-foreground">
-                          {ent.transacoes} transações
+                          {ent.transacoes} análises
                         </p>
                       </div>
                     </div>

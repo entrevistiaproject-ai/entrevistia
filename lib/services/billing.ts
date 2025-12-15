@@ -49,9 +49,9 @@ export interface UsageFinanceiro {
   limiteAtingido: boolean;
 
   /**
-   * Total de transações realizadas
+   * Total de análises realizadas
    */
-  totalTransacoes: number;
+  totalAnalises: number;
 
   /**
    * Se é uma conta de teste (QA)
@@ -73,10 +73,22 @@ export async function getUsageFinanceiro(userId: string): Promise<UsageFinanceir
   const [resultado] = await db
     .select({
       totalGasto: sql<string>`COALESCE(SUM(${transacoes.valorCobrado}), 0)`,
-      totalTransacoes: sql<number>`COUNT(*)::int`,
     })
     .from(transacoes)
     .where(eq(transacoes.userId, userId));
+
+  // Conta total de análises (cada taxa_base_candidato representa uma análise completa)
+  const [analises] = await db
+    .select({
+      total: sql<number>`COUNT(*)::int`,
+    })
+    .from(transacoes)
+    .where(
+      and(
+        eq(transacoes.userId, userId),
+        eq(transacoes.tipo, "taxa_base_candidato")
+      )
+    );
 
   // Busca o crédito extra e se é conta de teste
   const [usuario] = await db
@@ -88,7 +100,7 @@ export async function getUsageFinanceiro(userId: string): Promise<UsageFinanceir
     .where(eq(users.id, userId));
 
   const totalGasto = parseFloat(resultado?.totalGasto || "0");
-  const totalTransacoes = resultado?.totalTransacoes || 0;
+  const totalAnalises = analises?.total || 0;
   const creditoExtra = parseFloat(usuario?.creditoExtra || "0");
   const isContaTeste = usuario?.isTestAccount || false;
 
@@ -112,7 +124,7 @@ export async function getUsageFinanceiro(userId: string): Promise<UsageFinanceir
     saldoRestante,
     percentualUsado,
     limiteAtingido,
-    totalTransacoes,
+    totalAnalises,
     isTestAccount: isContaTeste,
   };
 }

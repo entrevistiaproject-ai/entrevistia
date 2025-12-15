@@ -11,7 +11,7 @@ interface UsageFinanceiroCardProps {
   saldoRestante: number;
   percentualUsado: number;
   limiteAtingido: boolean;
-  totalTransacoes: number;
+  totalAnalises: number;
 }
 
 export function UsageFinanceiroCard({
@@ -20,7 +20,7 @@ export function UsageFinanceiroCard({
   saldoRestante,
   percentualUsado,
   limiteAtingido,
-  totalTransacoes,
+  totalAnalises,
 }: UsageFinanceiroCardProps) {
   // Determina a cor da progress bar baseado no percentual usado
   const getProgressColor = () => {
@@ -46,8 +46,8 @@ export function UsageFinanceiroCard({
             </CardDescription>
           </div>
           <div className="text-right">
-            <div className="text-sm text-muted-foreground">Transações</div>
-            <div className="text-2xl font-bold">{totalTransacoes}</div>
+            <div className="text-sm text-muted-foreground">Análises</div>
+            <div className="text-2xl font-bold">{totalAnalises}</div>
           </div>
         </div>
       </CardHeader>
@@ -114,7 +114,7 @@ export function UsageFinanceiroCard({
         )}
 
         {/* Mensagem para novos usuários */}
-        {totalTransacoes === 0 && (
+        {totalAnalises === 0 && (
           <div className="text-center py-4 text-muted-foreground">
             <p className="text-sm">
               Você ainda não realizou nenhuma operação. Comece criando sua primeira entrevista!
