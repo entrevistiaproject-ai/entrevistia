@@ -597,53 +597,107 @@ export default function EntrevistaDetalhesPage() {
                   <div className="space-y-3">
                     {candidatosFiltrados.map((candidato) => {
                     return (
-                      <div
+                      <Link
                         key={candidato.id}
-                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors group"
+                        href={`/candidatos/${candidato.id}/resultado`}
+                        className="block p-4 border rounded-xl hover:bg-muted/30 hover:border-primary/20 transition-all group"
                       >
-                        <Link
-                          href={`/candidatos/${candidato.id}/resultado`}
-                          className="flex-1 min-w-0"
-                        >
-                          <p className="font-medium truncate hover:text-primary transition-colors">{candidato.nome}</p>
-                          <p className="text-sm text-muted-foreground truncate">{candidato.email}</p>
-                        </Link>
+                        {/* Layout Mobile: Stack vertical */}
+                        <div className="flex flex-col gap-3 sm:hidden">
+                          {/* Linha 1: Nome e Score */}
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                                {candidato.nome}
+                              </p>
+                              <p className="text-sm text-muted-foreground truncate mt-0.5">
+                                {candidato.email}
+                              </p>
+                            </div>
+                            {candidato.notaGeral !== null && (
+                              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 dark:bg-amber-950/50 rounded-lg shrink-0">
+                                <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                                <span className={`text-sm font-bold ${getScoreColor(candidato.notaGeral)}`}>
+                                  {Math.round(candidato.notaGeral)}
+                                </span>
+                              </div>
+                            )}
+                          </div>
 
-                        {/* Score, Decisão e Status */}
-                        <div className="flex items-center gap-3 ml-4">
+                          {/* Linha 2: Decisão, Status e Seta */}
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {candidato.status === "concluida" && (
+                                <div onClick={(e) => e.preventDefault()}>
+                                  <DecisaoCandidato
+                                    candidatoId={candidato.id}
+                                    entrevistaId={entrevista.id}
+                                    candidatoNome={candidato.nome}
+                                    decisaoAtual={candidato.decisaoRecrutador}
+                                    recomendacaoIA={candidato.recomendacao}
+                                    observacaoAtual={candidato.decisaoRecrutadorObservacao}
+                                    emailEncerramentoEnviado={!!candidato.emailEncerramentoEnviadoEm}
+                                    onDecisaoAtualizada={fetchData}
+                                    compact
+                                  />
+                                </div>
+                              )}
+                              <Badge variant={candidatoStatusConfig[candidato.status]?.variant || "outline"} className="text-xs">
+                                {candidatoStatusConfig[candidato.status]?.label || "Pendente"}
+                              </Badge>
+                            </div>
+                            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                          </div>
+                        </div>
+
+                        {/* Layout Desktop: Linha horizontal otimizada */}
+                        <div className="hidden sm:flex sm:items-center sm:gap-4">
+                          {/* Info do candidato */}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                              {candidato.nome}
+                            </p>
+                            <p className="text-sm text-muted-foreground truncate mt-0.5">
+                              {candidato.email}
+                            </p>
+                          </div>
+
+                          {/* Score */}
                           {candidato.notaGeral !== null && (
-                            <div className="flex items-center gap-1.5">
-                              <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                              <span className={`font-bold ${getScoreColor(candidato.notaGeral)}`}>
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-950/50 rounded-lg shrink-0">
+                              <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                              <span className={`text-sm font-bold ${getScoreColor(candidato.notaGeral)}`}>
                                 {Math.round(candidato.notaGeral)}
                               </span>
                             </div>
                           )}
 
-                          {/* Decisão do recrutador - só mostra para entrevistas concluídas */}
+                          {/* Decisão */}
                           {candidato.status === "concluida" && (
-                            <DecisaoCandidato
-                              candidatoId={candidato.id}
-                              entrevistaId={entrevista.id}
-                              candidatoNome={candidato.nome}
-                              decisaoAtual={candidato.decisaoRecrutador}
-                              recomendacaoIA={candidato.recomendacao}
-                              observacaoAtual={candidato.decisaoRecrutadorObservacao}
-                              emailEncerramentoEnviado={!!candidato.emailEncerramentoEnviadoEm}
-                              onDecisaoAtualizada={fetchData}
-                              compact
-                            />
+                            <div onClick={(e) => e.preventDefault()} className="shrink-0">
+                              <DecisaoCandidato
+                                candidatoId={candidato.id}
+                                entrevistaId={entrevista.id}
+                                candidatoNome={candidato.nome}
+                                decisaoAtual={candidato.decisaoRecrutador}
+                                recomendacaoIA={candidato.recomendacao}
+                                observacaoAtual={candidato.decisaoRecrutadorObservacao}
+                                emailEncerramentoEnviado={!!candidato.emailEncerramentoEnviadoEm}
+                                onDecisaoAtualizada={fetchData}
+                                compact
+                              />
+                            </div>
                           )}
 
-                          <Badge variant={candidatoStatusConfig[candidato.status]?.variant || "outline"}>
+                          {/* Status Badge */}
+                          <Badge variant={candidatoStatusConfig[candidato.status]?.variant || "outline"} className="shrink-0">
                             {candidatoStatusConfig[candidato.status]?.label || "Pendente"}
                           </Badge>
 
-                          <Link href={`/candidatos/${candidato.id}/resultado`}>
-                            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-                          </Link>
+                          {/* Seta */}
+                          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
                         </div>
-                      </div>
+                      </Link>
                     );
                   })}
                   </div>
