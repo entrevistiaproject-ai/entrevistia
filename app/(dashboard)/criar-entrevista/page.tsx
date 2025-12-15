@@ -173,7 +173,7 @@ export default function CriarEntrevistaPage() {
   };
 
   return (
-    <div className="space-y-10 pb-8">
+    <div className="space-y-10 pb-20 sm:pb-8">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link href="/entrevistas">
@@ -417,8 +417,8 @@ Breve contexto sobre a posição e equipe...
           </CardContent>
         </Card>
 
-        {/* Ações - Fixo no mobile */}
-        <div className="flex flex-col sm:flex-row justify-end gap-4 sticky bottom-20 sm:static bg-background/95 backdrop-blur-sm -mx-4 px-4 py-5 sm:mx-0 sm:px-0 sm:py-0 sm:bg-transparent sm:backdrop-blur-none border-t sm:border-0 border-border">
+        {/* Ações */}
+        <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
           <Link href="/entrevistas" className="w-full sm:w-auto">
             <Button type="button" variant="outline" disabled={loading} className="w-full sm:w-auto" size="touch">
               Cancelar
