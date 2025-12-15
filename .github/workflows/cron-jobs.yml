@@ -1,0 +1,30 @@
+name: Cron Jobs
+
+on:
+  schedule:
+    # A cada 5 minutos
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Permite rodar manualmente
+
+jobs:
+  trigger-crons:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Processar Análises Pendentes
+        run: |
+          curl -s -X GET "${{ secrets.VERCEL_APP_URL }}/api/cron/process-pending-analysis" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --max-time 60 || true
+        continue-on-error: true
+
+      - name: Aguardar 10 segundos
+        run: sleep 10
+
+      - name: Processar Decisões Automáticas
+        run: |
+          curl -s -X GET "${{ secrets.VERCEL_APP_URL }}/api/cron/process-auto-decisions" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --max-time 60 || true
+        continue-on-error: true
