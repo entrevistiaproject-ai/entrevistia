@@ -13,7 +13,7 @@ import {
   DollarSign,
   PlusCircle,
   MessageSquare,
-  ClipboardList,
+  Home,
   UsersRound,
 } from "lucide-react";
 import { useState } from "react";
@@ -30,8 +30,8 @@ import { SupportWidget } from "@/components/support/support-widget";
 const navItems = [
   {
     href: "/painel",
-    icon: ClipboardList,
-    label: "Tarefas",
+    icon: Home,
+    label: "Minha Mesa",
   },
   {
     href: "/entrevistas",

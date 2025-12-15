@@ -754,8 +754,8 @@ export default function PainelPage() {
     return (
       <div className="space-y-6">
         <PageHeader
-          title="Painel"
-          description="Acompanhe e gerencie seus candidatos"
+          title="Minha Mesa"
+          description="Gerencie seus últimos candidatos"
         />
         <div className="flex items-center justify-center min-h-[400px]">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -768,8 +768,8 @@ export default function PainelPage() {
     return (
       <div className="space-y-6">
         <PageHeader
-          title="Painel"
-          description="Acompanhe e gerencie seus candidatos"
+          title="Minha Mesa"
+          description="Gerencie seus últimos candidatos"
         />
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
@@ -792,8 +792,8 @@ export default function PainelPage() {
     return (
       <div className="space-y-6">
         <PageHeader
-          title="Painel"
-          description="Acompanhe e gerencie seus candidatos"
+          title="Minha Mesa"
+          description="Gerencie seus últimos candidatos"
         >
           <Button asChild size="touch">
             <Link href="/criar-entrevista">
@@ -835,8 +835,8 @@ export default function PainelPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Painel"
-        description="Acompanhe e gerencie seus candidatos"
+        title="Minha Mesa"
+        description="Gerencie seus últimos candidatos"
       >
         <Button asChild size="touch" className="w-full sm:w-auto">
           <Link href="/criar-entrevista">

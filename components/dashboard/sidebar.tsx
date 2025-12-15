@@ -15,7 +15,7 @@ import {
   LogOut,
   MessageSquare,
   UsersRound,
-  ClipboardList,
+  Home,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { signOut } from "next-auth/react";
@@ -23,9 +23,9 @@ import { SupportWidget } from "@/components/support/support-widget";
 
 const mainMenuItems = [
   {
-    title: "Tarefas",
+    title: "Minha Mesa",
     href: "/painel",
-    icon: ClipboardList,
+    icon: Home,
   },
   {
     title: "Entrevistas",
