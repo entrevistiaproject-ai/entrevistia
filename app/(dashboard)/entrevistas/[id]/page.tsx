@@ -849,7 +849,7 @@ export default function EntrevistaDetalhesPage() {
                         </Badge>
 
                         {/* Menu de ações */}
-                        {mostrarAcoes && (candidato.status === "pendente" || candidato.status === "em_andamento" || candidato.status === "expirada" || candidato.status === "cancelada") && (
+                        {mostrarAcoes && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
@@ -857,6 +857,12 @@ export default function EntrevistaDetalhesPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
+                              <DropdownMenuItem asChild>
+                                <Link href={`/candidatos/${candidato.id}/resultado`}>
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  Ver detalhes
+                                </Link>
+                              </DropdownMenuItem>
                               {(candidato.status === "pendente" || candidato.status === "em_andamento") && (
                                 <DropdownMenuItem
                                   onClick={() => {

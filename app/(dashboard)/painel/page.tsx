@@ -26,6 +26,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -49,6 +58,7 @@ import {
   ArchiveRestore,
   Sparkles,
   ExternalLink,
+  FileText,
   Filter,
   Trophy,
   UserCheck,
@@ -56,6 +66,7 @@ import {
   Play,
   AlertTriangle,
   Timer,
+  TimerReset,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
@@ -88,6 +99,9 @@ export default function PainelPage() {
   } | null>(null);
   const [activeTab, setActiveTab] = useState<TabValue>("pendentes");
   const [filtroEntrevista, setFiltroEntrevista] = useState<string>("todas");
+  const [prorrogarDialog, setProrrogarDialog] = useState<{ open: boolean; candidato: EmAndamentoCandidate | null }>({ open: false, candidato: null });
+  const [horasAdicionais, setHorasAdicionais] = useState(24);
+  const [candidatoActionLoading, setCandidatoActionLoading] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -250,6 +264,44 @@ export default function PainelPage() {
     }
   };
 
+  // Handler para prorrogar prazo
+  const handleProrrogarPrazo = async () => {
+    if (!prorrogarDialog.candidato) return;
+
+    setCandidatoActionLoading(prorrogarDialog.candidato.id);
+    try {
+      const res = await fetch(`/api/candidato-entrevistas/${prorrogarDialog.candidato.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ horasAdicionais }),
+      });
+
+      if (res.ok) {
+        toast({
+          title: "Prazo prorrogado",
+          description: `Prazo estendido em ${horasAdicionais} horas`,
+        });
+        setProrrogarDialog({ open: false, candidato: null });
+        await fetchData(filtroEntrevista);
+      } else {
+        const data = await res.json();
+        toast({
+          title: "Erro",
+          description: data.error || "Erro ao prorrogar prazo",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao prorrogar prazo",
+        variant: "destructive",
+      });
+    } finally {
+      setCandidatoActionLoading(null);
+    }
+  };
+
   const actionLabels = {
     aprovar: {
       title: "Aprovar candidatos",
@@ -403,7 +455,7 @@ export default function PainelPage() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
                       <Link href={`/candidatos/${candidate.candidatoId}/resultado?entrevistaId=${candidate.entrevistaId}`}>
-                        <ExternalLink className="h-4 w-4 mr-2" />
+                        <FileText className="h-4 w-4 mr-2" />
                         Ver detalhes
                       </Link>
                     </DropdownMenuItem>
@@ -427,7 +479,7 @@ export default function PainelPage() {
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem asChild>
                     <Link href={`/candidatos/${candidate.candidatoId}/resultado?entrevistaId=${candidate.entrevistaId}`}>
-                      <ExternalLink className="h-4 w-4 mr-2" />
+                      <FileText className="h-4 w-4 mr-2" />
                       Ver detalhes
                     </Link>
                   </DropdownMenuItem>
@@ -547,7 +599,7 @@ export default function PainelPage() {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
                   <Link href={`/candidatos/${candidate.candidatoId}/resultado?entrevistaId=${candidate.entrevistaId}`}>
-                    <ExternalLink className="h-4 w-4 mr-2" />
+                    <FileText className="h-4 w-4 mr-2" />
                     Ver detalhes
                   </Link>
                 </DropdownMenuItem>
@@ -667,7 +719,7 @@ export default function PainelPage() {
             </div>
           )}
 
-          {/* Link para detalhes */}
+          {/* Menu de ações */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -680,6 +732,16 @@ export default function PainelPage() {
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Ver entrevista
                 </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  setHorasAdicionais(24);
+                  setProrrogarDialog({ open: true, candidato: candidate });
+                }}
+              >
+                <TimerReset className="h-4 w-4 mr-2" />
+                Prorrogar prazo
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -1079,6 +1141,62 @@ export default function PainelPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Dialog: Prorrogar Prazo */}
+      <Dialog open={prorrogarDialog.open} onOpenChange={(open) => !open && setProrrogarDialog({ open: false, candidato: null })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Prorrogar Prazo</DialogTitle>
+            <DialogDescription>
+              Estenda o prazo de resposta para {prorrogarDialog.candidato?.nome}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Adicionar horas ao prazo</Label>
+              <Select value={horasAdicionais.toString()} onValueChange={(v) => setHorasAdicionais(parseInt(v))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="12">12 horas</SelectItem>
+                  <SelectItem value="24">24 horas (1 dia)</SelectItem>
+                  <SelectItem value="48">48 horas (2 dias)</SelectItem>
+                  <SelectItem value="72">72 horas (3 dias)</SelectItem>
+                  <SelectItem value="168">168 horas (1 semana)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {prorrogarDialog.candidato?.prazoResposta && (
+              <div className="text-sm text-muted-foreground">
+                <p>Prazo atual: {new Date(prorrogarDialog.candidato.prazoResposta).toLocaleString("pt-BR")}</p>
+                <p className="mt-1">
+                  Novo prazo: {new Date(
+                    Math.max(
+                      new Date(prorrogarDialog.candidato.prazoResposta).getTime(),
+                      Date.now()
+                    ) + horasAdicionais * 60 * 60 * 1000
+                  ).toLocaleString("pt-BR")}
+                </p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setProrrogarDialog({ open: false, candidato: null })}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleProrrogarPrazo}
+              disabled={candidatoActionLoading === prorrogarDialog.candidato?.id}
+            >
+              {candidatoActionLoading === prorrogarDialog.candidato?.id && (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              )}
+              Prorrogar Prazo
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
