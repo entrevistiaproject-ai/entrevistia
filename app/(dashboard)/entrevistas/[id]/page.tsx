@@ -1022,9 +1022,9 @@ export default function EntrevistaDetalhesPage() {
             <CardContent className="space-y-6">
               {/* Ação: Encerrar Vaga */}
               {entrevista.status === "active" && (
-                <div className="flex items-start justify-between p-4 border rounded-lg">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 p-4 border rounded-lg">
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-amber-100 rounded-lg">
+                    <div className="p-2 bg-amber-100 rounded-lg shrink-0">
                       <CheckCircle className="h-5 w-5 text-amber-600" />
                     </div>
                     <div>
@@ -1039,6 +1039,7 @@ export default function EntrevistaDetalhesPage() {
                     variant="outline"
                     onClick={handleEncerrar}
                     disabled={actionLoading !== null}
+                    className="w-full sm:w-auto shrink-0"
                   >
                     {actionLoading === "encerrar" ? (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -1052,9 +1053,9 @@ export default function EntrevistaDetalhesPage() {
 
               {/* Ação: Arquivar Vaga */}
               {(entrevista.status === "active" || entrevista.status === "completed") && (
-                <div className="flex items-start justify-between p-4 border rounded-lg">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 p-4 border rounded-lg">
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-gray-100 rounded-lg">
+                    <div className="p-2 bg-gray-100 rounded-lg shrink-0">
                       <Archive className="h-5 w-5 text-gray-600" />
                     </div>
                     <div>
@@ -1069,6 +1070,7 @@ export default function EntrevistaDetalhesPage() {
                     variant="outline"
                     onClick={handleArquivar}
                     disabled={actionLoading !== null}
+                    className="w-full sm:w-auto shrink-0"
                   >
                     {actionLoading === "arquivar" ? (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -1082,9 +1084,9 @@ export default function EntrevistaDetalhesPage() {
 
               {/* Ação: Reativar Vaga */}
               {(entrevista.status === "completed" || entrevista.status === "archived") && (
-                <div className="flex items-start justify-between p-4 border rounded-lg border-green-200 bg-green-50">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 p-4 border rounded-lg border-green-200 bg-green-50">
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-green-100 rounded-lg">
+                    <div className="p-2 bg-green-100 rounded-lg shrink-0">
                       <Play className="h-5 w-5 text-green-600" />
                     </div>
                     <div>
@@ -1098,6 +1100,7 @@ export default function EntrevistaDetalhesPage() {
                     variant="default"
                     onClick={handleReativar}
                     disabled={actionLoading !== null}
+                    className="w-full sm:w-auto shrink-0"
                   >
                     {actionLoading === "reativar" ? (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
