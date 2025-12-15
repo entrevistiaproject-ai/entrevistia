@@ -192,6 +192,8 @@ export async function GET(request: Request) {
         mes: sql<string>`TO_CHAR(${transacoes.createdAt}, 'YYYY-MM')`,
         custo: sql<number>`SUM(${transacoes.valorCobrado})::numeric`,
         transacoes: sql<number>`COUNT(*)::int`,
+        // Conta apenas taxa_base_candidato para representar o número real de análises (candidatos)
+        analises: sql<number>`COUNT(*) FILTER (WHERE ${transacoes.tipo} = 'taxa_base_candidato')::int`,
       })
       .from(transacoes)
       .where(
@@ -375,6 +377,7 @@ export async function GET(request: Request) {
         mes: e.mes,
         custo: Number(e.custo),
         transacoes: e.transacoes,
+        analises: e.analises,
       })),
       // Novas métricas de análises
       metricas: {
