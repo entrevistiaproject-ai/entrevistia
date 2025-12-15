@@ -47,6 +47,7 @@ export default function ResponderEntrevistaPage() {
   const [etapaPreparacao, setEtapaPreparacao] = useState<EtapaPreparacao>("verificacao-microfone");
   const [perguntaAtualIndex, setPerguntaAtualIndex] = useState(0);
   const [fase, setFase] = useState<Fase>("reflexao");
+  const [perguntasRespondidas, setPerguntasRespondidas] = useState<string[]>([]);
   const [tempoReflexao, setTempoReflexao] = useState(45); // 45 segundos
   const [inicioResposta, setInicioResposta] = useState<number>(0);
 
@@ -56,7 +57,7 @@ export default function ResponderEntrevistaPage() {
       return;
     }
 
-    carregarEntrevista();
+    carregarEntrevistaEProgresso();
   }, [slug, candidatoId, sessaoId]);
 
   useEffect(() => {
@@ -71,19 +72,51 @@ export default function ResponderEntrevistaPage() {
     }
   }, [fase, tempoReflexao]);
 
-  const carregarEntrevista = async () => {
+  const carregarEntrevistaEProgresso = async () => {
     try {
       setCarregando(true);
       setErro(null);
 
-      const response = await fetch(`/api/entrevista-publica/${slug}`);
+      // Carregar entrevista e progresso em paralelo
+      const [entrevistaResponse, progressoResponse] = await Promise.all([
+        fetch(`/api/entrevista-publica/${slug}`),
+        fetch(`/api/entrevista-publica/${slug}/progresso?candidatoId=${candidatoId}&sessaoId=${sessaoId}`),
+      ]);
 
-      if (!response.ok) {
+      if (!entrevistaResponse.ok) {
         throw new Error("Erro ao carregar entrevista");
       }
 
-      const data = await response.json();
-      setEntrevista(data);
+      const entrevistaData = await entrevistaResponse.json();
+      setEntrevista(entrevistaData);
+
+      // Carregar progresso se disponível
+      if (progressoResponse.ok) {
+        const progressoData = await progressoResponse.json();
+
+        // Se já concluiu, redirecionar ou mostrar mensagem
+        if (progressoData.status === "concluida") {
+          setFase("concluida");
+          return;
+        }
+
+        // Marcar perguntas já respondidas
+        if (progressoData.perguntasRespondidas?.length > 0) {
+          setPerguntasRespondidas(progressoData.perguntasRespondidas);
+
+          // Encontrar a primeira pergunta não respondida
+          const primeiraAindaNaoRespondida = entrevistaData.perguntas.findIndex(
+            (p: Pergunta) => !progressoData.perguntasRespondidas.includes(p.id)
+          );
+
+          if (primeiraAindaNaoRespondida !== -1) {
+            setPerguntaAtualIndex(primeiraAindaNaoRespondida);
+          } else {
+            // Todas respondidas, finalizar
+            setFase("concluida");
+          }
+        }
+      }
     } catch (error) {
       console.error("Erro ao carregar entrevista:", error);
       setErro("Não foi possível carregar a entrevista");
@@ -133,13 +166,21 @@ export default function ResponderEntrevistaPage() {
         throw new Error("Erro ao salvar resposta");
       }
 
-      // Ir para próxima pergunta ou finalizar
-      if (perguntaAtualIndex < entrevista.perguntas.length - 1) {
-        setPerguntaAtualIndex((prev) => prev + 1);
+      // Marcar pergunta como respondida
+      const novasRespondidas = [...perguntasRespondidas, perguntaAtual.id];
+      setPerguntasRespondidas(novasRespondidas);
+
+      // Encontrar próxima pergunta não respondida
+      const proximaNaoRespondida = entrevista.perguntas.findIndex(
+        (p, idx) => idx > perguntaAtualIndex && !novasRespondidas.includes(p.id)
+      );
+
+      if (proximaNaoRespondida !== -1) {
+        setPerguntaAtualIndex(proximaNaoRespondida);
         setFase("reflexao");
         setTempoReflexao(45);
       } else {
-        // Finalizar entrevista
+        // Todas as perguntas foram respondidas, finalizar
         await finalizarEntrevista();
       }
     } catch (error) {
@@ -261,7 +302,9 @@ export default function ResponderEntrevistaPage() {
 
   const perguntaAtual = entrevista.perguntas[perguntaAtualIndex];
   const totalPerguntas = entrevista.perguntas.length;
-  const progresso = ((perguntaAtualIndex + 1) / totalPerguntas) * 100;
+  // Progresso baseado em respostas já feitas
+  const perguntasCompletadas = perguntasRespondidas.length;
+  const progresso = ((perguntasCompletadas + 1) / totalPerguntas) * 100;
   const tempoMaximoResposta = perguntaAtual.tempoMaximo || entrevista.tempoResposta || 180;
 
   return (
@@ -272,7 +315,7 @@ export default function ResponderEntrevistaPage() {
           <CardContent className="py-5 px-5 sm:px-6">
             <div className="flex justify-between items-center mb-4">
               <span className="text-sm font-medium text-muted-foreground">
-                Pergunta {perguntaAtualIndex + 1} de {totalPerguntas}
+                Pergunta {perguntasCompletadas + 1} de {totalPerguntas}
               </span>
               <span className="text-sm font-bold text-primary">
                 {Math.round(progresso)}%

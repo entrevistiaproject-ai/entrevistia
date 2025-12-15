@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, AlertCircle, Briefcase, Users, Building2, Shield, ArrowLeft, Check } from "lucide-react";
+import { Loader2, AlertCircle, Briefcase, Users, Building2, Shield, ArrowLeft, Check, CheckCircle2, Clock, Play } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getLabelNivel } from "@/lib/constants/niveis";
@@ -45,9 +45,10 @@ export default function CadastroEntrevistaPage() {
   const [verificandoEmail, setVerificandoEmail] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
-  // Controle de etapas: "email" -> "dados"
-  const [etapa, setEtapa] = useState<"email" | "dados">("email");
+  // Controle de etapas: "email" -> "dados" -> "sucesso"
+  const [etapa, setEtapa] = useState<"email" | "dados" | "sucesso">("email");
   const [candidatoExistente, setCandidatoExistente] = useState<CandidatoExistente | null>(null);
+  const [dadosSessao, setDadosSessao] = useState<{ candidatoId: string; sessaoId: string } | null>(null);
 
   const [formData, setFormData] = useState({
     nome: "",
@@ -185,9 +186,9 @@ export default function CadastroEntrevistaPage() {
 
       const { candidatoId, sessaoId } = await response.json();
 
-      router.push(
-        `/entrevista/${slug}/responder?candidatoId=${candidatoId}&sessaoId=${sessaoId}`
-      );
+      // Mostrar tela de sucesso antes de iniciar
+      setDadosSessao({ candidatoId, sessaoId });
+      setEtapa("sucesso");
     } catch (error) {
       console.error("Erro ao enviar cadastro:", error);
       setErro(
@@ -209,6 +210,14 @@ export default function CadastroEntrevistaPage() {
       documento: "",
       sexo: "",
     });
+  };
+
+  const iniciarEntrevista = () => {
+    if (dadosSessao) {
+      router.push(
+        `/entrevista/${slug}/responder?candidatoId=${dadosSessao.candidatoId}&sessaoId=${dadosSessao.sessaoId}`
+      );
+    }
   };
 
   if (carregando) {
@@ -237,6 +246,60 @@ export default function CadastroEntrevistaPage() {
             </Button>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  // Tela de sucesso após cadastro
+  if (etapa === "sucesso") {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-green-50 to-primary/10 dark:from-green-950/20 dark:to-primary/5 py-8 sm:py-12 px-4">
+        <div className="max-w-lg mx-auto space-y-6">
+          <Card>
+            <CardContent className="pt-8 pb-8 px-6 text-center">
+              <div className="relative mx-auto w-20 h-20 mb-6">
+                <div className="absolute inset-0 rounded-full bg-green-200 dark:bg-green-800 animate-ping opacity-75" />
+                <div className="relative w-full h-full rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                  <CheckCircle2 className="h-10 w-10 text-green-600 dark:text-green-400" />
+                </div>
+              </div>
+
+              <h1 className="text-2xl font-bold text-green-700 dark:text-green-400 mb-2">
+                Candidatura Realizada!
+              </h1>
+              <p className="text-muted-foreground mb-6">
+                Sua candidatura para a vaga foi registrada com sucesso.
+              </p>
+
+              <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-6">
+                <div className="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-400 mb-2">
+                  <Clock className="h-5 w-5" />
+                  <span className="font-semibold">Prazo de 48 horas</span>
+                </div>
+                <p className="text-sm text-amber-600 dark:text-amber-500">
+                  Você tem até <strong>48 horas</strong> a partir de agora para realizar a entrevista.
+                  Após esse prazo, sua candidatura poderá ser invalidada.
+                </p>
+              </div>
+
+              <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6">
+                <p className="text-sm text-blue-700 dark:text-blue-400">
+                  <strong>Dica:</strong> Você pode iniciar agora ou voltar depois acessando o mesmo link.
+                  Se precisar pausar durante a entrevista, poderá continuar de onde parou.
+                </p>
+              </div>
+
+              <Button
+                onClick={iniciarEntrevista}
+                size="lg"
+                className="w-full h-14 text-lg gap-2"
+              >
+                <Play className="h-5 w-5" />
+                Iniciar Entrevista Agora
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
