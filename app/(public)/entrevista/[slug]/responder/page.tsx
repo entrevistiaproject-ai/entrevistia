@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { GravadorAudio } from "@/components/gravador-audio";
 import { VerificacaoMicrofone } from "@/components/verificacao-microfone";
 import { TutorialEntrevista } from "@/components/tutorial-entrevista";
-import { Loader2, CheckCircle2, Clock, AlertCircle, PartyPopper, Sparkles, Info } from "lucide-react";
+import { Loader2, CheckCircle2, Clock, AlertCircle, PartyPopper, Sparkles, Info, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -29,7 +29,7 @@ interface EntrevistaPublica {
 }
 
 type EtapaPreparacao = "verificacao-microfone" | "tutorial" | "entrevista";
-type Fase = "reflexao" | "resposta" | "processando" | "concluida";
+type Fase = "reflexao" | "resposta" | "processando" | "concluida" | "expirada";
 
 export default function ResponderEntrevistaPage() {
   const params = useParams();
@@ -94,9 +94,15 @@ export default function ResponderEntrevistaPage() {
       if (progressoResponse.ok) {
         const progressoData = await progressoResponse.json();
 
-        // Se já concluiu, redirecionar ou mostrar mensagem
+        // Se já concluiu, mostrar mensagem
         if (progressoData.status === "concluida") {
           setFase("concluida");
+          return;
+        }
+
+        // Se expirou, mostrar mensagem amigável
+        if (progressoData.status === "expirada") {
+          setFase("expirada");
           return;
         }
 
@@ -292,6 +298,39 @@ export default function ResponderEntrevistaPage() {
             <div className="bg-muted/50 rounded-xl p-5">
               <p className="text-sm text-muted-foreground">
                 A empresa vai analisar suas respostas e entrará em contato em breve.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Tela de entrevista expirada
+  if (fase === "expirada") {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-amber-50 to-orange-100 dark:from-amber-950/20 dark:to-orange-950/20 flex items-center justify-center p-4 sm:p-6">
+        <Card className="max-w-md w-full text-center">
+          <CardContent className="pt-10 pb-10 px-6">
+            <div className="mx-auto w-20 h-20 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center mb-7">
+              <Clock className="h-10 w-10 text-amber-600 dark:text-amber-400" />
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-amber-700 dark:text-amber-400 mb-3">
+              Prazo Expirado
+            </h1>
+            <p className="text-muted-foreground mb-6">
+              Infelizmente o prazo para realizar esta entrevista terminou.
+            </p>
+            <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-5 mb-6">
+              <p className="text-sm text-amber-700 dark:text-amber-400">
+                O prazo de <strong>48 horas</strong> para completar a entrevista foi excedido.
+                Sua candidatura não pôde ser processada.
+              </p>
+            </div>
+            <div className="bg-muted/50 rounded-xl p-5">
+              <p className="text-sm text-muted-foreground">
+                Se você acredita que isso foi um erro ou deseja uma nova oportunidade,
+                entre em contato diretamente com a empresa recrutadora.
               </p>
             </div>
           </CardContent>

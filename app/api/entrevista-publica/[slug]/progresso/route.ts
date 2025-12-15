@@ -65,13 +65,44 @@ export async function GET(
       );
     }
 
-    // Se a sessão já foi concluída, retornar status
+    // Se a sessão já foi concluída ou expirada, retornar status
     if (sessao.status === "concluida") {
       return NextResponse.json({
         status: "concluida",
         perguntasRespondidas: [],
         totalPerguntas: 0,
       });
+    }
+
+    if (sessao.status === "expirada" || sessao.status === "desistente") {
+      return NextResponse.json({
+        status: "expirada",
+        perguntasRespondidas: [],
+        totalPerguntas: 0,
+      });
+    }
+
+    // Verificar se o prazo expirou (em_andamento mas passou do prazo)
+    if (sessao.status === "em_andamento" && sessao.prazoResposta) {
+      const agora = new Date();
+      const prazo = new Date(sessao.prazoResposta);
+
+      if (agora > prazo) {
+        // Marcar como expirada/desistente
+        await db
+          .update(candidatoEntrevistas)
+          .set({
+            status: "expirada",
+            updatedAt: new Date(),
+          })
+          .where(eq(candidatoEntrevistas.id, sessaoId));
+
+        return NextResponse.json({
+          status: "expirada",
+          perguntasRespondidas: [],
+          totalPerguntas: 0,
+        });
+      }
     }
 
     // Buscar perguntas da entrevista

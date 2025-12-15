@@ -28,7 +28,7 @@ export const candidatoEntrevistas = pgTable("candidato_entrevistas", {
     .references(() => entrevistas.id, { onDelete: "cascade" }),
 
   // Status da participação
-  status: text("status").default("em_andamento").notNull(), // 'em_andamento', 'concluida', 'cancelada'
+  status: text("status").default("em_andamento").notNull(), // 'em_andamento', 'concluida', 'cancelada', 'expirada'
 
   // Controle de tentativas
   iniciadaEm: timestamp("iniciada_em", { mode: "date" }),

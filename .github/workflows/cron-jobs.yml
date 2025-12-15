@@ -28,3 +28,14 @@ jobs:
             -H "Content-Type: application/json" \
             --max-time 60 || true
         continue-on-error: true
+
+      - name: Aguardar 10 segundos
+        run: sleep 10
+
+      - name: Expirar Entrevistas Abandonadas
+        run: |
+          curl -s -X GET "${{ secrets.VERCEL_APP_URL }}/api/cron/expire-interviews" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --max-time 60 || true
+        continue-on-error: true
