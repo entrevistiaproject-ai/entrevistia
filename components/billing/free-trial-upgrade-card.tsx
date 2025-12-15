@@ -20,9 +20,9 @@ export function FreeTrialUpgradeCard() {
             Plano Gratuito
           </Badge>
         </div>
-        <CardTitle className="text-2xl">Upgrade para Continuar Crescendo</CardTitle>
+        <CardTitle className="text-2xl">Desbloqueie Entrevistas Ilimitadas</CardTitle>
         <CardDescription className="text-base">
-          Escolha um plano profissional e tenha acesso ilimitado a todas as funcionalidades
+          Assine o plano profissional e acelere suas contratações
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
