@@ -6,6 +6,7 @@ import { FREE_TRIAL_LIMITS } from "@/lib/config/free-trial";
 import { PRECOS_USUARIO, calcularCustoAnalise, USAGE_ESTIMATES_ANALISE_PERGUNTA } from "@/lib/config/pricing";
 import { logSystemError } from "@/lib/support/ticket-service";
 import { logger } from "@/lib/logger";
+import { validarNovaCobranca, validarCobrancaRegistrada } from "./billing-validation";
 
 /**
  * Verifica se o usuário é uma conta de teste
@@ -311,6 +312,28 @@ export async function registrarTransacao(params: {
       descricao: params.descricao,
     });
 
+    // VALIDAÇÃO PRÉ-REGISTRO: Verificar se a cobrança é válida antes de registrar
+    if (params.entrevistaId && (params.tipo === "taxa_base_candidato" || params.tipo === "analise_pergunta")) {
+      const validacaoPre = await validarNovaCobranca({
+        userId: params.userId,
+        entrevistaId: params.entrevistaId,
+        tipo: params.tipo,
+      });
+
+      if (!validacaoPre.valid) {
+        logger.warn("[BILLING] ⚠️ Cobrança bloqueada pela validação", {
+          userId: params.userId,
+          tipo: params.tipo,
+          entrevistaId: params.entrevistaId,
+          reason: validacaoPre.reason,
+        });
+        return {
+          success: false,
+          error: validacaoPre.reason || "Cobrança inválida",
+        };
+      }
+    }
+
     // Busca ou cria a fatura do mês atual
     const now = new Date();
     const mesAtual = now.getMonth() + 1;
@@ -380,6 +403,27 @@ export async function registrarTransacao(params: {
       valorCobrado: valorCobrado.toFixed(2),
       tipo: params.tipo,
     });
+
+    // VALIDAÇÃO PÓS-REGISTRO: Verificar que a transação foi registrada corretamente
+    if (params.entrevistaId && transacao.id) {
+      const validacaoPos = await validarCobrancaRegistrada({
+        userId: params.userId,
+        entrevistaId: params.entrevistaId,
+        transacaoId: transacao.id,
+        tipo: params.tipo,
+        valorEsperado: valorCobrado,
+      });
+
+      if (!validacaoPos.valid) {
+        logger.error("[BILLING] ❌ Validação pós-registro falhou", {
+          userId: params.userId,
+          transacaoId: transacao.id,
+          error: validacaoPos.error,
+        });
+        // Não retorna erro aqui pois a transação já foi registrada
+        // O erro será tratado pelo cron de verificação
+      }
+    }
 
     return { success: true, transacaoId: transacao.id };
   } catch (error) {

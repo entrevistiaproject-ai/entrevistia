@@ -1,0 +1,46 @@
+name: Billing Validation
+
+on:
+  schedule:
+    # Executa diariamente às 6h da manhã (horário de Brasília = 9h UTC)
+    - cron: '0 9 * * *'
+  workflow_dispatch: # Permite rodar manualmente
+
+jobs:
+  billing-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar Consistência de Billing
+        run: |
+          echo "🔍 Executando verificação de consistência de billing..."
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X GET "${{ secrets.VERCEL_APP_URL }}/api/cron/billing-check" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --max-time 120)
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "📊 Resposta (HTTP $HTTP_CODE):"
+          echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ Verificação falhou com código HTTP $HTTP_CODE"
+            exit 1
+          fi
+
+          # Verificar se houve erros não corrigíveis
+          ERRORS=$(echo "$BODY" | jq -r '.errosNaoCorrigiveis // 0')
+          if [ "$ERRORS" != "0" ]; then
+            echo "⚠️ Encontrados $ERRORS erros não corrigíveis - ticket criado para admin"
+          fi
+
+          echo "✅ Verificação de billing concluída"
+        continue-on-error: false
+
+      - name: Notificar Falha (se aplicável)
+        if: failure()
+        run: |
+          echo "❌ A verificação de billing falhou!"
+          echo "Um ticket será criado automaticamente para investigação."
