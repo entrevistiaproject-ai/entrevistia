@@ -1090,8 +1090,7 @@ export default function EntrevistaDetalhesPage() {
                     <div>
                       <p className="font-medium">Reativar Vaga</p>
                       <p className="text-sm text-muted-foreground">
-                        Reativa a vaga para receber novas respostas. Candidatos poderão
-                        acessar e responder à entrevista novamente.
+                        Reativa a vaga para convidar novos candidatos via email ou link.
                       </p>
                     </div>
                   </div>
