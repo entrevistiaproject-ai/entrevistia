@@ -14,7 +14,6 @@ import {
   MessageSquareText,
   ClipboardCheck,
   BarChart3,
-  Receipt,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -913,52 +912,6 @@ export default function CustosPage() {
         </Card>
       </div>
 
-      {/* Breakdown de Custos por Tipo */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3">
-            <div className="p-2 rounded-md bg-muted">
-              <Receipt className="h-5 w-5 text-muted-foreground" />
-            </div>
-            Detalhamento de Custos
-          </CardTitle>
-          <CardDescription className="pl-12">
-            Custos separados por tipo de operação
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            {Object.entries(periodoData.custoPorTipo || {}).map(([tipo, valor]) => {
-              const tipoLabels: Record<string, { label: string; icon: React.ElementType }> = {
-                taxa_base_candidato: { label: "Taxa Base", icon: Users },
-                analise_pergunta: { label: "Análise por Pergunta", icon: TrendingUp },
-                transcricao_audio: { label: "Transcrição de Áudio", icon: Users },
-                analise_ia: { label: "Análise com IA", icon: TrendingUp },
-                pergunta_criada: { label: "Perguntas Criadas", icon: Briefcase },
-                entrevista_criada: { label: "Entrevistas Criadas", icon: Briefcase },
-              };
-
-              const info = tipoLabels[tipo] || { label: tipo, icon: DollarSign };
-              const Icon = info.icon;
-
-              return (
-                <div
-                  key={tipo}
-                  className="p-3 sm:p-4 rounded-lg border bg-muted/30"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="p-1 rounded bg-muted">
-                      <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-                    </div>
-                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">{info.label}</p>
-                  </div>
-                  <p className="text-xl sm:text-2xl font-bold">R$ {Number(valor).toFixed(2)}</p>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
