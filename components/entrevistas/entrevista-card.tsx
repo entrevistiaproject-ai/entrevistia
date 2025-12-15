@@ -103,17 +103,17 @@ export function EntrevistaCard({ entrevista }: EntrevistaCardProps) {
             <span className="text-base font-bold tabular-nums">{entrevista.totalConcluiram}</span>
             <span className="text-[10px] text-muted-foreground">Concluídos</span>
           </div>
-          <div className="flex flex-col items-center justify-center p-2 bg-emerald-100 dark:bg-emerald-950 rounded-lg">
-            <UserCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mb-1" />
-            <span className="text-base font-bold tabular-nums text-emerald-700 dark:text-emerald-300">{entrevista.totalAprovados}</span>
-            <span className="text-[10px] text-emerald-600 dark:text-emerald-400">Aprovados</span>
+          <div className="flex flex-col items-center justify-center p-2 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-lg">
+            <UserCheck className="h-4 w-4 text-emerald-500 mb-1" />
+            <span className="text-base font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{entrevista.totalAprovados}</span>
+            <span className="text-[10px] text-emerald-500 dark:text-emerald-400">Aprovados</span>
           </div>
-          <div className="flex flex-col items-center justify-center p-2 bg-orange-100 dark:bg-orange-950 rounded-lg">
-            <Star className="h-4 w-4 text-orange-500 dark:text-orange-400 mb-1" />
-            <span className="text-base font-bold tabular-nums text-orange-600 dark:text-orange-300">
+          <div className="flex flex-col items-center justify-center p-2 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+            <Star className="h-4 w-4 text-amber-500 mb-1" />
+            <span className="text-base font-bold tabular-nums text-amber-600 dark:text-amber-400">
               {entrevista.mediaScore !== null ? entrevista.mediaScore : "-"}
             </span>
-            <span className="text-[10px] text-orange-600 dark:text-orange-400">Score</span>
+            <span className="text-[10px] text-amber-500 dark:text-amber-400">Score</span>
           </div>
           <div className="flex flex-col items-center justify-center p-2 bg-muted/50 rounded-lg">
             <FileQuestion className="h-4 w-4 text-muted-foreground mb-1" />
