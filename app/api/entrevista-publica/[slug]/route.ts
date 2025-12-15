@@ -28,6 +28,7 @@ export async function GET(
         tempoResposta: entrevistas.tempoResposta,
         status: entrevistas.status,
         expiracaoLink: entrevistas.expiracaoLink,
+        configuracoes: entrevistas.configuracoes,
       })
       .from(entrevistas)
       .where(
@@ -71,8 +72,12 @@ export async function GET(
       )
       .orderBy(asc(perguntas.ordem));
 
+    // Extrair prazo de resposta das configurações (padrão: 48 horas)
+    const prazoRespostaHoras = (entrevista.configuracoes as { prazoRespostaHoras?: number } | null)?.prazoRespostaHoras || 48;
+
     return NextResponse.json({
       ...entrevista,
+      prazoRespostaHoras,
       perguntas: perguntasEntrevista,
     });
   } catch (error) {

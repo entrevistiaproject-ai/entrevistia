@@ -24,6 +24,20 @@ interface EntrevistaPublica {
   cargo?: string;
   nivel?: string;
   empresa?: string;
+  prazoRespostaHoras?: number;
+}
+
+// Formata o prazo em texto amigável
+const formatarPrazo = (horas: number): string => {
+  if (horas === 24) return "24 horas";
+  if (horas === 48) return "48 horas";
+  if (horas === 72) return "72 horas (3 dias)";
+  if (horas === 168) return "7 dias";
+  if (horas >= 24) {
+    const dias = Math.floor(horas / 24);
+    return dias === 1 ? "1 dia" : `${dias} dias`;
+  }
+  return `${horas} horas`;
 }
 
 interface CandidatoExistente {
@@ -274,10 +288,10 @@ export default function CadastroEntrevistaPage() {
               <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-6">
                 <div className="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-400 mb-2">
                   <Clock className="h-5 w-5" />
-                  <span className="font-semibold">Prazo de 48 horas</span>
+                  <span className="font-semibold">Prazo de {formatarPrazo(entrevista?.prazoRespostaHoras || 48)}</span>
                 </div>
                 <p className="text-sm text-amber-600 dark:text-amber-500">
-                  Você tem até <strong>48 horas</strong> a partir de agora para realizar a entrevista.
+                  Você tem até <strong>{formatarPrazo(entrevista?.prazoRespostaHoras || 48)}</strong> a partir de agora para realizar a entrevista.
                   Após esse prazo, sua candidatura poderá ser invalidada.
                 </p>
               </div>

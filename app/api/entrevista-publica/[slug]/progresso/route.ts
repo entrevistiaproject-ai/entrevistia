@@ -125,11 +125,15 @@ export async function GET(
 
     const perguntasRespondidas = respostasExistentes.map(r => r.perguntaId);
 
+    // Extrair prazo de resposta em horas das configurações (padrão: 48 horas)
+    const prazoRespostaHoras = (entrevista.configuracoes as { prazoRespostaHoras?: number } | null)?.prazoRespostaHoras || 48;
+
     return NextResponse.json({
       status: sessao.status,
       perguntasRespondidas,
       totalPerguntas: perguntasEntrevista.length,
       prazoResposta: sessao.prazoResposta,
+      prazoRespostaHoras,
     });
   } catch (error) {
     console.error("Erro ao buscar progresso:", error);

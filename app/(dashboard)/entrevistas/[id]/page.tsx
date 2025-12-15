@@ -56,6 +56,8 @@ interface Entrevista {
   slug: string | null;
   createdAt: Date;
   updatedAt: Date;
+  // Prazo para candidatos responderem
+  prazoRespostaHoras: number;
   // Configurações de aprovação automática
   autoApprovalEnabled: boolean;
   autoApprovalMinScore: number;
@@ -136,6 +138,10 @@ export default function EntrevistaDetalhesPage() {
   const [descricaoAberta, setDescricaoAberta] = useState(false);
   const [filtroDecisao, setFiltroDecisao] = useState<string>("todos");
 
+  // Estado para prazo de resposta
+  const [prazoRespostaHoras, setPrazoRespostaHoras] = useState(48);
+  const [savingPrazo, setSavingPrazo] = useState(false);
+
   // Estados para aprovação automática
   const [savingAutoApproval, setSavingAutoApproval] = useState(false);
   const [autoApprovalEnabled, setAutoApprovalEnabled] = useState(false);
@@ -163,6 +169,8 @@ export default function EntrevistaDetalhesPage() {
       if (resEntrevista.ok) {
         const data = await resEntrevista.json();
         setEntrevista(data);
+        // Preencher prazo de resposta
+        setPrazoRespostaHoras(data.prazoRespostaHoras || 48);
         // Preencher estados de aprovação automática
         setAutoApprovalEnabled(data.autoApprovalEnabled || false);
         setAutoApprovalMinScore(data.autoApprovalMinScore || 70);
@@ -258,6 +266,47 @@ export default function EntrevistaDetalhesPage() {
   };
 
   // Handler para salvar configurações de aprovação automática
+  const handleSavePrazoResposta = async () => {
+    if (!entrevista) return;
+
+    setSavingPrazo(true);
+    try {
+      const res = await fetch(`/api/entrevistas/${entrevista.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          configuracoes: {
+            ...((entrevista as any).configuracoes || {}),
+            prazoRespostaHoras,
+          },
+        }),
+      });
+
+      if (res.ok) {
+        toast({
+          title: "Prazo atualizado",
+          description: `Candidatos terão ${prazoRespostaHoras} horas para responder`,
+        });
+        await fetchData();
+      } else {
+        const data = await res.json();
+        toast({
+          title: "Erro",
+          description: data.error || "Erro ao salvar prazo",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar prazo",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingPrazo(false);
+    }
+  };
+
   const handleSaveAutoApproval = async () => {
     if (!entrevista) return;
 
@@ -816,6 +865,59 @@ export default function EntrevistaDetalhesPage() {
                     {statusInfo.label}
                   </Badge>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card de Prazo de Resposta */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/50">
+                  <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <CardTitle>Prazo de Resposta</CardTitle>
+                  <CardDescription>
+                    Defina quanto tempo os candidatos têm para completar a entrevista
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex gap-3 p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <Info className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div className="text-sm text-amber-900 dark:text-amber-100">
+                  <p>
+                    O prazo começa a contar quando o candidato se cadastra na entrevista.
+                    Após o prazo, a candidatura é marcada como expirada.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="prazo-resposta">Prazo para responder</Label>
+                <Select
+                  value={prazoRespostaHoras.toString()}
+                  onValueChange={(value) => setPrazoRespostaHoras(parseInt(value))}
+                >
+                  <SelectTrigger id="prazo-resposta" className="w-full sm:w-64">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="24">24 horas (1 dia)</SelectItem>
+                    <SelectItem value="48">48 horas (2 dias)</SelectItem>
+                    <SelectItem value="72">72 horas (3 dias)</SelectItem>
+                    <SelectItem value="168">7 dias</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex justify-end">
+                <Button onClick={handleSavePrazoResposta} disabled={savingPrazo}>
+                  {savingPrazo && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Salvar Prazo
+                </Button>
               </div>
             </CardContent>
           </Card>

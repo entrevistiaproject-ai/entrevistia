@@ -26,6 +26,20 @@ interface EntrevistaPublica {
   descricao?: string;
   perguntas: Pergunta[];
   tempoResposta?: number;
+  prazoRespostaHoras?: number;
+}
+
+// Formata o prazo em texto amigável
+const formatarPrazo = (horas: number): string => {
+  if (horas === 24) return "24 horas";
+  if (horas === 48) return "48 horas";
+  if (horas === 72) return "72 horas (3 dias)";
+  if (horas === 168) return "7 dias";
+  if (horas >= 24) {
+    const dias = Math.floor(horas / 24);
+    return dias === 1 ? "1 dia" : `${dias} dias`;
+  }
+  return `${horas} horas`;
 }
 
 type EtapaPreparacao = "verificacao-microfone" | "tutorial" | "entrevista";
@@ -323,7 +337,7 @@ export default function ResponderEntrevistaPage() {
             </p>
             <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-5 mb-6">
               <p className="text-sm text-amber-700 dark:text-amber-400">
-                O prazo de <strong>48 horas</strong> para completar a entrevista foi excedido.
+                O prazo de <strong>{formatarPrazo(entrevista?.prazoRespostaHoras || 48)}</strong> para completar a entrevista foi excedido.
                 Sua candidatura não pôde ser processada.
               </p>
             </div>
