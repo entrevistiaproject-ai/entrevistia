@@ -7,7 +7,8 @@ import {
   candidatos,
   candidatoEntrevistas,
 } from "@/lib/db/schema";
-import { eq, and, isNull, isNotNull, sql, desc, gte, inArray, or } from "drizzle-orm";
+import { eq, and, isNull, isNotNull, sql, desc, gte, inArray, or, count } from "drizzle-orm";
+import { perguntas, respostas } from "@/lib/db/schema";
 import { revalidatePath } from "next/cache";
 
 export interface DashboardMetrics {
@@ -420,6 +421,21 @@ export interface PipelineCandidate {
   arquivadoEm: Date | null;
 }
 
+export interface EmAndamentoCandidate {
+  id: string; // candidatoEntrevistas.id
+  candidatoId: string;
+  nome: string;
+  email: string;
+  entrevistaId: string;
+  entrevistaTitulo: string;
+  cargo: string | null;
+  empresa: string | null;
+  iniciadaEm: Date | null;
+  prazoResposta: Date | null;
+  perguntasRespondidas: number;
+  totalPerguntas: number;
+}
+
 export interface EntrevistaFiltro {
   id: string;
   titulo: string;
@@ -431,6 +447,7 @@ export interface PipelineData {
   pendentes: PipelineCandidate[]; // Concluídos aguardando decisão
   finalistas: PipelineCandidate[]; // Aprovados não arquivados
   arquivados: PipelineCandidate[]; // Arquivados (aprovados e reprovados)
+  emAndamento: EmAndamentoCandidate[]; // Em andamento com prazo e progresso
   counts: {
     pendentes: number;
     finalistas: number;
@@ -506,6 +523,8 @@ export async function getPipelineData(entrevistaIdFiltro?: string): Promise<{
         decisaoRecrutadorEm: candidatoEntrevistas.decisaoRecrutadorEm,
         arquivadoEm: candidatoEntrevistas.arquivadoEm,
         status: candidatoEntrevistas.status,
+        iniciadaEm: candidatoEntrevistas.iniciadaEm,
+        prazoResposta: candidatoEntrevistas.prazoResposta,
       })
       .from(candidatoEntrevistas)
       .innerJoin(candidatos, eq(candidatoEntrevistas.candidatoId, candidatos.id))
@@ -518,7 +537,8 @@ export async function getPipelineData(entrevistaIdFiltro?: string): Promise<{
     const pendentes: PipelineCandidate[] = [];
     const finalistas: PipelineCandidate[] = [];
     const arquivados: PipelineCandidate[] = [];
-    let emAndamento = 0;
+    const emAndamentoList: EmAndamentoCandidate[] = [];
+    const emAndamentoIds: { ceId: string; candidatoId: string; entrevistaId: string }[] = [];
 
     allCandidates.forEach((c) => {
       const candidate: PipelineCandidate = {
@@ -553,8 +573,70 @@ export async function getPipelineData(entrevistaIdFiltro?: string): Promise<{
       }
       // Em andamento
       else if (c.status === "em_andamento") {
-        emAndamento++;
+        emAndamentoIds.push({
+          ceId: c.id,
+          candidatoId: c.candidatoId,
+          entrevistaId: c.entrevistaId,
+        });
+        emAndamentoList.push({
+          id: c.id,
+          candidatoId: c.candidatoId,
+          nome: c.nome,
+          email: c.email,
+          entrevistaId: c.entrevistaId,
+          entrevistaTitulo: c.entrevistaTitulo,
+          cargo: c.cargo,
+          empresa: c.empresa,
+          iniciadaEm: c.iniciadaEm,
+          prazoResposta: c.prazoResposta,
+          perguntasRespondidas: 0, // Será preenchido abaixo
+          totalPerguntas: 0, // Será preenchido abaixo
+        });
       }
+    });
+
+    // Buscar progresso para candidatos em andamento
+    if (emAndamentoIds.length > 0) {
+      // Buscar total de perguntas por entrevista
+      const entrevistaIds = [...new Set(emAndamentoIds.map(e => e.entrevistaId))];
+      const perguntasPorEntrevista = await db
+        .select({
+          entrevistaId: perguntas.entrevistaId,
+          total: sql<number>`COUNT(*)::int`,
+        })
+        .from(perguntas)
+        .where(and(
+          inArray(perguntas.entrevistaId, entrevistaIds),
+          isNull(perguntas.deletedAt)
+        ))
+        .groupBy(perguntas.entrevistaId);
+
+      const perguntasMap = new Map(perguntasPorEntrevista.map(p => [p.entrevistaId, p.total]));
+
+      // Buscar respostas de cada candidato
+      for (const emAndamento of emAndamentoList) {
+        const respondidas = await db
+          .select({
+            count: sql<number>`COUNT(*)::int`,
+          })
+          .from(respostas)
+          .where(and(
+            eq(respostas.candidatoId, emAndamento.candidatoId),
+            eq(respostas.entrevistaId, emAndamento.entrevistaId),
+            isNull(respostas.deletedAt)
+          ));
+
+        emAndamento.perguntasRespondidas = respondidas[0]?.count || 0;
+        emAndamento.totalPerguntas = perguntasMap.get(emAndamento.entrevistaId) || 0;
+      }
+    }
+
+    // Ordenar em andamento por prazo (mais urgente primeiro)
+    emAndamentoList.sort((a, b) => {
+      if (!a.prazoResposta && !b.prazoResposta) return 0;
+      if (!a.prazoResposta) return 1;
+      if (!b.prazoResposta) return -1;
+      return new Date(a.prazoResposta).getTime() - new Date(b.prazoResposta).getTime();
     });
 
     return {
@@ -563,11 +645,12 @@ export async function getPipelineData(entrevistaIdFiltro?: string): Promise<{
         pendentes,
         finalistas,
         arquivados,
+        emAndamento: emAndamentoList,
         counts: {
           pendentes: pendentes.length,
           finalistas: finalistas.length,
           arquivados: arquivados.length,
-          emAndamento,
+          emAndamento: emAndamentoList.length,
         },
         entrevistas: entrevistasComCandidatos,
       },

@@ -53,13 +53,18 @@ import {
   Trophy,
   UserCheck,
   Target,
+  Play,
+  AlertTriangle,
+  Timer,
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   getPipelineData,
   PipelineData,
   PipelineCandidate,
+  EmAndamentoCandidate,
   arquivarCandidatos,
   desarquivarCandidatos,
   aprovarCandidatosEmLote,
@@ -69,7 +74,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
-type TabValue = "pendentes" | "finalistas" | "arquivados";
+type TabValue = "pendentes" | "finalistas" | "emAndamento" | "arquivados";
 
 export default function PainelPage() {
   const [data, setData] = useState<PipelineData | null>(null);
@@ -559,6 +564,130 @@ export default function PainelPage() {
     );
   };
 
+  // Card de candidato em andamento
+  const EmAndamentoCard = ({ candidate }: { candidate: EmAndamentoCandidate }) => {
+    const handleRowClick = (e: React.MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('button') || target.closest('a') || target.closest('[role="checkbox"]')) {
+        return;
+      }
+      // Não há página de resultado ainda, apenas ver a entrevista
+      router.push(`/entrevistas/${candidate.entrevistaId}`);
+    };
+
+    // Calcular tempo restante
+    const getTempoRestante = () => {
+      if (!candidate.prazoResposta) return null;
+      const agora = new Date();
+      const prazo = new Date(candidate.prazoResposta);
+      const diff = prazo.getTime() - agora.getTime();
+
+      if (diff <= 0) return { texto: "Expirado", cor: "text-red-600", urgente: true };
+
+      const horas = Math.floor(diff / (1000 * 60 * 60));
+      const dias = Math.floor(horas / 24);
+
+      if (dias > 0) {
+        return { texto: `${dias}d ${horas % 24}h`, cor: "text-muted-foreground", urgente: false };
+      }
+      if (horas > 12) {
+        return { texto: `${horas}h`, cor: "text-amber-600", urgente: false };
+      }
+      return { texto: `${horas}h`, cor: "text-red-600", urgente: true };
+    };
+
+    const tempoRestante = getTempoRestante();
+    const progresso = candidate.totalPerguntas > 0
+      ? Math.round((candidate.perguntasRespondidas / candidate.totalPerguntas) * 100)
+      : 0;
+
+    return (
+      <div
+        onClick={handleRowClick}
+        className={cn(
+          "group flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-xl border transition-all cursor-pointer",
+          "border-blue-200 bg-blue-50/50",
+          "hover:shadow-md hover:border-blue-400"
+        )}
+      >
+        {/* Avatar + Info */}
+        <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+          <div className="relative">
+            <Avatar className="h-11 w-11 shrink-0 ring-2 ring-blue-200">
+              <AvatarFallback className="bg-blue-100 text-blue-700 text-sm font-medium">
+                {getInitials(candidate.nome)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+              <Play className="h-2.5 w-2.5 text-white fill-white" />
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-medium truncate group-hover:text-blue-700 transition-colors">
+                {candidate.nome}
+              </span>
+              <Badge variant="default" className="bg-blue-500 hover:bg-blue-600 text-white">
+                <Sparkles className="h-3 w-3 mr-1" />
+                Em andamento
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Briefcase className="h-3 w-3 shrink-0" />
+              <span className="truncate">
+                {candidate.entrevistaTitulo}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Progresso + Prazo */}
+        <div className="flex items-center justify-end gap-4 pl-11 sm:pl-0">
+          {/* Progresso */}
+          <div className="min-w-[100px]">
+            <div className="flex items-center justify-between text-xs mb-1">
+              <span className="text-muted-foreground">Progresso</span>
+              <span className="font-medium">{candidate.perguntasRespondidas}/{candidate.totalPerguntas}</span>
+            </div>
+            <Progress value={progresso} className="h-2" />
+          </div>
+
+          {/* Prazo */}
+          {tempoRestante && (
+            <div className="text-center min-w-[60px]" title={candidate.prazoResposta ? `Prazo: ${new Date(candidate.prazoResposta).toLocaleString('pt-BR')}` : ''}>
+              <div className={cn("flex items-center gap-1 justify-center", tempoRestante.cor)}>
+                {tempoRestante.urgente ? (
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                ) : (
+                  <Timer className="h-3.5 w-3.5" />
+                )}
+                <span className="text-sm font-medium">{tempoRestante.texto}</span>
+              </div>
+              <p className="text-[10px] text-muted-foreground">Prazo</p>
+            </div>
+          )}
+
+          {/* Link para detalhes */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link href={`/entrevistas/${candidate.entrevistaId}`}>
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Ver entrevista
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -632,11 +761,14 @@ export default function PainelPage() {
     );
   }
 
+  // Para abas com PipelineCandidate
   const currentCandidates = activeTab === "pendentes"
     ? data.pendentes
     : activeTab === "finalistas"
     ? data.finalistas
-    : data.arquivados;
+    : activeTab === "arquivados"
+    ? data.arquivados
+    : [];
 
   return (
     <div className="space-y-6">
@@ -694,7 +826,13 @@ export default function PainelPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card
+          className={cn(
+            "cursor-pointer transition-all",
+            activeTab === "emAndamento" ? "border-blue-400 bg-blue-100 ring-1 ring-blue-200" : "hover:border-blue-300"
+          )}
+          onClick={() => setActiveTab("emAndamento")}
+        >
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="rounded-lg bg-blue-100 dark:bg-blue-900 p-2.5">
@@ -766,6 +904,11 @@ export default function PainelPage() {
                     <span className="hidden sm:inline">Finalistas</span>
                     <Badge variant="secondary" className="ml-1">{data.counts.finalistas}</Badge>
                   </TabsTrigger>
+                  <TabsTrigger value="emAndamento" className="flex-1 sm:flex-none gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    <span className="hidden sm:inline">Em andamento</span>
+                    <Badge variant="secondary" className="ml-1">{data.counts.emAndamento}</Badge>
+                  </TabsTrigger>
                   <TabsTrigger value="arquivados" className="flex-1 sm:flex-none gap-2">
                     <Archive className="h-4 w-4" />
                     <span className="hidden sm:inline">Arquivados</span>
@@ -829,8 +972,8 @@ export default function PainelPage() {
           </div>
 
           <CardContent>
-            {/* Header com select all */}
-            {currentCandidates.length > 0 && (
+            {/* Header com select all (apenas para abas com selecao) */}
+            {currentCandidates.length > 0 && activeTab !== "emAndamento" && (
               <div className="flex items-center gap-2 mb-4 pb-3 border-b">
                 <Checkbox
                   checked={selectedIds.size === currentCandidates.length && currentCandidates.length > 0}
@@ -870,6 +1013,22 @@ export default function PainelPage() {
               ) : (
                 data.finalistas.map((candidate) => (
                   <FinalistaCard key={candidate.id} candidate={candidate} />
+                ))
+              )}
+            </TabsContent>
+
+            <TabsContent value="emAndamento" className="mt-0 space-y-3">
+              {data.emAndamento.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Sparkles className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Nenhuma entrevista em andamento</h3>
+                  <p className="text-sm text-muted-foreground max-w-sm">
+                    Quando candidatos iniciarem suas entrevistas, eles aparecerao aqui.
+                  </p>
+                </div>
+              ) : (
+                data.emAndamento.map((candidate) => (
+                  <EmAndamentoCard key={candidate.id} candidate={candidate} />
                 ))
               )}
             </TabsContent>

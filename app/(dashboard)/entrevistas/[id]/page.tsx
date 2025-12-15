@@ -19,7 +19,6 @@ import {
   AlertTriangle,
   ChevronDown,
   FileText,
-  ChevronRight,
   Star,
   Zap,
   XCircle,
@@ -49,7 +48,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -851,7 +849,7 @@ export default function EntrevistaDetalhesPage() {
                         </Badge>
 
                         {/* Menu de ações */}
-                        {mostrarAcoes && (
+                        {mostrarAcoes && (candidato.status === "pendente" || candidato.status === "em_andamento" || candidato.status === "expirada" || candidato.status === "cancelada") && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
@@ -859,48 +857,31 @@ export default function EntrevistaDetalhesPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem asChild>
-                                <Link href={`/candidatos/${candidato.id}/resultado`}>
-                                  <FileText className="h-4 w-4 mr-2" />
-                                  Ver resultado
-                                </Link>
-                              </DropdownMenuItem>
                               {(candidato.status === "pendente" || candidato.status === "em_andamento") && (
-                                <>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      setHorasAdicionais(24);
-                                      setProrrogarDialog({ open: true, candidato });
-                                    }}
-                                  >
-                                    <TimerReset className="h-4 w-4 mr-2" />
-                                    Prorrogar prazo
-                                  </DropdownMenuItem>
-                                </>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setHorasAdicionais(24);
+                                    setProrrogarDialog({ open: true, candidato });
+                                  }}
+                                >
+                                  <TimerReset className="h-4 w-4 mr-2" />
+                                  Prorrogar prazo
+                                </DropdownMenuItem>
                               )}
                               {(candidato.status === "expirada" || candidato.status === "cancelada") && (
-                                <>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      setPrazoReenvio(48);
-                                      setReenviarDialog({ open: true, candidato });
-                                    }}
-                                  >
-                                    <RefreshCw className="h-4 w-4 mr-2" />
-                                    Reenviar entrevista
-                                  </DropdownMenuItem>
-                                </>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setPrazoReenvio(48);
+                                    setReenviarDialog({ open: true, candidato });
+                                  }}
+                                >
+                                  <RefreshCw className="h-4 w-4 mr-2" />
+                                  Reenviar entrevista
+                                </DropdownMenuItem>
                               )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         )}
-
-                        {/* Seta */}
-                        <Link href={`/candidatos/${candidato.id}/resultado`} className="shrink-0">
-                          <ChevronRight className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
-                        </Link>
                       </div>
                     </div>
                   );
