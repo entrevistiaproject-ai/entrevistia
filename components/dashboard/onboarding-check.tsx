@@ -22,11 +22,18 @@ export function OnboardingCheck() {
     const checkOnboarding = async () => {
       try {
         const response = await fetch("/api/user/cargo-preferences");
+
+        // Se não autenticado, não fazer nada (deixar o middleware lidar)
+        if (response.status === 401) {
+          setChecked(true);
+          return;
+        }
+
         if (response.ok) {
           const data = await response.json();
-          // Se o onboarding não foi completado E não tem cargos selecionados
-          // (usuário nunca configurou), redireciona
-          if (!data.onboardingCompleted && (!data.cargosVisiveis || data.cargosVisiveis.length === 0)) {
+          // Se o onboarding não foi completado, redireciona
+          // Verifica especificamente se onboardingCompleted é false (não apenas falsy)
+          if (data.onboardingCompleted === false) {
             router.push("/onboarding/areas");
             return;
           }
@@ -37,7 +44,9 @@ export function OnboardingCheck() {
       setChecked(true);
     };
 
-    checkOnboarding();
+    // Pequeno delay para garantir que a sessão está carregada
+    const timer = setTimeout(checkOnboarding, 100);
+    return () => clearTimeout(timer);
   }, [pathname, router]);
 
   // Não renderiza nada - apenas faz a verificação
