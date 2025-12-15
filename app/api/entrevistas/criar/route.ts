@@ -27,6 +27,7 @@ interface CreateEntrevistaRequest {
   autoApprovalMinScore?: number;
   autoRejectEnabled?: boolean;
   autoRejectMaxScore?: number;
+  prazoRespostaHoras?: number;
 }
 
 export async function POST(request: NextRequest) {
@@ -106,6 +107,7 @@ export async function POST(request: NextRequest) {
         status: "active", // Entrevista criada já ativa
         configuracoes: {
           compartilharResultados: body.compartilharResultados || false,
+          prazoRespostaHoras: body.prazoRespostaHoras || 48,
         },
         // Aprovação automática
         autoApprovalEnabled: body.autoApprovalEnabled || false,

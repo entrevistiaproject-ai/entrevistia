@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Lightbulb } from "lucide-react";
+import { ArrowLeft, Lightbulb, Clock } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -86,6 +86,7 @@ export default function CriarEntrevistaPage() {
   const [autoApprovalMinScore, setAutoApprovalMinScore] = useState(70);
   const [autoRejectEnabled, setAutoRejectEnabled] = useState(false);
   const [autoRejectMaxScore, setAutoRejectMaxScore] = useState(30);
+  const [prazoRespostaHoras, setPrazoRespostaHoras] = useState(48);
   const [perguntas, setPerguntas] = useState<PerguntaSelecionada[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -152,6 +153,7 @@ export default function CriarEntrevistaPage() {
           autoApprovalMinScore,
           autoRejectEnabled,
           autoRejectMaxScore,
+          prazoRespostaHoras,
         }),
       });
 
@@ -340,6 +342,33 @@ Breve contexto sobre a posição e equipe...
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Prazo de resposta */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <Label htmlFor="prazo-resposta" className="text-sm sm:text-base">
+                  Prazo para responder
+                </Label>
+              </div>
+              <Select
+                value={prazoRespostaHoras.toString()}
+                onValueChange={(value) => setPrazoRespostaHoras(parseInt(value))}
+              >
+                <SelectTrigger id="prazo-resposta" className="w-full sm:w-64 h-11 sm:h-10">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="24">24 horas (1 dia)</SelectItem>
+                  <SelectItem value="48">48 horas (2 dias)</SelectItem>
+                  <SelectItem value="72">72 horas (3 dias)</SelectItem>
+                  <SelectItem value="168">7 dias</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Tempo que o candidato terá para completar a entrevista após se cadastrar
+              </p>
+            </div>
+
             {/* TODO: Reativar após MVP - Mostrar resultado para o candidato */}
             {/* <div className="flex items-center justify-between gap-4">
               <div className="space-y-1 flex-1">
