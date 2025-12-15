@@ -15,6 +15,8 @@ import {
   Brain,
   Sparkles,
   Clock,
+  Code2,
+  Target,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import {
@@ -562,6 +564,127 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Technical Evaluation Section - Key differentiator */}
+      <section className="py-16 sm:py-24 relative overflow-hidden">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
+
+        {/* Decorative code elements */}
+        <div className="absolute top-10 left-10 text-primary/10 font-mono text-xs hidden lg:block">
+          {'{'} &quot;skills&quot;: [&quot;React&quot;, &quot;Node.js&quot;, &quot;AWS&quot;] {'}'}
+        </div>
+        <div className="absolute bottom-10 right-10 text-primary/10 font-mono text-xs hidden lg:block">
+          function avaliarCandidato() {'{ ... }'}
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-4xl mx-auto">
+            {/* Badge */}
+            <div className="flex justify-center mb-8">
+              <div className="inline-flex items-center gap-2 bg-primary/20 backdrop-blur-sm rounded-full px-4 py-2">
+                <Code2 className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-primary">Diferencial exclusivo</span>
+              </div>
+            </div>
+
+            {/* Main headline */}
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-6 text-white leading-tight">
+              Domine qualquer área técnica{" "}
+              <span className="text-primary">com o poder da IA</span>
+            </h2>
+
+            {/* Subheadline - Pain point */}
+            <p className="text-lg sm:text-xl text-slate-300 text-center mb-12 max-w-3xl mx-auto leading-relaxed">
+              Java, React, Kubernetes, SAP, AutoCAD, Contabilidade Avançada... Você não precisa dominar nenhum desses temas.
+              A IA avalia com profundidade técnica que antes só um especialista conseguiria.
+            </p>
+
+            {/* Cards grid */}
+            <div className="grid md:grid-cols-2 gap-6 mb-12">
+              {/* Pain card */}
+              <div className="bg-red-950/30 border border-red-500/20 rounded-2xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                    <span className="text-xl">😰</span>
+                  </div>
+                  <h3 className="font-semibold text-white">Antes</h3>
+                </div>
+                <ul className="space-y-3">
+                  {[
+                    "Depender de gestores técnicos ocupados",
+                    "Não saber avaliar frameworks e linguagens",
+                    "Perder candidatos por demora no processo",
+                    "Fazer triagens superficiais por currículo",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-slate-400 text-sm">
+                      <span className="text-red-400 mt-0.5">✗</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Solution card */}
+              <div className="bg-emerald-950/30 border border-emerald-500/20 rounded-2xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                    <Target className="h-5 w-5 text-emerald-400" />
+                  </div>
+                  <h3 className="font-semibold text-white">Com EntrevistIA</h3>
+                </div>
+                <ul className="space-y-3">
+                  {[
+                    "IA avalia conhecimento técnico profundo",
+                    "Perguntas específicas para cada tecnologia",
+                    "Análise detalhada que você entende",
+                    "Decisões embasadas em dados técnicos",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-slate-300 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400 mt-0.5 shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Use cases */}
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/10">
+              <p className="text-sm text-slate-400 text-center mb-6">Avalie com confiança profissionais de qualquer área</p>
+              <div className="flex flex-wrap justify-center gap-3">
+                {[
+                  "Desenvolvedores",
+                  "Arquitetos de Software",
+                  "DevOps / SRE",
+                  "Data Scientists",
+                  "Engenheiros",
+                  "Contadores",
+                  "Analistas Financeiros",
+                  "Especialistas SAP",
+                ].map((role, i) => (
+                  <span
+                    key={i}
+                    className="px-4 py-2 bg-white/10 rounded-full text-sm text-slate-300 border border-white/10"
+                  >
+                    {role}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Quote/Testimonial style */}
+            <div className="mt-12 text-center">
+              <p className="text-xl sm:text-2xl text-white/90 italic max-w-2xl mx-auto">
+                &ldquo;Agora consigo avaliar desenvolvedores sênior com confiança,
+                mesmo sem saber a diferença entre frontend e backend.&rdquo;
+              </p>
+              <p className="text-sm text-slate-400 mt-4">— O que nossos clientes de RH dizem</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing - Simple and clear */}
       <section id="precos" className="py-8 sm:py-16">
         <div className="container mx-auto px-4">
@@ -643,9 +766,10 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
             {[
               { icon: Users, text: "Equipes de RH enxutas" },
+              { icon: Code2, text: "Vagas técnicas especializadas" },
               { icon: Clock, text: "Vagas com muitos candidatos" },
               { icon: Zap, text: "Processos seletivos urgentes" },
             ].map((item, i) => (
