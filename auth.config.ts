@@ -21,6 +21,16 @@ export const authConfig = {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
+        // Armazena preferência de "lembrar de mim"
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const rememberMe = (user as any).rememberMe === true;
+        token.rememberMe = rememberMe;
+
+        // Define expiração baseada na preferência do usuário
+        // Se "manter conectado" está marcado: 7 dias
+        // Se não está marcado: 8 horas (sessão de trabalho)
+        const maxAge = rememberMe ? 7 * 24 * 60 * 60 : 8 * 60 * 60;
+        token.exp = Math.floor(Date.now() / 1000) + maxAge;
       }
       return token;
     },
@@ -39,6 +49,7 @@ export const authConfig = {
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
+        rememberMe: { label: "Remember Me", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -68,6 +79,7 @@ export const authConfig = {
           id: user.id,
           email: user.email,
           name: user.nome,
+          rememberMe: credentials.rememberMe === "true",
         };
       },
     }),

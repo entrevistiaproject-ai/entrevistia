@@ -19,6 +19,7 @@ import {
   EyeOff
 } from "lucide-react";
 import { Logo, LogoIcon } from "@/components/logo";
+import { Checkbox } from "@/components/ui/checkbox";
 import { signIn } from "next-auth/react";
 
 function LoginForm() {
@@ -27,15 +28,29 @@ function LoginForm() {
   const emailVerificado = searchParams.get("email_verificado");
   const callbackUrl = searchParams.get("callbackUrl") || "/painel";
 
-  const [formData, setFormData] = useState({
-    email: "",
-    senha: "",
+  const [formData, setFormData] = useState(() => {
+    // Recupera email salvo se "lembrar de mim" estava marcado
+    if (typeof window !== "undefined") {
+      const savedEmail = localStorage.getItem("savedEmail");
+      return {
+        email: savedEmail || "",
+        senha: "",
+      };
+    }
+    return { email: "", senha: "" };
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(emailVerificado === "true");
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(() => {
+    // Se tem email salvo, significa que "lembrar de mim" estava marcado
+    if (typeof window !== "undefined") {
+      return !!localStorage.getItem("savedEmail");
+    }
+    return false;
+  });
 
   useEffect(() => {
     if (showSuccessMessage) {
@@ -61,11 +76,19 @@ function LoginForm() {
     setErrors({});
     setIsLoading(true);
 
+    // Salva ou remove email do localStorage baseado na preferência
+    if (rememberMe) {
+      localStorage.setItem("savedEmail", formData.email);
+    } else {
+      localStorage.removeItem("savedEmail");
+    }
+
     try {
       const result = await signIn("credentials", {
         redirect: false,
         email: formData.email,
         password: formData.senha,
+        rememberMe: rememberMe.toString(),
       });
 
       if (result?.error) {
@@ -180,6 +203,7 @@ function LoginForm() {
                   error={!!errors.email}
                   disabled={isLoading}
                   autoFocus
+                  autoComplete="email"
                 />
                 {errors.email && (
                   <p className="text-sm text-destructive mt-1.5">{errors.email}</p>
@@ -211,6 +235,7 @@ function LoginForm() {
                     error={!!errors.senha}
                     disabled={isLoading}
                     className="pr-10"
+                    autoComplete="current-password"
                   />
                   <button
                     type="button"
@@ -224,6 +249,22 @@ function LoginForm() {
                 {errors.senha && (
                   <p className="text-sm text-destructive mt-1.5">{errors.senha}</p>
                 )}
+              </div>
+
+              {/* Lembrar de mim */}
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) => setRememberMe(checked === true)}
+                  disabled={isLoading}
+                />
+                <label
+                  htmlFor="rememberMe"
+                  className="text-sm text-muted-foreground cursor-pointer select-none"
+                >
+                  Lembrar de mim e manter conectado
+                </label>
               </div>
 
               {/* Botão de Submit */}
