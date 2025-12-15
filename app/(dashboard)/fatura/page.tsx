@@ -64,6 +64,7 @@ interface FaturaDetalhe extends Fatura {
     descricao: string | null;
     status: string;
     metadados: Record<string, unknown> | null;
+    entrevistaId: string | null;
     createdAt: string;
   }>;
 }
@@ -250,6 +251,7 @@ export default function FaturaPage() {
 
   // Agrupar transações por avaliação de candidato
   // Cada avaliação consiste em: taxa_base_candidato + N * analise_pergunta
+  // Agrupa por entrevistaId + intervalo de tempo (mesma análise = dentro de 5 minutos)
   const avaliacoesAgrupadas: AvaliacaoAgrupada[] = (() => {
     if (!selectedFatura?.transacoes) return [];
 
@@ -258,27 +260,32 @@ export default function FaturaPage() {
       (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
 
-    // Agrupar por metadados.respostaId ou por proximidade temporal
+    // Agrupar por entrevistaId + timestamp arredondado (janela de 5 minutos)
+    // Isso garante que taxa_base e analise_pergunta da mesma análise sejam agrupadas
     const grupos: Map<string, typeof transacoesOrdenadas> = new Map();
 
     transacoesOrdenadas.forEach((t) => {
-      // Usa respostaId dos metadados como chave de agrupamento
-      const respostaId = (t.metadados as Record<string, unknown>)?.respostaId as string | undefined;
-      const candidatoId = (t.metadados as Record<string, unknown>)?.candidatoId as string | undefined;
-
-      // Chave de agrupamento: prefere respostaId, depois candidatoId+data
-      let chave = respostaId || candidatoId;
-
-      if (!chave) {
-        // Agrupa por data (mesmo minuto)
+      // Para transações de análise (taxa_base ou analise_pergunta), agrupa por timestamp
+      // arredondado para 5 minutos, pois todas as transações de uma análise ocorrem juntas
+      if (t.tipo === "taxa_base_candidato" || t.tipo === "analise_pergunta") {
         const data = new Date(t.createdAt);
-        chave = `${data.toISOString().slice(0, 16)}`;
-      }
+        // Arredonda para janela de 5 minutos
+        const minutos = Math.floor(data.getMinutes() / 5) * 5;
+        data.setMinutes(minutos, 0, 0);
 
-      if (!grupos.has(chave)) {
-        grupos.set(chave, []);
+        // Chave: entrevistaId (campo direto da transação) + timestamp arredondado
+        const entrevistaId = t.entrevistaId || "sem-entrevista";
+        const chave = `${entrevistaId}_${data.toISOString()}`;
+
+        if (!grupos.has(chave)) {
+          grupos.set(chave, []);
+        }
+        grupos.get(chave)!.push(t);
+      } else {
+        // Outras transações ficam individuais
+        const chave = t.id;
+        grupos.set(chave, [t]);
       }
-      grupos.get(chave)!.push(t);
     });
 
     // Converter grupos em avaliações

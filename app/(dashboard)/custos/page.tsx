@@ -14,6 +14,7 @@ import {
   MessageSquareText,
   ClipboardCheck,
   BarChart3,
+  Receipt,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -91,9 +92,220 @@ interface DadosCustos {
     porMes: Array<{ mes: string; total: number; analisadas: number }>;
     porAno: Array<{ ano: string; total: number; analisadas: number }>;
   };
+  transacoesRecentes: Array<{
+    id: string;
+    tipo: string;
+    valorCobrado: number;
+    descricao: string | null;
+    status: string;
+    entrevistaId: string | null;
+    createdAt: string;
+  }>;
 }
 
 type GraficoTipo = "dia" | "semana" | "mes" | "ano";
+
+// Interface para avaliações agrupadas
+interface AvaliacaoAgrupada {
+  id: string;
+  descricao: string;
+  totalPerguntas: number;
+  taxaBase: number;
+  valorPerguntas: number;
+  valorTotal: number;
+  createdAt: string;
+  status: string;
+}
+
+// Componente de Detalhamento de Transações
+function DetalhamentoTransacoes({ transacoes }: { transacoes: DadosCustos["transacoesRecentes"] }) {
+  // Agrupar transações por avaliação de candidato
+  const avaliacoesAgrupadas: AvaliacaoAgrupada[] = (() => {
+    if (!transacoes || transacoes.length === 0) return [];
+
+    const avaliacoes: AvaliacaoAgrupada[] = [];
+    const transacoesOrdenadas = [...transacoes].sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+
+    // Agrupar por entrevistaId + timestamp arredondado (janela de 5 minutos)
+    const grupos: Map<string, typeof transacoesOrdenadas> = new Map();
+
+    transacoesOrdenadas.forEach((t) => {
+      if (t.tipo === "taxa_base_candidato" || t.tipo === "analise_pergunta") {
+        const data = new Date(t.createdAt);
+        const minutos = Math.floor(data.getMinutes() / 5) * 5;
+        data.setMinutes(minutos, 0, 0);
+
+        const entrevistaId = t.entrevistaId || "sem-entrevista";
+        const chave = `${entrevistaId}_${data.toISOString()}`;
+
+        if (!grupos.has(chave)) {
+          grupos.set(chave, []);
+        }
+        grupos.get(chave)!.push(t);
+      } else {
+        const chave = t.id;
+        grupos.set(chave, [t]);
+      }
+    });
+
+    // Converter grupos em avaliações
+    grupos.forEach((trans, chave) => {
+      const taxaBaseTransacao = trans.find(t => t.tipo === "taxa_base_candidato");
+      const perguntasTransacoes = trans.filter(t => t.tipo === "analise_pergunta");
+
+      if (taxaBaseTransacao || perguntasTransacoes.length > 0) {
+        const taxaBase = taxaBaseTransacao?.valorCobrado || 0;
+        const valorPerguntas = perguntasTransacoes.reduce((sum, t) => sum + t.valorCobrado, 0);
+        const totalPerguntas = perguntasTransacoes.length;
+
+        const descricao = taxaBaseTransacao?.descricao || "Candidato avaliado";
+
+        avaliacoes.push({
+          id: chave,
+          descricao,
+          totalPerguntas,
+          taxaBase,
+          valorPerguntas,
+          valorTotal: taxaBase + valorPerguntas,
+          createdAt: taxaBaseTransacao?.createdAt || perguntasTransacoes[0]?.createdAt || "",
+          status: taxaBaseTransacao?.status || perguntasTransacoes[0]?.status || "concluida",
+        });
+      } else {
+        trans.forEach((t) => {
+          const tipoLabels: Record<string, string> = {
+            taxa_base_candidato: "Taxa Base por Candidato",
+            analise_pergunta: "Análise por Pergunta",
+            transcricao_audio: "Transcrição de Áudio",
+            analise_ia: "Análise de IA",
+            pergunta_criada: "Criação de Pergunta",
+            entrevista_criada: "Criação de Entrevista",
+          };
+
+          avaliacoes.push({
+            id: t.id,
+            descricao: t.descricao || tipoLabels[t.tipo] || t.tipo,
+            totalPerguntas: 0,
+            taxaBase: t.valorCobrado,
+            valorPerguntas: 0,
+            valorTotal: t.valorCobrado,
+            createdAt: t.createdAt,
+            status: t.status,
+          });
+        });
+      }
+    });
+
+    return avaliacoes.sort((a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  })();
+
+  const formatDateTime = (dateString: string | null) => {
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value);
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "concluida":
+        return (
+          <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 text-xs">
+            Concluída
+          </Badge>
+        );
+      case "pendente":
+        return (
+          <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300 text-xs">
+            Pendente
+          </Badge>
+        );
+      default:
+        return <Badge variant="outline" className="text-xs">{status}</Badge>;
+    }
+  };
+
+  if (avaliacoesAgrupadas.length === 0) {
+    return null;
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Detalhamento ({avaliacoesAgrupadas.length})</CardTitle>
+        <CardDescription>Histórico de cobranças por avaliação</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {avaliacoesAgrupadas.map((avaliacao) => (
+            <div
+              key={avaliacao.id}
+              className="flex items-start justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+            >
+              <div className="flex items-start gap-3 flex-1 min-w-0">
+                <div className={`p-2 rounded-lg mt-0.5 ${
+                  avaliacao.totalPerguntas > 0
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600"
+                    : "bg-muted text-muted-foreground"
+                }`}>
+                  {avaliacao.totalPerguntas > 0 ? (
+                    <Users className="h-4 w-4" />
+                  ) : (
+                    <Receipt className="h-4 w-4" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-medium">
+                      {avaliacao.totalPerguntas > 0 ? "Candidato avaliado" : avaliacao.descricao}
+                    </p>
+                    {getStatusBadge(avaliacao.status)}
+                  </div>
+
+                  {avaliacao.totalPerguntas > 0 ? (
+                    <div className="mt-2 space-y-1">
+                      <p className="text-sm text-muted-foreground">
+                        {avaliacao.totalPerguntas} {avaliacao.totalPerguntas === 1 ? "pergunta" : "perguntas"}
+                      </p>
+                      <p className="text-xs text-muted-foreground font-mono">
+                        {formatCurrency(avaliacao.taxaBase)} + {formatCurrency(avaliacao.valorPerguntas)} = {formatCurrency(avaliacao.valorTotal)}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {avaliacao.descricao}
+                    </p>
+                  )}
+
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {formatDateTime(avaliacao.createdAt)}
+                  </p>
+                </div>
+              </div>
+              <div className="text-right ml-4 shrink-0">
+                <p className="text-lg font-semibold">{formatCurrency(avaliacao.valorTotal)}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function CustosPage() {
   const [loading, setLoading] = useState(true);
@@ -214,6 +426,11 @@ export default function CustosPage() {
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Detalhamento de Transações */}
+        {dados.transacoesRecentes && dados.transacoesRecentes.length > 0 && (
+          <DetalhamentoTransacoes transacoes={dados.transacoesRecentes} />
         )}
       </div>
     );

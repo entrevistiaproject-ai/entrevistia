@@ -86,26 +86,16 @@ export function FreeTrialUpgradeCard() {
           </div>
         </div>
 
-        {/* Botões de Upgrade */}
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Button
-            size="touch"
-            variant="default"
-            onClick={handleUpgrade}
-            className="w-full"
-          >
-            <CreditCard className="h-4 w-4" />
-            Cadastrar Cartão
-          </Button>
-          <Button
-            size="touch"
-            variant="outline"
-            onClick={handleUpgrade}
-            className="w-full"
-          >
-            Ver Planos
-          </Button>
-        </div>
+        {/* Botão de Upgrade */}
+        <Button
+          size="touch"
+          variant="default"
+          onClick={handleUpgrade}
+          className="w-full"
+        >
+          <CreditCard className="h-4 w-4" />
+          Cadastrar Cartão
+        </Button>
 
         {/* Nota sobre segurança */}
         <p className="text-xs text-center text-muted-foreground">

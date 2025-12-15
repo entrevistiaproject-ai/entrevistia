@@ -41,6 +41,7 @@ export async function GET(
         descricao: transacoes.descricao,
         status: transacoes.status,
         metadados: transacoes.metadados,
+        entrevistaId: transacoes.entrevistaId,
         createdAt: transacoes.createdAt,
       })
       .from(transacoes)
@@ -80,6 +81,7 @@ export async function GET(
         descricao: t.descricao,
         status: t.status,
         metadados: t.metadados,
+        entrevistaId: t.entrevistaId,
         createdAt: t.createdAt.toISOString(),
       })),
     };

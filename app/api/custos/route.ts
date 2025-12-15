@@ -320,6 +320,22 @@ export async function GET(request: Request) {
       .groupBy(sql`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY')`)
       .orderBy(sql`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY')`);
 
+    // 10. Buscar transações recentes para detalhamento (útil para trial)
+    const transacoesRecentes = await db
+      .select({
+        id: transacoes.id,
+        tipo: transacoes.tipo,
+        valorCobrado: transacoes.valorCobrado,
+        descricao: transacoes.descricao,
+        status: transacoes.status,
+        entrevistaId: transacoes.entrevistaId,
+        createdAt: transacoes.createdAt,
+      })
+      .from(transacoes)
+      .where(eq(transacoes.userId, userId))
+      .orderBy(desc(transacoes.createdAt))
+      .limit(50);
+
     return NextResponse.json({
       planType,
       usageFinanceiro,
@@ -388,6 +404,16 @@ export async function GET(request: Request) {
           analisadas: e.analisadas,
         })),
       },
+      // Transações recentes para detalhamento
+      transacoesRecentes: transacoesRecentes.map((t) => ({
+        id: t.id,
+        tipo: t.tipo,
+        valorCobrado: Number(t.valorCobrado),
+        descricao: t.descricao,
+        status: t.status,
+        entrevistaId: t.entrevistaId,
+        createdAt: t.createdAt.toISOString(),
+      })),
     });
   } catch (error) {
     console.error("Erro ao buscar custos:", error);
