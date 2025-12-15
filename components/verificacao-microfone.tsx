@@ -157,15 +157,15 @@ export function VerificacaoMicrofone({ onMicrofoneVerificado }: VerificacaoMicro
       <div className="text-center mb-8">
         <div className={cn(
           "w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center",
-          status === "idle" && "bg-gray-100",
-          status === "checking" && "bg-blue-100",
-          status === "success" && "bg-green-100",
-          status === "error" && "bg-red-100"
+          status === "idle" && "bg-slate-bg",
+          status === "checking" && "bg-info-bg",
+          status === "success" && "bg-success-bg",
+          status === "error" && "bg-error-bg"
         )}>
-          {status === "idle" && <Mic className="h-10 w-10 text-gray-400" />}
-          {status === "checking" && <Mic className="h-10 w-10 text-blue-500 animate-pulse" />}
-          {status === "success" && <CheckCircle2 className="h-10 w-10 text-green-500" />}
-          {status === "error" && <MicOff className="h-10 w-10 text-red-500" />}
+          {status === "idle" && <Mic className="h-10 w-10 text-slate-icon" />}
+          {status === "checking" && <Mic className="h-10 w-10 text-info-icon animate-pulse" />}
+          {status === "success" && <CheckCircle2 className="h-10 w-10 text-success-icon" />}
+          {status === "error" && <MicOff className="h-10 w-10 text-error-icon" />}
         </div>
 
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -196,20 +196,20 @@ export function VerificacaoMicrofone({ onMicrofoneVerificado }: VerificacaoMicro
           </div>
 
           {!microfoneTestado && nivelAudio < 5 && (
-            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700 text-center">
+            <div className="mt-4 p-3 bg-warning-bg border border-warning-border rounded-lg text-sm text-warning-text text-center">
               <AlertCircle className="h-4 w-4 inline mr-2" />
               Não estamos captando som. Fale algo para testar seu microfone.
             </div>
           )}
 
           {!microfoneTestado && nivelAudio >= 5 && nivelAudio < 15 && (
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800 text-center">
+            <div className="mt-4 p-3 bg-info-bg border border-info-border rounded-lg text-sm text-info-text text-center">
               Volume baixo detectado. Aproxime-se do microfone ou aumente o volume.
             </div>
           )}
 
           {microfoneTestado && (
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 text-center">
+            <div className="mt-4 p-3 bg-success-bg border border-success-border rounded-lg text-sm text-success-text text-center">
               <CheckCircle2 className="h-4 w-4 inline mr-2" />
               Seu microfone está funcionando perfeitamente!
             </div>
@@ -247,9 +247,9 @@ export function VerificacaoMicrofone({ onMicrofoneVerificado }: VerificacaoMicro
       </div>
 
       {/* Dicas */}
-      <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
-        <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">Dicas para uma boa gravação:</h3>
-        <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+      <div className="mt-8 p-4 bg-info-bg rounded-lg border border-info-border">
+        <h3 className="font-semibold text-info-text mb-2">Dicas para uma boa gravação:</h3>
+        <ul className="text-sm text-info-text space-y-1">
           <li>• Escolha um ambiente silencioso</li>
           <li>• Posicione-se a cerca de 30cm do microfone</li>
           <li>• Use fones de ouvido para evitar eco</li>

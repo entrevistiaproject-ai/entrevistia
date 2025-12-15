@@ -103,17 +103,17 @@ export function EntrevistaCard({ entrevista }: EntrevistaCardProps) {
             <span className="text-base font-bold tabular-nums">{entrevista.totalConcluiram}</span>
             <span className="text-[10px] text-muted-foreground">Concluídos</span>
           </div>
-          <div className="flex flex-col items-center justify-center p-2 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-lg">
-            <UserCheck className="h-4 w-4 text-emerald-500 mb-1" />
-            <span className="text-base font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{entrevista.totalAprovados}</span>
-            <span className="text-[10px] text-emerald-500 dark:text-emerald-400">Aprovados</span>
+          <div className="flex flex-col items-center justify-center p-2 bg-success-bg border border-success-border rounded-lg">
+            <UserCheck className="h-4 w-4 text-success-icon mb-1" />
+            <span className="text-base font-bold tabular-nums text-success-text">{entrevista.totalAprovados}</span>
+            <span className="text-[10px] text-success-icon">Aprovados</span>
           </div>
-          <div className="flex flex-col items-center justify-center p-2 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg">
-            <Star className="h-4 w-4 text-amber-500 mb-1" />
-            <span className="text-base font-bold tabular-nums text-amber-600 dark:text-amber-400">
+          <div className="flex flex-col items-center justify-center p-2 bg-score-bg border border-score-border rounded-lg">
+            <Star className="h-4 w-4 text-score-icon mb-1" />
+            <span className="text-base font-bold tabular-nums text-warning-text">
               {entrevista.mediaScore !== null ? entrevista.mediaScore : "-"}
             </span>
-            <span className="text-[10px] text-amber-500 dark:text-amber-400">Score</span>
+            <span className="text-[10px] text-score-icon">Score</span>
           </div>
           <div className="flex flex-col items-center justify-center p-2 bg-muted/50 rounded-lg">
             <FileQuestion className="h-4 w-4 text-muted-foreground mb-1" />

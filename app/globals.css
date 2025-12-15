@@ -2,26 +2,74 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --background: 0 0% 99%;
+    --foreground: 220 14% 25%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 220 14% 25%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 220 14% 25%;
     --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 214 32% 91%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 214 32% 91%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 217 91% 95%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 84% 60%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 14% 25%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 217 91% 97%;
+    --accent-foreground: 220 14% 25%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
     --ring: 217 91% 60%;
     --radius: 0.5rem;
+
+    /* Cores Semânticas - Tema Claro Pastel 2025 */
+    /* Info - Azul Etéreo */
+    --info-bg: 204 100% 97%;
+    --info-bg-hover: 204 93% 94%;
+    --info-border: 199 89% 86%;
+    --info-text: 201 96% 32%;
+    --info-icon: 199 89% 48%;
+
+    /* Success - Verde Menta */
+    --success-bg: 152 81% 96%;
+    --success-bg-hover: 149 80% 90%;
+    --success-border: 152 76% 80%;
+    --success-text: 161 94% 24%;
+    --success-icon: 160 84% 39%;
+
+    /* Warning - Creme Baunilha */
+    --warning-bg: 48 100% 96%;
+    --warning-bg-hover: 48 96% 89%;
+    --warning-border: 48 96% 76%;
+    --warning-text: 28 80% 36%;
+    --warning-icon: 38 92% 50%;
+
+    /* Error - Rosa Pétala */
+    --error-bg: 0 86% 97%;
+    --error-bg-hover: 0 93% 94%;
+    --error-border: 0 93% 86%;
+    --error-text: 0 72% 45%;
+    --error-icon: 0 84% 60%;
+
+    /* Score - Champanhe */
+    --score-bg: 45 100% 97%;
+    --score-border: 45 93% 82%;
+    --score-icon: 45 93% 47%;
+
+    /* Purple/Accent - Lavanda */
+    --purple-bg: 270 100% 98%;
+    --purple-bg-hover: 269 100% 95%;
+    --purple-border: 269 100% 86%;
+    --purple-text: 263 70% 50%;
+    --purple-icon: 258 90% 66%;
+
+    /* Slate - Neutro */
+    --slate-bg: 220 14% 96%;
+    --slate-bg-hover: 220 13% 91%;
+    --slate-border: 220 13% 86%;
+    --slate-text: 215 16% 47%;
+    --slate-icon: 215 14% 54%;
   }
 
   .dark {
@@ -44,6 +92,54 @@
     --border: 217 19% 27%;
     --input: 217 19% 27%;
     --ring: 217 91% 60%;
+
+    /* Cores Semânticas - Tema Escuro */
+    /* Info - Azul Etéreo */
+    --info-bg: 213 47% 15%;
+    --info-bg-hover: 213 47% 20%;
+    --info-border: 213 47% 25%;
+    --info-text: 199 89% 70%;
+    --info-icon: 199 89% 60%;
+
+    /* Success - Verde Menta */
+    --success-bg: 160 47% 12%;
+    --success-bg-hover: 160 47% 17%;
+    --success-border: 160 47% 22%;
+    --success-text: 152 76% 70%;
+    --success-icon: 160 84% 50%;
+
+    /* Warning - Creme Baunilha */
+    --warning-bg: 38 47% 12%;
+    --warning-bg-hover: 38 47% 17%;
+    --warning-border: 38 47% 22%;
+    --warning-text: 48 96% 76%;
+    --warning-icon: 38 92% 55%;
+
+    /* Error - Rosa Pétala */
+    --error-bg: 0 47% 15%;
+    --error-bg-hover: 0 47% 20%;
+    --error-border: 0 47% 25%;
+    --error-text: 0 93% 75%;
+    --error-icon: 0 84% 60%;
+
+    /* Score - Champanhe */
+    --score-bg: 38 47% 15%;
+    --score-border: 38 47% 25%;
+    --score-icon: 45 93% 55%;
+
+    /* Purple/Accent - Lavanda */
+    --purple-bg: 263 47% 15%;
+    --purple-bg-hover: 263 47% 20%;
+    --purple-border: 263 47% 25%;
+    --purple-text: 258 90% 75%;
+    --purple-icon: 258 90% 66%;
+
+    /* Slate - Neutro */
+    --slate-bg: 217 19% 20%;
+    --slate-bg-hover: 217 19% 25%;
+    --slate-border: 217 19% 30%;
+    --slate-text: 215 20% 65%;
+    --slate-icon: 215 14% 54%;
   }
 }
 
@@ -69,6 +165,47 @@
   --color-ring: hsl(var(--ring));
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Cores Semânticas Pastel */
+  --color-info-bg: hsl(var(--info-bg));
+  --color-info-bg-hover: hsl(var(--info-bg-hover));
+  --color-info-border: hsl(var(--info-border));
+  --color-info-text: hsl(var(--info-text));
+  --color-info-icon: hsl(var(--info-icon));
+
+  --color-success-bg: hsl(var(--success-bg));
+  --color-success-bg-hover: hsl(var(--success-bg-hover));
+  --color-success-border: hsl(var(--success-border));
+  --color-success-text: hsl(var(--success-text));
+  --color-success-icon: hsl(var(--success-icon));
+
+  --color-warning-bg: hsl(var(--warning-bg));
+  --color-warning-bg-hover: hsl(var(--warning-bg-hover));
+  --color-warning-border: hsl(var(--warning-border));
+  --color-warning-text: hsl(var(--warning-text));
+  --color-warning-icon: hsl(var(--warning-icon));
+
+  --color-error-bg: hsl(var(--error-bg));
+  --color-error-bg-hover: hsl(var(--error-bg-hover));
+  --color-error-border: hsl(var(--error-border));
+  --color-error-text: hsl(var(--error-text));
+  --color-error-icon: hsl(var(--error-icon));
+
+  --color-score-bg: hsl(var(--score-bg));
+  --color-score-border: hsl(var(--score-border));
+  --color-score-icon: hsl(var(--score-icon));
+
+  --color-purple-bg: hsl(var(--purple-bg));
+  --color-purple-bg-hover: hsl(var(--purple-bg-hover));
+  --color-purple-border: hsl(var(--purple-border));
+  --color-purple-text: hsl(var(--purple-text));
+  --color-purple-icon: hsl(var(--purple-icon));
+
+  --color-slate-bg: hsl(var(--slate-bg));
+  --color-slate-bg-hover: hsl(var(--slate-bg-hover));
+  --color-slate-border: hsl(var(--slate-border));
+  --color-slate-text: hsl(var(--slate-text));
+  --color-slate-icon: hsl(var(--slate-icon));
 }
 
 @layer base {

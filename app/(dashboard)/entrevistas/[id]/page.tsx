@@ -586,8 +586,8 @@ export default function EntrevistaDetalhesPage() {
         <Card>
           <CardContent className="pt-5 pb-4 px-4">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="p-1.5 bg-blue-50 dark:bg-blue-950 rounded-md shrink-0">
-                <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <div className="p-1.5 bg-info-bg rounded-md shrink-0">
+                <Users className="h-4 w-4 text-info-icon" />
               </div>
               <span className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Candidatos</span>
             </div>
@@ -599,8 +599,8 @@ export default function EntrevistaDetalhesPage() {
         <Card>
           <CardContent className="pt-5 pb-4 px-4">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="p-1.5 bg-purple-50 dark:bg-purple-950 rounded-md shrink-0">
-                <FileQuestion className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              <div className="p-1.5 bg-purple-bg rounded-md shrink-0">
+                <FileQuestion className="h-4 w-4 text-purple-icon" />
               </div>
               <span className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Perguntas</span>
             </div>
@@ -612,8 +612,8 @@ export default function EntrevistaDetalhesPage() {
         <Card>
           <CardContent className="pt-5 pb-4 px-4">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="p-1.5 bg-green-50 dark:bg-green-950 rounded-md shrink-0">
-                <Clock className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <div className="p-1.5 bg-success-bg rounded-md shrink-0">
+                <Clock className="h-4 w-4 text-success-icon" />
               </div>
               <span className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Duração Média</span>
             </div>
@@ -650,8 +650,8 @@ export default function EntrevistaDetalhesPage() {
         <Card>
           <CardContent className="pt-5 pb-4 px-4">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="p-1.5 bg-amber-50 dark:bg-amber-950 rounded-md shrink-0">
-                <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <div className="p-1.5 bg-warning-bg rounded-md shrink-0">
+                <Clock className="h-4 w-4 text-warning-icon" />
               </div>
               <span className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Tempo Máx.</span>
             </div>
@@ -684,8 +684,8 @@ export default function EntrevistaDetalhesPage() {
         <Card className="col-span-2 sm:col-span-1">
           <CardContent className="pt-5 pb-4 px-4">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="p-1.5 bg-slate-100 dark:bg-slate-800 rounded-md shrink-0">
-                <Calendar className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+              <div className="p-1.5 bg-slate-bg rounded-md shrink-0">
+                <Calendar className="h-4 w-4 text-slate-icon" />
               </div>
               <span className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Criada</span>
             </div>
@@ -808,10 +808,10 @@ export default function EntrevistaDetalhesPage() {
                         {tempoRestante && (
                           <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg shrink-0 ${
                             tempoRestante.expirado
-                              ? "bg-red-50 dark:bg-red-950/50 text-red-600"
+                              ? "bg-error-bg text-error-text"
                               : tempoRestante.urgente
-                                ? "bg-amber-50 dark:bg-amber-950/50 text-amber-600"
-                                : "bg-blue-50 dark:bg-blue-950/50 text-blue-600"
+                                ? "bg-warning-bg text-warning-text"
+                                : "bg-info-bg text-info-text"
                           }`}>
                             <Timer className="h-3.5 w-3.5" />
                             <span className="text-xs font-medium">{tempoRestante.texto}</span>
@@ -820,8 +820,8 @@ export default function EntrevistaDetalhesPage() {
 
                         {/* Score */}
                         {candidato.notaGeral !== null && (
-                          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-950/50 rounded-lg shrink-0">
-                            <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-score-bg border border-score-border rounded-lg shrink-0">
+                            <Star className="h-4 w-4 text-score-icon fill-score-icon" />
                             <span className={`text-sm font-bold ${getScoreColor(candidato.notaGeral)}`}>
                               {Math.round(candidato.notaGeral)}
                             </span>
@@ -1078,8 +1078,8 @@ export default function EntrevistaDetalhesPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/50">
-                  <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                <div className="p-2 rounded-lg bg-warning-bg">
+                  <Clock className="h-5 w-5 text-warning-icon" />
                 </div>
                 <div>
                   <CardTitle>Prazo de Resposta</CardTitle>
@@ -1090,9 +1090,9 @@ export default function EntrevistaDetalhesPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex gap-3 p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
-                <Info className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                <div className="text-sm text-amber-900 dark:text-amber-100">
+              <div className="flex gap-3 p-4 bg-warning-bg border border-warning-border rounded-lg">
+                <Info className="h-5 w-5 text-warning-icon shrink-0 mt-0.5" />
+                <div className="text-sm text-warning-text">
                   <p>
                     O prazo começa a contar quando o candidato se cadastra na entrevista.
                     Após o prazo, a candidatura é marcada como expirada.
@@ -1131,8 +1131,8 @@ export default function EntrevistaDetalhesPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-100">
-                  <Zap className="h-5 w-5 text-blue-600" />
+                <div className="p-2 rounded-lg bg-info-bg">
+                  <Zap className="h-5 w-5 text-info-icon" />
                 </div>
                 <div>
                   <CardTitle>Aprovação Automática</CardTitle>
@@ -1144,11 +1144,11 @@ export default function EntrevistaDetalhesPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Explicação */}
-              <div className="flex gap-3 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
-                <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-                <div className="text-sm text-blue-900 dark:text-blue-100">
+              <div className="flex gap-3 p-4 bg-info-bg border border-info-border rounded-lg">
+                <Info className="h-5 w-5 text-info-icon shrink-0 mt-0.5" />
+                <div className="text-sm text-info-text">
                   <p className="font-medium mb-1">Como funciona?</p>
-                  <p className="text-blue-800 dark:text-blue-200">
+                  <p>
                     Após a análise da IA, o sistema pode automaticamente aprovar ou reprovar candidatos com base no score obtido. Isso agiliza o processo de triagem.
                   </p>
                 </div>
@@ -1158,8 +1158,8 @@ export default function EntrevistaDetalhesPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-green-100">
-                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    <div className="p-2 rounded-lg bg-success-bg">
+                      <CheckCircle className="h-5 w-5 text-success-icon" />
                     </div>
                     <div>
                       <p className="font-medium">Aprovação Automática</p>
@@ -1175,7 +1175,7 @@ export default function EntrevistaDetalhesPage() {
                 </div>
 
                 {autoApprovalEnabled && (
-                  <div className="space-y-4 pl-4 border-l-2 border-green-200 ml-4">
+                  <div className="space-y-4 pl-4 border-l-2 border-success-border ml-4">
                     {/* Score mínimo */}
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
@@ -1195,7 +1195,7 @@ export default function EntrevistaDetalhesPage() {
                           max={100}
                           className="w-20 text-right"
                         />
-                        <span className="text-lg font-semibold text-green-600">%</span>
+                        <span className="text-lg font-semibold text-success-icon">%</span>
                       </div>
                     </div>
 
@@ -1215,7 +1215,7 @@ export default function EntrevistaDetalhesPage() {
 
                     {/* Compatibilidade mínima */}
                     {autoApprovalUseCompatibility && (
-                      <div className="flex items-center justify-between pl-4 border-l-2 border-green-100">
+                      <div className="flex items-center justify-between pl-4 border-l-2 border-success-bg">
                         <div className="space-y-0.5">
                           <Label>Compatibilidade Mínima</Label>
                           <p className="text-sm text-muted-foreground">
@@ -1233,7 +1233,7 @@ export default function EntrevistaDetalhesPage() {
                             max={100}
                             className="w-20 text-right"
                           />
-                          <span className="text-lg font-semibold text-green-600">%</span>
+                          <span className="text-lg font-semibold text-success-icon">%</span>
                         </div>
                       </div>
                     )}
@@ -1276,8 +1276,8 @@ export default function EntrevistaDetalhesPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-red-100">
-                      <XCircle className="h-5 w-5 text-red-600" />
+                    <div className="p-2 rounded-lg bg-error-bg">
+                      <XCircle className="h-5 w-5 text-error-icon" />
                     </div>
                     <div>
                       <p className="font-medium">Reprovação Automática</p>
@@ -1293,7 +1293,7 @@ export default function EntrevistaDetalhesPage() {
                 </div>
 
                 {autoRejectEnabled && (
-                  <div className="space-y-4 pl-4 border-l-2 border-red-200 ml-4">
+                  <div className="space-y-4 pl-4 border-l-2 border-error-border ml-4">
                     {/* Score máximo */}
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
@@ -1313,7 +1313,7 @@ export default function EntrevistaDetalhesPage() {
                           max={50}
                           className="w-20 text-right"
                         />
-                        <span className="text-lg font-semibold text-red-600">%</span>
+                        <span className="text-lg font-semibold text-error-icon">%</span>
                       </div>
                     </div>
 
@@ -1351,11 +1351,11 @@ export default function EntrevistaDetalhesPage() {
 
               {/* Aviso de conflito */}
               {autoApprovalEnabled && autoRejectEnabled && autoApprovalMinScore <= autoRejectMaxScore && (
-                <div className="flex gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                  <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-                  <div className="text-sm text-amber-900">
+                <div className="flex gap-3 p-4 bg-warning-bg border border-warning-border rounded-lg">
+                  <AlertTriangle className="h-5 w-5 text-warning-icon shrink-0 mt-0.5" />
+                  <div className="text-sm text-warning-text">
                     <p className="font-medium mb-1">Atenção!</p>
-                    <p className="text-amber-800">
+                    <p>
                       O score mínimo de aprovação ({autoApprovalMinScore}%) deve ser maior que o score máximo de reprovação ({autoRejectMaxScore}%). Ajuste os valores para evitar conflitos.
                     </p>
                   </div>
@@ -1385,8 +1385,8 @@ export default function EntrevistaDetalhesPage() {
               {entrevista.status === "active" && (
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 p-4 border rounded-lg">
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-amber-100 rounded-lg shrink-0">
-                      <CheckCircle className="h-5 w-5 text-amber-600" />
+                    <div className="p-2 bg-warning-bg rounded-lg shrink-0">
+                      <CheckCircle className="h-5 w-5 text-warning-icon" />
                     </div>
                     <div>
                       <p className="font-medium">Encerrar Vaga</p>
@@ -1416,8 +1416,8 @@ export default function EntrevistaDetalhesPage() {
               {(entrevista.status === "active" || entrevista.status === "completed") && (
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 p-4 border rounded-lg">
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-gray-100 rounded-lg shrink-0">
-                      <Archive className="h-5 w-5 text-gray-600" />
+                    <div className="p-2 bg-slate-bg rounded-lg shrink-0">
+                      <Archive className="h-5 w-5 text-slate-icon" />
                     </div>
                     <div>
                       <p className="font-medium">Arquivar Vaga</p>
@@ -1445,10 +1445,10 @@ export default function EntrevistaDetalhesPage() {
 
               {/* Ação: Reativar Vaga */}
               {(entrevista.status === "completed" || entrevista.status === "archived") && (
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 p-4 border rounded-lg border-green-200 bg-green-50">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 p-4 border rounded-lg border-success-border bg-success-bg">
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-green-100 rounded-lg shrink-0">
-                      <Play className="h-5 w-5 text-green-600" />
+                    <div className="p-2 bg-success-bg-hover rounded-lg shrink-0">
+                      <Play className="h-5 w-5 text-success-icon" />
                     </div>
                     <div>
                       <p className="font-medium">Reativar Vaga</p>
@@ -1475,11 +1475,11 @@ export default function EntrevistaDetalhesPage() {
 
               {/* Aviso sobre status atual */}
               {entrevista.status === "archived" && (
-                <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                  <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-3 p-4 bg-warning-bg border border-warning-border rounded-lg">
+                  <AlertTriangle className="h-5 w-5 text-warning-icon shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium text-amber-800">Vaga arquivada</p>
-                    <p className="text-sm text-amber-700">
+                    <p className="text-sm font-medium text-warning-text">Vaga arquivada</p>
+                    <p className="text-sm text-warning-text">
                       Esta vaga está arquivada e não está visível na listagem principal.
                       Você pode reativá-la a qualquer momento.
                     </p>
@@ -1488,11 +1488,11 @@ export default function EntrevistaDetalhesPage() {
               )}
 
               {entrevista.status === "completed" && (
-                <div className="flex items-start gap-3 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                  <CheckCircle className="h-5 w-5 text-gray-600 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-3 p-4 bg-slate-bg border border-slate-border rounded-lg">
+                  <CheckCircle className="h-5 w-5 text-slate-icon shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium text-gray-800">Processo encerrado</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm font-medium text-foreground">Processo encerrado</p>
+                    <p className="text-sm text-muted-foreground">
                       O processo seletivo para esta vaga foi encerrado. Candidatos não podem
                       mais responder à entrevista.
                     </p>
@@ -1543,9 +1543,9 @@ export default function EntrevistaDetalhesPage() {
               </div>
             )}
             {prorrogarDialog.candidato?.status === "expirada" && (
-              <div className="flex gap-3 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
-                <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-                <p className="text-sm text-amber-800 dark:text-amber-200">
+              <div className="flex gap-3 p-3 bg-warning-bg border border-warning-border rounded-lg">
+                <AlertTriangle className="h-4 w-4 text-warning-icon shrink-0 mt-0.5" />
+                <p className="text-sm text-warning-text">
                   A entrevista deste candidato expirou. Ao prorrogar, o status será revertido para &quot;Em andamento&quot;.
                 </p>
               </div>
@@ -1577,9 +1577,9 @@ export default function EntrevistaDetalhesPage() {
               <p>
                 Você está prestes a dar uma nova chance para <strong>{reenviarDialog.candidato?.nome}</strong> realizar a entrevista.
               </p>
-              <div className="flex gap-3 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
-                <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-                <div className="text-sm text-amber-800 dark:text-amber-200">
+              <div className="flex gap-3 p-3 bg-warning-bg border border-warning-border rounded-lg">
+                <AlertTriangle className="h-4 w-4 text-warning-icon shrink-0 mt-0.5" />
+                <div className="text-sm text-warning-text">
                   <p className="font-medium">Atenção:</p>
                   <ul className="list-disc list-inside mt-1 space-y-1">
                     <li>Todas as respostas anteriores serão apagadas</li>

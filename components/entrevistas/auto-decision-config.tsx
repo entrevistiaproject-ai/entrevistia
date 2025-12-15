@@ -49,7 +49,7 @@ export function AutoDecisionConfig({
 
       {/* Score mínimo para aprovação */}
       {autoApprovalEnabled && (
-        <div className="ml-0 sm:ml-4 p-4 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg space-y-3">
+        <div className="ml-0 sm:ml-4 p-4 bg-success-bg border border-success-border rounded-lg space-y-3">
           <div className="flex items-center justify-between gap-4">
             <Label htmlFor="min-score" className="text-sm">
               Nota mínima para aprovação
@@ -93,7 +93,7 @@ export function AutoDecisionConfig({
 
       {/* Score máximo para reprovação */}
       {autoRejectEnabled && (
-        <div className="ml-0 sm:ml-4 p-4 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg space-y-3">
+        <div className="ml-0 sm:ml-4 p-4 bg-error-bg border border-error-border rounded-lg space-y-3">
           <div className="flex items-center justify-between gap-4">
             <Label htmlFor="max-score-reject" className="text-sm">
               Nota máxima para reprovação
@@ -119,17 +119,17 @@ export function AutoDecisionConfig({
 
       {/* Aviso de faixa de análise manual */}
       {autoApprovalEnabled && autoRejectEnabled && autoApprovalMinScore > autoRejectMaxScore && (
-        <div className="p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
-          <p className="text-xs text-blue-800 dark:text-blue-200">
-            <strong className="text-blue-900 dark:text-blue-100">Faixa de análise manual:</strong> Candidatos com nota entre {autoRejectMaxScore + 1}% e {autoApprovalMinScore - 1}% ficarão pendentes para sua decisão.
+        <div className="p-3 bg-info-bg border border-info-border rounded-lg">
+          <p className="text-xs text-info-text">
+            <strong>Faixa de análise manual:</strong> Candidatos com nota entre {autoRejectMaxScore + 1}% e {autoApprovalMinScore - 1}% ficarão pendentes para sua decisão.
           </p>
         </div>
       )}
 
       {/* Aviso de conflito */}
       {autoApprovalEnabled && autoRejectEnabled && autoApprovalMinScore <= autoRejectMaxScore && (
-        <div className="p-3 bg-amber-50 dark:bg-amber-900 border border-amber-200 dark:border-amber-700 rounded-lg">
-          <p className="text-xs text-amber-800 dark:text-amber-200">
+        <div className="p-3 bg-warning-bg border border-warning-border rounded-lg">
+          <p className="text-xs text-warning-text">
             <strong>Atenção:</strong> A nota de aprovação ({autoApprovalMinScore}%) deve ser maior que a nota de reprovação ({autoRejectMaxScore}%).
           </p>
         </div>

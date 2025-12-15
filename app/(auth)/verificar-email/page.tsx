@@ -179,9 +179,9 @@ function VerificarEmailContent() {
           <div className="px-6 sm:px-8 pb-8">
             {/* Alerta de sucesso ao reenviar */}
             {resendSuccess && (
-              <div className="mb-6 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg flex items-start gap-4">
-                <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-                <p className="text-sm text-green-600 dark:text-green-400">
+              <div className="mb-6 p-4 bg-success-bg border border-success-border rounded-lg flex items-start gap-4">
+                <CheckCircle2 className="w-5 h-5 text-success-icon shrink-0 mt-0.5" />
+                <p className="text-sm text-success-text">
                   Pronto! Enviamos um novo código para seu email.
                 </p>
               </div>
@@ -282,9 +282,9 @@ function VerificarEmailContent() {
         </Card>
 
         {/* Dica */}
-        <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
-          <p className="text-sm text-blue-800 dark:text-blue-200 text-center">
-            <strong className="text-blue-900 dark:text-blue-100">Dica:</strong> Olhe também na pasta de spam ou lixo eletrônico
+        <div className="mt-8 p-4 bg-info-bg rounded-lg border border-info-border">
+          <p className="text-sm text-info-text text-center">
+            <strong>Dica:</strong> Olhe também na pasta de spam ou lixo eletrônico
           </p>
         </div>
       </div>
