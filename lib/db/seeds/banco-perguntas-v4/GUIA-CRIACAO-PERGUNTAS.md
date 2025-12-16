@@ -8,7 +8,7 @@ proximo passo em GUIA-CRIACAO-PERGUNTAS.md
 
 ---
 
-## 📋 PRÓXIMO PASSO: B3
+## 📋 PRÓXIMO PASSO: B4
 
 ### FASE B: CRIAÇÃO DE NOVAS ÁREAS
 
@@ -16,8 +16,8 @@ proximo passo em GUIA-CRIACAO-PERGUNTAS.md
 |-------|-----------|--------|
 | B1 | Saúde Parte 1 (Enfermeiro, Téc. Enfermagem, Recepcionista, Fisioterapeuta) | ✅ CONCLUÍDO |
 | B2 | Saúde Parte 2 (Farmacêutico, Nutricionista, Psicólogo, Aux. Saúde Bucal) | ✅ CONCLUÍDO |
-| B3 | Call Center (todos os cargos) | 🔴 EXECUTAR AGORA |
-| B4 | Logística Parte 1 (Auxiliar, Analista, Conferente) | ⏳ Aguardando |
+| B3 | Call Center (todos os cargos) | ✅ CONCLUÍDO |
+| B4 | Logística Parte 1 (Auxiliar, Analista, Conferente) | 🔴 EXECUTAR AGORA |
 | B5 | Logística Parte 2 (Coordenador, Motorista, Estoquista) | ⏳ Aguardando |
 | B6 | Engenharia Parte 1 (Eng. Civil, Eng. Produção, Téc. Segurança) | ⏳ Aguardando |
 | B7 | Engenharia Parte 2 (Téc. Edificações, Mestre de Obras, Eng. Ambiental) | ⏳ Aguardando |
@@ -41,8 +41,8 @@ proximo passo em GUIA-CRIACAO-PERGUNTAS.md
 | Comercial | 219 | ✅ Auditado |
 | Varejo | 281 | ✅ Auditado |
 | Administrativo | 292 | ✅ Auditado |
-| **Saúde** | 594 | ✅ Completo |
-| Call Center | 0 | 🔴 Criar |
+| Saúde | 594 | ✅ Completo |
+| **Call Center** | 198 | ✅ Completo |
 | Logística | 0 | 🔴 Criar |
 | Engenharia | 0 | 🔴 Criar |
 | Agronegócio | 0 | 🔴 Criar |
@@ -50,7 +50,7 @@ proximo passo em GUIA-CRIACAO-PERGUNTAS.md
 | Hotelaria | 0 | 🔴 Criar |
 | Indústria | 0 | 🔴 Criar |
 
-**Total atual: 2.095 | Meta: ~3.600+**
+**Total atual: 2.293 | Meta: ~3.600+**
 
 ---
 
