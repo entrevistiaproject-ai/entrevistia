@@ -15,7 +15,8 @@ export type AreaProfissional =
   | 'agronegocio'
   | 'educacao'
   | 'hotelaria'
-  | 'industria';
+  | 'industria'
+  | 'design';
 
 export interface PerguntaSeed {
   texto: string;
@@ -123,6 +124,12 @@ export const AREAS_CARGOS: Record<AreaProfissional, string[]> = {
     'Analista de PCP',
     'Inspetor de Qualidade',
   ],
+  design: [
+    'Designer UX',
+    'Designer UI',
+    'Designer UI/UX',
+    'Designer Gráfico',
+  ],
 };
 
 /**
@@ -142,6 +149,7 @@ export const AREAS_LABELS: Record<AreaProfissional, string> = {
   educacao: 'Educação',
   hotelaria: 'Hotelaria / Turismo',
   industria: 'Indústria / Produção',
+  design: 'Design / UX / UI',
 };
 
 export interface EstatisticasCargo {

@@ -44,9 +44,10 @@ async function seedPerguntasV4() {
 
       for (const pergunta of batch) {
         await sql`
-          INSERT INTO perguntas_templates (texto, cargo, nivel, categoria, competencia, is_padrao, tipo)
+          INSERT INTO perguntas_templates (texto, area, cargo, nivel, categoria, competencia, is_padrao, tipo)
           VALUES (
             ${pergunta.texto},
+            ${pergunta.area},
             ${pergunta.cargo},
             ${pergunta.nivel},
             ${pergunta.categoria},

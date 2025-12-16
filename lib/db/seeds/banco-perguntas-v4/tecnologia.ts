@@ -1,6 +1,15 @@
 /**
  * Banco de Perguntas v4 - TECNOLOGIA
  *
+ * Cargos incluídos:
+ * - Desenvolvedor Front-End (Junior, Pleno, Senior)
+ * - Desenvolvedor Back-End (Junior, Pleno, Senior)
+ * - QA / Testes (Junior, Pleno, Senior)
+ * - Suporte Técnico / HelpDesk (Junior, Pleno, Senior)
+ * - Cientista de Dados (Junior, Pleno, Senior)
+ * - Coordenador de Tecnologia (Senior)
+ * - Gerente de Projetos de TI (Junior, Pleno, Senior)
+ *
  * Melhorias aplicadas:
  * - Perguntas aprofundadas (sem sim/não)
  * - Variações por nível
@@ -588,6 +597,113 @@ export const coordenadorTecnologia: PerguntaSeed[] = [
 ];
 
 // ============================================
+// GERENTE DE PROJETOS DE TI
+// ============================================
+
+export const gerenteProjetosTIJunior: PerguntaSeed[] = [
+  // Técnica (6)
+  { area: 'tecnologia', texto: 'Quais metodologias de gerenciamento de projetos você conhece e como decide qual utilizar em cada situação?', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'tecnica', competencia: 'Metodologias de Gestão' },
+  { area: 'tecnologia', texto: 'Como você elabora um cronograma de projeto? Quais ferramentas você utiliza para isso?', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'tecnica', competencia: 'Planejamento de Cronograma' },
+  { area: 'tecnologia', texto: 'Explique como você estrutura uma WBS (Work Breakdown Structure) para um projeto de desenvolvimento de software.', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'tecnica', competencia: 'Estrutura de Projeto' },
+  { area: 'tecnologia', texto: 'Quais indicadores você monitora para acompanhar a saúde de um projeto de TI?', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'tecnica', competencia: 'Indicadores de Projeto' },
+  { area: 'tecnologia', texto: 'Como você documenta e comunica o escopo de um projeto para a equipe técnica e stakeholders?', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'tecnica', competencia: 'Gestão de Escopo' },
+  { area: 'tecnologia', texto: 'Quais técnicas você utiliza para estimar o esforço e duração de atividades em projetos de TI?', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'tecnica', competencia: 'Estimativas' },
+
+  // Experiência (5)
+  { area: 'tecnologia', texto: 'Conte sobre um projeto de TI que você gerenciou. Qual foi o escopo, prazo e qual foi o maior desafio?', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'experiencia', competencia: 'Gestão de Projetos' },
+  { area: 'tecnologia', texto: 'Descreva uma situação em que você precisou lidar com mudança de escopo no meio de um projeto. Como gerenciou?', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'experiencia', competencia: 'Gestão de Mudanças' },
+  { area: 'tecnologia', texto: 'Como foi sua experiência trabalhando com equipes de desenvolvimento? Quais foram as principais lições aprendidas?', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'experiencia', competencia: 'Trabalho com Equipes Técnicas' },
+  { area: 'tecnologia', texto: 'Descreva um projeto que atrasou ou saiu do orçamento. O que aconteceu e como você lidou com a situação?', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'experiencia', competencia: 'Gestão de Problemas' },
+  { area: 'tecnologia', texto: 'Conte sobre sua experiência com ferramentas de gestão de projetos como Jira, MS Project, Trello ou similares.', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'experiencia', competencia: 'Ferramentas de Gestão' },
+
+  // Comportamental (5)
+  { area: 'tecnologia', texto: 'Como você lida com a pressão de múltiplos projetos ou entregas simultâneas?', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'comportamental', competencia: 'Gestão de Pressão' },
+  { area: 'tecnologia', texto: 'Descreva como você se comunica com stakeholders que não são técnicos sobre o andamento de projetos.', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'comportamental', competencia: 'Comunicação' },
+  { area: 'tecnologia', texto: 'Como você organiza seu dia para acompanhar projetos e ainda ter tempo para resolução de problemas?', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'comportamental', competencia: 'Organização' },
+  { area: 'tecnologia', texto: 'Como você lida quando há conflito entre as prioridades do projeto e as limitações da equipe técnica?', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'comportamental', competencia: 'Negociação' },
+  { area: 'tecnologia', texto: 'De que forma você busca aprimorar seus conhecimentos em gestão de projetos e tecnologia?', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'comportamental', competencia: 'Desenvolvimento Profissional' },
+
+  // Situacional (5)
+  { area: 'tecnologia', texto: 'O cliente solicita uma mudança significativa de escopo a duas semanas do prazo final. Como você procede?', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'situacional', competencia: 'Gestão de Mudanças' },
+  { area: 'tecnologia', texto: 'Um desenvolvedor-chave está de férias e surge um bug crítico em produção. O que você faz?', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'situacional', competencia: 'Gestão de Crise' },
+  { area: 'tecnologia', texto: 'O projeto está atrasado e o sponsor pergunta sobre o status. Como você comunica a situação?', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'situacional', competencia: 'Comunicação de Riscos' },
+  { area: 'tecnologia', texto: 'Dois membros da equipe não estão se entendendo e isso está afetando as entregas. Como você intervém?', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'situacional', competencia: 'Gestão de Conflitos' },
+  { area: 'tecnologia', texto: 'O fornecedor de uma tecnologia crítica para o projeto não está cumprindo os prazos acordados. Qual sua abordagem?', cargo: 'Gerente de Projetos de TI', nivel: 'junior', categoria: 'situacional', competencia: 'Gestão de Fornecedores' },
+];
+
+export const gerenteProjetosTIPleno: PerguntaSeed[] = [
+  // Técnica (6)
+  { area: 'tecnologia', texto: 'Como você estrutura um PMO ou escritório de projetos para uma área de TI? Quais processos são essenciais?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'tecnica', competencia: 'Estruturação de PMO' },
+  { area: 'tecnologia', texto: 'Descreva como você aplica metodologias ágeis (Scrum, Kanban) em conjunto com práticas tradicionais de gestão.', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'tecnica', competencia: 'Metodologias Híbridas' },
+  { area: 'tecnologia', texto: 'Como você estrutura a gestão de riscos em projetos de TI? Quais ferramentas e técnicas utiliza?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'tecnica', competencia: 'Gestão de Riscos' },
+  { area: 'tecnologia', texto: 'Quais métricas de performance de projeto você monitora e como as utiliza para tomada de decisão?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'tecnica', competencia: 'Métricas de Projeto' },
+  { area: 'tecnologia', texto: 'Como você gerencia o orçamento de projetos de TI e lida com variações de custo?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'tecnica', competencia: 'Gestão Financeira' },
+  { area: 'tecnologia', texto: 'Explique como você conduz reuniões de status e reporting para diferentes níveis de stakeholders.', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'tecnica', competencia: 'Reporting' },
+
+  // Experiência (6)
+  { area: 'tecnologia', texto: 'Conte sobre o projeto mais complexo que você gerenciou. Quais foram os principais desafios e como os superou?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'experiencia', competencia: 'Projetos Complexos' },
+  { area: 'tecnologia', texto: 'Descreva sua experiência gerenciando múltiplos projetos simultaneamente. Como você priorizou recursos e atenção?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'experiencia', competencia: 'Gestão de Portfolio' },
+  { area: 'tecnologia', texto: 'Conte sobre uma implementação de sistema que você liderou. Quais foram as principais lições aprendidas?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'experiencia', competencia: 'Implementação de Sistemas' },
+  { area: 'tecnologia', texto: 'Descreva como você conduziu um projeto que precisou ser redefinido ou cancelado. Como foi o processo?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'experiencia', competencia: 'Recovery de Projetos' },
+  { area: 'tecnologia', texto: 'Conte sobre sua experiência com gestão de contratos e fornecedores em projetos de TI.', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'experiencia', competencia: 'Gestão de Contratos' },
+  { area: 'tecnologia', texto: 'Descreva um projeto onde você precisou gerenciar equipes distribuídas ou remotas. Quais desafios enfrentou?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'experiencia', competencia: 'Equipes Distribuídas' },
+
+  // Comportamental (6)
+  { area: 'tecnologia', texto: 'Como você constrói e mantém relacionamentos com stakeholders de diferentes níveis hierárquicos?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'comportamental', competencia: 'Gestão de Stakeholders' },
+  { area: 'tecnologia', texto: 'Descreva como você equilibra a necessidade de controle do projeto com a autonomia da equipe técnica.', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'comportamental', competencia: 'Liderança' },
+  { area: 'tecnologia', texto: 'Como você lida com decisões difíceis que podem impactar o prazo ou orçamento do projeto?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'comportamental', competencia: 'Tomada de Decisão' },
+  { area: 'tecnologia', texto: 'De que forma você promove a colaboração entre áreas técnicas e de negócio em seus projetos?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'comportamental', competencia: 'Integração' },
+  { area: 'tecnologia', texto: 'Como você mantém a motivação da equipe durante projetos longos ou com muitas dificuldades?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'comportamental', competencia: 'Motivação de Equipe' },
+  { area: 'tecnologia', texto: 'Descreva como você gerencia expectativas quando há pressão por entregas irrealistas.', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'comportamental', competencia: 'Gestão de Expectativas' },
+
+  // Situacional (6)
+  { area: 'tecnologia', texto: 'O sponsor do projeto quer adicionar funcionalidades sem ajustar prazo ou orçamento. Como você negocia?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'situacional', competencia: 'Negociação de Escopo' },
+  { area: 'tecnologia', texto: 'Um projeto crítico está em risco por causa de dependências externas fora do seu controle. O que você faz?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'situacional', competencia: 'Gestão de Dependências' },
+  { area: 'tecnologia', texto: 'A equipe técnica diz que a estimativa inicial está subestimada. Como você renegocia com os stakeholders?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'situacional', competencia: 'Replanejamento' },
+  { area: 'tecnologia', texto: 'Dois projetos que você gerencia estão competindo pelos mesmos recursos. Como você prioriza?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'situacional', competencia: 'Priorização de Recursos' },
+  { area: 'tecnologia', texto: 'O projeto entregou funcionalidades, mas o usuário não está satisfeito com o resultado. Como você conduz?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'situacional', competencia: 'Gestão de Qualidade' },
+  { area: 'tecnologia', texto: 'Um membro sênior da equipe está desmotivado e isso afeta o projeto. Qual sua abordagem?', cargo: 'Gerente de Projetos de TI', nivel: 'pleno', categoria: 'situacional', competencia: 'Gestão de Pessoas' },
+];
+
+export const gerenteProjetosTISenior: PerguntaSeed[] = [
+  // Técnica (7)
+  { area: 'tecnologia', texto: 'Como você estrutura a governança de projetos e programas de TI em uma organização? Quais processos são críticos?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'tecnica', competencia: 'Governança de TI' },
+  { area: 'tecnologia', texto: 'Descreva sua abordagem para gestão de portfolio de projetos de TI. Como você alinha com a estratégia do negócio?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'tecnica', competencia: 'Gestão de Portfolio' },
+  { area: 'tecnologia', texto: 'Como você avalia e gerencia a complexidade e interdependências em programas com múltiplos projetos?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'tecnica', competencia: 'Gestão de Programas' },
+  { area: 'tecnologia', texto: 'Quais frameworks e metodologias você utiliza para transformação digital? Como você mede o sucesso?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'tecnica', competencia: 'Transformação Digital' },
+  { area: 'tecnologia', texto: 'Como você estrutura business cases para projetos de TI? Quais métricas de ROI você utiliza?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'tecnica', competencia: 'Business Case' },
+  { area: 'tecnologia', texto: 'Descreva como você gerencia riscos em nível de programa ou portfolio. Quais técnicas de mitigação são mais eficazes?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'tecnica', competencia: 'Gestão de Riscos Estratégicos' },
+  { area: 'tecnologia', texto: 'Como você estrutura OKRs ou KPIs para medir o sucesso de iniciativas de TI alinhadas ao negócio?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'tecnica', competencia: 'Métricas Estratégicas' },
+
+  // Experiência (7)
+  { area: 'tecnologia', texto: 'Conte sobre uma transformação tecnológica de grande escala que você liderou. Quais foram os fatores de sucesso?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'experiencia', competencia: 'Transformação' },
+  { area: 'tecnologia', texto: 'Descreva sua experiência estruturando ou reestruturando um PMO de TI. Quais processos você implementou?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'experiencia', competencia: 'Estruturação de PMO' },
+  { area: 'tecnologia', texto: 'Conte sobre um programa ou portfolio de projetos que você gerenciou. Como você coordenou as interdependências?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'experiencia', competencia: 'Gestão de Programas' },
+  { area: 'tecnologia', texto: 'Descreva uma situação onde você teve que recuperar um projeto ou programa em situação crítica.', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'experiencia', competencia: 'Turnaround de Projetos' },
+  { area: 'tecnologia', texto: 'Conte sobre sua experiência com projetos de M&A ou integração de sistemas em fusões e aquisições.', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'experiencia', competencia: 'Projetos de M&A' },
+  { area: 'tecnologia', texto: 'Descreva como você desenvolveu e mentoreou outros gerentes de projeto na sua carreira.', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'experiencia', competencia: 'Desenvolvimento de Pessoas' },
+  { area: 'tecnologia', texto: 'Conte sobre uma negociação complexa com fornecedores ou parceiros de tecnologia que você conduziu.', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'experiencia', competencia: 'Negociação Estratégica' },
+
+  // Comportamental (7)
+  { area: 'tecnologia', texto: 'Como você influencia decisões estratégicas da organização usando a perspectiva de gestão de projetos?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'comportamental', competencia: 'Influência Estratégica' },
+  { area: 'tecnologia', texto: 'Descreva como você constrói e mantém relacionamentos com a alta liderança e C-level.', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'comportamental', competencia: 'Relacionamento Executivo' },
+  { area: 'tecnologia', texto: 'Como você equilibra inovação e risco na seleção e priorização de projetos de TI?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'comportamental', competencia: 'Gestão de Inovação' },
+  { area: 'tecnologia', texto: 'Descreva como você promove uma cultura de execução e accountability na gestão de projetos.', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'comportamental', competencia: 'Cultura de Execução' },
+  { area: 'tecnologia', texto: 'Como você lida com a complexidade política de projetos que envolvem múltiplas áreas da organização?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'comportamental', competencia: 'Navegação Política' },
+  { area: 'tecnologia', texto: 'De que forma você se mantém atualizado sobre tendências de gestão de projetos e tecnologia?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'comportamental', competencia: 'Atualização Profissional' },
+  { area: 'tecnologia', texto: 'Como você constrói times de alta performance em gestão de projetos?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'comportamental', competencia: 'Building Teams' },
+
+  // Situacional (7)
+  { area: 'tecnologia', texto: 'O board questiona o ROI de investimentos em TI. Como você defende e demonstra o valor gerado?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'situacional', competencia: 'Defesa de Investimentos' },
+  { area: 'tecnologia', texto: 'Um programa estratégico está em risco por falta de recursos e disputas internas. Como você intervém?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'situacional', competencia: 'Gestão de Crises' },
+  { area: 'tecnologia', texto: 'A empresa precisa cortar 30% do budget de projetos. Como você prioriza e comunica as decisões?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'situacional', competencia: 'Priorização de Investimentos' },
+  { area: 'tecnologia', texto: 'Há conflito entre a área de TI e o negócio sobre prioridades de projetos. Como você media?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'situacional', competencia: 'Alinhamento TI-Negócio' },
+  { area: 'tecnologia', texto: 'Um projeto estratégico entregue não está gerando os benefícios esperados. Como você conduz o pós-projeto?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'situacional', competencia: 'Realização de Benefícios' },
+  { area: 'tecnologia', texto: 'A organização quer adotar uma nova metodologia de projetos rapidamente. Como você planeja a transição?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'situacional', competencia: 'Change Management' },
+  { area: 'tecnologia', texto: 'Um parceiro estratégico de tecnologia está apresentando problemas graves de entrega. Qual sua abordagem?', cargo: 'Gerente de Projetos de TI', nivel: 'senior', categoria: 'situacional', competencia: 'Gestão de Parcerias' },
+];
+
+// ============================================
 // EXPORTAÇÃO CONSOLIDADA
 // ============================================
 
@@ -608,6 +724,9 @@ export const perguntasTecnologia: PerguntaSeed[] = [
   ...cientistaDadosPleno,
   ...cientistaDadosSenior,
   ...coordenadorTecnologia,
+  ...gerenteProjetosTIJunior,
+  ...gerenteProjetosTIPleno,
+  ...gerenteProjetosTISenior,
 ];
 
 export const estatisticasTecnologia = {
@@ -629,5 +748,8 @@ export const estatisticasTecnologia = {
     'Cientista de Dados Pleno': cientistaDadosPleno.length,
     'Cientista de Dados Senior': cientistaDadosSenior.length,
     'Coordenador de Tecnologia': coordenadorTecnologia.length,
+    'Gerente de Projetos de TI Junior': gerenteProjetosTIJunior.length,
+    'Gerente de Projetos de TI Pleno': gerenteProjetosTIPleno.length,
+    'Gerente de Projetos de TI Senior': gerenteProjetosTISenior.length,
   },
 };

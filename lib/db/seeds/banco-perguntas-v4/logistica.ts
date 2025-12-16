@@ -4,9 +4,9 @@
  * Cargos incluídos:
  * - Auxiliar de Logística (Junior, Pleno)
  * - Analista de Logística (Junior, Pleno, Senior)
- * - Conferente (Junior, Pleno)
+ * - Conferente de Mercadorias (Junior, Pleno)
  * - Coordenador de Logística (Senior)
- * - Motorista de Entregas (Junior, Pleno)
+ * - Motorista de Entrega (Junior, Pleno)
  * - Estoquista (Junior, Pleno)
  *
  * Total: ~290 perguntas
@@ -191,72 +191,72 @@ export const analistaLogisticaSenior: PerguntaSeed[] = [
 ];
 
 // ============================================
-// CONFERENTE
+// CONFERENTE DE MERCADORIAS
 // ============================================
 
 export const conferenteJunior: PerguntaSeed[] = [
   // Técnica (6)
-  { area: 'logistica', texto: 'Quais são os principais pontos de verificação ao conferir uma carga no recebimento?', cargo: 'Conferente', nivel: 'junior', categoria: 'tecnica', competencia: 'Conferência de Recebimento' },
-  { area: 'logistica', texto: 'Como você utiliza equipamentos de leitura (coletores, scanners) na conferência de produtos?', cargo: 'Conferente', nivel: 'junior', categoria: 'tecnica', competencia: 'Equipamentos de Conferência' },
-  { area: 'logistica', texto: 'Quais documentos você verifica ao realizar a conferência de uma entrega?', cargo: 'Conferente', nivel: 'junior', categoria: 'tecnica', competencia: 'Documentação' },
-  { area: 'logistica', texto: 'Como você identifica e registra produtos com avarias ou não conformidades?', cargo: 'Conferente', nivel: 'junior', categoria: 'tecnica', competencia: 'Registro de Avarias' },
-  { area: 'logistica', texto: 'Quais são os critérios para aprovação ou recusa de mercadorias no recebimento?', cargo: 'Conferente', nivel: 'junior', categoria: 'tecnica', competencia: 'Critérios de Aceitação' },
-  { area: 'logistica', texto: 'Como você confere a integridade das embalagens e lacres de segurança?', cargo: 'Conferente', nivel: 'junior', categoria: 'tecnica', competencia: 'Verificação de Embalagens' },
+  { area: 'logistica', texto: 'Quais são os principais pontos de verificação ao conferir uma carga no recebimento?', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'tecnica', competencia: 'Conferência de Recebimento' },
+  { area: 'logistica', texto: 'Como você utiliza equipamentos de leitura (coletores, scanners) na conferência de produtos?', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'tecnica', competencia: 'Equipamentos de Conferência' },
+  { area: 'logistica', texto: 'Quais documentos você verifica ao realizar a conferência de uma entrega?', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'tecnica', competencia: 'Documentação' },
+  { area: 'logistica', texto: 'Como você identifica e registra produtos com avarias ou não conformidades?', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'tecnica', competencia: 'Registro de Avarias' },
+  { area: 'logistica', texto: 'Quais são os critérios para aprovação ou recusa de mercadorias no recebimento?', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'tecnica', competencia: 'Critérios de Aceitação' },
+  { area: 'logistica', texto: 'Como você confere a integridade das embalagens e lacres de segurança?', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'tecnica', competencia: 'Verificação de Embalagens' },
 
   // Experiência (5)
-  { area: 'logistica', texto: 'Conte sobre sua experiência anterior com atividades de conferência ou controle de qualidade.', cargo: 'Conferente', nivel: 'junior', categoria: 'experiencia', competencia: 'Conferência de Mercadorias' },
-  { area: 'logistica', texto: 'Descreva uma situação em que sua atenção evitou que uma divergência passasse despercebida.', cargo: 'Conferente', nivel: 'junior', categoria: 'experiencia', competencia: 'Atenção aos Detalhes' },
-  { area: 'logistica', texto: 'Como foi sua adaptação ao ritmo de trabalho em ambiente de armazenagem ou distribuição?', cargo: 'Conferente', nivel: 'junior', categoria: 'experiencia', competencia: 'Adaptação ao Ambiente' },
-  { area: 'logistica', texto: 'Descreva um momento em que precisou reportar um problema encontrado na conferência.', cargo: 'Conferente', nivel: 'junior', categoria: 'experiencia', competencia: 'Comunicação de Problemas' },
-  { area: 'logistica', texto: 'Conte sobre sua experiência com diferentes tipos de produtos ou cargas.', cargo: 'Conferente', nivel: 'junior', categoria: 'experiencia', competencia: 'Variedade de Produtos' },
+  { area: 'logistica', texto: 'Conte sobre sua experiência anterior com atividades de conferência ou controle de qualidade.', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'experiencia', competencia: 'Conferência de Mercadorias' },
+  { area: 'logistica', texto: 'Descreva uma situação em que sua atenção evitou que uma divergência passasse despercebida.', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'experiencia', competencia: 'Atenção aos Detalhes' },
+  { area: 'logistica', texto: 'Como foi sua adaptação ao ritmo de trabalho em ambiente de armazenagem ou distribuição?', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'experiencia', competencia: 'Adaptação ao Ambiente' },
+  { area: 'logistica', texto: 'Descreva um momento em que precisou reportar um problema encontrado na conferência.', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'experiencia', competencia: 'Comunicação de Problemas' },
+  { area: 'logistica', texto: 'Conte sobre sua experiência com diferentes tipos de produtos ou cargas.', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'experiencia', competencia: 'Variedade de Produtos' },
 
   // Comportamental (5)
-  { area: 'logistica', texto: 'Como você mantém a concentração ao realizar conferências repetitivas ao longo do dia?', cargo: 'Conferente', nivel: 'junior', categoria: 'comportamental', competencia: 'Concentração' },
-  { area: 'logistica', texto: 'De que forma você lida com a pressão de prazos apertados nas operações de carga e descarga?', cargo: 'Conferente', nivel: 'junior', categoria: 'comportamental', competencia: 'Trabalho sob Pressão' },
-  { area: 'logistica', texto: 'Como você se comunica com motoristas ou fornecedores quando há divergências?', cargo: 'Conferente', nivel: 'junior', categoria: 'comportamental', competencia: 'Comunicação' },
-  { area: 'logistica', texto: 'Descreva como você colabora com a equipe para agilizar o processo de conferência.', cargo: 'Conferente', nivel: 'junior', categoria: 'comportamental', competencia: 'Trabalho em Equipe' },
-  { area: 'logistica', texto: 'Como você reage quando encontra algo diferente do procedimento padrão?', cargo: 'Conferente', nivel: 'junior', categoria: 'comportamental', competencia: 'Senso Crítico' },
+  { area: 'logistica', texto: 'Como você mantém a concentração ao realizar conferências repetitivas ao longo do dia?', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'comportamental', competencia: 'Concentração' },
+  { area: 'logistica', texto: 'De que forma você lida com a pressão de prazos apertados nas operações de carga e descarga?', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'comportamental', competencia: 'Trabalho sob Pressão' },
+  { area: 'logistica', texto: 'Como você se comunica com motoristas ou fornecedores quando há divergências?', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'comportamental', competencia: 'Comunicação' },
+  { area: 'logistica', texto: 'Descreva como você colabora com a equipe para agilizar o processo de conferência.', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'comportamental', competencia: 'Trabalho em Equipe' },
+  { area: 'logistica', texto: 'Como você reage quando encontra algo diferente do procedimento padrão?', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'comportamental', competencia: 'Senso Crítico' },
 
   // Situacional (5)
-  { area: 'logistica', texto: 'Você encontra diferença entre a quantidade física e o documento fiscal. Como procede?', cargo: 'Conferente', nivel: 'junior', categoria: 'situacional', competencia: 'Divergência Quantitativa' },
-  { area: 'logistica', texto: 'Uma mercadoria chegou com embalagem violada. O que você faz?', cargo: 'Conferente', nivel: 'junior', categoria: 'situacional', competencia: 'Mercadoria Avariada' },
-  { area: 'logistica', texto: 'O motorista tem pressa para liberar o veículo mas a conferência não terminou. Como você age?', cargo: 'Conferente', nivel: 'junior', categoria: 'situacional', competencia: 'Pressão Externa' },
-  { area: 'logistica', texto: 'Você percebe que um lote está com data de validade muito próxima. O que faz?', cargo: 'Conferente', nivel: 'junior', categoria: 'situacional', competencia: 'Controle de Validade' },
-  { area: 'logistica', texto: 'O coletor de dados para de funcionar no meio de uma conferência. Como você resolve?', cargo: 'Conferente', nivel: 'junior', categoria: 'situacional', competencia: 'Contingência Técnica' },
+  { area: 'logistica', texto: 'Você encontra diferença entre a quantidade física e o documento fiscal. Como procede?', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'situacional', competencia: 'Divergência Quantitativa' },
+  { area: 'logistica', texto: 'Uma mercadoria chegou com embalagem violada. O que você faz?', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'situacional', competencia: 'Mercadoria Avariada' },
+  { area: 'logistica', texto: 'O motorista tem pressa para liberar o veículo mas a conferência não terminou. Como você age?', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'situacional', competencia: 'Pressão Externa' },
+  { area: 'logistica', texto: 'Você percebe que um lote está com data de validade muito próxima. O que faz?', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'situacional', competencia: 'Controle de Validade' },
+  { area: 'logistica', texto: 'O coletor de dados para de funcionar no meio de uma conferência. Como você resolve?', cargo: 'Conferente de Mercadorias', nivel: 'junior', categoria: 'situacional', competencia: 'Contingência Técnica' },
 ];
 
 export const conferentePleno: PerguntaSeed[] = [
   // Técnica (6)
-  { area: 'logistica', texto: 'Como você conduz a conferência de cargas complexas com múltiplos SKUs e lotes?', cargo: 'Conferente', nivel: 'pleno', categoria: 'tecnica', competencia: 'Conferência Complexa' },
-  { area: 'logistica', texto: 'Quais procedimentos você segue para conferência de produtos com controle especial (cadeia fria, perigosos)?', cargo: 'Conferente', nivel: 'pleno', categoria: 'tecnica', competencia: 'Produtos Especiais' },
-  { area: 'logistica', texto: 'Como você organiza e prioriza as conferências quando há múltiplos veículos aguardando?', cargo: 'Conferente', nivel: 'pleno', categoria: 'tecnica', competencia: 'Priorização de Conferências' },
-  { area: 'logistica', texto: 'Quais indicadores você acompanha para avaliar a eficiência do processo de conferência?', cargo: 'Conferente', nivel: 'pleno', categoria: 'tecnica', competencia: 'Indicadores de Conferência' },
-  { area: 'logistica', texto: 'Como você realiza a conferência de expedição garantindo que o pedido está completo?', cargo: 'Conferente', nivel: 'pleno', categoria: 'tecnica', competencia: 'Conferência de Expedição' },
-  { area: 'logistica', texto: 'Quais técnicas você utiliza para agilizar a conferência sem comprometer a qualidade?', cargo: 'Conferente', nivel: 'pleno', categoria: 'tecnica', competencia: 'Eficiência em Conferência' },
+  { area: 'logistica', texto: 'Como você conduz a conferência de cargas complexas com múltiplos SKUs e lotes?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'tecnica', competencia: 'Conferência Complexa' },
+  { area: 'logistica', texto: 'Quais procedimentos você segue para conferência de produtos com controle especial (cadeia fria, perigosos)?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'tecnica', competencia: 'Produtos Especiais' },
+  { area: 'logistica', texto: 'Como você organiza e prioriza as conferências quando há múltiplos veículos aguardando?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'tecnica', competencia: 'Priorização de Conferências' },
+  { area: 'logistica', texto: 'Quais indicadores você acompanha para avaliar a eficiência do processo de conferência?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'tecnica', competencia: 'Indicadores de Conferência' },
+  { area: 'logistica', texto: 'Como você realiza a conferência de expedição garantindo que o pedido está completo?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'tecnica', competencia: 'Conferência de Expedição' },
+  { area: 'logistica', texto: 'Quais técnicas você utiliza para agilizar a conferência sem comprometer a qualidade?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'tecnica', competencia: 'Eficiência em Conferência' },
 
   // Experiência (6)
-  { area: 'logistica', texto: 'Conte sobre uma melhoria que você sugeriu no processo de conferência.', cargo: 'Conferente', nivel: 'pleno', categoria: 'experiencia', competencia: 'Melhoria de Processos' },
-  { area: 'logistica', texto: 'Descreva como você treinou colegas mais novos nas atividades de conferência.', cargo: 'Conferente', nivel: 'pleno', categoria: 'experiencia', competencia: 'Treinamento de Equipe' },
-  { area: 'logistica', texto: 'Como foi sua experiência com conferências de inventário ou auditorias de estoque?', cargo: 'Conferente', nivel: 'pleno', categoria: 'experiencia', competencia: 'Inventário' },
-  { area: 'logistica', texto: 'Descreva uma situação complexa de divergência que você resolveu.', cargo: 'Conferente', nivel: 'pleno', categoria: 'experiencia', competencia: 'Resolução de Divergências' },
-  { area: 'logistica', texto: 'Conte sobre sua experiência com conferência de cargas de alto valor ou sensíveis.', cargo: 'Conferente', nivel: 'pleno', categoria: 'experiencia', competencia: 'Cargas Especiais' },
-  { area: 'logistica', texto: 'Como você lidou com uma situação de alto volume de conferências em período crítico?', cargo: 'Conferente', nivel: 'pleno', categoria: 'experiencia', competencia: 'Gestão de Picos' },
+  { area: 'logistica', texto: 'Conte sobre uma melhoria que você sugeriu no processo de conferência.', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'experiencia', competencia: 'Melhoria de Processos' },
+  { area: 'logistica', texto: 'Descreva como você treinou colegas mais novos nas atividades de conferência.', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'experiencia', competencia: 'Treinamento de Equipe' },
+  { area: 'logistica', texto: 'Como foi sua experiência com conferências de inventário ou auditorias de estoque?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'experiencia', competencia: 'Inventário' },
+  { area: 'logistica', texto: 'Descreva uma situação complexa de divergência que você resolveu.', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'experiencia', competencia: 'Resolução de Divergências' },
+  { area: 'logistica', texto: 'Conte sobre sua experiência com conferência de cargas de alto valor ou sensíveis.', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'experiencia', competencia: 'Cargas Especiais' },
+  { area: 'logistica', texto: 'Como você lidou com uma situação de alto volume de conferências em período crítico?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'experiencia', competencia: 'Gestão de Picos' },
 
   // Comportamental (6)
-  { area: 'logistica', texto: 'Como você equilibra velocidade e precisão nas conferências do dia a dia?', cargo: 'Conferente', nivel: 'pleno', categoria: 'comportamental', competencia: 'Equilíbrio Velocidade-Precisão' },
-  { area: 'logistica', texto: 'De que forma você contribui para a prevenção de erros recorrentes na equipe?', cargo: 'Conferente', nivel: 'pleno', categoria: 'comportamental', competencia: 'Prevenção de Erros' },
-  { area: 'logistica', texto: 'Como você lida com situações de tensão com motoristas ou fornecedores?', cargo: 'Conferente', nivel: 'pleno', categoria: 'comportamental', competencia: 'Gestão de Conflitos' },
-  { area: 'logistica', texto: 'Descreva como você mantém a qualidade mesmo em momentos de alta pressão.', cargo: 'Conferente', nivel: 'pleno', categoria: 'comportamental', competencia: 'Consistência' },
-  { area: 'logistica', texto: 'Como você se mantém atualizado sobre procedimentos e mudanças nos processos?', cargo: 'Conferente', nivel: 'pleno', categoria: 'comportamental', competencia: 'Atualização de Conhecimentos' },
-  { area: 'logistica', texto: 'De que forma você apoia os colegas em momentos de dificuldade operacional?', cargo: 'Conferente', nivel: 'pleno', categoria: 'comportamental', competencia: 'Apoio à Equipe' },
+  { area: 'logistica', texto: 'Como você equilibra velocidade e precisão nas conferências do dia a dia?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'comportamental', competencia: 'Equilíbrio Velocidade-Precisão' },
+  { area: 'logistica', texto: 'De que forma você contribui para a prevenção de erros recorrentes na equipe?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'comportamental', competencia: 'Prevenção de Erros' },
+  { area: 'logistica', texto: 'Como você lida com situações de tensão com motoristas ou fornecedores?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'comportamental', competencia: 'Gestão de Conflitos' },
+  { area: 'logistica', texto: 'Descreva como você mantém a qualidade mesmo em momentos de alta pressão.', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'comportamental', competencia: 'Consistência' },
+  { area: 'logistica', texto: 'Como você se mantém atualizado sobre procedimentos e mudanças nos processos?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'comportamental', competencia: 'Atualização de Conhecimentos' },
+  { area: 'logistica', texto: 'De que forma você apoia os colegas em momentos de dificuldade operacional?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'comportamental', competencia: 'Apoio à Equipe' },
 
   // Situacional (6)
-  { area: 'logistica', texto: 'A conferência identifica uma divergência recorrente com um mesmo fornecedor. O que você faz?', cargo: 'Conferente', nivel: 'pleno', categoria: 'situacional', competencia: 'Padrão de Divergências' },
-  { area: 'logistica', texto: 'Você precisa conferir uma carga urgente mas está no meio de outra conferência. Como prioriza?', cargo: 'Conferente', nivel: 'pleno', categoria: 'situacional', competencia: 'Gestão de Prioridades' },
-  { area: 'logistica', texto: 'Um colega está cometendo erros frequentes nas conferências. Como você aborda?', cargo: 'Conferente', nivel: 'pleno', categoria: 'situacional', competencia: 'Feedback Construtivo' },
-  { area: 'logistica', texto: 'A mercadoria está correta mas a documentação apresenta erro. Como procede?', cargo: 'Conferente', nivel: 'pleno', categoria: 'situacional', competencia: 'Divergência Documental' },
-  { area: 'logistica', texto: 'Você identifica um produto que deveria ter sido segregado por recall. O que faz?', cargo: 'Conferente', nivel: 'pleno', categoria: 'situacional', competencia: 'Gestão de Recall' },
-  { area: 'logistica', texto: 'O supervisor solicita que você aceite uma carga com divergência para não atrasar. Como age?', cargo: 'Conferente', nivel: 'pleno', categoria: 'situacional', competencia: 'Integridade Profissional' },
+  { area: 'logistica', texto: 'A conferência identifica uma divergência recorrente com um mesmo fornecedor. O que você faz?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'situacional', competencia: 'Padrão de Divergências' },
+  { area: 'logistica', texto: 'Você precisa conferir uma carga urgente mas está no meio de outra conferência. Como prioriza?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'situacional', competencia: 'Gestão de Prioridades' },
+  { area: 'logistica', texto: 'Um colega está cometendo erros frequentes nas conferências. Como você aborda?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'situacional', competencia: 'Feedback Construtivo' },
+  { area: 'logistica', texto: 'A mercadoria está correta mas a documentação apresenta erro. Como procede?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'situacional', competencia: 'Divergência Documental' },
+  { area: 'logistica', texto: 'Você identifica um produto que deveria ter sido segregado por recall. O que faz?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'situacional', competencia: 'Gestão de Recall' },
+  { area: 'logistica', texto: 'O supervisor solicita que você aceite uma carga com divergência para não atrasar. Como age?', cargo: 'Conferente de Mercadorias', nivel: 'pleno', categoria: 'situacional', competencia: 'Integridade Profissional' },
 ];
 
 // ============================================
@@ -302,72 +302,72 @@ export const coordenadorLogisticaSenior: PerguntaSeed[] = [
 ];
 
 // ============================================
-// MOTORISTA DE ENTREGAS
+// MOTORISTA DE ENTREGA
 // ============================================
 
 export const motoristaEntregasJunior: PerguntaSeed[] = [
   // Técnica (6)
-  { area: 'logistica', texto: 'Quais verificações você realiza no veículo antes de iniciar a rota de entregas?', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'tecnica', competencia: 'Checklist Veicular' },
-  { area: 'logistica', texto: 'Como você organiza as mercadorias no veículo para otimizar as entregas?', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'tecnica', competencia: 'Organização de Carga' },
-  { area: 'logistica', texto: 'Quais documentos são necessários para realizar uma entrega corretamente?', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'tecnica', competencia: 'Documentação de Entrega' },
-  { area: 'logistica', texto: 'Como você utiliza aplicativos de roteirização ou GPS na sua rotina de trabalho?', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'tecnica', competencia: 'Tecnologia de Roteirização' },
-  { area: 'logistica', texto: 'Quais cuidados você toma no manuseio de mercadorias frágeis ou perecíveis?', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'tecnica', competencia: 'Manuseio de Mercadorias' },
-  { area: 'logistica', texto: 'Como você procede para coletar a assinatura e confirmar a entrega ao cliente?', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'tecnica', competencia: 'Confirmação de Entrega' },
+  { area: 'logistica', texto: 'Quais verificações você realiza no veículo antes de iniciar a rota de entregas?', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'tecnica', competencia: 'Checklist Veicular' },
+  { area: 'logistica', texto: 'Como você organiza as mercadorias no veículo para otimizar as entregas?', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'tecnica', competencia: 'Organização de Carga' },
+  { area: 'logistica', texto: 'Quais documentos são necessários para realizar uma entrega corretamente?', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'tecnica', competencia: 'Documentação de Entrega' },
+  { area: 'logistica', texto: 'Como você utiliza aplicativos de roteirização ou GPS na sua rotina de trabalho?', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'tecnica', competencia: 'Tecnologia de Roteirização' },
+  { area: 'logistica', texto: 'Quais cuidados você toma no manuseio de mercadorias frágeis ou perecíveis?', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'tecnica', competencia: 'Manuseio de Mercadorias' },
+  { area: 'logistica', texto: 'Como você procede para coletar a assinatura e confirmar a entrega ao cliente?', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'tecnica', competencia: 'Confirmação de Entrega' },
 
   // Experiência (5)
-  { area: 'logistica', texto: 'Conte sobre sua experiência anterior com entregas ou transporte de mercadorias.', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'experiencia', competencia: 'Experiência em Entregas' },
-  { area: 'logistica', texto: 'Descreva uma situação desafiadora que você enfrentou durante uma rota de entregas.', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'experiencia', competencia: 'Resolução de Problemas' },
-  { area: 'logistica', texto: 'Como foi sua adaptação ao ritmo e às exigências do trabalho de entregas?', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'experiencia', competencia: 'Adaptação ao Trabalho' },
-  { area: 'logistica', texto: 'Descreva uma situação em que você precisou lidar com um cliente difícil.', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'experiencia', competencia: 'Atendimento ao Cliente' },
-  { area: 'logistica', texto: 'Conte sobre uma entrega que você realizou em condições adversas (trânsito, clima).', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'experiencia', competencia: 'Condições Adversas' },
+  { area: 'logistica', texto: 'Conte sobre sua experiência anterior com entregas ou transporte de mercadorias.', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'experiencia', competencia: 'Experiência em Entregas' },
+  { area: 'logistica', texto: 'Descreva uma situação desafiadora que você enfrentou durante uma rota de entregas.', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'experiencia', competencia: 'Resolução de Problemas' },
+  { area: 'logistica', texto: 'Como foi sua adaptação ao ritmo e às exigências do trabalho de entregas?', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'experiencia', competencia: 'Adaptação ao Trabalho' },
+  { area: 'logistica', texto: 'Descreva uma situação em que você precisou lidar com um cliente difícil.', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'experiencia', competencia: 'Atendimento ao Cliente' },
+  { area: 'logistica', texto: 'Conte sobre uma entrega que você realizou em condições adversas (trânsito, clima).', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'experiencia', competencia: 'Condições Adversas' },
 
   // Comportamental (5)
-  { area: 'logistica', texto: 'Como você mantém a calma e a cordialidade ao lidar com clientes impacientes?', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'comportamental', competencia: 'Controle Emocional' },
-  { area: 'logistica', texto: 'De que forma você zela pela conservação do veículo que utiliza?', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'comportamental', competencia: 'Cuidado com Patrimônio' },
-  { area: 'logistica', texto: 'Como você administra seu tempo para cumprir todas as entregas do dia?', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'comportamental', competencia: 'Gestão do Tempo' },
-  { area: 'logistica', texto: 'Descreva como você mantém a atenção e a segurança durante longas jornadas.', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'comportamental', competencia: 'Segurança no Trânsito' },
-  { area: 'logistica', texto: 'Como você reage quando percebe que não conseguirá cumprir o horário previsto?', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'comportamental', competencia: 'Comunicação Proativa' },
+  { area: 'logistica', texto: 'Como você mantém a calma e a cordialidade ao lidar com clientes impacientes?', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'comportamental', competencia: 'Controle Emocional' },
+  { area: 'logistica', texto: 'De que forma você zela pela conservação do veículo que utiliza?', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'comportamental', competencia: 'Cuidado com Patrimônio' },
+  { area: 'logistica', texto: 'Como você administra seu tempo para cumprir todas as entregas do dia?', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'comportamental', competencia: 'Gestão do Tempo' },
+  { area: 'logistica', texto: 'Descreva como você mantém a atenção e a segurança durante longas jornadas.', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'comportamental', competencia: 'Segurança no Trânsito' },
+  { area: 'logistica', texto: 'Como você reage quando percebe que não conseguirá cumprir o horário previsto?', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'comportamental', competencia: 'Comunicação Proativa' },
 
   // Situacional (5)
-  { area: 'logistica', texto: 'O cliente não está no endereço no momento da entrega. O que você faz?', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'situacional', competencia: 'Cliente Ausente' },
-  { area: 'logistica', texto: 'Você percebe que uma mercadoria está danificada ao abrir o veículo. Como procede?', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'situacional', competencia: 'Mercadoria Avariada' },
-  { area: 'logistica', texto: 'O veículo apresenta um problema mecânico no meio da rota. O que você faz?', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'situacional', competencia: 'Problema Mecânico' },
-  { area: 'logistica', texto: 'Um cliente se recusa a receber a mercadoria alegando que não pediu. Como age?', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'situacional', competencia: 'Recusa de Recebimento' },
-  { area: 'logistica', texto: 'Você está atrasado e o próximo cliente liga cobrando a entrega. Como comunica?', cargo: 'Motorista de Entregas', nivel: 'junior', categoria: 'situacional', competencia: 'Comunicação de Atrasos' },
+  { area: 'logistica', texto: 'O cliente não está no endereço no momento da entrega. O que você faz?', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'situacional', competencia: 'Cliente Ausente' },
+  { area: 'logistica', texto: 'Você percebe que uma mercadoria está danificada ao abrir o veículo. Como procede?', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'situacional', competencia: 'Mercadoria Avariada' },
+  { area: 'logistica', texto: 'O veículo apresenta um problema mecânico no meio da rota. O que você faz?', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'situacional', competencia: 'Problema Mecânico' },
+  { area: 'logistica', texto: 'Um cliente se recusa a receber a mercadoria alegando que não pediu. Como age?', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'situacional', competencia: 'Recusa de Recebimento' },
+  { area: 'logistica', texto: 'Você está atrasado e o próximo cliente liga cobrando a entrega. Como comunica?', cargo: 'Motorista de Entrega', nivel: 'junior', categoria: 'situacional', competencia: 'Comunicação de Atrasos' },
 ];
 
 export const motoristaEntregasPleno: PerguntaSeed[] = [
   // Técnica (6)
-  { area: 'logistica', texto: 'Como você otimiza sua rota considerando janelas de entrega e restrições de trânsito?', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'tecnica', competencia: 'Otimização de Rotas' },
-  { area: 'logistica', texto: 'Quais procedimentos você segue para entrega de produtos que exigem cuidados especiais?', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'tecnica', competencia: 'Entregas Especiais' },
-  { area: 'logistica', texto: 'Como você gerencia múltiplas entregas com prioridades diferentes?', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'tecnica', competencia: 'Gestão de Prioridades' },
-  { area: 'logistica', texto: 'Quais técnicas você utiliza para garantir a integridade da carga durante o transporte?', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'tecnica', competencia: 'Preservação de Carga' },
-  { area: 'logistica', texto: 'Como você utiliza os sistemas da empresa para registro e acompanhamento das entregas?', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'tecnica', competencia: 'Sistemas de Registro' },
-  { area: 'logistica', texto: 'Quais são os procedimentos de segurança que você segue em áreas de risco?', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'tecnica', competencia: 'Segurança em Áreas de Risco' },
+  { area: 'logistica', texto: 'Como você otimiza sua rota considerando janelas de entrega e restrições de trânsito?', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'tecnica', competencia: 'Otimização de Rotas' },
+  { area: 'logistica', texto: 'Quais procedimentos você segue para entrega de produtos que exigem cuidados especiais?', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'tecnica', competencia: 'Entregas Especiais' },
+  { area: 'logistica', texto: 'Como você gerencia múltiplas entregas com prioridades diferentes?', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'tecnica', competencia: 'Gestão de Prioridades' },
+  { area: 'logistica', texto: 'Quais técnicas você utiliza para garantir a integridade da carga durante o transporte?', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'tecnica', competencia: 'Preservação de Carga' },
+  { area: 'logistica', texto: 'Como você utiliza os sistemas da empresa para registro e acompanhamento das entregas?', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'tecnica', competencia: 'Sistemas de Registro' },
+  { area: 'logistica', texto: 'Quais são os procedimentos de segurança que você segue em áreas de risco?', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'tecnica', competencia: 'Segurança em Áreas de Risco' },
 
   // Experiência (6)
-  { area: 'logistica', texto: 'Conte sobre uma situação complexa de entrega que você resolveu de forma criativa.', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'experiencia', competencia: 'Resolução Criativa' },
-  { area: 'logistica', texto: 'Descreva como você ajudou a treinar um motorista mais novo.', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'experiencia', competencia: 'Treinamento de Colegas' },
-  { area: 'logistica', texto: 'Como foi sua experiência com entregas de alto valor ou cargas especiais?', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'experiencia', competencia: 'Cargas Especiais' },
-  { area: 'logistica', texto: 'Descreva uma melhoria que você sugeriu para o processo de entregas.', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'experiencia', competencia: 'Melhoria de Processos' },
-  { area: 'logistica', texto: 'Conte sobre como você lidou com uma situação de emergência durante uma rota.', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'experiencia', competencia: 'Gestão de Emergências' },
-  { area: 'logistica', texto: 'Descreva sua experiência com diferentes tipos de veículos e cargas.', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'experiencia', competencia: 'Versatilidade' },
+  { area: 'logistica', texto: 'Conte sobre uma situação complexa de entrega que você resolveu de forma criativa.', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'experiencia', competencia: 'Resolução Criativa' },
+  { area: 'logistica', texto: 'Descreva como você ajudou a treinar um motorista mais novo.', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'experiencia', competencia: 'Treinamento de Colegas' },
+  { area: 'logistica', texto: 'Como foi sua experiência com entregas de alto valor ou cargas especiais?', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'experiencia', competencia: 'Cargas Especiais' },
+  { area: 'logistica', texto: 'Descreva uma melhoria que você sugeriu para o processo de entregas.', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'experiencia', competencia: 'Melhoria de Processos' },
+  { area: 'logistica', texto: 'Conte sobre como você lidou com uma situação de emergência durante uma rota.', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'experiencia', competencia: 'Gestão de Emergências' },
+  { area: 'logistica', texto: 'Descreva sua experiência com diferentes tipos de veículos e cargas.', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'experiencia', competencia: 'Versatilidade' },
 
   // Comportamental (6)
-  { area: 'logistica', texto: 'Como você mantém um bom relacionamento com clientes frequentes da sua rota?', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'comportamental', competencia: 'Relacionamento com Clientes' },
-  { area: 'logistica', texto: 'De que forma você contribui para a imagem da empresa durante as entregas?', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'comportamental', competencia: 'Representação da Empresa' },
-  { area: 'logistica', texto: 'Como você lida com situações de estresse no trânsito mantendo a segurança?', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'comportamental', competencia: 'Controle de Estresse' },
-  { area: 'logistica', texto: 'Descreva como você colabora com a equipe de logística para resolver problemas.', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'comportamental', competencia: 'Colaboração' },
-  { area: 'logistica', texto: 'Como você mantém a motivação em dias com rotas muito longas ou difíceis?', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'comportamental', competencia: 'Resiliência' },
-  { area: 'logistica', texto: 'De que forma você busca melhorar continuamente seu desempenho nas entregas?', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'comportamental', competencia: 'Autodesenvolvimento' },
+  { area: 'logistica', texto: 'Como você mantém um bom relacionamento com clientes frequentes da sua rota?', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'comportamental', competencia: 'Relacionamento com Clientes' },
+  { area: 'logistica', texto: 'De que forma você contribui para a imagem da empresa durante as entregas?', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'comportamental', competencia: 'Representação da Empresa' },
+  { area: 'logistica', texto: 'Como você lida com situações de estresse no trânsito mantendo a segurança?', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'comportamental', competencia: 'Controle de Estresse' },
+  { area: 'logistica', texto: 'Descreva como você colabora com a equipe de logística para resolver problemas.', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'comportamental', competencia: 'Colaboração' },
+  { area: 'logistica', texto: 'Como você mantém a motivação em dias com rotas muito longas ou difíceis?', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'comportamental', competencia: 'Resiliência' },
+  { area: 'logistica', texto: 'De que forma você busca melhorar continuamente seu desempenho nas entregas?', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'comportamental', competencia: 'Autodesenvolvimento' },
 
   // Situacional (6)
-  { area: 'logistica', texto: 'Você identifica que a rota planejada não é a mais eficiente. O que faz?', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'situacional', competencia: 'Questionamento de Rotas' },
-  { area: 'logistica', texto: 'Um cliente importante reclama do horário de entrega. Como você resolve?', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'situacional', competencia: 'Gestão de Reclamações' },
-  { area: 'logistica', texto: 'Você presencia outro motorista da empresa dirigindo de forma imprudente. O que faz?', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'situacional', competencia: 'Ética e Segurança' },
-  { area: 'logistica', texto: 'A rota inclui uma entrega em local que você considera inseguro. Como procede?', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'situacional', competencia: 'Avaliação de Riscos' },
-  { area: 'logistica', texto: 'Você percebe que um colega motorista está com dificuldades nas entregas. Como ajuda?', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'situacional', competencia: 'Apoio entre Colegas' },
-  { area: 'logistica', texto: 'O sistema de roteirização está fora do ar e você precisa organizar as entregas. O que faz?', cargo: 'Motorista de Entregas', nivel: 'pleno', categoria: 'situacional', competencia: 'Autonomia Operacional' },
+  { area: 'logistica', texto: 'Você identifica que a rota planejada não é a mais eficiente. O que faz?', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'situacional', competencia: 'Questionamento de Rotas' },
+  { area: 'logistica', texto: 'Um cliente importante reclama do horário de entrega. Como você resolve?', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'situacional', competencia: 'Gestão de Reclamações' },
+  { area: 'logistica', texto: 'Você presencia outro motorista da empresa dirigindo de forma imprudente. O que faz?', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'situacional', competencia: 'Ética e Segurança' },
+  { area: 'logistica', texto: 'A rota inclui uma entrega em local que você considera inseguro. Como procede?', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'situacional', competencia: 'Avaliação de Riscos' },
+  { area: 'logistica', texto: 'Você percebe que um colega motorista está com dificuldades nas entregas. Como ajuda?', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'situacional', competencia: 'Apoio entre Colegas' },
+  { area: 'logistica', texto: 'O sistema de roteirização está fora do ar e você precisa organizar as entregas. O que faz?', cargo: 'Motorista de Entrega', nivel: 'pleno', categoria: 'situacional', competencia: 'Autonomia Operacional' },
 ];
 
 // ============================================
@@ -466,11 +466,11 @@ export const estatisticasLogistica = {
     'Analista de Logística Junior': analistaLogisticaJunior.length,
     'Analista de Logística Pleno': analistaLogisticaPleno.length,
     'Analista de Logística Senior': analistaLogisticaSenior.length,
-    'Conferente Junior': conferenteJunior.length,
-    'Conferente Pleno': conferentePleno.length,
+    'Conferente de Mercadorias Junior': conferenteJunior.length,
+    'Conferente de Mercadorias Pleno': conferentePleno.length,
     'Coordenador de Logística Senior': coordenadorLogisticaSenior.length,
-    'Motorista de Entregas Junior': motoristaEntregasJunior.length,
-    'Motorista de Entregas Pleno': motoristaEntregasPleno.length,
+    'Motorista de Entrega Junior': motoristaEntregasJunior.length,
+    'Motorista de Entrega Pleno': motoristaEntregasPleno.length,
     'Estoquista Junior': estoquistaJunior.length,
     'Estoquista Pleno': estoquistaPleno.length,
   },

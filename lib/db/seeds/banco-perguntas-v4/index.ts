@@ -60,6 +60,10 @@ import { perguntasHotelaria, estatisticasHotelaria } from './hotelaria';
 export * from './industria';
 import { perguntasIndustria, estatisticasIndustria } from './industria';
 
+// Design (UX, UI, UI/UX, Design Gráfico)
+export * from './design';
+import { perguntasDesign, estatisticasDesign } from './design';
+
 // ============================================
 // EXPORTAÇÃO CONSOLIDADA
 // ============================================
@@ -78,6 +82,7 @@ export const todasPerguntas = [
   ...perguntasEducacao,
   ...perguntasHotelaria,
   ...perguntasIndustria,
+  ...perguntasDesign,
 ];
 
 export const estatisticasGerais = {
@@ -96,6 +101,7 @@ export const estatisticasGerais = {
     educacao: estatisticasEducacao,
     hotelaria: estatisticasHotelaria,
     industria: estatisticasIndustria,
+    design: estatisticasDesign,
   },
   resumo: {
     tecnologia: estatisticasTecnologia.total,
@@ -111,6 +117,7 @@ export const estatisticasGerais = {
     educacao: estatisticasEducacao.total,
     hotelaria: estatisticasHotelaria.total,
     industria: estatisticasIndustria.total,
+    design: estatisticasDesign.total,
   },
 };
 
@@ -133,6 +140,7 @@ export function imprimirEstatisticas(): void {
   console.log(`  - Educação: ${estatisticasEducacao.total} perguntas`);
   console.log(`  - Hotelaria: ${estatisticasHotelaria.total} perguntas`);
   console.log(`  - Indústria: ${estatisticasIndustria.total} perguntas`);
+  console.log(`  - Design: ${estatisticasDesign.total} perguntas`);
 
   console.log('\n================================================\n');
 }

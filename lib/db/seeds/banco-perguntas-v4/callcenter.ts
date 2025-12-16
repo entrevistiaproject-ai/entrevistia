@@ -3,11 +3,12 @@
  *
  * Cargos incluídos:
  * - Operador de Telemarketing (Junior, Pleno)
+ * - Operador de SAC (Junior, Pleno)
  * - Supervisor de Call Center (Pleno, Senior)
  * - Analista de Qualidade (Junior, Pleno, Senior)
  * - Coordenador de Operações (Senior)
  *
- * Total: ~198 perguntas
+ * Total: ~244 perguntas
  */
 
 import { PerguntaSeed } from './types';
@@ -79,6 +80,75 @@ export const operadorTelemarketingPleno: PerguntaSeed[] = [
   { area: 'callcenter', texto: 'Um cliente quer cancelar o serviço mas você tem uma oferta de retenção. Como aborda?', cargo: 'Operador de Telemarketing', nivel: 'pleno', categoria: 'situacional', competencia: 'Retenção de Clientes' },
   { area: 'callcenter', texto: 'Você identificou uma prática que poderia melhorar os resultados da equipe. Como apresenta essa ideia?', cargo: 'Operador de Telemarketing', nivel: 'pleno', categoria: 'situacional', competencia: 'Proatividade' },
   { area: 'callcenter', texto: 'O cliente pede para falar com o supervisor no meio de uma negociação. Como você procede?', cargo: 'Operador de Telemarketing', nivel: 'pleno', categoria: 'situacional', competencia: 'Gestão de Escalações' },
+];
+
+// ============================================
+// OPERADOR DE SAC
+// ============================================
+
+export const operadorSACJunior: PerguntaSeed[] = [
+  // Técnica (6)
+  { area: 'callcenter', texto: 'Quais são os elementos essenciais de um bom atendimento ao cliente via SAC?', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'tecnica', competencia: 'Atendimento ao Cliente' },
+  { area: 'callcenter', texto: 'Como você registra e categoriza as solicitações dos clientes no sistema de atendimento?', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'tecnica', competencia: 'Registro de Atendimento' },
+  { area: 'callcenter', texto: 'Quais procedimentos você segue para identificar o problema real do cliente e propor uma solução?', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'tecnica', competencia: 'Diagnóstico de Problemas' },
+  { area: 'callcenter', texto: 'Como você consulta a base de conhecimento para resolver dúvidas frequentes dos clientes?', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'tecnica', competencia: 'Base de Conhecimento' },
+  { area: 'callcenter', texto: 'Quais informações você coleta para abrir um protocolo de reclamação ou solicitação?', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'tecnica', competencia: 'Abertura de Protocolos' },
+  { area: 'callcenter', texto: 'Como você diferencia os diferentes canais de atendimento (telefone, chat, e-mail) e adapta sua comunicação?', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'tecnica', competencia: 'Atendimento Multicanal' },
+
+  // Experiência (5)
+  { area: 'callcenter', texto: 'Conte sobre sua experiência anterior com atendimento ao cliente, seja presencial, por telefone ou digital.', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'experiencia', competencia: 'Experiência em Atendimento' },
+  { area: 'callcenter', texto: 'Descreva uma situação em que você conseguiu resolver uma reclamação difícil de um cliente. O que fez?', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'experiencia', competencia: 'Resolução de Reclamações' },
+  { area: 'callcenter', texto: 'Como foi sua adaptação ao trabalho com múltiplos sistemas e telas simultâneas durante o atendimento?', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'experiencia', competencia: 'Uso de Sistemas' },
+  { area: 'callcenter', texto: 'Descreva uma ocasião em que você precisou transferir um atendimento. Como garantiu que o cliente fosse bem atendido?', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'experiencia', competencia: 'Transferência de Atendimento' },
+  { area: 'callcenter', texto: 'Conte sobre um momento em que você recebeu um elogio de um cliente pelo seu atendimento.', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'experiencia', competencia: 'Excelência no Atendimento' },
+
+  // Comportamental (5)
+  { area: 'callcenter', texto: 'Como você mantém a calma e cordialidade ao atender clientes nervosos ou frustrados?', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'comportamental', competencia: 'Controle Emocional' },
+  { area: 'callcenter', texto: 'De que forma você lida com a pressão de atender muitos clientes em sequência mantendo a qualidade?', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'comportamental', competencia: 'Gestão de Pressão' },
+  { area: 'callcenter', texto: 'Como você reage quando não consegue resolver o problema do cliente na primeira ligação?', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'comportamental', competencia: 'Resiliência' },
+  { area: 'callcenter', texto: 'Descreva como você se organiza para cumprir os indicadores de tempo de atendimento sem perder qualidade.', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'comportamental', competencia: 'Gestão de Tempo' },
+  { area: 'callcenter', texto: 'Como você busca aprender sobre novos produtos ou procedimentos para melhorar seu atendimento?', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'comportamental', competencia: 'Aprendizado Contínuo' },
+
+  // Situacional (5)
+  { area: 'callcenter', texto: 'Um cliente liga extremamente irritado reclamando de um problema recorrente. Como você conduz o atendimento?', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'situacional', competencia: 'Gestão de Conflitos' },
+  { area: 'callcenter', texto: 'O sistema cai no meio de um atendimento importante. O que você faz para não perder as informações do cliente?', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'situacional', competencia: 'Resolução de Problemas' },
+  { area: 'callcenter', texto: 'Um cliente solicita algo que está fora da sua alçada e o supervisor não está disponível. Como procede?', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'situacional', competencia: 'Autonomia' },
+  { area: 'callcenter', texto: 'Você identificou que o problema do cliente foi causado por um erro da empresa. Como comunica isso?', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'situacional', competencia: 'Comunicação Transparente' },
+  { area: 'callcenter', texto: 'Um cliente solicita informações confidenciais que você não pode fornecer. Como você explica isso educadamente?', cargo: 'Operador de SAC', nivel: 'junior', categoria: 'situacional', competencia: 'Confidencialidade' },
+];
+
+export const operadorSACPleno: PerguntaSeed[] = [
+  // Técnica (6)
+  { area: 'callcenter', texto: 'Como você analisa indicadores de qualidade de atendimento e propõe melhorias baseadas nos dados?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'tecnica', competencia: 'Análise de Indicadores' },
+  { area: 'callcenter', texto: 'Quais técnicas você utiliza para resolver problemas complexos que envolvem múltiplas áreas da empresa?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'tecnica', competencia: 'Resolução de Problemas Complexos' },
+  { area: 'callcenter', texto: 'Como você aplica técnicas de escuta ativa para identificar necessidades ocultas dos clientes?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'tecnica', competencia: 'Escuta Ativa' },
+  { area: 'callcenter', texto: 'Quais estratégias você usa para transformar reclamações em oportunidades de fidelização?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'tecnica', competencia: 'Fidelização' },
+  { area: 'callcenter', texto: 'Como você documenta e escala casos críticos para as áreas responsáveis de forma eficiente?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'tecnica', competencia: 'Escalação de Casos' },
+  { area: 'callcenter', texto: 'Quais métricas de FCR (First Call Resolution) você monitora e como busca melhorá-las?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'tecnica', competencia: 'Resolução no Primeiro Contato' },
+
+  // Experiência (6)
+  { area: 'callcenter', texto: 'Conte sobre uma situação complexa de atendimento que você resolveu e que serviu como caso de sucesso.', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'experiencia', competencia: 'Casos de Sucesso' },
+  { area: 'callcenter', texto: 'Descreva como você ajudou colegas mais novos a melhorar suas habilidades de atendimento.', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'experiencia', competencia: 'Mentoria' },
+  { area: 'callcenter', texto: 'Como você lidou com uma reclamação que viralizou nas redes sociais ou chegou aos órgãos de defesa do consumidor?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'experiencia', competencia: 'Gestão de Crise' },
+  { area: 'callcenter', texto: 'Descreva uma melhoria de processo que você sugeriu baseada na sua experiência de atendimento.', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'experiencia', competencia: 'Melhoria de Processos' },
+  { area: 'callcenter', texto: 'Conte sobre sua experiência atendendo clientes corporativos ou de alto valor. Quais são as diferenças?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'experiencia', competencia: 'Atendimento Corporativo' },
+  { area: 'callcenter', texto: 'Descreva como você se adaptou a uma grande mudança de produto ou procedimento no SAC.', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'experiencia', competencia: 'Adaptabilidade' },
+
+  // Comportamental (6)
+  { area: 'callcenter', texto: 'Como você equilibra empatia com o cliente e assertividade nas regras da empresa?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'comportamental', competencia: 'Equilíbrio Empatia-Regras' },
+  { area: 'callcenter', texto: 'De que forma você contribui para manter um ambiente positivo e colaborativo na equipe?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'comportamental', competencia: 'Trabalho em Equipe' },
+  { area: 'callcenter', texto: 'Como você lida com feedbacks negativos da monitoria de qualidade?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'comportamental', competencia: 'Receptividade a Feedback' },
+  { area: 'callcenter', texto: 'Descreva como você mantém consistência no atendimento mesmo em dias difíceis.', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'comportamental', competencia: 'Consistência' },
+  { area: 'callcenter', texto: 'Como você se diferencia no atendimento para ser reconhecido como referência na equipe?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'comportamental', competencia: 'Excelência' },
+  { area: 'callcenter', texto: 'De que forma você gerencia o estresse acumulado de atendimentos difíceis ao longo do dia?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'comportamental', competencia: 'Gestão de Estresse' },
+
+  // Situacional (6)
+  { area: 'callcenter', texto: 'Um cliente VIP está insatisfeito com a resolução proposta e ameaça cancelar todos os serviços. Como você conduz?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'situacional', competencia: 'Retenção de Clientes' },
+  { area: 'callcenter', texto: 'Você identifica que um procedimento padrão está causando insatisfação recorrente nos clientes. O que faz?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'situacional', competencia: 'Proatividade' },
+  { area: 'callcenter', texto: 'Um cliente apresenta documentação para contestar uma cobrança indevida. Como você conduz a análise?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'situacional', competencia: 'Análise de Contestações' },
+  { area: 'callcenter', texto: 'A fila de espera está muito longa e os clientes estão reclamando do tempo. Como você age?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'situacional', competencia: 'Gestão de Demanda' },
+  { area: 'callcenter', texto: 'Um colega está passando informações incorretas para os clientes. Como você aborda isso?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'situacional', competencia: 'Ética Profissional' },
+  { area: 'callcenter', texto: 'O cliente quer encerrar o atendimento insatisfeito antes de você conseguir resolver. O que você faz?', cargo: 'Operador de SAC', nivel: 'pleno', categoria: 'situacional', competencia: 'Retenção de Atendimento' },
 ];
 
 // ============================================
@@ -313,6 +383,8 @@ export const coordenadorOperacoesSenior: PerguntaSeed[] = [
 export const perguntasCallCenter: PerguntaSeed[] = [
   ...operadorTelemarketingJunior,
   ...operadorTelemarketingPleno,
+  ...operadorSACJunior,
+  ...operadorSACPleno,
   ...supervisorCallCenterPleno,
   ...supervisorCallCenterSenior,
   ...analistaQualidadeJunior,
@@ -326,6 +398,8 @@ export const estatisticasCallCenter = {
   porCargo: {
     'Operador de Telemarketing Junior': operadorTelemarketingJunior.length,
     'Operador de Telemarketing Pleno': operadorTelemarketingPleno.length,
+    'Operador de SAC Junior': operadorSACJunior.length,
+    'Operador de SAC Pleno': operadorSACPleno.length,
     'Supervisor de Call Center Pleno': supervisorCallCenterPleno.length,
     'Supervisor de Call Center Senior': supervisorCallCenterSenior.length,
     'Analista de Qualidade Junior': analistaQualidadeJunior.length,
