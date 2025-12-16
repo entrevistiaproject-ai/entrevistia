@@ -1,19 +1,42 @@
 import { NextResponse } from "next/server";
 import { getDB } from "@/lib/db";
 import { faturas } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { getUserId } from "@/lib/auth/get-user";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const userId = await getUserId();
     if (!userId) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
+    // Parâmetros de paginação
+    let page = 1;
+    let limit = 20;
+
+    // Valores permitidos de itens por página (computacionalmente aceitáveis)
+    const ALLOWED_LIMITS = [10, 20, 50, 100];
+
+    try {
+      const { searchParams } = new URL(request.url);
+      page = Math.max(1, parseInt(searchParams.get("page") || "1"));
+      const requestedLimit = parseInt(searchParams.get("limit") || "20");
+      limit = ALLOWED_LIMITS.includes(requestedLimit) ? requestedLimit : 20;
+    } catch (error) {
+      console.warn("Falha ao processar URL:", error);
+    }
+
+    const offset = (page - 1) * limit;
     const db = getDB();
 
-    // Buscar todas as faturas do usuário
+    // Buscar total para paginação
+    const [{ count: totalCount }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(faturas)
+      .where(eq(faturas.userId, userId));
+
+    // Buscar faturas do usuário com paginação
     const faturasUsuario = await db
       .select({
         id: faturas.id,
@@ -33,7 +56,9 @@ export async function GET() {
       })
       .from(faturas)
       .where(eq(faturas.userId, userId))
-      .orderBy(desc(faturas.anoReferencia), desc(faturas.mesReferencia));
+      .orderBy(desc(faturas.anoReferencia), desc(faturas.mesReferencia))
+      .limit(limit)
+      .offset(offset);
 
     // Formatar resposta
     const faturasFormatadas = faturasUsuario.map((f) => ({
@@ -57,9 +82,9 @@ export async function GET() {
       createdAt: f.createdAt.toISOString(),
     }));
 
-    // Calcular totais
+    // Calcular totais (baseado nos itens da página atual)
     const totais = {
-      totalFaturas: faturasFormatadas.length,
+      totalFaturas: totalCount,
       valorTotal: faturasFormatadas.reduce((acc, f) => acc + f.valorTotal, 0),
       valorPago: faturasFormatadas.reduce((acc, f) => acc + f.valorPago, 0),
       valorPendente: faturasFormatadas.reduce(
@@ -73,9 +98,20 @@ export async function GET() {
         .length,
     };
 
+    const totalPages = Math.ceil(totalCount / limit);
+    const pagination = {
+      page,
+      limit,
+      total: totalCount,
+      totalPages,
+      hasMore: page < totalPages,
+      allowedLimits: ALLOWED_LIMITS,
+    };
+
     return NextResponse.json({
       faturas: faturasFormatadas,
       totais,
+      pagination,
     });
   } catch (error) {
     console.error("Erro ao buscar faturas:", error);

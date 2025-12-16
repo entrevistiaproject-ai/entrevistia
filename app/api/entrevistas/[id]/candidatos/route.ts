@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getUserId } from "@/lib/auth/get-user";
 import { getDB } from "@/lib/db";
 import { candidatos, candidatoEntrevistas, entrevistas } from "@/lib/db/schema";
-import { eq, and, isNull, desc } from "drizzle-orm";
+import { eq, and, isNull, desc, sql } from "drizzle-orm";
 
 export async function GET(
   request: Request,
@@ -19,6 +19,23 @@ export async function GET(
 
     const { id: entrevistaId } = await params;
 
+    // Parâmetros de paginação
+    let page = 1;
+    let limit = 20;
+
+    // Valores permitidos de itens por página (computacionalmente aceitáveis)
+    const ALLOWED_LIMITS = [10, 20, 50, 100];
+
+    try {
+      const { searchParams } = new URL(request.url);
+      page = Math.max(1, parseInt(searchParams.get("page") || "1"));
+      const requestedLimit = parseInt(searchParams.get("limit") || "20");
+      limit = ALLOWED_LIMITS.includes(requestedLimit) ? requestedLimit : 20;
+    } catch (error) {
+      console.warn("Falha ao processar URL:", error);
+    }
+
+    const offset = (page - 1) * limit;
     const db = getDB();
 
     // Verificar se a entrevista pertence ao usuário
@@ -39,6 +56,19 @@ export async function GET(
         { status: 404 }
       );
     }
+
+    // Condições para filtrar candidatos da entrevista
+    const baseConditions = and(
+      eq(candidatoEntrevistas.entrevistaId, entrevistaId),
+      isNull(candidatos.deletedAt)
+    );
+
+    // Buscar total para paginação
+    const [{ count: totalCount }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(candidatoEntrevistas)
+      .innerJoin(candidatos, eq(candidatoEntrevistas.candidatoId, candidatos.id))
+      .where(baseConditions);
 
     // Buscar candidatos vinculados à entrevista através da tabela candidato_entrevistas
     const resultado = await db
@@ -71,15 +101,22 @@ export async function GET(
       })
       .from(candidatoEntrevistas)
       .innerJoin(candidatos, eq(candidatoEntrevistas.candidatoId, candidatos.id))
-      .where(
-        and(
-          eq(candidatoEntrevistas.entrevistaId, entrevistaId),
-          isNull(candidatos.deletedAt)
-        )
-      )
-      .orderBy(desc(candidatoEntrevistas.createdAt));
+      .where(baseConditions)
+      .orderBy(desc(candidatoEntrevistas.createdAt))
+      .limit(limit)
+      .offset(offset);
 
-    return NextResponse.json(resultado);
+    const totalPages = Math.ceil(totalCount / limit);
+    const pagination = {
+      page,
+      limit,
+      total: totalCount,
+      totalPages,
+      hasMore: page < totalPages,
+      allowedLimits: ALLOWED_LIMITS,
+    };
+
+    return NextResponse.json({ candidatos: resultado, pagination });
   } catch (error) {
     console.error("Erro ao buscar candidatos da entrevista:", error);
     return NextResponse.json(

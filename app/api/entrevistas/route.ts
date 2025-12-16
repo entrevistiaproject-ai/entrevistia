@@ -20,13 +20,24 @@ export async function GET(request: Request) {
     }
 
     let statusFilter: string | null = null;
+    let page = 1;
+    let limit = 20;
+
+    // Valores permitidos de itens por página (computacionalmente aceitáveis)
+    const ALLOWED_LIMITS = [10, 20, 50, 100];
+
     try {
       const { searchParams } = new URL(request.url);
       statusFilter = searchParams.get("status");
+      page = Math.max(1, parseInt(searchParams.get("page") || "1"));
+      const requestedLimit = parseInt(searchParams.get("limit") || "20");
+      limit = ALLOWED_LIMITS.includes(requestedLimit) ? requestedLimit : 20;
     } catch (error) {
       // Se falhar ao criar URL (ex: durante build), continua sem filtro
       console.warn("Falha ao processar URL:", error);
     }
+
+    const offset = (page - 1) * limit;
 
     // Query otimizada: busca entrevistas com contagem de candidatos e respostas em uma única query
     // Usamos subqueries otimizadas para evitar múltiplas queries
@@ -38,6 +49,12 @@ export async function GET(request: Request) {
 
     console.log("🔎 [GET /api/entrevistas] Filtrando por userId:", userId);
     console.log("🔎 [GET /api/entrevistas] statusFilter:", statusFilter);
+
+    // Buscar total para paginação
+    const [{ count: totalCount }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(entrevistas)
+      .where(baseWhere);
 
     const query = db
       .select({
@@ -88,14 +105,26 @@ export async function GET(request: Request) {
       })
       .from(entrevistas)
       .where(baseWhere)
-      .orderBy(desc(entrevistas.createdAt));
+      .orderBy(desc(entrevistas.createdAt))
+      .limit(limit)
+      .offset(offset);
 
     const result = await query;
+
+    const totalPages = Math.ceil(totalCount / limit);
+    const pagination = {
+      page,
+      limit,
+      total: totalCount,
+      totalPages,
+      hasMore: page < totalPages,
+      allowedLimits: ALLOWED_LIMITS,
+    };
 
     console.log("✅ [GET /api/entrevistas] Encontradas:", result.length, "entrevistas");
     console.log("📊 [GET /api/entrevistas] Primeira entrevista:", result[0]);
 
-    return NextResponse.json({ entrevistas: result });
+    return NextResponse.json({ entrevistas: result, pagination });
   } catch (error) {
     console.error("[GET /api/entrevistas] Erro:", error);
     return NextResponse.json(

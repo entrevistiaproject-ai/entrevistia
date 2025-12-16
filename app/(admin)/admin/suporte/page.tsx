@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +35,7 @@ import {
   Users,
   MessageSquare,
   ChevronRight,
+  ChevronLeft,
   RefreshCw,
   Plus,
 } from "lucide-react";
@@ -68,6 +69,15 @@ interface TicketStats {
   tempoMedioResolucao: number;
 }
 
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasMore: boolean;
+  allowedLimits: number[];
+}
+
 const STATUS_CONFIG = {
   aberto: { label: "Aberto", color: "bg-blue-900 text-blue-400 border-blue-700", icon: Clock },
   em_analise: { label: "Em Análise", color: "bg-amber-900 text-amber-400 border-amber-700", icon: AlertCircle },
@@ -96,12 +106,17 @@ const CATEGORY_CONFIG = {
   outro: { label: "Outro", color: "text-slate-400" },
 };
 
+const ALLOWED_LIMITS = [10, 20, 50, 100];
+
 export default function SuportePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [tickets, setTickets] = useState<TicketData[]>([]);
   const [stats, setStats] = useState<TicketStats | null>(null);
   const [total, setTotal] = useState(0);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
 
   // Filtros
   const [search, setSearch] = useState("");
@@ -109,11 +124,13 @@ export default function SuportePage() {
   const [prioridadeFilter, setPrioridadeFilter] = useState<string>("all");
   const [categoriaFilter, setCategoriaFilter] = useState<string>("all");
 
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async (page: number, limit: number) => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       params.append("includeStats", "true");
+      params.append("page", page.toString());
+      params.append("limit", limit.toString());
       if (statusFilter !== "all") params.append("status", statusFilter);
       if (prioridadeFilter !== "all") params.append("prioridade", prioridadeFilter);
       if (categoriaFilter !== "all") params.append("categoria", categoriaFilter);
@@ -125,21 +142,36 @@ export default function SuportePage() {
         setTickets(data.tickets);
         setStats(data.stats);
         setTotal(data.total);
+        if (data.pagination) {
+          setPagination(data.pagination);
+        } else {
+          // Fallback se a API não retornar paginação
+          const totalPages = Math.ceil(data.total / limit);
+          setPagination({
+            page,
+            limit,
+            total: data.total,
+            totalPages,
+            hasMore: page < totalPages,
+            allowedLimits: ALLOWED_LIMITS,
+          });
+        }
       }
     } catch (error) {
       console.error("Erro ao carregar tickets:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter, prioridadeFilter, categoriaFilter, search]);
 
   useEffect(() => {
-    fetchTickets();
-  }, [statusFilter, prioridadeFilter, categoriaFilter]);
+    fetchTickets(currentPage, itemsPerPage);
+  }, [currentPage, itemsPerPage, fetchTickets]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchTickets();
+    setCurrentPage(1);
+    fetchTickets(1, itemsPerPage);
   };
 
   const formatDate = (dateString: string) => {
@@ -169,7 +201,7 @@ export default function SuportePage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button onClick={fetchTickets} variant="outline" className="border-slate-700">
+          <Button onClick={() => fetchTickets(currentPage, itemsPerPage)} variant="outline" className="border-slate-700">
             <RefreshCw className="h-4 w-4 mr-2" />
             Atualizar
           </Button>
@@ -449,6 +481,56 @@ export default function SuportePage() {
                   })}
                 </TableBody>
               </Table>
+            </div>
+          )}
+
+          {/* Paginação */}
+          {pagination && pagination.totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 pt-4 border-t border-slate-700">
+              <div className="flex items-center gap-2 text-sm text-slate-400">
+                <span>Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, pagination.total)} de {pagination.total}</span>
+                <Select
+                  value={itemsPerPage.toString()}
+                  onValueChange={(value) => {
+                    setItemsPerPage(parseInt(value));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-[100px] h-8 bg-slate-800 border-slate-700 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(pagination.allowedLimits || ALLOWED_LIMITS).map((limit) => (
+                      <SelectItem key={limit} value={limit.toString()}>
+                        {limit} itens
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-slate-700"
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm text-slate-400 px-2">
+                  {currentPage} / {pagination.totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-slate-700"
+                  onClick={() => setCurrentPage(p => Math.min(pagination.totalPages, p + 1))}
+                  disabled={currentPage >= pagination.totalPages}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>

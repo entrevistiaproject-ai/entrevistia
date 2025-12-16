@@ -5,19 +5,42 @@ import { users, faturas, transacoes, entrevistas, candidatoEntrevistas } from "@
 import { sql, desc, isNull, eq, and, count, sum } from "drizzle-orm";
 import { FREE_TRIAL_LIMITS } from "@/lib/config/free-trial";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await verifyAdminSession();
     if (!session || !session.permissions.canManageUsers) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
+    // Parâmetros de paginação
+    let page = 1;
+    let limit = 20;
+
+    // Valores permitidos de itens por página (computacionalmente aceitáveis)
+    const ALLOWED_LIMITS = [10, 20, 50, 100];
+
+    try {
+      const { searchParams } = new URL(request.url);
+      page = Math.max(1, parseInt(searchParams.get("page") || "1"));
+      const requestedLimit = parseInt(searchParams.get("limit") || "20");
+      limit = ALLOWED_LIMITS.includes(requestedLimit) ? requestedLimit : 20;
+    } catch (error) {
+      console.warn("Falha ao processar URL:", error);
+    }
+
+    const offset = (page - 1) * limit;
     const db = getDB();
     const now = new Date();
     const mesAtual = now.getMonth() + 1;
     const anoAtual = now.getFullYear();
 
-    // Buscar usuários básicos primeiro
+    // Buscar total para paginação
+    const [{ count: totalCount }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(users)
+      .where(isNull(users.deletedAt));
+
+    // Buscar usuários básicos primeiro com paginação
     const usuariosBasicos = await db
       .select({
         id: users.id,
@@ -38,7 +61,9 @@ export async function GET() {
       })
       .from(users)
       .where(isNull(users.deletedAt))
-      .orderBy(desc(users.createdAt));
+      .orderBy(desc(users.createdAt))
+      .limit(limit)
+      .offset(offset);
 
     // Buscar gastos totais por usuário
     const gastosQuery = await db
@@ -184,7 +209,17 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({ usuarios: usuariosComDados });
+    const totalPages = Math.ceil(totalCount / limit);
+    const pagination = {
+      page,
+      limit,
+      total: totalCount,
+      totalPages,
+      hasMore: page < totalPages,
+      allowedLimits: ALLOWED_LIMITS,
+    };
+
+    return NextResponse.json({ usuarios: usuariosComDados, pagination });
   } catch (error) {
     console.error("Erro ao listar usuários:", error);
     return NextResponse.json(

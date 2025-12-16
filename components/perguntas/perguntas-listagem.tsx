@@ -19,7 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Search, Star, Edit, Trash2, EyeOff } from "lucide-react";
+import { Search, Star, Edit, Trash2, EyeOff, ChevronLeft, ChevronRight } from "lucide-react";
 import { getLabelNivel } from "@/lib/constants/niveis";
 
 interface PerguntasListagemProps {
@@ -45,6 +45,8 @@ const categoriaLabels: Record<string, string> = {
   situacional: "Situacional",
 };
 
+const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50, 100];
+
 export function PerguntasListagem({
   perguntas,
   perguntasOcultasIds = [],
@@ -58,6 +60,8 @@ export function PerguntasListagem({
   const [filtroCategoria, setFiltroCategoria] = useState<string>("todas");
   const [filtroNivel, setFiltroNivel] = useState<string>("todos");
   const [mostrarOcultas, setMostrarOcultas] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
 
   // Extrair valores únicos para filtros
   const cargos = Array.from(new Set(perguntas.map((p) => p.cargo)));
@@ -87,6 +91,18 @@ export function PerguntasListagem({
     return matchTexto && matchCargo && matchCategoria && matchNivel;
   });
 
+  // Paginação client-side
+  const totalPages = Math.ceil(perguntasFiltradas.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const perguntasPaginadas = perguntasFiltradas.slice(startIndex, endIndex);
+
+  // Reset página quando filtros mudam
+  const handleFilterChange = (setter: (value: string) => void, value: string) => {
+    setter(value);
+    setCurrentPage(1);
+  };
+
   return (
     <div className="space-y-6">
       {/* Filtros */}
@@ -101,7 +117,7 @@ export function PerguntasListagem({
           />
         </div>
 
-        <Select value={filtroCargo} onValueChange={setFiltroCargo}>
+        <Select value={filtroCargo} onValueChange={(v) => handleFilterChange(setFiltroCargo, v)}>
           <SelectTrigger className="w-full md:w-[180px]">
             <SelectValue placeholder="Cargo" />
           </SelectTrigger>
@@ -115,7 +131,7 @@ export function PerguntasListagem({
           </SelectContent>
         </Select>
 
-        <Select value={filtroCategoria} onValueChange={setFiltroCategoria}>
+        <Select value={filtroCategoria} onValueChange={(v) => handleFilterChange(setFiltroCategoria, v)}>
           <SelectTrigger className="w-full md:w-[180px]">
             <SelectValue placeholder="Categoria" />
           </SelectTrigger>
@@ -129,7 +145,7 @@ export function PerguntasListagem({
           </SelectContent>
         </Select>
 
-        <Select value={filtroNivel} onValueChange={setFiltroNivel}>
+        <Select value={filtroNivel} onValueChange={(v) => handleFilterChange(setFiltroNivel, v)}>
           <SelectTrigger className="w-full md:w-[180px]">
             <SelectValue placeholder="Nível" />
           </SelectTrigger>
@@ -165,7 +181,7 @@ export function PerguntasListagem({
 
       {/* Grid de Perguntas */}
       <div className="grid gap-4 md:grid-cols-2">
-        {perguntasFiltradas.map((pergunta) => {
+        {perguntasPaginadas.map((pergunta) => {
           const isOculta = perguntasOcultasIds.includes(pergunta.id);
 
           return (
@@ -264,6 +280,54 @@ export function PerguntasListagem({
           <p className="text-muted-foreground">
             Nenhuma pergunta encontrada com os filtros selecionados.
           </p>
+        </div>
+      )}
+
+      {/* Paginação */}
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>Mostrando {startIndex + 1} a {Math.min(endIndex, perguntasFiltradas.length)} de {perguntasFiltradas.length}</span>
+            <Select
+              value={itemsPerPage.toString()}
+              onValueChange={(value) => {
+                setItemsPerPage(parseInt(value));
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger className="w-[100px] h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ITEMS_PER_PAGE_OPTIONS.map((limit) => (
+                  <SelectItem key={limit} value={limit.toString()}>
+                    {limit} itens
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm px-2">
+              {currentPage} / {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage >= totalPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
     </div>

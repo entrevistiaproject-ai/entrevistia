@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getUserId } from "@/lib/auth/get-user";
 import { getDB } from "@/lib/db";
 import { candidatos, candidatoEntrevistas, entrevistas, users } from "@/lib/db/schema";
-import { eq, and, isNull, desc } from "drizzle-orm";
+import { eq, and, isNull, desc, sql } from "drizzle-orm";
 import { enviarEmail } from "@/lib/email/resend";
 import { emailConviteEntrevistaTemplate } from "@/lib/email/templates";
 
@@ -224,30 +224,65 @@ export async function GET(request: Request) {
     }
 
     let includeEntrevistas = false;
+    let page = 1;
+    let limit = 20;
+    let search = "";
+
+    // Valores permitidos de itens por página (computacionalmente aceitáveis)
+    const ALLOWED_LIMITS = [10, 20, 50, 100];
+
     try {
       const { searchParams } = new URL(request.url);
       includeEntrevistas = searchParams.get("includeEntrevistas") === "true";
+      page = Math.max(1, parseInt(searchParams.get("page") || "1"));
+      const requestedLimit = parseInt(searchParams.get("limit") || "20");
+      // Usa o valor permitido mais próximo
+      limit = ALLOWED_LIMITS.includes(requestedLimit) ? requestedLimit : 20;
+      search = searchParams.get("search") || "";
     } catch (error) {
       console.warn("Falha ao processar URL:", error);
     }
 
     const db = getDB();
+    const offset = (page - 1) * limit;
 
-    // Buscar candidatos do usuário
+    // Condições base de filtro
+    const baseConditions = and(
+      eq(candidatos.userId, userId),
+      isNull(candidatos.deletedAt)
+    );
+
+    // Buscar total para paginação
+    const [{ count: totalCount }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(candidatos)
+      .where(baseConditions);
+
+    // Buscar candidatos do usuário com paginação
     const candidatosList = await db
       .select()
       .from(candidatos)
-      .where(
-        and(
-          eq(candidatos.userId, userId),
-          isNull(candidatos.deletedAt)
-        )
-      )
-      .orderBy(desc(candidatos.createdAt));
+      .where(baseConditions)
+      .orderBy(desc(candidatos.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    const totalPages = Math.ceil(totalCount / limit);
+    const pagination = {
+      page,
+      limit,
+      total: totalCount,
+      totalPages,
+      hasMore: page < totalPages,
+      allowedLimits: ALLOWED_LIMITS,
+    };
 
     // Se não precisa incluir entrevistas, retorna só os candidatos
     if (!includeEntrevistas) {
-      return NextResponse.json(candidatosList);
+      return NextResponse.json({
+        candidatos: candidatosList,
+        pagination,
+      });
     }
 
     // Buscar entrevistas de cada candidato
@@ -274,7 +309,10 @@ export async function GET(request: Request) {
       })
     );
 
-    return NextResponse.json(candidatosComEntrevistas);
+    return NextResponse.json({
+      candidatos: candidatosComEntrevistas,
+      pagination,
+    });
   } catch (error) {
     console.error("Erro ao buscar candidatos:", error);
     return NextResponse.json(

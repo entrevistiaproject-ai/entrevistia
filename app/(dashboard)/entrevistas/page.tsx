@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Filter, Loader2, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Search, Filter, Loader2, X, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { EntrevistaCard } from "@/components/entrevistas/entrevista-card";
 import { EntrevistasEmptyState } from "@/components/entrevistas/empty-state";
@@ -25,43 +26,53 @@ interface Entrevista {
   slug: string | null;
 }
 
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasMore: boolean;
+  allowedLimits: number[];
+}
+
 export default function EntrevistasPage() {
   const [entrevistas, setEntrevistas] = useState<Entrevista[]>([]);
   const [filteredEntrevistas, setFilteredEntrevistas] = useState<Entrevista[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("ativas");
   const [searchQuery, setSearchQuery] = useState("");
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
 
   // Buscar entrevistas do backend
-  useEffect(() => {
-    async function fetchEntrevistas() {
-      try {
-        setLoading(true);
+  const fetchEntrevistas = useCallback(async (page: number, limit: number) => {
+    try {
+      setLoading(true);
 
-        
+      const response = await fetch(`/api/entrevistas?page=${page}&limit=${limit}`);
 
-        const response = await fetch("/api/entrevistas", {
-          });
-
-        if (!response.ok) {
-          throw new Error("Erro ao buscar entrevistas");
-        }
-
-        const data = await response.json();
-        console.log("API Response:", data);
-        const entrevistasList = data.entrevistas || data;
-        console.log("Entrevistas List:", entrevistasList);
-        setEntrevistas(entrevistasList);
-        setFilteredEntrevistas(entrevistasList);
-      } catch (error) {
-        console.error("Erro ao buscar entrevistas:", error);
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        throw new Error("Erro ao buscar entrevistas");
       }
-    }
 
-    fetchEntrevistas();
+      const data = await response.json();
+      console.log("API Response:", data);
+      const entrevistasList = data.entrevistas || data;
+      console.log("Entrevistas List:", entrevistasList);
+      setEntrevistas(entrevistasList);
+      setFilteredEntrevistas(entrevistasList);
+      setPagination(data.pagination || null);
+    } catch (error) {
+      console.error("Erro ao buscar entrevistas:", error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchEntrevistas(currentPage, itemsPerPage);
+  }, [currentPage, itemsPerPage, fetchEntrevistas]);
 
   // Filtrar entrevistas por status e busca
   useEffect(() => {
@@ -239,11 +250,61 @@ export default function EntrevistasPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {filteredEntrevistas.map((entrevista) => (
-            <EntrevistaCard key={entrevista.id} entrevista={entrevista} />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {filteredEntrevistas.map((entrevista) => (
+              <EntrevistaCard key={entrevista.id} entrevista={entrevista} />
+            ))}
+          </div>
+
+          {/* Paginação */}
+          {pagination && pagination.totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, pagination.total)} de {pagination.total}</span>
+                <Select
+                  value={itemsPerPage.toString()}
+                  onValueChange={(value) => {
+                    setItemsPerPage(parseInt(value));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-[100px] h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(pagination.allowedLimits || [10, 20, 50, 100]).map((limit) => (
+                      <SelectItem key={limit} value={limit.toString()}>
+                        {limit} itens
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm px-2">
+                  {currentPage} / {pagination.totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.min(pagination.totalPages, p + 1))}
+                  disabled={currentPage >= pagination.totalPages}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
