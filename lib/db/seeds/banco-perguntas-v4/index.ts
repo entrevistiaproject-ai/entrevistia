@@ -36,6 +36,22 @@ import { perguntasSaude, estatisticasSaude } from './saude';
 export * from './callcenter';
 import { perguntasCallCenter, estatisticasCallCenter } from './callcenter';
 
+// Logística
+export * from './logistica';
+import { perguntasLogistica, estatisticasLogistica } from './logistica';
+
+// Engenharia
+export * from './engenharia';
+import { perguntasEngenharia, estatisticasEngenharia } from './engenharia';
+
+// Agronegócio
+export * from './agronegocio';
+import { perguntasAgronegocio, estatisticasAgronegocio } from './agronegocio';
+
+// Educação
+export * from './educacao';
+import { perguntasEducacao, estatisticasEducacao } from './educacao';
+
 // ============================================
 // EXPORTAÇÃO CONSOLIDADA
 // ============================================
@@ -48,6 +64,10 @@ export const todasPerguntas = [
   ...perguntasAdministrativo,
   ...perguntasSaude,
   ...perguntasCallCenter,
+  ...perguntasLogistica,
+  ...perguntasEngenharia,
+  ...perguntasAgronegocio,
+  ...perguntasEducacao,
 ];
 
 export const estatisticasGerais = {
@@ -60,6 +80,10 @@ export const estatisticasGerais = {
     administrativo: estatisticasAdministrativo,
     saude: estatisticasSaude,
     callcenter: estatisticasCallCenter,
+    logistica: estatisticasLogistica,
+    engenharia: estatisticasEngenharia,
+    agronegocio: estatisticasAgronegocio,
+    educacao: estatisticasEducacao,
   },
   resumo: {
     tecnologia: estatisticasTecnologia.total,
@@ -69,6 +93,10 @@ export const estatisticasGerais = {
     administrativo: estatisticasAdministrativo.total,
     saude: estatisticasSaude.total,
     callcenter: estatisticasCallCenter.total,
+    logistica: estatisticasLogistica.total,
+    engenharia: estatisticasEngenharia.total,
+    agronegocio: estatisticasAgronegocio.total,
+    educacao: estatisticasEducacao.total,
   },
 };
 
@@ -85,6 +113,10 @@ export function imprimirEstatisticas(): void {
   console.log(`  - Administrativo/Gestão: ${estatisticasGerais.resumo.administrativo} perguntas`);
   console.log(`  - Saúde: ${estatisticasSaude.total} perguntas`);
   console.log(`  - Call Center: ${estatisticasCallCenter.total} perguntas`);
+  console.log(`  - Logística: ${estatisticasLogistica.total} perguntas`);
+  console.log(`  - Engenharia: ${estatisticasEngenharia.total} perguntas`);
+  console.log(`  - Agronegócio: ${estatisticasAgronegocio.total} perguntas`);
+  console.log(`  - Educação: ${estatisticasEducacao.total} perguntas`);
 
   console.log('\n================================================\n');
 }
