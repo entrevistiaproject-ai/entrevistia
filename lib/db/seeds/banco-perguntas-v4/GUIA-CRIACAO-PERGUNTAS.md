@@ -8,15 +8,15 @@ proximo passo em GUIA-CRIACAO-PERGUNTAS.md
 
 ---
 
-## 📋 PRÓXIMO PASSO: B2
+## 📋 PRÓXIMO PASSO: B3
 
 ### FASE B: CRIAÇÃO DE NOVAS ÁREAS
 
 | Passo | Descrição | Status |
 |-------|-----------|--------|
 | B1 | Saúde Parte 1 (Enfermeiro, Téc. Enfermagem, Recepcionista, Fisioterapeuta) | ✅ CONCLUÍDO |
-| B2 | Saúde Parte 2 (Farmacêutico, Nutricionista, Psicólogo, Aux. Saúde Bucal) | 🔴 EXECUTAR AGORA |
-| B3 | Call Center (todos os cargos) | ⏳ Aguardando |
+| B2 | Saúde Parte 2 (Farmacêutico, Nutricionista, Psicólogo, Aux. Saúde Bucal) | ✅ CONCLUÍDO |
+| B3 | Call Center (todos os cargos) | 🔴 EXECUTAR AGORA |
 | B4 | Logística Parte 1 (Auxiliar, Analista, Conferente) | ⏳ Aguardando |
 | B5 | Logística Parte 2 (Coordenador, Motorista, Estoquista) | ⏳ Aguardando |
 | B6 | Engenharia Parte 1 (Eng. Civil, Eng. Produção, Téc. Segurança) | ⏳ Aguardando |
@@ -36,12 +36,12 @@ proximo passo em GUIA-CRIACAO-PERGUNTAS.md
 
 | Área | Perguntas | Status |
 |------|-----------|--------|
-| Tecnologia | 388 | ✅ Auditado |
+| Tecnologia | 393 | ✅ Auditado |
 | Jurídico | 316 | ✅ Auditado |
 | Comercial | 219 | ✅ Auditado |
-| Varejo | 312 | ✅ Auditado |
+| Varejo | 281 | ✅ Auditado |
 | Administrativo | 292 | ✅ Auditado |
-| **Saúde** | ~236 | 🟡 Parte 1/2 |
+| **Saúde** | 594 | ✅ Completo |
 | Call Center | 0 | 🔴 Criar |
 | Logística | 0 | 🔴 Criar |
 | Engenharia | 0 | 🔴 Criar |
@@ -50,44 +50,40 @@ proximo passo em GUIA-CRIACAO-PERGUNTAS.md
 | Hotelaria | 0 | 🔴 Criar |
 | Indústria | 0 | 🔴 Criar |
 
-**Total atual: ~1.763 | Meta: ~3.600+**
+**Total atual: 2.095 | Meta: ~3.600+**
 
 ---
 
-## B2: SAÚDE PARTE 2
+## B3: CALL CENTER
 
-### Cargos a adicionar em saude.ts:
+### Criar arquivo callcenter.ts com os cargos:
 
-#### 5. Farmacêutico (Junior, Pleno, Senior) - 73 perguntas
-- Dispensação de Medicamentos
-- Atenção Farmacêutica
-- Controle de Estoque de Medicamentos
-- Medicamentos Controlados
-- Farmacovigilância
-- Manipulação Farmacêutica
+#### 1. Operador de Telemarketing (Junior, Pleno) - 45 perguntas
+- Técnicas de Atendimento
+- Scripts e Abordagem
+- Metas e Indicadores
+- Gestão de Reclamações
+- Vendas por Telefone
 
-#### 6. Nutricionista (Junior, Pleno, Senior) - 73 perguntas
-- Avaliação Nutricional
-- Elaboração de Dietas
-- Nutrição Clínica
-- Educação Alimentar
-- Gestão de UAN
-- Segurança Alimentar
+#### 2. Supervisor de Call Center (Pleno, Senior) - 52 perguntas
+- Gestão de Equipe
+- Monitoramento de Qualidade
+- Indicadores de Performance
+- Treinamento de Operadores
+- Gestão de Conflitos
 
-#### 7. Psicólogo (Junior, Pleno, Senior) - 73 perguntas
-- Avaliação Psicológica
-- Técnicas de Entrevista
-- Psicoterapia
-- Laudos e Pareceres
-- Orientação Profissional
-- Psicologia Organizacional
+#### 3. Analista de Qualidade (Junior, Pleno, Senior) - 73 perguntas
+- Monitoramento de Ligações
+- Feedback e Coaching
+- Elaboração de Relatórios
+- Calibração de Avaliações
+- Melhoria Contínua
 
-#### 8. Auxiliar de Saúde Bucal (Junior) - 21 perguntas
-- Instrumentação Odontológica
-- Biossegurança
-- Radiologia Odontológica
-- Preparo do Consultório
-- Orientação de Higiene Bucal
+#### 4. Coordenador de Operações (Senior) - 28 perguntas
+- Planejamento de Capacidade
+- Gestão de Resultados
+- Relacionamento com Clientes
+- Processos e Procedimentos
 
 ---
 

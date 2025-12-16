@@ -28,6 +28,10 @@ import { perguntasComercial, estatisticasComercial } from './comercial';
 export * from './administrativo';
 import { perguntasAdministrativo, estatisticasAdministrativo } from './administrativo';
 
+// Saúde
+export * from './saude';
+import { perguntasSaude, estatisticasSaude } from './saude';
+
 // ============================================
 // EXPORTAÇÃO CONSOLIDADA
 // ============================================
@@ -38,6 +42,7 @@ export const todasPerguntas = [
   ...perguntasVarejo,
   ...perguntasComercial,
   ...perguntasAdministrativo,
+  ...perguntasSaude,
 ];
 
 export const estatisticasGerais = {
@@ -48,6 +53,7 @@ export const estatisticasGerais = {
     varejo: estatisticasVarejo,
     comercial: estatisticasComercial,
     administrativo: estatisticasAdministrativo,
+    saude: estatisticasSaude,
   },
   resumo: {
     tecnologia: estatisticasTecnologia.total,
@@ -55,6 +61,7 @@ export const estatisticasGerais = {
     varejo: estatisticasVarejo.total,
     comercial: estatisticasComercial.total,
     administrativo: estatisticasAdministrativo.total,
+    saude: estatisticasSaude.total,
   },
 };
 
@@ -69,6 +76,7 @@ export function imprimirEstatisticas(): void {
   console.log(`  - Varejo: ${estatisticasGerais.resumo.varejo} perguntas`);
   console.log(`  - Comercial/Marketing: ${estatisticasGerais.resumo.comercial} perguntas`);
   console.log(`  - Administrativo/Gestão: ${estatisticasGerais.resumo.administrativo} perguntas`);
+  console.log(`  - Saúde: ${estatisticasSaude.total} perguntas`);
 
   console.log('\n================================================\n');
 }
