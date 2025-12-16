@@ -239,29 +239,21 @@ export default function VisaoGeralPage() {
         title="Visão Geral"
         description="Acompanhe o desempenho do seu processo seletivo"
       >
-        <div className="flex flex-row gap-2 w-full sm:w-auto">
-          <Select value={periodo} onValueChange={(v) => handlePeriodoChange(v as PeriodoFiltro)}>
-            <SelectTrigger className="h-10 w-[140px] sm:w-[160px] bg-background border-input">
-              <Calendar className="h-4 w-4 mr-2 shrink-0 text-muted-foreground" />
-              <SelectValue placeholder="Período" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="hoje">Hoje</SelectItem>
-              <SelectItem value="esta_semana">Esta Semana</SelectItem>
-              <SelectItem value="este_mes">Este Mês</SelectItem>
-              <SelectItem value="ultimos_30_dias">Últimos 30 dias</SelectItem>
-              <SelectItem value="ultimos_3_meses">Últimos 3 meses</SelectItem>
-              <SelectItem value="ultimos_6_meses">Últimos 6 meses</SelectItem>
-              <SelectItem value="este_ano">Este Ano</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button asChild size="touch" className="flex-1 sm:flex-none min-w-0">
-            <Link href="/criar-entrevista">
-              <PlusCircle className="h-4 w-4 shrink-0" />
-              <span className="truncate">Nova Entrevista</span>
-            </Link>
-          </Button>
-        </div>
+        <Select value={periodo} onValueChange={(v) => handlePeriodoChange(v as PeriodoFiltro)}>
+          <SelectTrigger className="w-[180px]">
+            <Calendar className="h-4 w-4 mr-2 shrink-0 text-muted-foreground" />
+            <SelectValue placeholder="Período" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="hoje">Hoje</SelectItem>
+            <SelectItem value="esta_semana">Esta Semana</SelectItem>
+            <SelectItem value="este_mes">Este Mês</SelectItem>
+            <SelectItem value="ultimos_30_dias">Últimos 30 dias</SelectItem>
+            <SelectItem value="ultimos_3_meses">Últimos 3 meses</SelectItem>
+            <SelectItem value="ultimos_6_meses">Últimos 6 meses</SelectItem>
+            <SelectItem value="este_ano">Este Ano</SelectItem>
+          </SelectContent>
+        </Select>
       </PageHeader>
 
       {/* KPIs Principais */}
