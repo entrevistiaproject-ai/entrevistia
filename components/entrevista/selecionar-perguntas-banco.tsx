@@ -67,9 +67,10 @@ export function SelecionarPerguntasBanco({
   useEffect(() => {
     async function fetchPerguntas() {
       try {
-        const response = await fetch("/api/perguntas");
+        const response = await fetch("/api/perguntas?limit=100");
         const data = await response.json();
-        setPerguntas(data);
+        // A API retorna { perguntas, pagination } com paginação
+        setPerguntas(data.perguntas || []);
       } catch (error) {
         console.error("Erro ao buscar perguntas:", error);
       } finally {
