@@ -52,6 +52,14 @@ import { perguntasAgronegocio, estatisticasAgronegocio } from './agronegocio';
 export * from './educacao';
 import { perguntasEducacao, estatisticasEducacao } from './educacao';
 
+// Hotelaria
+export * from './hotelaria';
+import { perguntasHotelaria, estatisticasHotelaria } from './hotelaria';
+
+// Indústria
+export * from './industria';
+import { perguntasIndustria, estatisticasIndustria } from './industria';
+
 // ============================================
 // EXPORTAÇÃO CONSOLIDADA
 // ============================================
@@ -68,6 +76,8 @@ export const todasPerguntas = [
   ...perguntasEngenharia,
   ...perguntasAgronegocio,
   ...perguntasEducacao,
+  ...perguntasHotelaria,
+  ...perguntasIndustria,
 ];
 
 export const estatisticasGerais = {
@@ -84,6 +94,8 @@ export const estatisticasGerais = {
     engenharia: estatisticasEngenharia,
     agronegocio: estatisticasAgronegocio,
     educacao: estatisticasEducacao,
+    hotelaria: estatisticasHotelaria,
+    industria: estatisticasIndustria,
   },
   resumo: {
     tecnologia: estatisticasTecnologia.total,
@@ -97,6 +109,8 @@ export const estatisticasGerais = {
     engenharia: estatisticasEngenharia.total,
     agronegocio: estatisticasAgronegocio.total,
     educacao: estatisticasEducacao.total,
+    hotelaria: estatisticasHotelaria.total,
+    industria: estatisticasIndustria.total,
   },
 };
 
@@ -117,6 +131,8 @@ export function imprimirEstatisticas(): void {
   console.log(`  - Engenharia: ${estatisticasEngenharia.total} perguntas`);
   console.log(`  - Agronegócio: ${estatisticasAgronegocio.total} perguntas`);
   console.log(`  - Educação: ${estatisticasEducacao.total} perguntas`);
+  console.log(`  - Hotelaria: ${estatisticasHotelaria.total} perguntas`);
+  console.log(`  - Indústria: ${estatisticasIndustria.total} perguntas`);
 
   console.log('\n================================================\n');
 }
