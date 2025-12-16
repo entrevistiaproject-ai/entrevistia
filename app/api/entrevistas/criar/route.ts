@@ -4,6 +4,7 @@ import { getDB } from "@/lib/db";
 import { entrevistas, perguntas, perguntasTemplates } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { canCreateEntrevista, canAddPerguntas, incrementEntrevistasCount } from "@/lib/services/plan-limits";
+import { getEffectiveOwnerId } from "@/lib/services/team-service";
 
 interface PerguntaRequest {
   id?: string; // ID se for do banco de perguntas
@@ -39,6 +40,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Usuário não autenticado" }, { status: 401 });
     }
 
+    // Usa o owner efetivo para membros de time criarem entrevistas para o owner
+    const effectiveOwnerId = await getEffectiveOwnerId(userId);
+
     const body: CreateEntrevistaRequest = await request.json();
 
     // Validações básicas
@@ -71,8 +75,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verifica limite de entrevistas do plano
-    const limiteEntrevista = await canCreateEntrevista(userId);
+    // Verifica limite de entrevistas do plano (usa owner efetivo)
+    const limiteEntrevista = await canCreateEntrevista(effectiveOwnerId);
     if (!limiteEntrevista.allowed) {
       return NextResponse.json(
         {
@@ -92,11 +96,11 @@ export async function POST(request: NextRequest) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "")}-${Date.now().toString(36)}`;
 
-    // Cria a entrevista diretamente como ativa
+    // Cria a entrevista vinculada ao owner efetivo
     const [novaEntrevista] = await db
       .insert(entrevistas)
       .values({
-        userId,
+        userId: effectiveOwnerId,
         titulo: body.titulo,
         descricao: body.descricao || null,
         cargo: body.cargo || null,
@@ -118,8 +122,8 @@ export async function POST(request: NextRequest) {
       })
       .returning();
 
-    // Verifica limite de perguntas por entrevista
-    const limitePerguntas = await canAddPerguntas(userId, novaEntrevista.id, body.perguntas.length);
+    // Verifica limite de perguntas por entrevista (usa owner efetivo)
+    const limitePerguntas = await canAddPerguntas(effectiveOwnerId, novaEntrevista.id, body.perguntas.length);
     if (!limitePerguntas.allowed) {
       // Desfaz a criação da entrevista
       await db.delete(entrevistas).where(eq(entrevistas.id, novaEntrevista.id));
@@ -141,6 +145,7 @@ export async function POST(request: NextRequest) {
       const pergunta = body.perguntas[i];
 
       // Se for uma pergunta nova que deve ser salva no banco de templates
+      // Salva no banco do owner efetivo
       if (pergunta.origem === "nova" && pergunta.salvarNoBanco) {
         const [template] = await db
           .insert(perguntasTemplates)
@@ -150,7 +155,7 @@ export async function POST(request: NextRequest) {
             categoria: pergunta.categoria || "tecnica",
             cargo: body.cargo || "Geral",
             nivel: body.nivel || "pleno",
-            userId: userId,
+            userId: effectiveOwnerId,
           })
           .returning();
 
@@ -187,8 +192,8 @@ export async function POST(request: NextRequest) {
     // Insere todas as perguntas
     await db.insert(perguntas).values(perguntasParaInserir);
 
-    // Incrementa contador de entrevistas do usuário
-    await incrementEntrevistasCount(userId);
+    // Incrementa contador de entrevistas do owner efetivo
+    await incrementEntrevistasCount(effectiveOwnerId);
 
     return NextResponse.json(
       {

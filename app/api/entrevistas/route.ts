@@ -3,6 +3,7 @@ import { getDB } from "@/lib/db";
 import { entrevistas, perguntas, candidatoEntrevistas } from "@/lib/db/schema";
 import { desc, eq, and, isNull, sql } from "drizzle-orm";
 import { getUserId } from "@/lib/auth/get-user";
+import { getEffectiveOwnerId } from "@/lib/services/team-service";
 
 export async function GET(request: Request) {
   try {
@@ -18,6 +19,10 @@ export async function GET(request: Request) {
         { status: 401 }
       );
     }
+
+    // Usa o owner efetivo para membros de time acessarem dados do owner
+    const effectiveOwnerId = await getEffectiveOwnerId(userId);
+    console.log("🔍 [GET /api/entrevistas] effectiveOwnerId:", effectiveOwnerId);
 
     let statusFilter: string | null = null;
     let page = 1;
@@ -41,13 +46,14 @@ export async function GET(request: Request) {
 
     // Query otimizada: busca entrevistas com contagem de candidatos e respostas em uma única query
     // Usamos subqueries otimizadas para evitar múltiplas queries
+    // Usa effectiveOwnerId para que membros do time vejam as entrevistas do owner
     const baseWhere = and(
-      eq(entrevistas.userId, userId),
+      eq(entrevistas.userId, effectiveOwnerId),
       isNull(entrevistas.deletedAt),
       statusFilter ? eq(entrevistas.status, statusFilter) : undefined
     );
 
-    console.log("🔎 [GET /api/entrevistas] Filtrando por userId:", userId);
+    console.log("🔎 [GET /api/entrevistas] Filtrando por effectiveOwnerId:", effectiveOwnerId);
     console.log("🔎 [GET /api/entrevistas] statusFilter:", statusFilter);
 
     // Buscar total para paginação

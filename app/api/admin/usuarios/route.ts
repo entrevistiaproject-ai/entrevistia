@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { verifyAdminSession } from "@/lib/auth/admin-auth";
 import { getDB } from "@/lib/db";
-import { users, faturas, transacoes, entrevistas, candidatoEntrevistas } from "@/lib/db/schema";
+import { users, faturas, transacoes, entrevistas, candidatoEntrevistas, teamMembers } from "@/lib/db/schema";
 import { sql, desc, isNull, eq, and, count, sum } from "drizzle-orm";
 import { FREE_TRIAL_LIMITS } from "@/lib/config/free-trial";
 
@@ -140,6 +140,42 @@ export async function GET(request: Request) {
       }
     }
 
+    // Buscar informações de membros de time (quem é membro de outro time)
+    const teamMembersQuery = await db
+      .select({
+        memberId: teamMembers.memberId,
+        ownerId: teamMembers.ownerId,
+        role: teamMembers.role,
+        ownerNome: users.nome,
+        ownerEmail: users.email,
+      })
+      .from(teamMembers)
+      .innerJoin(users, eq(teamMembers.ownerId, users.id))
+      .where(eq(teamMembers.isActive, true));
+
+    const teamMembersMap = new Map(
+      teamMembersQuery.map((tm) => [tm.memberId, {
+        ownerId: tm.ownerId,
+        ownerNome: tm.ownerNome,
+        ownerEmail: tm.ownerEmail,
+        role: tm.role,
+      }])
+    );
+
+    // Buscar quantos membros cada usuário tem no seu time
+    const teamMemberCountQuery = await db
+      .select({
+        ownerId: teamMembers.ownerId,
+        count: count(),
+      })
+      .from(teamMembers)
+      .where(eq(teamMembers.isActive, true))
+      .groupBy(teamMembers.ownerId);
+
+    const teamMemberCountMap = new Map(
+      teamMemberCountQuery.map((tc) => [tc.ownerId, Number(tc.count) || 0])
+    );
+
     // Buscar total devido e total pago por usuário
     const totaisFaturasQuery = await db
       .select({
@@ -166,6 +202,10 @@ export async function GET(request: Request) {
       const totaisFaturas = totaisFaturasMap.get(usuario.id) || { totalDevido: 0, totalPago: 0 };
       const creditoExtra = Number(usuario.creditoExtra) || 0;
       const limiteTotal = FREE_TRIAL_LIMITS.LIMITE_FINANCEIRO + creditoExtra;
+
+      // Informações de time
+      const teamMembership = teamMembersMap.get(usuario.id);
+      const teamMemberCount = teamMemberCountMap.get(usuario.id) || 0;
 
       const mesesAtivo = Math.max(
         1,
@@ -206,6 +246,15 @@ export async function GET(request: Request) {
         totalEntrevistas,
         totalCandidatos: usuario.usageCandidatos || 0,
         isTeste: usuario.isTestAccount || false,
+        // Informações de time
+        isTeamMember: !!teamMembership, // É membro de outro time?
+        teamOwner: teamMembership ? {
+          id: teamMembership.ownerId,
+          nome: teamMembership.ownerNome,
+          email: teamMembership.ownerEmail,
+        } : null,
+        teamRole: teamMembership?.role || null,
+        teamMemberCount, // Quantos membros esse usuário tem no seu time
       };
     });
 

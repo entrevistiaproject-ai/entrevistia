@@ -4,6 +4,7 @@ import { getDB } from "@/lib/db";
 import { perguntasTemplates } from "@/lib/db/schema";
 import { isNull, desc, or, eq, and, sql } from "drizzle-orm";
 import { sugerirCategoria } from "@/lib/utils/classificacao-perguntas";
+import { getEffectiveOwnerId } from "@/lib/services/team-service";
 
 export async function POST(request: Request) {
   try {
@@ -26,12 +27,18 @@ export async function POST(request: Request) {
     }
 
     const userId = await getUserId();
+    if (!userId) {
+      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    }
+
+    // Usa o owner efetivo para membros de time
+    const effectiveOwnerId = await getEffectiveOwnerId(userId);
     const db = getDB();
 
     // Se categoria não foi fornecida, sugere automaticamente
     const categoriaFinal = categoria || sugerirCategoria(texto).categoria;
 
-    // Inserir pergunta
+    // Inserir pergunta vinculada ao owner efetivo
     const [novaPergunta] = await db
       .insert(perguntasTemplates)
       .values({
@@ -42,7 +49,7 @@ export async function POST(request: Request) {
         competencia: competencia || null,
         tipo: tipo || "texto",
         isPadrao: false,
-        userId,
+        userId: effectiveOwnerId,
       })
       .returning();
 
@@ -64,6 +71,9 @@ export async function GET(request: Request) {
     // Pega o userId
     const userId = await getUserId();
 
+    // Usa o owner efetivo para membros de time verem perguntas do owner
+    const effectiveOwnerId = userId ? await getEffectiveOwnerId(userId) : null;
+
     // Parâmetros de filtro
     const cargo = searchParams.get('cargo');
     const nivel = searchParams.get('nivel');
@@ -80,12 +90,12 @@ export async function GET(request: Request) {
 
     const offset = (page - 1) * limit;
 
-    // Condições base
+    // Condições base - usa effectiveOwnerId para membros de time
     const baseConditions = and(
       isNull(perguntasTemplates.deletedAt),
       or(
         eq(perguntasTemplates.isPadrao, true),
-        userId ? eq(perguntasTemplates.userId, userId) : undefined
+        effectiveOwnerId ? eq(perguntasTemplates.userId, effectiveOwnerId) : undefined
       )
     );
 

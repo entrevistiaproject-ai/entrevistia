@@ -275,6 +275,20 @@ export async function createTeamInvitation(params: {
   const { invitedBy, invitedEmail, invitedName, role, message } = params;
   const db = getDB();
 
+  // Verifica se o owner está tentando convidar a si mesmo
+  const [ownerUser] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, invitedBy))
+    .limit(1);
+
+  if (ownerUser && ownerUser.email.toLowerCase() === invitedEmail.toLowerCase()) {
+    return {
+      success: false,
+      error: "Você não pode convidar a si mesmo para o seu próprio time"
+    };
+  }
+
   // Verifica limite de membros no time
   const currentMemberCount = await getTeamMemberCount(invitedBy);
   if (currentMemberCount >= MAX_TEAM_MEMBERS) {

@@ -3,6 +3,7 @@ import { getUserId } from "@/lib/auth/get-user";
 import { getDB } from "@/lib/db";
 import { candidatoEntrevistas, entrevistas } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
+import { getEffectiveOwnerId } from "@/lib/services/team-service";
 
 /**
  * PATCH /api/entrevistas/[id]/candidatos/[candidatoId]/decisao
@@ -27,6 +28,9 @@ export async function PATCH(
       );
     }
 
+    // Usa o owner efetivo para membros de time
+    const effectiveOwnerId = await getEffectiveOwnerId(userId);
+
     const { id: entrevistaId, candidatoId } = await params;
     const body = await request.json();
     const { decisao, observacao } = body;
@@ -41,14 +45,14 @@ export async function PATCH(
 
     const db = getDB();
 
-    // Verificar se a entrevista pertence ao usuário
+    // Verificar se a entrevista pertence ao owner efetivo
     const [entrevista] = await db
       .select()
       .from(entrevistas)
       .where(
         and(
           eq(entrevistas.id, entrevistaId),
-          eq(entrevistas.userId, userId)
+          eq(entrevistas.userId, effectiveOwnerId)
         )
       )
       .limit(1);

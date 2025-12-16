@@ -38,6 +38,9 @@ import {
   Plus,
   Coins,
   FlaskConical,
+  Users,
+  Crown,
+  UserCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -71,6 +74,15 @@ interface Usuario {
   totalEntrevistas: number;
   totalCandidatos: number;
   isTeste: boolean;
+  // Informações de time
+  isTeamMember: boolean;
+  teamOwner: {
+    id: string;
+    nome: string;
+    email: string;
+  } | null;
+  teamRole: string | null;
+  teamMemberCount: number;
 }
 
 interface UsuarioDetalhe extends Usuario {
@@ -99,6 +111,7 @@ export default function UsuariosPage() {
   const [filtroPlano, setFiltroPlano] = useState<string>("todos");
   const [filtroStatus, setFiltroStatus] = useState<string>("todos");
   const [filtroPagamento, setFiltroPagamento] = useState<string>("todos");
+  const [filtroTipoConta, setFiltroTipoConta] = useState<string>("todos");
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [sortField, setSortField] = useState<SortField>("createdAt");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
@@ -310,6 +323,17 @@ export default function UsuariosPage() {
       }
     }
 
+    // Filtro por tipo de conta (owner/membro)
+    if (filtroTipoConta !== "todos") {
+      if (filtroTipoConta === "owners") {
+        filtered = filtered.filter((u) => !u.isTeamMember);
+      } else if (filtroTipoConta === "membros") {
+        filtered = filtered.filter((u) => u.isTeamMember);
+      } else if (filtroTipoConta === "com_time") {
+        filtered = filtered.filter((u) => u.teamMemberCount > 0);
+      }
+    }
+
     // Ordenação
     filtered.sort((a, b) => {
       let valueA: string | number;
@@ -345,7 +369,7 @@ export default function UsuariosPage() {
     });
 
     return filtered;
-  }, [usuarios, search, filtroPlano, filtroStatus, filtroPagamento, sortField, sortDirection]);
+  }, [usuarios, search, filtroPlano, filtroStatus, filtroPagamento, filtroTipoConta, sortField, sortDirection]);
 
   // Paginação
   const totalPaginas = Math.ceil(usuariosFiltrados.length / itensPorPagina);
@@ -526,6 +550,19 @@ export default function UsuariosPage() {
                 <SelectItem value="atrasado">Atrasado</SelectItem>
               </SelectContent>
             </Select>
+
+            {/* Filtro Tipo de Conta */}
+            <Select value={filtroTipoConta} onValueChange={setFiltroTipoConta}>
+              <SelectTrigger className="w-full lg:w-44 bg-slate-800/50 border-slate-700 text-white">
+                <SelectValue placeholder="Tipo Conta" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-700">
+                <SelectItem value="todos">Todos</SelectItem>
+                <SelectItem value="owners">Apenas Owners</SelectItem>
+                <SelectItem value="membros">Apenas Membros</SelectItem>
+                <SelectItem value="com_time">Owners c/ Time</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -599,7 +636,31 @@ export default function UsuariosPage() {
                         Inativo
                       </Badge>
                     )}
+                    {/* Badge de Time */}
+                    {usuario.isTeamMember ? (
+                      <Badge className="bg-purple-500/30 text-purple-200 border-purple-400/40 text-xs">
+                        <UserCheck className="h-3 w-3 mr-1" />
+                        Membro
+                      </Badge>
+                    ) : usuario.teamMemberCount > 0 ? (
+                      <Badge className="bg-cyan-500/30 text-cyan-200 border-cyan-400/40 text-xs">
+                        <Users className="h-3 w-3 mr-1" />
+                        {usuario.teamMemberCount}
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-yellow-500/30 text-yellow-200 border-yellow-400/40 text-xs">
+                        <Crown className="h-3 w-3 mr-1" />
+                        Owner
+                      </Badge>
+                    )}
                   </div>
+                  {/* Info do time se for membro */}
+                  {usuario.isTeamMember && usuario.teamOwner && (
+                    <div className="flex items-center gap-1 mt-1 text-xs text-purple-300">
+                      <span>Time de:</span>
+                      <span className="font-medium">{usuario.teamOwner.nome}</span>
+                    </div>
+                  )}
                   {usuario.planType === "free_trial" ? (
                     <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-700/50">
                       <div className="text-xs text-slate-300">
@@ -733,14 +794,30 @@ export default function UsuariosPage() {
 
                   {/* Plano */}
                   <td className="px-4 py-4 hidden lg:table-cell">
-                    <div className="flex items-center gap-2">
-                      {getPlanBadge(usuario.planType)}
-                      {usuario.isTeste && (
-                        <Badge className="bg-amber-500/30 text-amber-200 border-amber-400/40 text-xs">
-                          <FlaskConical className="h-3 w-3 mr-1" />
-                          QA
-                        </Badge>
-                      )}
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        {getPlanBadge(usuario.planType)}
+                        {usuario.isTeste && (
+                          <Badge className="bg-amber-500/30 text-amber-200 border-amber-400/40 text-xs">
+                            <FlaskConical className="h-3 w-3 mr-1" />
+                            QA
+                          </Badge>
+                        )}
+                      </div>
+                      {/* Badge de Time */}
+                      <div className="flex items-center gap-1">
+                        {usuario.isTeamMember ? (
+                          <Badge className="bg-purple-500/30 text-purple-200 border-purple-400/40 text-xs">
+                            <UserCheck className="h-3 w-3 mr-1" />
+                            Membro de {usuario.teamOwner?.nome?.split(' ')[0]}
+                          </Badge>
+                        ) : usuario.teamMemberCount > 0 ? (
+                          <Badge className="bg-cyan-500/30 text-cyan-200 border-cyan-400/40 text-xs">
+                            <Users className="h-3 w-3 mr-1" />
+                            {usuario.teamMemberCount} membro{usuario.teamMemberCount > 1 ? 's' : ''}
+                          </Badge>
+                        ) : null}
+                      </div>
                     </div>
                   </td>
 

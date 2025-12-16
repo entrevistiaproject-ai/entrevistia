@@ -5,6 +5,7 @@ import { candidatos, candidatoEntrevistas, entrevistas, users } from "@/lib/db/s
 import { eq, and, isNull, desc, sql } from "drizzle-orm";
 import { enviarEmail } from "@/lib/email/resend";
 import { emailConviteEntrevistaTemplate } from "@/lib/email/templates";
+import { getEffectiveOwnerId } from "@/lib/services/team-service";
 
 // URL base do app - NEXT_PUBLIC_APP_URL tem prioridade sobre VERCEL_URL
 // pois VERCEL_URL contém URLs de deployment específicos (ex: xxx.vercel.app)
@@ -23,6 +24,9 @@ export async function POST(request: Request) {
       );
     }
 
+    // Usa o owner efetivo para membros de time operarem nos dados do owner
+    const effectiveOwnerId = await getEffectiveOwnerId(userId);
+
     const body = await request.json();
     const { nome, email, telefone, linkedin, entrevistaId } = body;
 
@@ -35,19 +39,19 @@ export async function POST(request: Request) {
 
     const db = getDB();
 
-    // Buscar dados do recrutador
+    // Buscar dados do recrutador (owner efetivo)
     const [recrutador] = await db
       .select({
         nome: users.nome,
         empresa: users.empresa,
       })
       .from(users)
-      .where(eq(users.id, userId))
+      .where(eq(users.id, effectiveOwnerId))
       .limit(1);
 
     let entrevista = null;
 
-    // Se tem entrevistaId, verificar se pertence ao usuário
+    // Se tem entrevistaId, verificar se pertence ao owner efetivo
     if (entrevistaId) {
       const [entrevistaResult] = await db
         .select()
@@ -55,7 +59,7 @@ export async function POST(request: Request) {
         .where(
           and(
             eq(entrevistas.id, entrevistaId),
-            eq(entrevistas.userId, userId)
+            eq(entrevistas.userId, effectiveOwnerId)
           )
         )
         .limit(1);
@@ -70,14 +74,14 @@ export async function POST(request: Request) {
       entrevista = entrevistaResult;
     }
 
-    // Verificar se já existe candidato com este email para este recrutador
+    // Verificar se já existe candidato com este email para este owner
     const [candidatoExistente] = await db
       .select()
       .from(candidatos)
       .where(
         and(
           eq(candidatos.email, email),
-          eq(candidatos.userId, userId),
+          eq(candidatos.userId, effectiveOwnerId),
           isNull(candidatos.deletedAt)
         )
       )
@@ -98,11 +102,11 @@ export async function POST(request: Request) {
         .where(eq(candidatos.id, candidatoExistente.id))
         .returning();
     } else {
-      // Criar novo candidato
+      // Criar novo candidato vinculado ao owner efetivo
       [novoCandidato] = await db
         .insert(candidatos)
         .values({
-          userId,
+          userId: effectiveOwnerId,
           nome,
           email,
           telefone: telefone || null,
@@ -223,6 +227,9 @@ export async function GET(request: Request) {
       );
     }
 
+    // Usa o owner efetivo para membros de time verem candidatos do owner
+    const effectiveOwnerId = await getEffectiveOwnerId(userId);
+
     let includeEntrevistas = false;
     let page = 1;
     let limit = 20;
@@ -246,9 +253,9 @@ export async function GET(request: Request) {
     const db = getDB();
     const offset = (page - 1) * limit;
 
-    // Condições base de filtro
+    // Condições base de filtro - usa effectiveOwnerId para membros de time
     const baseConditions = and(
-      eq(candidatos.userId, userId),
+      eq(candidatos.userId, effectiveOwnerId),
       isNull(candidatos.deletedAt)
     );
 
