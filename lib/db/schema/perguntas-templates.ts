@@ -10,6 +10,15 @@ export const areaProfissionalEnum = pgEnum("area_profissional", [
   "comercial",
   "varejo",
   "administrativo",
+  "saude",
+  "callcenter",
+  "logistica",
+  "engenharia",
+  "agronegocio",
+  "educacao",
+  "hotelaria",
+  "industria",
+  "design",
 ]);
 
 /**
