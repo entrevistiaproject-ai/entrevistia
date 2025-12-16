@@ -8,6 +8,7 @@ import {
 import { eq, and, isNull, isNotNull } from "drizzle-orm";
 import { analyzeInterview } from "@/lib/ai/agent";
 import { logger } from "@/lib/logger";
+import { verificarPermissaoAnalise } from "@/lib/services/billing";
 
 const BATCH_SIZE = 10; // Processa em lotes menores para evitar timeout
 
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
   try {
     const db = getDB();
 
-    // Busca entrevistas concluídas mas não avaliadas
+    // Busca entrevistas concluídas mas não avaliadas (inclui userId para verificação de limite)
     const pendentes = await db
       .select({
         candidatoEntrevistaId: candidatoEntrevistas.id,
@@ -59,6 +60,7 @@ export async function GET(request: NextRequest) {
         concluidaEm: candidatoEntrevistas.concluidaEm,
         candidatoNome: candidatos.nome,
         entrevistaCargo: entrevistas.cargo,
+        userId: entrevistas.userId,
       })
       .from(candidatoEntrevistas)
       .innerJoin(candidatos, eq(candidatos.id, candidatoEntrevistas.candidatoId))
@@ -91,9 +93,23 @@ export async function GET(request: NextRequest) {
 
     let sucessos = 0;
     let falhas = 0;
+    let bloqueados = 0;
 
     for (const candidato of pendentes) {
       try {
+        // Verifica se o usuário dono da entrevista pode realizar análise (limite de free trial)
+        const permissao = await verificarPermissaoAnalise(candidato.userId);
+        if (!permissao.permitido) {
+          logger.warn("[CRON-ANALYSIS] Usuário bloqueado - limite de free trial atingido", {
+            cronId,
+            userId: candidato.userId,
+            candidatoNome: candidato.candidatoNome,
+            motivo: permissao.error?.code,
+          });
+          bloqueados++;
+          continue; // Pula para o próximo candidato
+        }
+
         logger.info("[CRON-ANALYSIS] Processando candidato", {
           cronId,
           candidatoNome: candidato.candidatoNome,
@@ -139,6 +155,7 @@ export async function GET(request: NextRequest) {
       totalEncontrados: pendentes.length,
       sucessos,
       falhas,
+      bloqueados,
       durationMs: duration,
     });
 
@@ -149,6 +166,7 @@ export async function GET(request: NextRequest) {
       processed: sucessos + falhas,
       success_count: sucessos,
       failed: falhas,
+      blocked_by_limit: bloqueados,
       durationMs: duration,
     });
   } catch (error) {

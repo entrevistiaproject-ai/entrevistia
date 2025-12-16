@@ -6,6 +6,7 @@ import { eq, and } from 'drizzle-orm';
 import { auth } from '@/auth';
 import { checkRateLimit, getClientIP, createRateLimitKey, getRateLimitHeaders } from '@/lib/security';
 import { sanitizeUUID } from '@/lib/security/sanitize';
+import { verificarPermissaoAnalise } from '@/lib/services/billing';
 
 export const maxDuration = 300; // 5 minutos - permite análises mais longas
 
@@ -33,6 +34,19 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = session.user.id;
+
+    // Verifica se o usuário pode realizar análise de IA (limite de free trial)
+    const permissao = await verificarPermissaoAnalise(userId);
+    if (!permissao.permitido && permissao.error) {
+      return NextResponse.json(
+        {
+          error: permissao.error.message,
+          code: permissao.error.code,
+          precisaUpgrade: true,
+        },
+        { status: permissao.error.statusCode }
+      );
+    }
 
     // Rate limiting por usuário para análises (recurso caro de IA)
     const clientIP = getClientIP(request);

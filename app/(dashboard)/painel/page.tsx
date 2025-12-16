@@ -84,6 +84,8 @@ import {
 } from "../visao-geral/actions";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useUsage } from "@/contexts/usage-context";
+import { UsageAlertBanner } from "@/components/billing/usage-alert-banner";
 
 type TabValue = "pendentes" | "finalistas" | "emAndamento" | "arquivados";
 
@@ -104,6 +106,7 @@ export default function PainelPage() {
   const [candidatoActionLoading, setCandidatoActionLoading] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
+  const { usage, isFreeTrial } = useUsage();
 
   const fetchData = useCallback(async (entrevistaId?: string) => {
     setLoading(true);
@@ -845,6 +848,15 @@ export default function PainelPage() {
           </Link>
         </Button>
       </PageHeader>
+
+      {/* Banner de alerta de uso (free trial) */}
+      {isFreeTrial && usage && (
+        <UsageAlertBanner
+          percentualUsado={usage.percentualUsado}
+          saldoRestante={usage.saldoRestante}
+          limiteAtingido={usage.limiteAtingido}
+        />
+      )}
 
       {/* KPIs Resumidos */}
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">

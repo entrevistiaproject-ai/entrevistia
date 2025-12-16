@@ -43,6 +43,10 @@ export const users = pgTable("users", {
   // Este valor é ADICIONADO ao limite padrão do free trial (R$ 50)
   creditoExtra: decimal("credito_extra", { precision: 10, scale: 2 }).default("0.00"),
 
+  // Controle de notificações de limite
+  // Data em que foi enviada a notificação de 75% do limite
+  notificacao75EnviadaEm: timestamp("notificacao_75_enviada_em", { mode: "date" }),
+
   // Consentimentos LGPD
   aceitouTermos: boolean("aceitou_termos").default(false).notNull(),
   aceitouPrivacidade: boolean("aceitou_privacidade").default(false).notNull(),

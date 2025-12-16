@@ -2,11 +2,12 @@ import { getDB } from "@/lib/db";
 import { transacoes, faturas, NewTransacao } from "@/lib/db/schema/transacoes";
 import { users } from "@/lib/db/schema/users";
 import { eq, sql, and } from "drizzle-orm";
-import { FREE_TRIAL_LIMITS } from "@/lib/config/free-trial";
+import { FREE_TRIAL_LIMITS, PlanType } from "@/lib/config/free-trial";
 import { PRECOS_USUARIO, calcularCustoAnalise, USAGE_ESTIMATES_ANALISE_PERGUNTA } from "@/lib/config/pricing";
 import { logSystemError } from "@/lib/support/ticket-service";
 import { logger } from "@/lib/logger";
 import { validarNovaCobranca, validarCobrancaRegistrada } from "./billing-validation";
+import { enviarEmail } from "@/lib/email/resend";
 
 /**
  * Verifica se o usuário é uma conta de teste
@@ -616,4 +617,288 @@ export async function registrarAnalisePerguntas(params: {
     totalCobrado,
     error: falhasRegistro > 0 ? `${falhasRegistro} transação(ões) falharam` : undefined,
   };
+}
+
+/**
+ * Interface para resultado da verificação de acesso à IA
+ */
+export interface AcessoIAResult {
+  /**
+   * Se o usuário tem permissão para usar funcionalidades de IA
+   */
+  permitido: boolean;
+
+  /**
+   * Motivo técnico (para logs)
+   */
+  motivo?: string;
+
+  /**
+   * Mensagem amigável para exibir ao usuário
+   */
+  mensagemUsuario?: string;
+
+  /**
+   * Percentual de uso atual
+   */
+  percentualUsado?: number;
+
+  /**
+   * Se o limite foi atingido
+   */
+  limiteAtingido?: boolean;
+
+  /**
+   * Se precisa fazer upgrade
+   */
+  precisaUpgrade?: boolean;
+}
+
+/**
+ * Verifica se o usuário tem acesso às funcionalidades de IA
+ * Bloqueia acesso quando o limite do free trial é excedido
+ */
+export async function verificarAcessoIA(userId: string): Promise<AcessoIAResult> {
+  const db = getDB();
+
+  // Busca dados do usuário
+  const [usuario] = await db
+    .select({
+      planType: users.planType,
+      planStatus: users.planStatus,
+      isTestAccount: users.isTestAccount,
+      notificacao75EnviadaEm: users.notificacao75EnviadaEm,
+      nome: users.nome,
+      email: users.email,
+    })
+    .from(users)
+    .where(eq(users.id, userId));
+
+  if (!usuario) {
+    return {
+      permitido: false,
+      motivo: "usuario_nao_encontrado",
+      mensagemUsuario: "Usuário não encontrado. Por favor, faça login novamente.",
+    };
+  }
+
+  // Contas de teste sempre têm acesso
+  if (usuario.isTestAccount) {
+    return {
+      permitido: true,
+      motivo: "conta_teste",
+      percentualUsado: 0,
+      limiteAtingido: false,
+      precisaUpgrade: false,
+    };
+  }
+
+  // Planos pagos sempre têm acesso (pay-per-use)
+  if (usuario.planType !== PlanType.FREE_TRIAL) {
+    return {
+      permitido: true,
+      motivo: "plano_pago",
+      percentualUsado: 0,
+      limiteAtingido: false,
+      precisaUpgrade: false,
+    };
+  }
+
+  // Para free trial, verifica o limite financeiro
+  const usage = await getUsageFinanceiro(userId);
+
+  // Verifica se precisa enviar notificação de 75%
+  if (usage.percentualUsado >= 75 && !usuario.notificacao75EnviadaEm) {
+    // Envia notificação de 75% em background (não bloqueia)
+    enviarNotificacao75(userId, usuario.nome, usuario.email, usage).catch((err) => {
+      logger.error("[BILLING] Erro ao enviar notificação de 75%", { error: err, userId });
+    });
+  }
+
+  // Se o limite foi atingido, bloqueia
+  if (usage.limiteAtingido) {
+    return {
+      permitido: false,
+      motivo: "limite_free_trial_atingido",
+      mensagemUsuario: "Sua cota de testes acabou! Cadastre seu cartão de crédito e pague apenas pelo que usar.",
+      percentualUsado: usage.percentualUsado,
+      limiteAtingido: true,
+      precisaUpgrade: true,
+    };
+  }
+
+  // Tudo ok
+  return {
+    permitido: true,
+    motivo: "dentro_do_limite",
+    percentualUsado: usage.percentualUsado,
+    limiteAtingido: false,
+    precisaUpgrade: false,
+  };
+}
+
+/**
+ * Envia notificação de 75% do limite atingido
+ */
+async function enviarNotificacao75(
+  userId: string,
+  nome: string,
+  email: string,
+  usage: UsageFinanceiro
+): Promise<void> {
+  const db = getDB();
+
+  // Template do email
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alerta: 75% do seu crédito gratuito foi utilizado</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td style="padding: 40px 20px;">
+        <table role="presentation" style="max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); padding: 32px 40px; text-align: center;">
+              <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600;">EntrevistIA</h1>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 40px;">
+              <!-- Alert Badge -->
+              <div style="text-align: center; margin-bottom: 24px;">
+                <span style="display: inline-block; background-color: #fef3c7; color: #92400e; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 500;">
+                  ⚠️ Alerta de Uso
+                </span>
+              </div>
+
+              <h2 style="margin: 0 0 16px; color: #18181b; font-size: 20px; font-weight: 600; text-align: center;">
+                Olá, ${nome}!
+              </h2>
+
+              <p style="margin: 0 0 24px; color: #52525b; font-size: 16px; line-height: 1.6; text-align: center;">
+                Você já utilizou <strong style="color: #f59e0b;">${Math.round(usage.percentualUsado)}%</strong> do seu crédito gratuito de teste.
+              </p>
+
+              <!-- Progress Bar -->
+              <div style="background-color: #f4f4f5; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                  <span style="color: #71717a; font-size: 14px;">Utilizado</span>
+                  <span style="color: #18181b; font-size: 14px; font-weight: 600;">R$ ${usage.totalGasto.toFixed(2)} / R$ ${usage.limiteFinanceiro.toFixed(2)}</span>
+                </div>
+                <div style="background-color: #e4e4e7; border-radius: 4px; height: 8px; overflow: hidden;">
+                  <div style="background: linear-gradient(90deg, #f59e0b, #ef4444); height: 100%; width: ${Math.min(usage.percentualUsado, 100)}%; border-radius: 4px;"></div>
+                </div>
+                <p style="margin: 12px 0 0; color: #71717a; font-size: 13px; text-align: center;">
+                  Saldo restante: <strong style="color: #22c55e;">R$ ${usage.saldoRestante.toFixed(2)}</strong>
+                </p>
+              </div>
+
+              <p style="margin: 0 0 24px; color: #52525b; font-size: 15px; line-height: 1.6;">
+                Quando o crédito acabar, as funcionalidades de análise por IA serão pausadas.
+                Para continuar avaliando candidatos sem interrupções, cadastre seu cartão de crédito e pague apenas pelo que usar.
+              </p>
+
+              <!-- Pricing Info -->
+              <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                <p style="margin: 0 0 8px; color: #166534; font-size: 14px; font-weight: 600;">
+                  💰 Preços transparentes:
+                </p>
+                <ul style="margin: 0; padding-left: 20px; color: #166534; font-size: 14px;">
+                  <li style="margin-bottom: 4px;">R$ 1,00 por candidato avaliado</li>
+                  <li>R$ 0,25 por pergunta analisada</li>
+                </ul>
+              </div>
+
+              <!-- CTA Button -->
+              <div style="text-align: center; margin-bottom: 24px;">
+                <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://entrevistia.com.br'}/upgrade"
+                   style="display: inline-block; background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(124, 58, 237, 0.3);">
+                  Cadastrar Cartão de Crédito
+                </a>
+              </div>
+
+              <p style="margin: 0; color: #a1a1aa; font-size: 13px; text-align: center;">
+                Sem compromisso. Cancele quando quiser.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #fafafa; padding: 24px 40px; border-top: 1px solid #f4f4f5;">
+              <p style="margin: 0; color: #a1a1aa; font-size: 12px; text-align: center; line-height: 1.5;">
+                Este email foi enviado pelo EntrevistIA.<br>
+                Se você não reconhece esta mensagem, por favor ignore-a.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`;
+
+  try {
+    await enviarEmail({
+      to: email,
+      subject: "⚠️ Alerta: 75% do seu crédito gratuito foi utilizado - EntrevistIA",
+      html,
+    });
+
+    // Marca como enviado no banco
+    await db
+      .update(users)
+      .set({
+        notificacao75EnviadaEm: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+
+    logger.info("[BILLING] Notificação de 75% enviada com sucesso", {
+      userId,
+      email,
+      percentualUsado: usage.percentualUsado,
+    });
+  } catch (error) {
+    logger.error("[BILLING] Erro ao enviar notificação de 75%", {
+      userId,
+      email,
+      error: error instanceof Error ? error.message : "Erro desconhecido",
+    });
+    throw error;
+  }
+}
+
+/**
+ * Verifica se o usuário pode realizar análise de IA
+ * Retorna erro formatado se não puder
+ */
+export async function verificarPermissaoAnalise(userId: string): Promise<{
+  permitido: boolean;
+  error?: { code: string; message: string; statusCode: number };
+}> {
+  const acesso = await verificarAcessoIA(userId);
+
+  if (!acesso.permitido) {
+    return {
+      permitido: false,
+      error: {
+        code: "LIMITE_FREE_TRIAL_ATINGIDO",
+        message: acesso.mensagemUsuario || "Limite do período de testes atingido. Faça upgrade do seu plano.",
+        statusCode: 402, // Payment Required
+      },
+    };
+  }
+
+  return { permitido: true };
 }
