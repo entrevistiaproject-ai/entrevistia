@@ -399,6 +399,40 @@ export async function getTeamMemberCount(ownerId: string): Promise<number> {
 }
 
 /**
+ * Verifica se um usuário é owner de sua própria conta (tem dados próprios)
+ * Um usuário é considerado owner se:
+ * 1. Tem entrevistas criadas em seu nome
+ * 2. Tem configurações de time como owner
+ */
+export async function isUserAccountOwner(userId: string): Promise<boolean> {
+  const db = getDB();
+
+  // Verifica se tem entrevistas próprias
+  const [hasEntrevistas] = await db
+    .select({ count: entrevistas.id })
+    .from(entrevistas)
+    .where(eq(entrevistas.userId, userId))
+    .limit(1);
+
+  if (hasEntrevistas) {
+    return true;
+  }
+
+  // Verifica se tem configurações de time como owner
+  const [hasTeamSettings] = await db
+    .select({ count: teamSettings.id })
+    .from(teamSettings)
+    .where(eq(teamSettings.ownerId, userId))
+    .limit(1);
+
+  if (hasTeamSettings) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Cria um convite para um novo membro
  */
 export async function createTeamInvitation(params: {
@@ -457,6 +491,40 @@ export async function createTeamInvitation(params: {
 
     if (existingMember) {
       return { success: false, error: "Este usuário já faz parte do seu time" };
+    }
+
+    // Verifica se o usuário convidado já é owner de sua própria conta
+    // Se ele tem entrevistas ou dados próprios, não pode ser membro de outro time
+    const isOwner = await isUserAccountOwner(existingUser.id);
+    if (isOwner) {
+      return {
+        success: false,
+        error: "Este usuário já possui uma conta própria com dados. Ele não pode ser adicionado como membro de outro time."
+      };
+    }
+
+    // Verifica se o usuário já é membro de outro time
+    // Um usuário só pode pertencer a um time por vez
+    const [existingMembershipInOtherTeam] = await db
+      .select({
+        ownerId: teamMembers.ownerId,
+        ownerNome: users.nome,
+      })
+      .from(teamMembers)
+      .innerJoin(users, eq(teamMembers.ownerId, users.id))
+      .where(
+        and(
+          eq(teamMembers.memberId, existingUser.id),
+          eq(teamMembers.isActive, true)
+        )
+      )
+      .limit(1);
+
+    if (existingMembershipInOtherTeam) {
+      return {
+        success: false,
+        error: `Este usuário já faz parte do time de ${existingMembershipInOtherTeam.ownerNome}. Um usuário só pode pertencer a um time por vez.`
+      };
     }
   }
 
