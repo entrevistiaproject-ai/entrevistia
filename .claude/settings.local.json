@@ -114,7 +114,8 @@
       "Bash(timeout 10 bash -c 'printf \"\"area\\n\"\" | npm run db:generate 2>&1')",
       "Bash(npx shadcn@latest add collapsible:*)",
       "Bash(npx shadcn@latest add:*)",
-      "Bash(timeout 60 npx tsc:*)"
+      "Bash(timeout 60 npx tsc:*)",
+      "Bash(timeout 120 npx tsc:*)"
     ],
     "deny": [],
     "ask": []

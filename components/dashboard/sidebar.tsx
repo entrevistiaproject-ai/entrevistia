@@ -18,7 +18,7 @@ import {
   Home,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { SupportWidget } from "@/components/support/support-widget";
 
 // Função de logout que limpa dados sensíveis do localStorage
@@ -97,10 +97,16 @@ interface UserInfo {
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
+  // Usa permissões da sessão JWT (calculadas no login) como valor inicial
+  // A API serve como reforço de segurança e atualização
+  const sessionUser = session?.user as { canAccessFinancials?: boolean } | undefined;
+  const canAccessFinancials = userInfo?.canAccessFinancials ?? sessionUser?.canAccessFinancials ?? true;
+
   useEffect(() => {
-    // Buscar informações do usuário
+    // Buscar informações do usuário (reforço de segurança)
     fetch("/api/user")
       .then((res) => res.json())
       .then((data) => {
@@ -173,7 +179,7 @@ export function Sidebar() {
               Configurações
             </p>
             {/* Itens financeiros - apenas para owners */}
-            {userInfo?.canAccessFinancials && financialMenuItems.map((item) => {
+            {canAccessFinancials && financialMenuItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
 

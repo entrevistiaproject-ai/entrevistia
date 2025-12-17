@@ -2,8 +2,8 @@ import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { getDB } from "@/lib/db";
-import { users } from "@/lib/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { users, teamMembers } from "@/lib/db/schema";
+import { eq, sql, and } from "drizzle-orm";
 
 export const authConfig = {
   pages: {
@@ -23,8 +23,12 @@ export const authConfig = {
         token.name = user.name;
         // Armazena preferência de "manter conectado"
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const keepLoggedIn = (user as any).keepLoggedIn === true;
+        const userAny = user as any;
+        const keepLoggedIn = userAny.keepLoggedIn === true;
         token.keepLoggedIn = keepLoggedIn;
+
+        // Armazena permissões calculadas no login
+        token.canAccessFinancials = userAny.canAccessFinancials ?? true;
 
         // Define expiração baseada na preferência do usuário
         // Se "manter conectado" está marcado: 7 dias
@@ -39,6 +43,9 @@ export const authConfig = {
         session.user.id = token.id as string;
         session.user.email = token.email as string;
         session.user.name = token.name as string;
+        // Passa permissões para a sessão
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (session.user as any).canAccessFinancials = token.canAccessFinancials ?? true;
       }
       return session;
     },
@@ -84,11 +91,25 @@ export const authConfig = {
           })
           .where(eq(users.id, user.id));
 
+        // Verifica se o usuário tem acesso financeiro
+        // Owner sempre tem acesso; membro só tem se tiver role 'financial'
+        const [membership] = await db
+          .select({ role: teamMembers.role, ownerId: teamMembers.ownerId })
+          .from(teamMembers)
+          .where(and(eq(teamMembers.memberId, user.id), eq(teamMembers.isActive, true)));
+
+        let canAccessFinancials = true;
+        if (membership) {
+          // É membro de um time - só tem acesso se for o próprio owner ou role financial
+          canAccessFinancials = membership.ownerId === user.id || membership.role === "financial";
+        }
+
         return {
           id: user.id,
           email: user.email,
           name: user.nome,
           keepLoggedIn: credentials.keepLoggedIn === "true",
+          canAccessFinancials,
         };
       },
     }),
