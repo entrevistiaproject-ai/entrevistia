@@ -18,9 +18,12 @@ import {
   Sparkles,
   MessageSquare,
   Clock,
+  Download,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { DecisaoCandidato } from "@/components/entrevistas/decisao-candidato";
+import { pdf } from "@react-pdf/renderer";
+import { ResultadoPDF } from "@/components/entrevistas/resultado-pdf";
 
 interface Candidato {
   id: string;
@@ -190,6 +193,7 @@ export default function ResultadoCandidatoPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
+  const [generatingPDF, setGeneratingPDF] = useState(false);
   const [candidato, setCandidato] = useState<Candidato | null>(null);
   const [participacao, setParticipacao] = useState<Participacao | null>(null);
   const [perguntasRespostas, setPerguntasRespostas] = useState<PerguntaResposta[]>([]);
@@ -304,6 +308,66 @@ export default function ResultadoCandidatoPage() {
     }
   };
 
+  // Gera e baixa o PDF
+  const handleDownloadPDF = async () => {
+    if (!candidato || !participacao) return;
+
+    try {
+      setGeneratingPDF(true);
+
+      toast({
+        title: "Gerando PDF",
+        description: "Aguarde enquanto preparamos o relatorio...",
+      });
+
+      // Gera o PDF
+      const blob = await pdf(
+        <ResultadoPDF
+          candidato={{
+            nome: candidato.nome,
+            email: candidato.email,
+          }}
+          participacao={{
+            notaGeral: participacao.notaGeral,
+            compatibilidadeVaga: participacao.compatibilidadeVaga,
+            recomendacao: participacao.recomendacao,
+            resumoGeral: participacao.resumoGeral,
+            competencias: participacao.competencias,
+            avaliadoEm: participacao.avaliadoEm,
+            concluidaEm: participacao.concluidaEm,
+            decisaoRecrutador: participacao.decisaoRecrutador,
+            decisaoRecrutadorObservacao: participacao.decisaoRecrutadorObservacao,
+          }}
+          perguntasRespostas={perguntasRespostas}
+        />
+      ).toBlob();
+
+      // Cria link para download
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `avaliacao-${candidato.nome.replace(/\s+/g, "-").toLowerCase()}-${new Date().toISOString().split("T")[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "PDF gerado com sucesso!",
+        description: "O download foi iniciado automaticamente",
+      });
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      toast({
+        title: "Erro ao gerar PDF",
+        description: "Nao foi possivel gerar o relatorio. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingPDF(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -346,24 +410,46 @@ export default function ResultadoCandidatoPage() {
             <p className="text-sm text-muted-foreground truncate">{candidato.email}</p>
           </div>
         </div>
-        <Button
-          variant={temAvaliacao ? "outline" : "default"}
-          onClick={handleAnalisar}
-          disabled={analyzing || participacao?.status !== 'concluida'}
-          className="w-full sm:w-auto shrink-0"
-        >
-          {analyzing ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Analisando...
-            </>
-          ) : (
-            <>
-              {temAvaliacao ? <RefreshCw className="h-4 w-4 mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
-              {temAvaliacao ? "Reanalisar" : "Analisar com IA"}
-            </>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          {temAvaliacao && (
+            <Button
+              variant="outline"
+              onClick={handleDownloadPDF}
+              disabled={generatingPDF}
+              className="w-full sm:w-auto shrink-0"
+            >
+              {generatingPDF ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Gerando...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  Baixar PDF
+                </>
+              )}
+            </Button>
           )}
-        </Button>
+          <Button
+            variant={temAvaliacao ? "outline" : "default"}
+            onClick={handleAnalisar}
+            disabled={analyzing || participacao?.status !== 'concluida'}
+            className="w-full sm:w-auto shrink-0"
+          >
+            {analyzing ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Analisando...
+              </>
+            ) : (
+              <>
+                {temAvaliacao ? <RefreshCw className="h-4 w-4 mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                {temAvaliacao ? "Reanalisar" : "Analisar com IA"}
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Aviso se não concluiu */}
