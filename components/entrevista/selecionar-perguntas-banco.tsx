@@ -55,8 +55,10 @@ export function SelecionarPerguntasBanco({
   perguntasSelecionadas,
   onSelecionar,
 }: SelecionarPerguntasBancoProps) {
-  const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [perguntasRecomendadasRaw, setPerguntasRecomendadasRaw] = useState<Pergunta[]>([]);
+  const [todasPerguntasRaw, setTodasPerguntasRaw] = useState<Pergunta[]>([]);
+  const [loadingRecomendadas, setLoadingRecomendadas] = useState(true);
+  const [loadingTodas, setLoadingTodas] = useState(true);
   const [filtroTexto, setFiltroTexto] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState<string>("todas");
   const [filtroCargo, setFiltroCargo] = useState<string>("todos");
@@ -64,38 +66,63 @@ export function SelecionarPerguntasBanco({
   const [mostrarPadrao, setMostrarPadrao] = useState<boolean>(true);
   const [tab, setTab] = useState<string>("recomendadas");
 
+  // Busca perguntas recomendadas (filtradas por cargo/nivel)
   useEffect(() => {
-    async function fetchPerguntas() {
+    async function fetchPerguntasRecomendadas() {
+      if (!cargo || !nivel) {
+        setPerguntasRecomendadasRaw([]);
+        setLoadingRecomendadas(false);
+        return;
+      }
+
       try {
-        const response = await fetch("/api/perguntas?limit=100");
+        setLoadingRecomendadas(true);
+        const params = new URLSearchParams({ limit: "100", cargo, nivel });
+        const response = await fetch(`/api/perguntas?${params.toString()}`);
         const data = await response.json();
-        // A API retorna { perguntas, pagination } com paginação
-        setPerguntas(data.perguntas || []);
+        setPerguntasRecomendadasRaw(data.perguntas || []);
       } catch (error) {
-        console.error("Erro ao buscar perguntas:", error);
+        console.error("Erro ao buscar perguntas recomendadas:", error);
       } finally {
-        setLoading(false);
+        setLoadingRecomendadas(false);
       }
     }
 
-    fetchPerguntas();
-  }, []);
+    fetchPerguntasRecomendadas();
+  }, [cargo, nivel]);
 
-  // Extrair cargos e níveis únicos para os filtros
+  // Busca todas as perguntas (sem filtro de cargo/nivel) quando muda para aba "todas"
+  useEffect(() => {
+    async function fetchTodasPerguntas() {
+      if (tab !== "todas" || todasPerguntasRaw.length > 0) return;
+
+      try {
+        setLoadingTodas(true);
+        const response = await fetch("/api/perguntas?limit=100");
+        const data = await response.json();
+        setTodasPerguntasRaw(data.perguntas || []);
+      } catch (error) {
+        console.error("Erro ao buscar todas as perguntas:", error);
+      } finally {
+        setLoadingTodas(false);
+      }
+    }
+
+    fetchTodasPerguntas();
+  }, [tab, todasPerguntasRaw.length]);
+
+  // Extrair cargos e níveis únicos para os filtros (usa todas as perguntas)
   const cargosUnicos = useMemo(() => {
-    return Array.from(new Set(perguntas.map((p) => p.cargo))).sort();
-  }, [perguntas]);
+    return Array.from(new Set(todasPerguntasRaw.map((p) => p.cargo))).sort();
+  }, [todasPerguntasRaw]);
 
   const niveisUnicos = useMemo(() => {
-    return Array.from(new Set(perguntas.map((p) => p.nivel)));
-  }, [perguntas]);
+    return Array.from(new Set(todasPerguntasRaw.map((p) => p.nivel)));
+  }, [todasPerguntasRaw]);
 
-  // Filtrar perguntas recomendadas (cargo e nível exatos)
+  // Filtrar perguntas recomendadas (já filtradas por cargo/nivel na API)
   const perguntasRecomendadas = useMemo(() => {
-    return perguntas.filter((p) => {
-      if (cargo && p.cargo !== cargo) return false;
-      if (nivel && p.nivel !== nivel) return false;
-
+    return perguntasRecomendadasRaw.filter((p) => {
       // Filtrar perguntas padrão se o toggle estiver desligado
       if (!mostrarPadrao && p.isPadrao) return false;
 
@@ -113,11 +140,11 @@ export function SelecionarPerguntasBanco({
 
       return true;
     });
-  }, [perguntas, cargo, nivel, filtroTexto, filtroCategoria, mostrarPadrao]);
+  }, [perguntasRecomendadasRaw, filtroTexto, filtroCategoria, mostrarPadrao]);
 
   // Filtrar todas as perguntas (busca expandida)
   const todasPerguntasFiltradas = useMemo(() => {
-    return perguntas.filter((p) => {
+    return todasPerguntasRaw.filter((p) => {
       if (filtroCargo !== "todos" && p.cargo !== filtroCargo) return false;
       if (filtroNivel !== "todos" && p.nivel !== filtroNivel) return false;
 
@@ -138,7 +165,9 @@ export function SelecionarPerguntasBanco({
 
       return true;
     });
-  }, [perguntas, filtroCargo, filtroNivel, filtroTexto, filtroCategoria, mostrarPadrao]);
+  }, [todasPerguntasRaw, filtroCargo, filtroNivel, filtroTexto, filtroCategoria, mostrarPadrao]);
+
+  const loading = tab === "recomendadas" ? loadingRecomendadas : loadingTodas;
 
   if (loading) {
     return (
@@ -165,7 +194,7 @@ export function SelecionarPerguntasBanco({
             Recomendadas ({perguntasRecomendadas.length})
           </TabsTrigger>
           <TabsTrigger value="todas">
-            Todas as Perguntas ({perguntas.length})
+            Todas as Perguntas ({todasPerguntasRaw.length})
           </TabsTrigger>
         </TabsList>
 

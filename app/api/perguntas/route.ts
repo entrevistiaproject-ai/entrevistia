@@ -96,7 +96,11 @@ export async function GET(request: Request) {
       or(
         eq(perguntasTemplates.isPadrao, true),
         effectiveOwnerId ? eq(perguntasTemplates.userId, effectiveOwnerId) : undefined
-      )
+      ),
+      // Filtros por cargo, nível e categoria aplicados diretamente no banco
+      cargo ? eq(perguntasTemplates.cargo, cargo) : undefined,
+      nivel ? eq(perguntasTemplates.nivel, nivel) : undefined,
+      categoria ? eq(perguntasTemplates.categoria, categoria) : undefined
     );
 
     // Buscar total para paginação
@@ -124,20 +128,7 @@ export async function GET(request: Request) {
       allowedLimits: ALLOWED_LIMITS,
     };
 
-    // Se não há parâmetros de filtro, retorna todas com paginação
-    if (!cargo && !nivel && !categoria) {
-      return NextResponse.json({ perguntas, pagination });
-    }
-
-    // Filtro simples por cargo, nível e categoria
-    const perguntasFiltradas = perguntas.filter(p => {
-      if (cargo && p.cargo !== cargo) return false;
-      if (nivel && p.nivel !== nivel) return false;
-      if (categoria && p.categoria !== categoria) return false;
-      return true;
-    });
-
-    return NextResponse.json({ perguntas: perguntasFiltradas, pagination });
+    return NextResponse.json({ perguntas, pagination });
   } catch (error) {
     console.error("Erro ao buscar perguntas:", error);
     return NextResponse.json(
