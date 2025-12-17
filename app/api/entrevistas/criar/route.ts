@@ -61,9 +61,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (descricaoTrimmed.length > 1000) {
+    if (descricaoTrimmed.length > 1250) {
       return NextResponse.json(
-        { error: `A descrição da vaga deve ter no máximo 1000 caracteres. Atual: ${descricaoTrimmed.length} caracteres.` },
+        { error: `A descrição da vaga deve ter no máximo 1250 caracteres. Atual: ${descricaoTrimmed.length} caracteres.` },
         { status: 400 }
       );
     }

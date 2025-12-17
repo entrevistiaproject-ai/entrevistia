@@ -269,16 +269,16 @@ Breve contexto sobre a posição e equipe...
                 rows={8}
                 required
                 className="font-mono text-sm min-h-[180px] sm:min-h-[280px] resize-none sm:resize-y"
-                maxLength={1000}
+                maxLength={1250}
               />
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className={descricao.length < 200 ? "text-destructive" : descricao.length > 900 ? "text-yellow-600" : "text-green-600"}>
-                    {descricao.length}/1000 caracteres
+                  <span className={descricao.length < 200 ? "text-destructive" : descricao.length > 1150 ? "text-yellow-600" : "text-green-600"}>
+                    {descricao.length}/1250 caracteres
                     {descricao.length < 200 && ` (mínimo: 200)`}
                   </span>
                   <span className="text-muted-foreground">
-                    {descricao.length >= 200 && descricao.length <= 1000 && "✓ Tamanho adequado"}
+                    {descricao.length >= 200 && descricao.length <= 1250 && "✓ Tamanho adequado"}
                   </span>
                 </div>
                 {/* Progress bar para caracteres */}
@@ -287,11 +287,11 @@ Breve contexto sobre a posição e equipe...
                     className={`h-full transition-all duration-300 ${
                       descricao.length < 200
                         ? "bg-destructive"
-                        : descricao.length > 900
+                        : descricao.length > 1150
                         ? "bg-yellow-500"
                         : "bg-green-500"
                     }`}
-                    style={{ width: `${Math.min((descricao.length / 1000) * 100, 100)}%` }}
+                    style={{ width: `${Math.min((descricao.length / 1250) * 100, 100)}%` }}
                   />
                 </div>
               </div>
