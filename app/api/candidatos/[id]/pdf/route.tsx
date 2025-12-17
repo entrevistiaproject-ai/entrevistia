@@ -451,6 +451,21 @@ function PDFDocument({
   const decisaoConfig = getDecisaoConfig(participacao?.decisaoRecrutador || null);
   const competencias = participacao?.competencias || [];
 
+  // Data e hora da conclusão da entrevista
+  const dataConclusao = participacao?.concluidaEm
+    ? new Date(participacao.concluidaEm).toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : new Date().toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      });
+
   return (
     <Document>
       {/* Pagina 1 - Resumo e Avaliacao */}
@@ -459,12 +474,8 @@ function PDFDocument({
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Relatorio de Avaliacao</Text>
           <Text style={styles.headerSubtitle}>
-            {entrevistaTitulo || "Entrevista"} - Gerado em{" "}
-            {new Date().toLocaleDateString("pt-BR", {
-              day: "2-digit",
-              month: "long",
-              year: "numeric",
-            })}
+            {entrevistaTitulo || "Entrevista"} - {participacao?.concluidaEm ? "Concluida em" : "Gerado em"}{" "}
+            {dataConclusao}
           </Text>
         </View>
 
