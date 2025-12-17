@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,12 +23,17 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
-  Sparkles
+  Sparkles,
+  Users,
+  Crown
 } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Logo, LogoIcon } from "@/components/logo";
 
 export default function CadastroPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
@@ -41,6 +46,39 @@ export default function CadastroPage() {
     aceitouPrivacidade: false,
     aceitaEmailMarketing: false,
   });
+
+  // Dados do convite de time (se houver)
+  const isConviteTime = searchParams.get("conviteTime") === "true";
+  const conviteData = {
+    empresa: searchParams.get("empresa") || null,
+    ownerNome: searchParams.get("ownerNome") || null,
+    cargo: searchParams.get("cargo") || null,
+    callbackUrl: searchParams.get("callbackUrl") || null,
+  };
+
+  // Pré-preencher campos com parâmetros da URL (ex: convite de time)
+  useEffect(() => {
+    const emailParam = searchParams.get("email");
+    const nomeParam = searchParams.get("nome");
+
+    if (emailParam || nomeParam) {
+      setFormData(prev => ({
+        ...prev,
+        ...(emailParam && { email: emailParam }),
+        ...(nomeParam && { nome: nomeParam }),
+      }));
+    }
+  }, [searchParams]);
+
+  // Iniciais do nome do owner
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -208,13 +246,61 @@ export default function CadastroPage() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
         <Card className="shadow-lg">
           <CardHeader className="text-center pb-4 pt-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-5 mx-auto">
-              <LogoIcon className="w-10 h-10" />
-            </div>
-            <CardTitle className="text-2xl sm:text-3xl">Crie sua conta gratuita</CardTitle>
-            <CardDescription className="mt-2">
-              Ganhe R$ 50 em créditos para testar. Sem cartão de crédito.
-            </CardDescription>
+            {isConviteTime ? (
+              <>
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-5 mx-auto">
+                  <Users className="w-8 h-8 text-indigo-600" />
+                </div>
+                <CardTitle className="text-2xl sm:text-3xl">Você foi convidado!</CardTitle>
+                <CardDescription className="mt-2">
+                  Crie sua conta para fazer parte do time
+                </CardDescription>
+
+                {/* Banner com informações do convite */}
+                <div className="mt-6 p-4 rounded-lg bg-indigo-50 border border-indigo-100 text-left">
+                  {conviteData.ownerNome && (
+                    <div className="flex items-center gap-3 mb-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback className="bg-indigo-100 text-indigo-700 text-sm">
+                          {getInitials(conviteData.ownerNome)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{conviteData.ownerNome}</p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Crown className="w-3 h-3" />
+                          Responsável pelo time
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex flex-wrap gap-2">
+                    {conviteData.empresa && (
+                      <Badge variant="secondary" className="text-xs">
+                        <Building2 className="w-3 h-3 mr-1" />
+                        {conviteData.empresa}
+                      </Badge>
+                    )}
+                    {conviteData.cargo && (
+                      <Badge variant="outline" className="text-xs bg-white">
+                        <Briefcase className="w-3 h-3 mr-1" />
+                        {conviteData.cargo}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-5 mx-auto">
+                  <LogoIcon className="w-10 h-10" />
+                </div>
+                <CardTitle className="text-2xl sm:text-3xl">Crie sua conta gratuita</CardTitle>
+                <CardDescription className="mt-2">
+                  Ganhe R$ 50 em créditos para testar. Sem cartão de crédito.
+                </CardDescription>
+              </>
+            )}
           </CardHeader>
           <CardContent className="pt-2 pb-8 px-6 sm:px-8">
             {/* Erro geral */}
@@ -264,8 +350,12 @@ export default function CadastroPage() {
                     value={formData.email}
                     onChange={handleChange}
                     error={!!errors.email}
-                    disabled={isLoading}
+                    disabled={isLoading || isConviteTime}
+                    className={isConviteTime ? "bg-muted" : ""}
                   />
+                  {isConviteTime && (
+                    <p className="text-xs text-muted-foreground">Este email foi definido pelo convite</p>
+                  )}
                   {errors.email && (
                     <p className="text-sm text-destructive">{errors.email}</p>
                   )}
@@ -292,47 +382,51 @@ export default function CadastroPage() {
                   )}
                 </div>
 
-                {/* Empresa */}
-                <div className="space-y-2">
-                  <Label htmlFor="empresa" className="flex items-center gap-2">
-                    <Building2 className="w-4 h-4 text-muted-foreground" />
-                    Nome da sua empresa
-                  </Label>
-                  <Input
-                    id="empresa"
-                    name="empresa"
-                    type="text"
-                    placeholder="Nome da empresa"
-                    value={formData.empresa}
-                    onChange={handleChange}
-                    error={!!errors.empresa}
-                    disabled={isLoading}
-                  />
-                  {errors.empresa && (
-                    <p className="text-sm text-destructive">{errors.empresa}</p>
-                  )}
-                </div>
+                {/* Empresa - ocultar se for convite de time */}
+                {!isConviteTime && (
+                  <div className="space-y-2">
+                    <Label htmlFor="empresa" className="flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-muted-foreground" />
+                      Nome da sua empresa
+                    </Label>
+                    <Input
+                      id="empresa"
+                      name="empresa"
+                      type="text"
+                      placeholder="Nome da empresa"
+                      value={formData.empresa}
+                      onChange={handleChange}
+                      error={!!errors.empresa}
+                      disabled={isLoading}
+                    />
+                    {errors.empresa && (
+                      <p className="text-sm text-destructive">{errors.empresa}</p>
+                    )}
+                  </div>
+                )}
 
-                {/* Cargo */}
-                <div className="space-y-2">
-                  <Label htmlFor="cargo" className="flex items-center gap-2">
-                    <Briefcase className="w-4 h-4 text-muted-foreground" />
-                    Seu cargo
-                  </Label>
-                  <Input
-                    id="cargo"
-                    name="cargo"
-                    type="text"
-                    placeholder="Ex: Analista de RH, Recrutador"
-                    value={formData.cargo}
-                    onChange={handleChange}
-                    error={!!errors.cargo}
-                    disabled={isLoading}
-                  />
-                  {errors.cargo && (
-                    <p className="text-sm text-destructive">{errors.cargo}</p>
-                  )}
-                </div>
+                {/* Cargo - ocultar se for convite de time */}
+                {!isConviteTime && (
+                  <div className="space-y-2">
+                    <Label htmlFor="cargo" className="flex items-center gap-2">
+                      <Briefcase className="w-4 h-4 text-muted-foreground" />
+                      Seu cargo
+                    </Label>
+                    <Input
+                      id="cargo"
+                      name="cargo"
+                      type="text"
+                      placeholder="Ex: Analista de RH, Recrutador"
+                      value={formData.cargo}
+                      onChange={handleChange}
+                      error={!!errors.cargo}
+                      disabled={isLoading}
+                    />
+                    {errors.cargo && (
+                      <p className="text-sm text-destructive">{errors.cargo}</p>
+                    )}
+                  </div>
+                )}
 
                 {/* Senha */}
                 <div className="space-y-2">
@@ -489,26 +583,28 @@ export default function CadastroPage() {
               </p>
             </div>
 
-            {/* Benefícios */}
-            <div className="mt-10 pt-8 border-t">
-              <p className="text-sm text-muted-foreground text-center mb-5">
-                O que você ganha ao criar sua conta:
-              </p>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <Card className="p-4 sm:p-5">
-                  <p className="text-xl sm:text-2xl font-bold text-primary">R$ 50</p>
-                  <p className="text-xs text-muted-foreground mt-1">Em créditos grátis</p>
-                </Card>
-                <Card className="p-4 sm:p-5">
-                  <p className="text-xl sm:text-2xl font-bold text-primary">∞</p>
-                  <p className="text-xs text-muted-foreground mt-1">Vagas ilimitadas</p>
-                </Card>
-                <Card className="p-4 sm:p-5">
-                  <p className="text-xl sm:text-2xl font-bold text-primary">IA</p>
-                  <p className="text-xs text-muted-foreground mt-1">Análise automática</p>
-                </Card>
+            {/* Benefícios - ocultar se for convite de time */}
+            {!isConviteTime && (
+              <div className="mt-10 pt-8 border-t">
+                <p className="text-sm text-muted-foreground text-center mb-5">
+                  O que você ganha ao criar sua conta:
+                </p>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <Card className="p-4 sm:p-5">
+                    <p className="text-xl sm:text-2xl font-bold text-primary">R$ 50</p>
+                    <p className="text-xs text-muted-foreground mt-1">Em créditos grátis</p>
+                  </Card>
+                  <Card className="p-4 sm:p-5">
+                    <p className="text-xl sm:text-2xl font-bold text-primary">∞</p>
+                    <p className="text-xs text-muted-foreground mt-1">Vagas ilimitadas</p>
+                  </Card>
+                  <Card className="p-4 sm:p-5">
+                    <p className="text-xl sm:text-2xl font-bold text-primary">IA</p>
+                    <p className="text-xs text-muted-foreground mt-1">Análise automática</p>
+                  </Card>
+                </div>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>

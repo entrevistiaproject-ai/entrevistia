@@ -234,44 +234,28 @@ export default function ConviteTimePage({
     );
   }
 
-  // Tela de precisa de autenticacao
-  if (needsAuth) {
+  // Redirecionar direto para cadastro quando não autenticado
+  // (Se alguém recebe convite para time, provavelmente não tem conta)
+  if (needsAuth && data) {
+    const params = new URLSearchParams();
+    params.set("email", data.invitation.invitedEmail);
+    if (data.invitation.invitedName) {
+      params.set("nome", data.invitation.invitedName);
+    }
+    params.set("callbackUrl", `/convite-time/${token}`);
+    params.set("conviteTime", "true");
+    if (data.owner?.empresa) {
+      params.set("empresa", data.owner.empresa);
+    }
+    if (data.owner?.nome) {
+      params.set("ownerNome", data.owner.nome);
+    }
+    params.set("cargo", roleLabels[data.invitation.role] || data.invitation.role);
+
+    router.push(`/cadastro?${params.toString()}`);
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4">
-        <Card className="w-full max-w-md text-center">
-          <CardContent className="pt-10 pb-8 space-y-6">
-            <div className="mx-auto w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center">
-              <LogIn className="h-8 w-8 text-amber-600" />
-            </div>
-
-            <div className="space-y-2">
-              <h1 className="text-2xl font-bold">Faça Login para Continuar</h1>
-              <p className="text-muted-foreground">
-                Você precisa estar logado para aceitar este convite. Se você
-                ainda não tem uma conta, crie uma com o mesmo email do convite.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <Link
-                href={`/login?callbackUrl=${encodeURIComponent(
-                  `/convite-time/${token}`
-                )}`}
-              >
-                <Button className="w-full">Fazer Login</Button>
-              </Link>
-              <Link
-                href={`/cadastro?email=${encodeURIComponent(
-                  data?.invitation.invitedEmail || ""
-                )}&callbackUrl=${encodeURIComponent(`/convite-time/${token}`)}`}
-              >
-                <Button variant="outline" className="w-full">
-                  Criar Conta
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
       </div>
     );
   }
