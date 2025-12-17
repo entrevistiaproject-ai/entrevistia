@@ -22,8 +22,6 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { DecisaoCandidato } from "@/components/entrevistas/decisao-candidato";
-import { pdf } from "@react-pdf/renderer";
-import { ResultadoPDF } from "@/components/entrevistas/resultado-pdf";
 
 interface Candidato {
   id: string;
@@ -308,9 +306,9 @@ export default function ResultadoCandidatoPage() {
     }
   };
 
-  // Gera e baixa o PDF
+  // Gera e baixa o PDF via API (server-side)
   const handleDownloadPDF = async () => {
-    if (!candidato || !participacao) return;
+    if (!candidato || !candidato.entrevistaId) return;
 
     try {
       setGeneratingPDF(true);
@@ -320,29 +318,18 @@ export default function ResultadoCandidatoPage() {
         description: "Aguarde enquanto preparamos o relatorio...",
       });
 
-      // Gera o PDF
-      const blob = await pdf(
-        <ResultadoPDF
-          candidato={{
-            nome: candidato.nome,
-            email: candidato.email,
-          }}
-          participacao={{
-            notaGeral: participacao.notaGeral,
-            compatibilidadeVaga: participacao.compatibilidadeVaga,
-            recomendacao: participacao.recomendacao,
-            resumoGeral: participacao.resumoGeral,
-            competencias: participacao.competencias,
-            avaliadoEm: participacao.avaliadoEm,
-            concluidaEm: participacao.concluidaEm,
-            decisaoRecrutador: participacao.decisaoRecrutador,
-            decisaoRecrutadorObservacao: participacao.decisaoRecrutadorObservacao,
-          }}
-          perguntasRespostas={perguntasRespostas}
-        />
-      ).toBlob();
+      // Chama a API para gerar o PDF no servidor
+      const response = await fetch(
+        `/api/candidatos/${candidatoId}/pdf?entrevistaId=${candidato.entrevistaId}`
+      );
 
-      // Cria link para download
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Erro ao gerar PDF");
+      }
+
+      // Baixa o PDF
+      const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -360,7 +347,7 @@ export default function ResultadoCandidatoPage() {
       console.error("Erro ao gerar PDF:", error);
       toast({
         title: "Erro ao gerar PDF",
-        description: "Nao foi possivel gerar o relatorio. Tente novamente.",
+        description: error instanceof Error ? error.message : "Nao foi possivel gerar o relatorio. Tente novamente.",
         variant: "destructive",
       });
     } finally {

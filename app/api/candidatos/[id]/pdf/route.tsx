@@ -1,27 +1,25 @@
-"use client";
-
+import { NextRequest, NextResponse } from "next/server";
+import { getDB } from "@/lib/db";
+import { respostas, perguntas, candidatoEntrevistas, candidatos, entrevistas } from "@/lib/db/schema";
+import { eq, and, asc } from "drizzle-orm";
+import {
+  requireParticipacaoAccess,
+  isErrorResponse,
+} from "@/lib/security/ownership";
+import { renderToBuffer } from "@react-pdf/renderer";
 import {
   Document,
   Page,
   Text,
   View,
   StyleSheet,
-  Font,
 } from "@react-pdf/renderer";
-
-// Registrar fontes padrão
-Font.register({
-  family: "Helvetica",
-  fonts: [
-    { src: "Helvetica" },
-    { src: "Helvetica-Bold", fontWeight: "bold" },
-  ],
-});
+import React from "react";
 
 // Tipos
 interface Competencia {
   nome: string;
-  categoria: "Experiência" | "Comunicação" | "Resolução de Problemas" | "Motivação" | "Fit com a Vaga";
+  categoria: string;
   nota: number;
   descricao: string;
 }
@@ -31,40 +29,17 @@ interface PerguntaResposta {
     id: string;
     texto: string;
     ordem: number;
-    tipo: string;
   };
   resposta: {
-    id: string;
     texto: string | null;
     transcricao: string | null;
     tempoResposta: number | null;
   };
 }
 
-interface ResultadoPDFProps {
-  candidato: {
-    nome: string;
-    email: string;
-  };
-  participacao: {
-    notaGeral: number | null;
-    compatibilidadeVaga: number | null;
-    recomendacao: "recomendado" | "recomendado_com_ressalvas" | "nao_recomendado" | null;
-    resumoGeral: string | null;
-    competencias: Competencia[] | null;
-    avaliadoEm: Date | null;
-    concluidaEm: Date | null;
-    decisaoRecrutador: "aprovado" | "reprovado" | null;
-    decisaoRecrutadorObservacao: string | null;
-  };
-  perguntasRespostas: PerguntaResposta[];
-  entrevistaTitulo?: string;
-}
-
 // Cores
 const colors = {
   primary: "#1e40af",
-  primaryLight: "#3b82f6",
   green: "#16a34a",
   greenLight: "#dcfce7",
   yellow: "#ca8a04",
@@ -86,7 +61,6 @@ const styles = StyleSheet.create({
     padding: 40,
     fontFamily: "Helvetica",
   },
-  // Header
   header: {
     marginBottom: 30,
     borderBottomWidth: 3,
@@ -103,7 +77,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.gray,
   },
-  // Candidato Info
   candidatoInfo: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -134,7 +107,6 @@ const styles = StyleSheet.create({
     color: colors.grayDark,
     fontWeight: "bold",
   },
-  // Scores Section
   scoresSection: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -163,7 +135,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontWeight: "bold",
   },
-  // Recomendacao
   recomendacaoCard: {
     padding: 15,
     borderRadius: 8,
@@ -179,7 +150,6 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: colors.gray,
   },
-  // Section
   section: {
     marginBottom: 20,
   },
@@ -197,7 +167,6 @@ const styles = StyleSheet.create({
     color: colors.grayDark,
     lineHeight: 1.5,
   },
-  // Pontos
   pontosContainer: {
     flexDirection: "row",
     gap: 15,
@@ -229,7 +198,6 @@ const styles = StyleSheet.create({
     flex: 1,
     lineHeight: 1.4,
   },
-  // Competencias
   competenciasGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -279,7 +247,6 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 2,
   },
-  // Perguntas e Respostas
   qaSection: {
     marginTop: 10,
   },
@@ -321,7 +288,6 @@ const styles = StyleSheet.create({
     color: colors.gray,
     fontStyle: "italic",
   },
-  // Footer
   footer: {
     position: "absolute",
     bottom: 30,
@@ -337,11 +303,6 @@ const styles = StyleSheet.create({
     fontSize: 8,
     color: colors.gray,
   },
-  // Page break
-  pageBreak: {
-    marginBottom: 30,
-  },
-  // Decisao
   decisaoCard: {
     padding: 12,
     borderRadius: 8,
@@ -428,7 +389,7 @@ const getDecisaoConfig = (decisao: string | null) => {
 
 // Parse do resumoGeral
 function parseResumoGeral(resumo: string | null) {
-  if (!resumo) return { texto: "", pontosFortes: [], pontosMelhoria: [] };
+  if (!resumo) return { texto: "", pontosFortes: [] as string[], pontosMelhoria: [] as string[] };
 
   const parts = resumo.split("**Pontos Fortes:**");
   const textoBase = parts[0]?.trim() || "";
@@ -456,13 +417,32 @@ function parseResumoGeral(resumo: string | null) {
   return { texto: textoBase, pontosFortes, pontosMelhoria };
 }
 
-// Componente principal
-export function ResultadoPDF({
+// Componente PDF
+interface PDFDocumentProps {
+  candidato: {
+    nome: string;
+    email: string;
+  };
+  participacao: {
+    notaGeral: number | null;
+    compatibilidadeVaga: number | null;
+    recomendacao: string | null;
+    resumoGeral: string | null;
+    competencias: Competencia[] | null;
+    concluidaEm: Date | null;
+    decisaoRecrutador: string | null;
+    decisaoRecrutadorObservacao: string | null;
+  };
+  perguntasRespostas: PerguntaResposta[];
+  entrevistaTitulo?: string;
+}
+
+function PDFDocument({
   candidato,
   participacao,
   perguntasRespostas,
   entrevistaTitulo,
-}: ResultadoPDFProps) {
+}: PDFDocumentProps) {
   const temAvaliacao = participacao?.notaGeral !== null && participacao?.notaGeral !== undefined;
   const { texto: resumoTexto, pontosFortes, pontosMelhoria } = parseResumoGeral(
     participacao?.resumoGeral || null
@@ -746,4 +726,130 @@ export function ResultadoPDF({
       )}
     </Document>
   );
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: candidatoId } = await params;
+    const { searchParams } = new URL(request.url);
+    const entrevistaId = searchParams.get("entrevistaId");
+
+    if (!entrevistaId) {
+      return NextResponse.json({ error: "entrevistaId obrigatorio" }, { status: 400 });
+    }
+
+    // Verifica autenticacao e ownership
+    const accessResult = await requireParticipacaoAccess(candidatoId, entrevistaId);
+    if (isErrorResponse(accessResult)) {
+      return accessResult;
+    }
+
+    const db = getDB();
+
+    // Busca candidato
+    const [candidato] = await db
+      .select()
+      .from(candidatos)
+      .where(eq(candidatos.id, candidatoId));
+
+    if (!candidato) {
+      return NextResponse.json({ error: "Candidato nao encontrado" }, { status: 404 });
+    }
+
+    // Busca entrevista
+    const [entrevista] = await db
+      .select()
+      .from(entrevistas)
+      .where(eq(entrevistas.id, entrevistaId));
+
+    // Busca participacao
+    const [participacao] = await db
+      .select()
+      .from(candidatoEntrevistas)
+      .where(
+        and(
+          eq(candidatoEntrevistas.candidatoId, candidatoId),
+          eq(candidatoEntrevistas.entrevistaId, entrevistaId)
+        )
+      );
+
+    if (!participacao) {
+      return NextResponse.json({ error: "Participacao nao encontrada" }, { status: 404 });
+    }
+
+    // Busca respostas
+    const respostasData = await db
+      .select({
+        id: respostas.id,
+        textoResposta: respostas.textoResposta,
+        transcricao: respostas.transcricao,
+        tempoResposta: respostas.tempoResposta,
+        perguntaId: perguntas.id,
+        perguntaTexto: perguntas.texto,
+        perguntaOrdem: perguntas.ordem,
+      })
+      .from(respostas)
+      .innerJoin(perguntas, eq(respostas.perguntaId, perguntas.id))
+      .where(
+        and(
+          eq(respostas.candidatoId, candidatoId),
+          eq(respostas.entrevistaId, entrevistaId)
+        )
+      )
+      .orderBy(asc(perguntas.ordem));
+
+    const perguntasRespostas: PerguntaResposta[] = respostasData.map((r) => ({
+      pergunta: {
+        id: r.perguntaId,
+        texto: r.perguntaTexto,
+        ordem: r.perguntaOrdem,
+      },
+      resposta: {
+        texto: r.textoResposta,
+        transcricao: r.transcricao,
+        tempoResposta: r.tempoResposta,
+      },
+    }));
+
+    // Gera PDF
+    const pdfBuffer = await renderToBuffer(
+      <PDFDocument
+        candidato={{
+          nome: candidato.nome,
+          email: candidato.email,
+        }}
+        participacao={{
+          notaGeral: participacao.notaGeral,
+          compatibilidadeVaga: participacao.compatibilidadeVaga,
+          recomendacao: participacao.recomendacao,
+          resumoGeral: participacao.resumoGeral,
+          competencias: participacao.competencias as Competencia[] | null,
+          concluidaEm: participacao.concluidaEm,
+          decisaoRecrutador: participacao.decisaoRecrutador,
+          decisaoRecrutadorObservacao: participacao.decisaoRecrutadorObservacao,
+        }}
+        perguntasRespostas={perguntasRespostas}
+        entrevistaTitulo={entrevista?.titulo}
+      />
+    );
+
+    // Retorna PDF
+    const filename = `avaliacao-${candidato.nome.replace(/\s+/g, "-").toLowerCase()}-${new Date().toISOString().split("T")[0]}.pdf`;
+
+    return new NextResponse(new Uint8Array(pdfBuffer), {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${filename}"`,
+      },
+    });
+  } catch (error) {
+    console.error("Erro ao gerar PDF:", error);
+    return NextResponse.json(
+      { error: "Erro ao gerar PDF", details: error instanceof Error ? error.message : "Erro desconhecido" },
+      { status: 500 }
+    );
+  }
 }
