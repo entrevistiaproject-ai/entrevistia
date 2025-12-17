@@ -2,8 +2,11 @@ import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { getDB } from "@/lib/db";
-import { users, teamMembers } from "@/lib/db/schema";
+import { users, teamMembers, defaultPermissionsByRole, type MemberPermissions } from "@/lib/db/schema";
 import { eq, sql, and } from "drizzle-orm";
+
+// Permissões padrão do owner (todas habilitadas)
+const ownerPermissions: MemberPermissions = defaultPermissionsByRole.owner;
 
 export const authConfig = {
   pages: {
@@ -21,14 +24,15 @@ export const authConfig = {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
-        // Armazena preferência de "manter conectado"
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const userAny = user as any;
         const keepLoggedIn = userAny.keepLoggedIn === true;
         token.keepLoggedIn = keepLoggedIn;
 
-        // Armazena permissões calculadas no login
-        token.canAccessFinancials = userAny.canAccessFinancials ?? true;
+        // Armazena informações de time e permissões calculadas no login
+        token.isTeamMember = userAny.isTeamMember ?? false;
+        token.teamOwnerId = userAny.teamOwnerId ?? null;
+        token.permissions = userAny.permissions ?? ownerPermissions;
 
         // Define expiração baseada na preferência do usuário
         // Se "manter conectado" está marcado: 7 dias
@@ -43,9 +47,12 @@ export const authConfig = {
         session.user.id = token.id as string;
         session.user.email = token.email as string;
         session.user.name = token.name as string;
-        // Passa permissões para a sessão
+        // Passa informações de time e permissões para a sessão
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (session.user as any).canAccessFinancials = token.canAccessFinancials ?? true;
+        const userAny = session.user as any;
+        userAny.isTeamMember = token.isTeamMember ?? false;
+        userAny.teamOwnerId = token.teamOwnerId ?? null;
+        userAny.permissions = token.permissions ?? ownerPermissions;
       }
       return session;
     },
@@ -91,17 +98,40 @@ export const authConfig = {
           })
           .where(eq(users.id, user.id));
 
-        // Verifica se o usuário tem acesso financeiro
-        // Owner sempre tem acesso; membro só tem se tiver role 'financial'
+        // Busca membership e permissões granulares do usuário
         const [membership] = await db
-          .select({ role: teamMembers.role, ownerId: teamMembers.ownerId })
+          .select()
           .from(teamMembers)
           .where(and(eq(teamMembers.memberId, user.id), eq(teamMembers.isActive, true)));
 
-        let canAccessFinancials = true;
-        if (membership) {
-          // É membro de um time - só tem acesso se for o próprio owner ou role financial
-          canAccessFinancials = membership.ownerId === user.id || membership.role === "financial";
+        // Se é membro de um time, usa as permissões do membro
+        // Se não, é owner do próprio time e tem todas as permissões
+        let permissions: MemberPermissions;
+        let isTeamMember = false;
+        let teamOwnerId: string | null = null;
+
+        if (membership && membership.ownerId !== user.id) {
+          // É membro de um time de outro usuário
+          isTeamMember = true;
+          teamOwnerId = membership.ownerId;
+          permissions = {
+            canViewInterviews: membership.canViewInterviews,
+            canCreateInterviews: membership.canCreateInterviews,
+            canEditInterviews: membership.canEditInterviews,
+            canDeleteInterviews: membership.canDeleteInterviews,
+            canViewCandidates: membership.canViewCandidates,
+            canApproveCandidates: membership.canApproveCandidates,
+            canRejectCandidates: membership.canRejectCandidates,
+            canViewFinancials: membership.canViewFinancials,
+            canInviteMembers: membership.canInviteMembers,
+            canRemoveMembers: membership.canRemoveMembers,
+            canEditMemberPermissions: membership.canEditMemberPermissions,
+            canEditSettings: membership.canEditSettings,
+            canEditAutoApproval: membership.canEditAutoApproval,
+          };
+        } else {
+          // É owner do próprio time - tem todas as permissões
+          permissions = ownerPermissions;
         }
 
         return {
@@ -109,7 +139,9 @@ export const authConfig = {
           email: user.email,
           name: user.nome,
           keepLoggedIn: credentials.keepLoggedIn === "true",
-          canAccessFinancials,
+          isTeamMember,
+          teamOwnerId,
+          permissions,
         };
       },
     }),

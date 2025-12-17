@@ -95,6 +95,23 @@ interface UserInfo {
   canAccessFinancials: boolean;
 }
 
+// Tipo para as permissões da sessão
+interface SessionPermissions {
+  canViewInterviews?: boolean;
+  canCreateInterviews?: boolean;
+  canEditInterviews?: boolean;
+  canDeleteInterviews?: boolean;
+  canViewCandidates?: boolean;
+  canApproveCandidates?: boolean;
+  canRejectCandidates?: boolean;
+  canViewFinancials?: boolean;
+  canInviteMembers?: boolean;
+  canRemoveMembers?: boolean;
+  canEditMemberPermissions?: boolean;
+  canEditSettings?: boolean;
+  canEditAutoApproval?: boolean;
+}
+
 export function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -102,8 +119,11 @@ export function Sidebar() {
 
   // Usa permissões da sessão JWT (calculadas no login) como valor inicial
   // A API serve como reforço de segurança e atualização
-  const sessionUser = session?.user as { canAccessFinancials?: boolean } | undefined;
-  const canAccessFinancials = userInfo?.canAccessFinancials ?? sessionUser?.canAccessFinancials ?? true;
+  const sessionUser = session?.user as { permissions?: SessionPermissions } | undefined;
+  const sessionPermissions = sessionUser?.permissions;
+
+  // Usa permissões da API se disponíveis, senão usa da sessão, senão assume owner (true)
+  const canAccessFinancials = userInfo?.canAccessFinancials ?? sessionPermissions?.canViewFinancials ?? true;
 
   useEffect(() => {
     // Buscar informações do usuário (reforço de segurança)
