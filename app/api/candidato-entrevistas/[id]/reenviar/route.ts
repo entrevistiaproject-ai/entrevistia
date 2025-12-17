@@ -160,7 +160,6 @@ export async function POST(
             nomeRecrutador: recrutador?.nome,
             linkEntrevista,
             prazoResposta: novoPrazo,
-            descricaoVaga: entrevista.descricao || undefined,
           }),
         });
 

@@ -175,7 +175,6 @@ export async function POST(request: Request) {
             nomeRecrutador: recrutador?.nome,
             linkEntrevista,
             prazoResposta,
-            descricaoVaga: entrevista.descricao || undefined,
           }),
         });
 
