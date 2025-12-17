@@ -4,12 +4,14 @@ import { getUsageFinanceiro, verificarAcessoIA } from '@/lib/services/billing';
 import { getDB } from '@/lib/db';
 import { users } from '@/lib/db/schema/users';
 import { eq } from 'drizzle-orm';
+import { getEffectiveOwnerId } from '@/lib/services/team-service';
 
 /**
  * GET /api/uso
  *
- * Retorna informações de uso do trial/plano do usuário autenticado
- * Usado pelo frontend para exibir alertas e bloquear funcionalidades
+ * Retorna informações de uso do trial/plano da CONTA (owner)
+ * Se o usuário é membro de um time, retorna as informações da conta do owner.
+ * Usado pelo frontend para exibir alertas e bloquear funcionalidades.
  */
 export async function GET() {
   try {
@@ -24,32 +26,35 @@ export async function GET() {
 
     const userId = session.user.id;
 
-    // Busca informações do usuário
+    // Obtém o owner efetivo (se for membro de time, usa o owner do time)
+    const ownerId = await getEffectiveOwnerId(userId);
+
+    // Busca informações do OWNER (conta), não do membro individual
     const db = getDB();
-    const [usuario] = await db
+    const [owner] = await db
       .select({
         planType: users.planType,
         planStatus: users.planStatus,
       })
       .from(users)
-      .where(eq(users.id, userId));
+      .where(eq(users.id, ownerId));
 
-    if (!usuario) {
+    if (!owner) {
       return NextResponse.json(
-        { error: 'Usuário não encontrado' },
+        { error: 'Conta não encontrada' },
         { status: 404 }
       );
     }
 
-    // Busca uso financeiro
+    // Busca uso financeiro da conta (já usa owner internamente)
     const usage = await getUsageFinanceiro(userId);
 
-    // Verifica acesso à IA
+    // Verifica acesso à IA da conta (já usa owner internamente)
     const acessoIA = await verificarAcessoIA(userId);
 
     return NextResponse.json({
-      planType: usuario.planType,
-      planStatus: usuario.planStatus,
+      planType: owner.planType,
+      planStatus: owner.planStatus,
       totalGasto: usage.totalGasto,
       limiteFinanceiro: usage.limiteFinanceiro,
       saldoRestante: usage.saldoRestante,

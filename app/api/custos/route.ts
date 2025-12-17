@@ -5,13 +5,23 @@ import { eq, and, gte, desc, sql } from "drizzle-orm";
 import { getUserId } from "@/lib/auth/get-user";
 import { getUsageFinanceiro } from "@/lib/services/billing";
 import { PlanType } from "@/lib/config/free-trial";
+import { getEffectiveOwnerId } from "@/lib/services/team-service";
 
+/**
+ * GET /api/custos
+ *
+ * Retorna informações detalhadas de custos da CONTA (owner).
+ * Se o usuário é membro de um time, retorna os custos da conta do owner.
+ */
 export async function GET(request: Request) {
   try {
     const userId = await getUserId();
     if (!userId) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
+
+    // Obtém o owner efetivo (se for membro de time, usa o owner do time)
+    const ownerId = await getEffectiveOwnerId(userId);
 
     let periodo = "mes";
     try {
@@ -24,15 +34,15 @@ export async function GET(request: Request) {
 
     const db = getDB();
 
-    // Buscar planType do usuário
-    const [usuario] = await db
+    // Buscar planType do OWNER (conta)
+    const [owner] = await db
       .select({ planType: users.planType })
       .from(users)
-      .where(eq(users.id, userId));
+      .where(eq(users.id, ownerId));
 
-    const planType = usuario?.planType || PlanType.FREE_TRIAL;
+    const planType = owner?.planType || PlanType.FREE_TRIAL;
 
-    // Se for free trial, buscar usage financeiro
+    // Se for free trial, buscar usage financeiro (já usa owner internamente)
     let usageFinanceiro = null;
     if (planType === PlanType.FREE_TRIAL) {
       usageFinanceiro = await getUsageFinanceiro(userId);
@@ -57,7 +67,7 @@ export async function GET(request: Request) {
         break;
     }
 
-    // 1. Buscar fatura atual do usuário
+    // 1. Buscar fatura atual da CONTA (owner)
     const mesAtual = hoje.getMonth() + 1;
     const anoAtual = hoje.getFullYear();
 
@@ -66,34 +76,34 @@ export async function GET(request: Request) {
       .from(faturas)
       .where(
         and(
-          eq(faturas.userId, userId),
+          eq(faturas.userId, ownerId),
           eq(faturas.mesReferencia, mesAtual),
           eq(faturas.anoReferencia, anoAtual)
         )
       );
 
-    // Se não existe, criar uma
+    // Se não existe, criar uma para o owner
     if (!faturaAtual) {
       [faturaAtual] = await db
         .insert(faturas)
         .values({
-          userId,
+          userId: ownerId,
           mesReferencia: mesAtual,
           anoReferencia: anoAtual,
         })
         .returning();
     }
 
-    // Calcular totais históricos
+    // Calcular totais históricos da conta
     const totaisHistoricos = await db
       .select({
         totalGasto: sql<number>`COALESCE(SUM(${faturas.valorTotal}), 0)::numeric`,
         totalPago: sql<number>`COALESCE(SUM(${faturas.valorPago}), 0)::numeric`,
       })
       .from(faturas)
-      .where(eq(faturas.userId, userId));
+      .where(eq(faturas.userId, ownerId));
 
-    // 2. Estatísticas de transações no período
+    // 2. Estatísticas de transações no período (da conta)
     const transacoesPeriodo = await db
       .select({
         total: sql<number>`COUNT(*)::int`,
@@ -102,12 +112,12 @@ export async function GET(request: Request) {
       .from(transacoes)
       .where(
         and(
-          eq(transacoes.userId, userId),
+          eq(transacoes.userId, ownerId),
           gte(transacoes.createdAt, dataInicio)
         )
       );
 
-    // Buscar custo por tipo separadamente
+    // Buscar custo por tipo separadamente (da conta)
     const custoPorTipo = await db
       .select({
         tipo: transacoes.tipo,
@@ -116,7 +126,7 @@ export async function GET(request: Request) {
       .from(transacoes)
       .where(
         and(
-          eq(transacoes.userId, userId),
+          eq(transacoes.userId, ownerId),
           gte(transacoes.createdAt, dataInicio)
         )
       )
@@ -127,7 +137,7 @@ export async function GET(request: Request) {
       return acc;
     }, {} as Record<string, number>);
 
-    // 3. Custo por entrevista
+    // 3. Custo por entrevista (da conta)
     const custosPorEntrevista = await db
       .select({
         entrevistaId: transacoes.entrevistaId,
@@ -139,14 +149,14 @@ export async function GET(request: Request) {
       .leftJoin(entrevistas, eq(transacoes.entrevistaId, entrevistas.id))
       .where(
         and(
-          eq(transacoes.userId, userId),
+          eq(transacoes.userId, ownerId),
           gte(transacoes.createdAt, dataInicio)
         )
       )
       .groupBy(transacoes.entrevistaId, entrevistas.titulo)
       .orderBy(desc(sql`SUM(${transacoes.valorCobrado})`));
 
-    // 4. Custo médio por candidato
+    // 4. Custo médio por candidato (da conta)
     // Conta quantas taxas base foram cobradas (1 por candidato avaliado)
     const candidatosStats = await db
       .select({
@@ -156,13 +166,13 @@ export async function GET(request: Request) {
       .from(transacoes)
       .where(
         and(
-          eq(transacoes.userId, userId),
+          eq(transacoes.userId, ownerId),
           eq(transacoes.tipo, "taxa_base_candidato"),
           gte(transacoes.createdAt, dataInicio)
         )
       );
 
-    // Custo total das análises de perguntas
+    // Custo total das análises de perguntas (da conta)
     const analisesStats = await db
       .select({
         custoAnalises: sql<number>`COALESCE(SUM(${transacoes.valorCobrado}), 0)::numeric`,
@@ -170,7 +180,7 @@ export async function GET(request: Request) {
       .from(transacoes)
       .where(
         and(
-          eq(transacoes.userId, userId),
+          eq(transacoes.userId, ownerId),
           eq(transacoes.tipo, "analise_pergunta"),
           gte(transacoes.createdAt, dataInicio)
         )
@@ -183,7 +193,7 @@ export async function GET(request: Request) {
       ? custoTotalCandidatos / totalCandidatos
       : 0;
 
-    // 5. Evolução mensal (últimos 6 meses)
+    // 5. Evolução mensal (últimos 6 meses) da conta
     const seismesesAtras = new Date();
     seismesesAtras.setMonth(hoje.getMonth() - 6);
 
@@ -198,7 +208,7 @@ export async function GET(request: Request) {
       .from(transacoes)
       .where(
         and(
-          eq(transacoes.userId, userId),
+          eq(transacoes.userId, ownerId),
           gte(transacoes.createdAt, seismesesAtras)
         )
       )
@@ -208,7 +218,7 @@ export async function GET(request: Request) {
     // 6. Top 5 entrevistas mais caras
     const top5Entrevistas = custosPorEntrevista.slice(0, 5);
 
-    // 7. Métricas de análises - Total de perguntas analisadas no período
+    // 7. Métricas de análises - Total de perguntas analisadas no período (da conta)
     const perguntasAnalisadas = await db
       .select({
         total: sql<number>`COUNT(*)::int`,
@@ -216,13 +226,13 @@ export async function GET(request: Request) {
       .from(transacoes)
       .where(
         and(
-          eq(transacoes.userId, userId),
+          eq(transacoes.userId, ownerId),
           eq(transacoes.tipo, "analise_pergunta"),
           gte(transacoes.createdAt, dataInicio)
         )
       );
 
-    // 8. Total de entrevistas analisadas (candidatos que tiveram análise completa)
+    // 8. Total de entrevistas analisadas (candidatos que tiveram análise completa) da conta
     const entrevistasAnalisadas = await db
       .select({
         total: sql<number>`COUNT(DISTINCT ${candidatoEntrevistas.id})::int`,
@@ -231,13 +241,13 @@ export async function GET(request: Request) {
       .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
       .where(
         and(
-          eq(entrevistas.userId, userId),
+          eq(entrevistas.userId, ownerId),
           sql`${candidatoEntrevistas.avaliadoEm} IS NOT NULL`,
           gte(candidatoEntrevistas.createdAt, dataInicio)
         )
       );
 
-    // 9. Dados para gráfico de entrevistas por período (dia, semana, mês, ano)
+    // 9. Dados para gráfico de entrevistas por período (dia, semana, mês, ano) da conta
     // Gráfico diário (últimos 30 dias)
     const trintaDiasAtras = new Date();
     trintaDiasAtras.setDate(hoje.getDate() - 30);
@@ -252,7 +262,7 @@ export async function GET(request: Request) {
       .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
       .where(
         and(
-          eq(entrevistas.userId, userId),
+          eq(entrevistas.userId, ownerId),
           gte(candidatoEntrevistas.createdAt, trintaDiasAtras)
         )
       )
@@ -273,7 +283,7 @@ export async function GET(request: Request) {
       .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
       .where(
         and(
-          eq(entrevistas.userId, userId),
+          eq(entrevistas.userId, ownerId),
           gte(candidatoEntrevistas.createdAt, dozeSemanas)
         )
       )
@@ -294,7 +304,7 @@ export async function GET(request: Request) {
       .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
       .where(
         and(
-          eq(entrevistas.userId, userId),
+          eq(entrevistas.userId, ownerId),
           gte(candidatoEntrevistas.createdAt, dozeMesesAtras)
         )
       )
@@ -315,14 +325,14 @@ export async function GET(request: Request) {
       .innerJoin(entrevistas, eq(candidatoEntrevistas.entrevistaId, entrevistas.id))
       .where(
         and(
-          eq(entrevistas.userId, userId),
+          eq(entrevistas.userId, ownerId),
           gte(candidatoEntrevistas.createdAt, cincoAnosAtras)
         )
       )
       .groupBy(sql`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY')`)
       .orderBy(sql`TO_CHAR(${candidatoEntrevistas.createdAt}, 'YYYY')`);
 
-    // 10. Buscar transações recentes para detalhamento (útil para trial)
+    // 10. Buscar transações recentes para detalhamento (útil para trial) da conta
     const transacoesRecentes = await db
       .select({
         id: transacoes.id,
@@ -334,7 +344,7 @@ export async function GET(request: Request) {
         createdAt: transacoes.createdAt,
       })
       .from(transacoes)
-      .where(eq(transacoes.userId, userId))
+      .where(eq(transacoes.userId, ownerId))
       .orderBy(desc(transacoes.createdAt))
       .limit(50);
 

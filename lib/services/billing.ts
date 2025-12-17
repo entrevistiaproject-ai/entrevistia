@@ -8,19 +8,24 @@ import { logSystemError } from "@/lib/support/ticket-service";
 import { logger } from "@/lib/logger";
 import { validarNovaCobranca, validarCobrancaRegistrada } from "./billing-validation";
 import { enviarEmail } from "@/lib/email/resend";
+import { getEffectiveOwnerId } from "./team-service";
 
 /**
- * Verifica se o usuário é uma conta de teste
+ * Verifica se a conta é uma conta de teste
+ * Se o usuário é membro de um time, verifica se o owner do time é conta de teste.
  */
 export async function isTestAccount(userId: string): Promise<boolean> {
   const db = getDB();
 
-  const [usuario] = await db
+  // Obtém o owner efetivo
+  const ownerId = await getEffectiveOwnerId(userId);
+
+  const [owner] = await db
     .select({ isTestAccount: users.isTestAccount })
     .from(users)
-    .where(eq(users.id, userId));
+    .where(eq(users.id, ownerId));
 
-  return usuario?.isTestAccount || false;
+  return owner?.isTestAccount || false;
 }
 
 export interface UsageFinanceiro {
@@ -62,21 +67,27 @@ export interface UsageFinanceiro {
 }
 
 /**
- * Busca o uso financeiro do usuário
+ * Busca o uso financeiro da conta (owner)
  * Calcula quanto já foi gasto e quanto ainda resta do free trial
  * Considera crédito extra concedido pelo admin
  * Contas de teste têm acesso ilimitado
+ *
+ * IMPORTANTE: Saldo e limite são por CONTA (owner), não por usuário individual.
+ * Se o usuário é membro de um time, usa o saldo/limite do owner do time.
  */
 export async function getUsageFinanceiro(userId: string): Promise<UsageFinanceiro> {
   const db = getDB();
 
-  // Busca todas as transações do usuário
+  // Obtém o owner efetivo (se for membro de time, usa o owner do time)
+  const ownerId = await getEffectiveOwnerId(userId);
+
+  // Busca todas as transações da conta (owner)
   const [resultado] = await db
     .select({
       totalGasto: sql<string>`COALESCE(SUM(${transacoes.valorCobrado}), 0)`,
     })
     .from(transacoes)
-    .where(eq(transacoes.userId, userId));
+    .where(eq(transacoes.userId, ownerId));
 
   // Conta total de análises (cada taxa_base_candidato representa uma análise completa)
   const [analises] = await db
@@ -86,19 +97,19 @@ export async function getUsageFinanceiro(userId: string): Promise<UsageFinanceir
     .from(transacoes)
     .where(
       and(
-        eq(transacoes.userId, userId),
+        eq(transacoes.userId, ownerId),
         eq(transacoes.tipo, "taxa_base_candidato")
       )
     );
 
-  // Busca o crédito extra e se é conta de teste
+  // Busca o crédito extra e se é conta de teste do OWNER
   const [usuario] = await db
     .select({
       creditoExtra: users.creditoExtra,
       isTestAccount: users.isTestAccount,
     })
     .from(users)
-    .where(eq(users.id, userId));
+    .where(eq(users.id, ownerId));
 
   const totalGasto = parseFloat(resultado?.totalGasto || "0");
   const totalAnalises = analises?.total || 0;
@@ -131,10 +142,14 @@ export async function getUsageFinanceiro(userId: string): Promise<UsageFinanceir
 }
 
 /**
- * Busca detalhes das faturas do usuário
+ * Busca detalhes das faturas da conta (owner)
+ * Se o usuário é membro de um time, busca as faturas do owner do time.
  */
 export async function getFaturasResumo(userId: string) {
   const db = getDB();
+
+  // Obtém o owner efetivo
+  const ownerId = await getEffectiveOwnerId(userId);
 
   const faturasUsuario = await db
     .select({
@@ -152,7 +167,7 @@ export async function getFaturasResumo(userId: string) {
       dataVencimento: faturas.dataVencimento,
     })
     .from(faturas)
-    .where(eq(faturas.userId, userId))
+    .where(eq(faturas.userId, ownerId))
     .orderBy(sql`${faturas.anoReferencia} DESC, ${faturas.mesReferencia} DESC`)
     .limit(12); // Últimos 12 meses
 
@@ -160,10 +175,14 @@ export async function getFaturasResumo(userId: string) {
 }
 
 /**
- * Busca as últimas transações do usuário
+ * Busca as últimas transações da conta (owner)
+ * Se o usuário é membro de um time, busca as transações do owner do time.
  */
 export async function getTransacoesRecentes(userId: string, limit: number = 10) {
   const db = getDB();
+
+  // Obtém o owner efetivo
+  const ownerId = await getEffectiveOwnerId(userId);
 
   const transacoesRecentes = await db
     .select({
@@ -177,7 +196,7 @@ export async function getTransacoesRecentes(userId: string, limit: number = 10) 
       metadados: transacoes.metadados,
     })
     .from(transacoes)
-    .where(eq(transacoes.userId, userId))
+    .where(eq(transacoes.userId, ownerId))
     .orderBy(sql`${transacoes.createdAt} DESC`)
     .limit(limit);
 
@@ -231,6 +250,9 @@ export type TipoTransacao =
 
 /**
  * Registra uma transação de cobrança
+ *
+ * IMPORTANTE: A transação é registrada para o OWNER da conta, não para o usuário individual.
+ * Se o userId passado é um membro de time, a transação será registrada para o owner do time.
  */
 export async function registrarTransacao(params: {
   userId: string;
@@ -252,6 +274,9 @@ export async function registrarTransacao(params: {
 }): Promise<{ success: boolean; transacaoId?: string; error?: string }> {
   const db = getDB();
 
+  // Obtém o owner efetivo (se for membro de time, usa o owner do time)
+  const ownerId = await getEffectiveOwnerId(params.userId);
+
   // Calcula custo base e valor cobrado baseado no tipo (declarados fora do try para log de erro)
   let custoBase: number = 0;
   let valorCobrado: number = 0;
@@ -259,6 +284,7 @@ export async function registrarTransacao(params: {
   // Log início da tentativa de registro
   logger.debug("[BILLING] Iniciando registro de transação", {
     userId: params.userId,
+    ownerId: ownerId,
     tipo: params.tipo,
     entrevistaId: params.entrevistaId,
     respostaId: params.respostaId,
@@ -318,6 +344,7 @@ export async function registrarTransacao(params: {
     // Log do valor que será cobrado
     logger.info("[BILLING] Registrando cobrança", {
       userId: params.userId,
+      ownerId: ownerId,
       tipo: params.tipo,
       valorCobrado: valorCobrado.toFixed(2),
       custoBase: custoBase.toFixed(6),
@@ -347,7 +374,7 @@ export async function registrarTransacao(params: {
       }
     }
 
-    // Busca ou cria a fatura do mês atual
+    // Busca ou cria a fatura do mês atual para o OWNER da conta
     const now = new Date();
     const mesAtual = now.getMonth() + 1;
     const anoAtual = now.getFullYear();
@@ -357,19 +384,19 @@ export async function registrarTransacao(params: {
       .from(faturas)
       .where(
         and(
-          eq(faturas.userId, params.userId),
+          eq(faturas.userId, ownerId),
           eq(faturas.mesReferencia, mesAtual),
           eq(faturas.anoReferencia, anoAtual)
         )
       )
       .limit(1);
 
-    // Cria fatura se não existir
+    // Cria fatura se não existir (para o owner)
     if (!faturaAtual) {
       const [novaFatura] = await db
         .insert(faturas)
         .values({
-          userId: params.userId,
+          userId: ownerId,
           mesReferencia: mesAtual,
           anoReferencia: anoAtual,
           valorTotal: "0.00",
@@ -380,11 +407,11 @@ export async function registrarTransacao(params: {
       faturaAtual = novaFatura;
     }
 
-    // Cria a transação
+    // Cria a transação para o OWNER da conta
     const [transacao] = await db
       .insert(transacoes)
       .values({
-        userId: params.userId,
+        userId: ownerId,
         faturaId: faturaAtual.id,
         entrevistaId: params.entrevistaId,
         respostaId: params.respostaId,
@@ -413,6 +440,7 @@ export async function registrarTransacao(params: {
       transacaoId: transacao.id,
       faturaId: faturaAtual.id,
       userId: params.userId,
+      ownerId: ownerId,
       valorCobrado: valorCobrado.toFixed(2),
       tipo: params.tipo,
     });
@@ -657,12 +685,18 @@ export interface AcessoIAResult {
 /**
  * Verifica se o usuário tem acesso às funcionalidades de IA
  * Bloqueia acesso quando o limite do free trial é excedido
+ *
+ * IMPORTANTE: Verifica o acesso baseado na CONTA (owner), não no usuário individual.
+ * Se o usuário é membro de um time, verifica o plano/limite do owner do time.
  */
 export async function verificarAcessoIA(userId: string): Promise<AcessoIAResult> {
   const db = getDB();
 
-  // Busca dados do usuário
-  const [usuario] = await db
+  // Obtém o owner efetivo (se for membro de time, usa o owner do time)
+  const ownerId = await getEffectiveOwnerId(userId);
+
+  // Busca dados do OWNER da conta (não do membro)
+  const [owner] = await db
     .select({
       planType: users.planType,
       planStatus: users.planStatus,
@@ -672,9 +706,9 @@ export async function verificarAcessoIA(userId: string): Promise<AcessoIAResult>
       email: users.email,
     })
     .from(users)
-    .where(eq(users.id, userId));
+    .where(eq(users.id, ownerId));
 
-  if (!usuario) {
+  if (!owner) {
     return {
       permitido: false,
       motivo: "usuario_nao_encontrado",
@@ -683,7 +717,7 @@ export async function verificarAcessoIA(userId: string): Promise<AcessoIAResult>
   }
 
   // Contas de teste sempre têm acesso
-  if (usuario.isTestAccount) {
+  if (owner.isTestAccount) {
     return {
       permitido: true,
       motivo: "conta_teste",
@@ -694,7 +728,7 @@ export async function verificarAcessoIA(userId: string): Promise<AcessoIAResult>
   }
 
   // Planos pagos sempre têm acesso (pay-per-use)
-  if (usuario.planType !== PlanType.FREE_TRIAL) {
+  if (owner.planType !== PlanType.FREE_TRIAL) {
     return {
       permitido: true,
       motivo: "plano_pago",
@@ -704,14 +738,14 @@ export async function verificarAcessoIA(userId: string): Promise<AcessoIAResult>
     };
   }
 
-  // Para free trial, verifica o limite financeiro
+  // Para free trial, verifica o limite financeiro (já usa owner internamente)
   const usage = await getUsageFinanceiro(userId);
 
-  // Verifica se precisa enviar notificação de 75%
-  if (usage.percentualUsado >= 75 && !usuario.notificacao75EnviadaEm) {
-    // Envia notificação de 75% em background (não bloqueia)
-    enviarNotificacao75(userId, usuario.nome, usuario.email, usage).catch((err) => {
-      logger.error("[BILLING] Erro ao enviar notificação de 75%", { error: err, userId });
+  // Verifica se precisa enviar notificação de 75% para o OWNER
+  if (usage.percentualUsado >= 75 && !owner.notificacao75EnviadaEm) {
+    // Envia notificação de 75% em background (não bloqueia) para o owner
+    enviarNotificacao75(ownerId, owner.nome, owner.email, usage).catch((err) => {
+      logger.error("[BILLING] Erro ao enviar notificação de 75%", { error: err, userId, ownerId });
     });
   }
 
