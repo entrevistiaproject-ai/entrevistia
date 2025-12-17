@@ -55,6 +55,10 @@ export const users = pgTable("users", {
   // Preferências de comunicação
   aceitaEmailMarketing: boolean("aceita_email_marketing").default(false).notNull(),
 
+  // Indicadores de uso
+  lastLoginAt: timestamp("last_login_at", { mode: "date" }),
+  loginCount: integer("login_count").default(0).notNull(),
+
   // Auditoria
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),

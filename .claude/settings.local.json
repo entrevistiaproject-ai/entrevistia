@@ -105,7 +105,16 @@
       "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" secret list)",
       "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" run list --limit 3)",
       "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" run list --limit 5)",
-      "Bash(timeout 300 npm run build:*)"
+      "Bash(timeout 300 npm run build:*)",
+      "Bash(git restore:*)",
+      "Bash(timeout 60 npm run db:generate:*)",
+      "Bash(npx drizzle-kit:*)",
+      "Bash(wc -l:*)",
+      "Bash(timeout 10 npm run:*)",
+      "Bash(timeout 10 bash -c 'printf \"\"area\\n\"\" | npm run db:generate 2>&1')",
+      "Bash(npx shadcn@latest add collapsible:*)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(timeout 60 npx tsc:*)"
     ],
     "deny": [],
     "ask": []

@@ -3,7 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { getDB } from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 export const authConfig = {
   pages: {
@@ -74,6 +74,15 @@ export const authConfig = {
         if (!isPasswordValid) {
           return null;
         }
+
+        // Atualiza contadores de login
+        await db
+          .update(users)
+          .set({
+            lastLoginAt: new Date(),
+            loginCount: sql`${users.loginCount} + 1`,
+          })
+          .where(eq(users.id, user.id));
 
         return {
           id: user.id,

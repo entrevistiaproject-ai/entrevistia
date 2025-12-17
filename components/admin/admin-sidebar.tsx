@@ -20,6 +20,7 @@ import {
   Ticket,
   Bug,
   Shield,
+  Building2,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 
@@ -58,6 +59,12 @@ const menuGroups = [
   {
     title: "Gerenciamento",
     items: [
+      {
+        title: "Contas",
+        href: "/admin/contas",
+        icon: Building2,
+        permission: "canManageUsers" as const,
+      },
       {
         title: "Usuários",
         href: "/admin/usuarios",

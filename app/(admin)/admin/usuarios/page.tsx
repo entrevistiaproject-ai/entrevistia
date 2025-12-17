@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -25,22 +24,21 @@ import {
   ChevronLeft,
   ChevronRight,
   Building2,
-  Clock,
   CheckCircle,
   XCircle,
-  AlertCircle,
   Download,
   RefreshCw,
   Eye,
   Edit,
   Loader2,
   ChevronsUpDown,
-  Plus,
-  Coins,
   FlaskConical,
   Users,
   Crown,
   UserCheck,
+  Calendar,
+  LogIn,
+  Briefcase,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -57,20 +55,7 @@ interface Usuario {
   emailVerified: string | null;
   createdAt: string;
   ultimoLogin: string | null;
-  gastoTotal: number;
-  totalDevido: number;
-  totalRecebido: number;
-  gastoMesAtual: number;
-  mediaGastoMensal: number;
-  creditoExtra: number;
-  limiteFreeTrial: number;
-  limiteTotal: number;
-  saldoRestante: number;
-  ultimaFatura: {
-    valor: number;
-    status: string;
-    dataVencimento: string | null;
-  } | null;
+  totalLogins: number;
   totalEntrevistas: number;
   totalCandidatos: number;
   isTeste: boolean;
@@ -85,32 +70,16 @@ interface Usuario {
   teamMemberCount: number;
 }
 
-interface UsuarioDetalhe extends Usuario {
-  faturas: Array<{
-    id: string;
-    mes: number;
-    ano: number;
-    valor: number;
-    status: string;
-  }>;
-  transacoesRecentes: Array<{
-    id: string;
-    tipo: string;
-    valor: number;
-    data: string;
-  }>;
-}
+type UsuarioDetalhe = Usuario;
 
-type SortField = "nome" | "email" | "gastoTotal" | "createdAt" | "planType";
+type SortField = "nome" | "email" | "createdAt" | "ultimoLogin" | "totalLogins";
 type SortDirection = "asc" | "desc";
 
 export default function UsuariosPage() {
   const [loading, setLoading] = useState(true);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [search, setSearch] = useState("");
-  const [filtroPlano, setFiltroPlano] = useState<string>("todos");
   const [filtroStatus, setFiltroStatus] = useState<string>("todos");
-  const [filtroPagamento, setFiltroPagamento] = useState<string>("todos");
   const [filtroTipoConta, setFiltroTipoConta] = useState<string>("todos");
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [sortField, setSortField] = useState<SortField>("createdAt");
@@ -119,18 +88,11 @@ export default function UsuariosPage() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
 
-  // Modal de créditos
-  const [creditosModalOpen, setCreditosModalOpen] = useState(false);
-  const [creditosUser, setCreditosUser] = useState<Usuario | null>(null);
-  const [creditoValor, setCreditoValor] = useState("");
-  const [creditoLoading, setCreditoLoading] = useState(false);
-
   // Modal de edição
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editUser, setEditUser] = useState<Usuario | null>(null);
   const [editLoading, setEditLoading] = useState(false);
   const [editForm, setEditForm] = useState({
-    planType: "",
     isActive: true,
     isTestAccount: false,
   });
@@ -144,7 +106,7 @@ export default function UsuariosPage() {
   const fetchUsuarios = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/admin/usuarios");
+      const response = await fetch("/api/admin/usuarios-lista");
       if (response.ok) {
         const data = await response.json();
         setUsuarios(data.usuarios);
@@ -158,7 +120,7 @@ export default function UsuariosPage() {
 
   const fetchUserDetails = async (userId: string) => {
     setDetailsLoading(true);
-    setDetailsOpen(true); // Abre o modal imediatamente para mostrar loading
+    setDetailsOpen(true);
     try {
       const response = await fetch(`/api/admin/usuarios/${userId}`);
       if (response.ok) {
@@ -179,54 +141,9 @@ export default function UsuariosPage() {
     }
   };
 
-  const openCreditosModal = (usuario: Usuario) => {
-    setCreditosUser(usuario);
-    setCreditoValor(usuario.creditoExtra?.toString() || "0");
-    setCreditosModalOpen(true);
-  };
-
-  const saveCreditoExtra = async () => {
-    if (!creditosUser) return;
-
-    setCreditoLoading(true);
-    try {
-      const response = await fetch(`/api/admin/usuarios/${creditosUser.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ creditoExtra: parseFloat(creditoValor) || 0 }),
-      });
-
-      if (response.ok) {
-        // Atualiza a lista localmente
-        setUsuarios((prev) =>
-          prev.map((u) =>
-            u.id === creditosUser.id
-              ? {
-                  ...u,
-                  creditoExtra: parseFloat(creditoValor) || 0,
-                  limiteTotal: u.limiteFreeTrial + (parseFloat(creditoValor) || 0),
-                  saldoRestante: Math.max(0, u.limiteFreeTrial + (parseFloat(creditoValor) || 0) - u.gastoTotal),
-                }
-              : u
-          )
-        );
-        setCreditosModalOpen(false);
-      } else {
-        const data = await response.json();
-        alert(data.error || "Erro ao atualizar créditos");
-      }
-    } catch (error) {
-      console.error("Erro ao salvar créditos:", error);
-      alert("Erro ao salvar créditos");
-    } finally {
-      setCreditoLoading(false);
-    }
-  };
-
   const openEditModal = (usuario: Usuario) => {
     setEditUser(usuario);
     setEditForm({
-      planType: usuario.planType,
       isActive: usuario.isActive,
       isTestAccount: usuario.isTeste || false,
     });
@@ -242,20 +159,17 @@ export default function UsuariosPage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          planType: editForm.planType,
           isActive: editForm.isActive,
           isTestAccount: editForm.isTestAccount,
         }),
       });
 
       if (response.ok) {
-        // Atualiza a lista localmente
         setUsuarios((prev) =>
           prev.map((u) =>
             u.id === editUser.id
               ? {
                   ...u,
-                  planType: editForm.planType,
                   isActive: editForm.isActive,
                   isTeste: editForm.isTestAccount,
                 }
@@ -286,13 +200,9 @@ export default function UsuariosPage() {
         (u) =>
           u.nome.toLowerCase().includes(searchLower) ||
           u.email.toLowerCase().includes(searchLower) ||
-          (u.empresa && u.empresa.toLowerCase().includes(searchLower))
+          (u.empresa && u.empresa.toLowerCase().includes(searchLower)) ||
+          (u.cargo && u.cargo.toLowerCase().includes(searchLower))
       );
-    }
-
-    // Filtro por plano
-    if (filtroPlano !== "todos") {
-      filtered = filtered.filter((u) => u.planType === filtroPlano);
     }
 
     // Filtro por status
@@ -303,23 +213,6 @@ export default function UsuariosPage() {
         filtered = filtered.filter((u) => !u.isActive);
       } else if (filtroStatus === "verificado") {
         filtered = filtered.filter((u) => u.emailVerified);
-      }
-    }
-
-    // Filtro por pagamento
-    if (filtroPagamento !== "todos") {
-      if (filtroPagamento === "em_dia") {
-        filtered = filtered.filter(
-          (u) => !u.ultimaFatura || u.ultimaFatura.status === "paga"
-        );
-      } else if (filtroPagamento === "pendente") {
-        filtered = filtered.filter(
-          (u) => u.ultimaFatura && u.ultimaFatura.status === "aberta"
-        );
-      } else if (filtroPagamento === "atrasado") {
-        filtered = filtered.filter(
-          (u) => u.ultimaFatura && u.ultimaFatura.status === "vencida"
-        );
       }
     }
 
@@ -336,8 +229,8 @@ export default function UsuariosPage() {
 
     // Ordenação
     filtered.sort((a, b) => {
-      let valueA: string | number;
-      let valueB: string | number;
+      let valueA: string | number | null;
+      let valueB: string | number | null;
 
       switch (sortField) {
         case "nome":
@@ -348,13 +241,13 @@ export default function UsuariosPage() {
           valueA = a.email.toLowerCase();
           valueB = b.email.toLowerCase();
           break;
-        case "gastoTotal":
-          valueA = a.gastoTotal;
-          valueB = b.gastoTotal;
+        case "ultimoLogin":
+          valueA = a.ultimoLogin ? new Date(a.ultimoLogin).getTime() : 0;
+          valueB = b.ultimoLogin ? new Date(b.ultimoLogin).getTime() : 0;
           break;
-        case "planType":
-          valueA = a.planType;
-          valueB = b.planType;
+        case "totalLogins":
+          valueA = a.totalLogins || 0;
+          valueB = b.totalLogins || 0;
           break;
         case "createdAt":
         default:
@@ -363,13 +256,15 @@ export default function UsuariosPage() {
           break;
       }
 
+      if (valueA === null) return sortDirection === "asc" ? 1 : -1;
+      if (valueB === null) return sortDirection === "asc" ? -1 : 1;
       if (valueA < valueB) return sortDirection === "asc" ? -1 : 1;
       if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
       return 0;
     });
 
     return filtered;
-  }, [usuarios, search, filtroPlano, filtroStatus, filtroPagamento, filtroTipoConta, sortField, sortDirection]);
+  }, [usuarios, search, filtroStatus, filtroTipoConta, sortField, sortDirection]);
 
   // Paginação
   const totalPaginas = Math.ceil(usuariosFiltrados.length / itensPorPagina);
@@ -387,79 +282,39 @@ export default function UsuariosPage() {
     }
   };
 
-  const getPlanBadge = (planType: string) => {
-    switch (planType) {
-      case "free_trial":
-        return (
-          <Badge className="bg-blue-500/30 text-blue-200 border-blue-400/40">
-            Gratuito
-          </Badge>
-        );
-      case "basic":
-        return (
-          <Badge className="bg-emerald-500/30 text-emerald-200 border-emerald-400/40">
-            Basic
-          </Badge>
-        );
-      case "professional":
-        return (
-          <Badge className="bg-amber-500/30 text-amber-200 border-amber-400/40">
-            Profissional
-          </Badge>
-        );
-      case "enterprise":
-        return (
-          <Badge className="bg-purple-500/30 text-purple-200 border-purple-400/40">
-            Profissional
-          </Badge>
-        );
-      default:
-        return (
-          <Badge className="bg-slate-500/30 text-slate-200 border-slate-400/40">
-            {planType}
-          </Badge>
-        );
-    }
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return "-";
+    return new Date(dateStr).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
   };
 
-  const getPaymentStatus = (usuario: Usuario) => {
-    if (!usuario.ultimaFatura) {
-      return (
-        <Badge variant="outline" className="text-slate-300 border-slate-500">
-          Sem faturas
-        </Badge>
-      );
-    }
+  const formatDateTime = (dateStr: string | null) => {
+    if (!dateStr) return "-";
+    return new Date(dateStr).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
-    switch (usuario.ultimaFatura.status) {
-      case "paga":
-        return (
-          <Badge className="bg-emerald-500/30 text-emerald-200 border-emerald-400/40">
-            <CheckCircle className="h-3 w-3 mr-1" />
-            Em dia
-          </Badge>
-        );
-      case "aberta":
-        return (
-          <Badge className="bg-amber-500/30 text-amber-200 border-amber-400/40">
-            <Clock className="h-3 w-3 mr-1" />
-            Pendente
-          </Badge>
-        );
-      case "vencida":
-        return (
-          <Badge className="bg-red-500/30 text-red-200 border-red-400/40">
-            <AlertCircle className="h-3 w-3 mr-1" />
-            Atrasado
-          </Badge>
-        );
-      default:
-        return (
-          <Badge variant="outline" className="text-slate-300 border-slate-500">
-            {usuario.ultimaFatura.status}
-          </Badge>
-        );
-    }
+  const getTimeSinceLastLogin = (dateStr: string | null) => {
+    if (!dateStr) return "Nunca";
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "Hoje";
+    if (diffDays === 1) return "Ontem";
+    if (diffDays < 7) return `${diffDays} dias`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} sem`;
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)} meses`;
+    return `${Math.floor(diffDays / 365)} anos`;
   };
 
   if (loading) {
@@ -504,26 +359,12 @@ export default function UsuariosPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
               <Input
-                placeholder="Buscar por nome, email ou empresa..."
+                placeholder="Buscar por nome, email, empresa ou cargo..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10 bg-slate-800/50 border-slate-700 text-white"
               />
             </div>
-
-            {/* Filtro Plano */}
-            <Select value={filtroPlano} onValueChange={setFiltroPlano}>
-              <SelectTrigger className="w-full lg:w-40 bg-slate-800/50 border-slate-700 text-white">
-                <SelectValue placeholder="Plano" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                <SelectItem value="todos">Todos os planos</SelectItem>
-                <SelectItem value="free_trial">Gratuito</SelectItem>
-                <SelectItem value="basic">Basic</SelectItem>
-                <SelectItem value="professional">Profissional</SelectItem>
-                <SelectItem value="enterprise">Profissional</SelectItem>
-              </SelectContent>
-            </Select>
 
             {/* Filtro Status */}
             <Select value={filtroStatus} onValueChange={setFiltroStatus}>
@@ -535,19 +376,6 @@ export default function UsuariosPage() {
                 <SelectItem value="ativo">Ativos</SelectItem>
                 <SelectItem value="inativo">Inativos</SelectItem>
                 <SelectItem value="verificado">Verificados</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Filtro Pagamento */}
-            <Select value={filtroPagamento} onValueChange={setFiltroPagamento}>
-              <SelectTrigger className="w-full lg:w-44 bg-slate-800/50 border-slate-700 text-white">
-                <SelectValue placeholder="Pagamento" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                <SelectItem value="todos">Todos</SelectItem>
-                <SelectItem value="em_dia">Em dia</SelectItem>
-                <SelectItem value="pendente">Pendente</SelectItem>
-                <SelectItem value="atrasado">Atrasado</SelectItem>
               </SelectContent>
             </Select>
 
@@ -567,129 +395,9 @@ export default function UsuariosPage() {
         </CardContent>
       </Card>
 
-      {/* Lista de Usuários - Cards para mobile, Tabela para desktop */}
+      {/* Lista de Usuários */}
       <Card className="bg-slate-900/50 border-slate-700 overflow-hidden">
-        {/* Versão Mobile - Cards */}
-        <div className="md:hidden divide-y divide-slate-700/50">
-          {usuariosPaginados.map((usuario) => (
-            <div
-              key={usuario.id}
-              className="p-4 hover:bg-slate-800/30 transition-colors cursor-pointer"
-              onClick={() => fetchUserDetails(usuario.id)}
-            >
-              <div className="flex items-start gap-3">
-                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white text-sm font-medium shrink-0">
-                  {usuario.nome
-                    .split(" ")
-                    .slice(0, 2)
-                    .map((n) => n[0])
-                    .join("")
-                    .toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-white truncate">
-                        {usuario.nome}
-                      </p>
-                      <p className="text-xs text-slate-400 truncate">
-                        {usuario.email}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      {usuario.planType === "free_trial" && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openCreditosModal(usuario);
-                          }}
-                          className="p-1.5 rounded-lg bg-emerald-900 text-emerald-400"
-                        >
-                          <Coins className="h-3.5 w-3.5" />
-                        </button>
-                      )}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openEditModal(usuario);
-                        }}
-                        className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-700"
-                      >
-                        <Edit className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 mt-2">
-                    {getPlanBadge(usuario.planType)}
-                    {usuario.isTeste && (
-                      <Badge className="bg-amber-500/30 text-amber-200 border-amber-400/40 text-xs">
-                        <FlaskConical className="h-3 w-3 mr-1" />
-                        Teste
-                      </Badge>
-                    )}
-                    {usuario.isActive ? (
-                      <Badge className="bg-emerald-500/30 text-emerald-200 border-emerald-400/40 text-xs">
-                        Ativo
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-red-500/30 text-red-200 border-red-400/40 text-xs">
-                        Inativo
-                      </Badge>
-                    )}
-                    {/* Badge de Time */}
-                    {usuario.isTeamMember ? (
-                      <Badge className="bg-purple-500/30 text-purple-200 border-purple-400/40 text-xs">
-                        <UserCheck className="h-3 w-3 mr-1" />
-                        Membro
-                      </Badge>
-                    ) : usuario.teamMemberCount > 0 ? (
-                      <Badge className="bg-cyan-500/30 text-cyan-200 border-cyan-400/40 text-xs">
-                        <Users className="h-3 w-3 mr-1" />
-                        {usuario.teamMemberCount}
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-yellow-500/30 text-yellow-200 border-yellow-400/40 text-xs">
-                        <Crown className="h-3 w-3 mr-1" />
-                        Owner
-                      </Badge>
-                    )}
-                  </div>
-                  {/* Info do time se for membro */}
-                  {usuario.isTeamMember && usuario.teamOwner && (
-                    <div className="flex items-center gap-1 mt-1 text-xs text-purple-300">
-                      <span>Time de:</span>
-                      <span className="font-medium">{usuario.teamOwner.nome}</span>
-                    </div>
-                  )}
-                  {usuario.planType === "free_trial" ? (
-                    <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-700/50">
-                      <div className="text-xs text-slate-300">
-                        Usado: <span className="text-white font-medium">R$ {(usuario.gastoTotal || 0).toFixed(2)}</span>
-                      </div>
-                      <div className="text-xs text-slate-300">
-                        Saldo: <span className={cn("font-medium", usuario.saldoRestante > 0 ? "text-emerald-300" : "text-red-300")}>R$ {(usuario.saldoRestante || 0).toFixed(2)}</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-700/50">
-                      <div className="text-xs text-slate-300">
-                        Recebido: <span className="text-emerald-300 font-medium">R$ {(usuario.totalRecebido || 0).toFixed(2)}</span>
-                      </div>
-                      {usuario.totalDevido > 0 && (
-                        <div className="text-xs text-slate-300">
-                          Devido: <span className="text-amber-300 font-medium">R$ {(usuario.totalDevido || 0).toFixed(2)}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Versão Desktop - Tabela */}
-        <div className="hidden md:block">
+        <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-slate-800/50 border-b border-slate-700">
               <tr>
@@ -704,38 +412,42 @@ export default function UsuariosPage() {
                 </th>
                 <th className="px-4 py-3 text-left">
                   <span className="text-xs font-semibold uppercase text-slate-400">
-                    Status
+                    Cargo
                   </span>
                 </th>
-                <th className="px-4 py-3 text-left hidden lg:table-cell">
+                <th className="px-4 py-3 text-left">
+                  <span className="text-xs font-semibold uppercase text-slate-400">
+                    Tipo
+                  </span>
+                </th>
+                <th className="px-4 py-3 text-center">
                   <button
-                    onClick={() => handleSort("planType")}
+                    onClick={() => handleSort("totalLogins")}
+                    className="flex items-center gap-1 text-xs font-semibold uppercase text-slate-400 hover:text-white mx-auto"
+                  >
+                    Logins
+                    <ChevronsUpDown className="h-3 w-3" />
+                  </button>
+                </th>
+                <th className="px-4 py-3 text-left">
+                  <button
+                    onClick={() => handleSort("ultimoLogin")}
                     className="flex items-center gap-1 text-xs font-semibold uppercase text-slate-400 hover:text-white"
                   >
-                    Plano
+                    Último Acesso
                     <ChevronsUpDown className="h-3 w-3" />
                   </button>
                 </th>
-                <th className="px-4 py-3 text-left hidden xl:table-cell">
-                  <span className="text-xs font-semibold uppercase text-slate-400">
-                    Uso/Pgto
-                  </span>
-                </th>
-                <th className="px-4 py-3 text-right hidden lg:table-cell">
-                  <span className="text-xs font-semibold uppercase text-slate-400">
-                    Saldo/Devido
-                  </span>
-                </th>
-                <th className="px-4 py-3 text-right">
+                <th className="px-4 py-3 text-left">
                   <button
-                    onClick={() => handleSort("gastoTotal")}
-                    className="flex items-center gap-1 text-xs font-semibold uppercase text-slate-400 hover:text-white ml-auto"
+                    onClick={() => handleSort("createdAt")}
+                    className="flex items-center gap-1 text-xs font-semibold uppercase text-slate-400 hover:text-white"
                   >
-                    Recebido
+                    Cadastro
                     <ChevronsUpDown className="h-3 w-3" />
                   </button>
                 </th>
-                <th className="px-4 py-3 text-center w-28">
+                <th className="px-4 py-3 text-center w-24">
                   <span className="text-xs font-semibold uppercase text-slate-400">
                     Ações
                   </span>
@@ -761,9 +473,21 @@ export default function UsuariosPage() {
                           .toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-white truncate max-w-[200px]">
-                          {usuario.nome}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium text-white truncate max-w-[180px]">
+                            {usuario.nome}
+                          </p>
+                          {usuario.isTeste && (
+                            <Badge className="bg-amber-500/30 text-amber-200 border-amber-400/40 text-xs py-0 px-1">
+                              <FlaskConical className="h-3 w-3" />
+                            </Badge>
+                          )}
+                          {!usuario.isActive && (
+                            <Badge className="bg-red-500/30 text-red-200 border-red-400/40 text-xs py-0 px-1">
+                              <XCircle className="h-3 w-3" />
+                            </Badge>
+                          )}
+                        </div>
                         <p className="text-xs text-slate-400 truncate max-w-[200px]">
                           {usuario.email}
                         </p>
@@ -777,84 +501,80 @@ export default function UsuariosPage() {
                     </div>
                   </td>
 
-                  {/* Status */}
+                  {/* Cargo */}
                   <td className="px-4 py-4">
-                    {usuario.isActive ? (
-                      <Badge className="bg-emerald-500/30 text-emerald-200 border-emerald-400/40 w-fit">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Ativo
-                      </Badge>
+                    {usuario.cargo ? (
+                      <div className="flex items-center gap-2">
+                        <Briefcase className="h-3.5 w-3.5 text-slate-500" />
+                        <span className="text-sm text-slate-300 truncate max-w-[150px]">
+                          {usuario.cargo}
+                        </span>
+                      </div>
                     ) : (
-                      <Badge className="bg-red-500/30 text-red-200 border-red-400/40 w-fit">
-                        <XCircle className="h-3 w-3 mr-1" />
-                        Inativo
-                      </Badge>
+                      <span className="text-sm text-slate-500">-</span>
                     )}
                   </td>
 
-                  {/* Plano */}
-                  <td className="px-4 py-4 hidden lg:table-cell">
+                  {/* Tipo (Owner/Membro) */}
+                  <td className="px-4 py-4">
                     <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        {getPlanBadge(usuario.planType)}
-                        {usuario.isTeste && (
-                          <Badge className="bg-amber-500/30 text-amber-200 border-amber-400/40 text-xs">
-                            <FlaskConical className="h-3 w-3 mr-1" />
-                            QA
-                          </Badge>
-                        )}
-                      </div>
-                      {/* Badge de Time */}
-                      <div className="flex items-center gap-1">
-                        {usuario.isTeamMember ? (
-                          <Badge className="bg-purple-500/30 text-purple-200 border-purple-400/40 text-xs">
-                            <UserCheck className="h-3 w-3 mr-1" />
-                            Membro de {usuario.teamOwner?.nome?.split(' ')[0]}
-                          </Badge>
-                        ) : usuario.teamMemberCount > 0 ? (
-                          <Badge className="bg-cyan-500/30 text-cyan-200 border-cyan-400/40 text-xs">
-                            <Users className="h-3 w-3 mr-1" />
-                            {usuario.teamMemberCount} membro{usuario.teamMemberCount > 1 ? 's' : ''}
-                          </Badge>
-                        ) : null}
-                      </div>
+                      {usuario.isTeamMember ? (
+                        <Badge className="bg-purple-500/30 text-purple-200 border-purple-400/40 text-xs w-fit">
+                          <UserCheck className="h-3 w-3 mr-1" />
+                          Membro
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-yellow-500/30 text-yellow-200 border-yellow-400/40 text-xs w-fit">
+                          <Crown className="h-3 w-3 mr-1" />
+                          Owner
+                        </Badge>
+                      )}
+                      {usuario.isTeamMember && usuario.teamOwner && (
+                        <span className="text-xs text-purple-300 truncate max-w-[120px]">
+                          {usuario.teamOwner.nome?.split(' ')[0]}
+                        </span>
+                      )}
+                      {!usuario.isTeamMember && usuario.teamMemberCount > 0 && (
+                        <Badge className="bg-cyan-500/30 text-cyan-200 border-cyan-400/40 text-xs w-fit">
+                          <Users className="h-3 w-3 mr-1" />
+                          {usuario.teamMemberCount}
+                        </Badge>
+                      )}
                     </div>
                   </td>
 
-                  {/* Saldo/Financeiro - muda baseado no tipo de plano */}
-                  <td className="px-4 py-4 hidden xl:table-cell">
-                    {usuario.planType === "free_trial" ? (
-                      <div className="text-sm">
-                        <p className="text-slate-300">
-                          Usado: <span className="text-white">R$ {(usuario.gastoTotal || 0).toFixed(2)}</span>
-                        </p>
-                        <p className="text-slate-300">
-                          Limite: <span className="text-slate-200">R$ {(usuario.limiteTotal || 0).toFixed(2)}</span>
-                        </p>
-                      </div>
-                    ) : (
-                      getPaymentStatus(usuario)
-                    )}
+                  {/* Total Logins */}
+                  <td className="px-4 py-4 text-center">
+                    <div className="flex items-center justify-center gap-1">
+                      <LogIn className="h-3.5 w-3.5 text-slate-500" />
+                      <span className="text-sm font-medium text-white">
+                        {usuario.totalLogins || 0}
+                      </span>
+                    </div>
                   </td>
 
-                  {/* Saldo/Devido */}
-                  <td className="px-4 py-4 text-right hidden lg:table-cell">
-                    {usuario.planType === "free_trial" ? (
-                      <p className={cn("text-sm font-medium", usuario.saldoRestante > 0 ? "text-emerald-300" : "text-red-300")}>
-                        R$ {(usuario.saldoRestante || 0).toFixed(2)}
+                  {/* Último Acesso */}
+                  <td className="px-4 py-4">
+                    <div className="text-sm">
+                      <p className="text-slate-300">
+                        {getTimeSinceLastLogin(usuario.ultimoLogin)}
                       </p>
-                    ) : (
-                      <p className="text-sm text-amber-300">
-                        R$ {(usuario.totalDevido || 0).toFixed(2)}
-                      </p>
-                    )}
+                      {usuario.ultimoLogin && (
+                        <p className="text-xs text-slate-500">
+                          {formatDateTime(usuario.ultimoLogin)}
+                        </p>
+                      )}
+                    </div>
                   </td>
 
-                  {/* Total Recebido */}
-                  <td className="px-4 py-4 text-right">
-                    <p className="text-sm font-semibold text-emerald-300">
-                      R$ {(usuario.totalRecebido || 0).toFixed(2)}
-                    </p>
+                  {/* Data Cadastro */}
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-3.5 w-3.5 text-slate-500" />
+                      <span className="text-sm text-slate-300">
+                        {formatDate(usuario.createdAt)}
+                      </span>
+                    </div>
                   </td>
 
                   {/* Ações */}
@@ -870,18 +590,6 @@ export default function UsuariosPage() {
                       >
                         <Eye className="h-4 w-4" />
                       </button>
-                      {usuario.planType === "free_trial" && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openCreditosModal(usuario);
-                          }}
-                          className="p-2 rounded-lg bg-emerald-900 text-emerald-400 hover:bg-emerald-600 hover:text-white transition-colors"
-                          title="Adicionar créditos extras"
-                        >
-                          <Coins className="h-4 w-4" />
-                        </button>
-                      )}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -918,13 +626,13 @@ export default function UsuariosPage() {
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span className="text-sm text-white px-2">
-              {paginaAtual} / {totalPaginas}
+              {paginaAtual} / {totalPaginas || 1}
             </span>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setPaginaAtual((p) => Math.min(totalPaginas, p + 1))}
-              disabled={paginaAtual === totalPaginas}
+              disabled={paginaAtual === totalPaginas || totalPaginas === 0}
               className="border-slate-700"
             >
               <ChevronRight className="h-4 w-4" />
@@ -965,27 +673,27 @@ export default function UsuariosPage() {
                 {/* Info Cards */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div className="p-3 rounded-lg bg-slate-800/50">
-                    <p className="text-xs text-slate-400">Total Gasto</p>
-                    <p className="text-lg font-semibold text-emerald-400">
-                      R$ {selectedUser.gastoTotal.toFixed(2)}
+                    <p className="text-xs text-slate-400">Total Logins</p>
+                    <p className="text-lg font-semibold text-white">
+                      {selectedUser.totalLogins || 0}
                     </p>
                   </div>
                   <div className="p-3 rounded-lg bg-slate-800/50">
                     <p className="text-xs text-slate-400">Entrevistas</p>
                     <p className="text-lg font-semibold text-white">
-                      {selectedUser.totalEntrevistas}
+                      {selectedUser.totalEntrevistas || 0}
                     </p>
                   </div>
                   <div className="p-3 rounded-lg bg-slate-800/50">
                     <p className="text-xs text-slate-400">Candidatos</p>
                     <p className="text-lg font-semibold text-white">
-                      {selectedUser.totalCandidatos}
+                      {selectedUser.totalCandidatos || 0}
                     </p>
                   </div>
                   <div className="p-3 rounded-lg bg-slate-800/50">
-                    <p className="text-xs text-slate-400">Média Mensal</p>
+                    <p className="text-xs text-slate-400">Último Acesso</p>
                     <p className="text-lg font-semibold text-white">
-                      R$ {selectedUser.mediaGastoMensal.toFixed(2)}
+                      {getTimeSinceLastLogin(selectedUser.ultimoLogin)}
                     </p>
                   </div>
                 </div>
@@ -1016,7 +724,7 @@ export default function UsuariosPage() {
                       <div className="flex justify-between">
                         <span className="text-slate-400">Cadastro</span>
                         <span className="text-white">
-                          {new Date(selectedUser.createdAt).toLocaleDateString("pt-BR")}
+                          {formatDate(selectedUser.createdAt)}
                         </span>
                       </div>
                     </div>
@@ -1025,8 +733,16 @@ export default function UsuariosPage() {
                     <h4 className="text-sm font-medium text-white">Status</h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between items-center">
-                        <span className="text-slate-300">Plano</span>
-                        {getPlanBadge(selectedUser.planType)}
+                        <span className="text-slate-300">Tipo</span>
+                        {selectedUser.isTeamMember ? (
+                          <Badge className="bg-purple-500/30 text-purple-200 border-purple-400/40">
+                            Membro de Time
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-yellow-500/30 text-yellow-200 border-yellow-400/40">
+                            Owner
+                          </Badge>
+                        )}
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-slate-300">Conta</span>
@@ -1040,159 +756,28 @@ export default function UsuariosPage() {
                           </Badge>
                         )}
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-300">Tipo</span>
-                        {selectedUser.isTeste ? (
-                          <Badge variant="outline" className="text-amber-300 border-amber-400/40">
-                            Teste
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-slate-300 border-slate-400/40">
-                            Normal
-                          </Badge>
-                        )}
-                      </div>
+                      {selectedUser.isTeamMember && selectedUser.teamOwner && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">Time de</span>
+                          <span className="text-white">
+                            {selectedUser.teamOwner.nome}
+                          </span>
+                        </div>
+                      )}
+                      {selectedUser.teamRole && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-300">Função</span>
+                          <span className="text-white capitalize">
+                            {selectedUser.teamRole}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
-
-                {/* Histórico de Faturas */}
-                {selectedUser.faturas && selectedUser.faturas.length > 0 && (
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-medium text-white">
-                      Histórico de Faturas
-                    </h4>
-                    <div className="space-y-2">
-                      {selectedUser.faturas.slice(0, 5).map((fatura) => (
-                        <div
-                          key={fatura.id}
-                          className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50"
-                        >
-                          <div>
-                            <p className="text-sm text-white">
-                              {fatura.mes}/{fatura.ano}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <Badge
-                              className={cn(
-                                fatura.status === "paga"
-                                  ? "bg-emerald-900 text-emerald-400"
-                                  : fatura.status === "vencida"
-                                  ? "bg-red-900 text-red-400"
-                                  : "bg-amber-900 text-amber-400"
-                              )}
-                            >
-                              {fatura.status}
-                            </Badge>
-                            <span className="text-sm font-medium text-white">
-                              R$ {fatura.valor.toFixed(2)}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             </>
           ) : null}
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal de Créditos */}
-      <Dialog open={creditosModalOpen} onOpenChange={setCreditosModalOpen}>
-        <DialogContent className="bg-slate-900 border-slate-700 max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <Coins className="h-5 w-5 text-emerald-400" />
-              Adicionar Créditos
-            </DialogTitle>
-            <DialogDescription className="text-slate-400">
-              Conceda créditos extras para o usuário do free trial
-            </DialogDescription>
-          </DialogHeader>
-
-          {creditosUser && (
-            <div className="space-y-4 mt-4">
-              {/* Info do usuário */}
-              <div className="p-3 rounded-lg bg-slate-800/50">
-                <p className="text-sm font-medium text-white">{creditosUser.nome}</p>
-                <p className="text-xs text-slate-400">{creditosUser.email}</p>
-              </div>
-
-              {/* Resumo atual */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-lg bg-slate-800/50">
-                  <p className="text-xs text-slate-400">Limite Base</p>
-                  <p className="text-sm font-medium text-white">
-                    R$ {creditosUser.limiteFreeTrial.toFixed(2)}
-                  </p>
-                </div>
-                <div className="p-3 rounded-lg bg-slate-800/50">
-                  <p className="text-xs text-slate-400">Já Utilizado</p>
-                  <p className="text-sm font-medium text-amber-400">
-                    R$ {creditosUser.gastoTotal.toFixed(2)}
-                  </p>
-                </div>
-                <div className="p-3 rounded-lg bg-slate-800/50">
-                  <p className="text-xs text-slate-400">Crédito Extra Atual</p>
-                  <p className="text-sm font-medium text-emerald-400">
-                    R$ {(creditosUser.creditoExtra || 0).toFixed(2)}
-                  </p>
-                </div>
-                <div className="p-3 rounded-lg bg-slate-800/50">
-                  <p className="text-xs text-slate-400">Saldo Restante</p>
-                  <p className="text-sm font-medium text-white">
-                    R$ {creditosUser.saldoRestante.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-
-              {/* Input de crédito */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-white">
-                  Novo valor de crédito extra (R$)
-                </label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={creditoValor}
-                  onChange={(e) => setCreditoValor(e.target.value)}
-                  placeholder="0.00"
-                  className="bg-slate-800/50 border-slate-700 text-white"
-                />
-                <p className="text-xs text-slate-500">
-                  Este valor substitui o crédito extra anterior. O limite total será: R$ {" "}
-                  {(creditosUser.limiteFreeTrial + (parseFloat(creditoValor) || 0)).toFixed(2)}
-                </p>
-              </div>
-
-              {/* Botões */}
-              <div className="flex gap-3 pt-2">
-                <Button
-                  variant="outline"
-                  className="flex-1 border-slate-700"
-                  onClick={() => setCreditosModalOpen(false)}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-                  onClick={saveCreditoExtra}
-                  disabled={creditoLoading}
-                >
-                  {creditoLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : (
-                    <Plus className="h-4 w-4 mr-2" />
-                  )}
-                  Salvar
-                </Button>
-              </div>
-            </div>
-          )}
         </DialogContent>
       </Dialog>
 
@@ -1215,25 +800,9 @@ export default function UsuariosPage() {
               <div className="p-3 rounded-lg bg-slate-800/50">
                 <p className="text-sm font-medium text-white">{editUser.nome}</p>
                 <p className="text-xs text-slate-400">{editUser.email}</p>
-              </div>
-
-              {/* Plano */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-white">Plano</label>
-                <Select
-                  value={editForm.planType}
-                  onValueChange={(value) => setEditForm({ ...editForm, planType: value })}
-                >
-                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
-                    <SelectValue placeholder="Selecione o plano" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="free_trial">Gratuito</SelectItem>
-                    <SelectItem value="basic">Basic</SelectItem>
-                    <SelectItem value="professional">Profissional</SelectItem>
-                    <SelectItem value="enterprise">Profissional</SelectItem>
-                  </SelectContent>
-                </Select>
+                {editUser.cargo && (
+                  <p className="text-xs text-slate-500 mt-1">{editUser.cargo}</p>
+                )}
               </div>
 
               {/* Status Ativo */}
@@ -1265,7 +834,7 @@ export default function UsuariosPage() {
                   <div>
                     <p className="text-sm font-medium text-white">Conta de Teste</p>
                     <p className="text-xs text-slate-400">
-                      Acesso livre para QA - custos não geram receita
+                      Acesso livre para QA
                     </p>
                   </div>
                 </div>
