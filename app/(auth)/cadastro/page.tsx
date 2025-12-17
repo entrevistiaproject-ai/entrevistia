@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Logo, LogoIcon } from "@/components/logo";
 
-export default function CadastroPage() {
+function CadastroForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
@@ -602,5 +602,17 @@ export default function CadastroPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function CadastroPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-primary/10 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    }>
+      <CadastroForm />
+    </Suspense>
   );
 }
