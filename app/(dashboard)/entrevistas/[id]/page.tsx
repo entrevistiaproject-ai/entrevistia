@@ -340,7 +340,7 @@ export default function EntrevistaDetalhesPage() {
 
       if (resCandidatos.ok) {
         const data = await resCandidatos.json();
-        setCandidatos(data);
+        setCandidatos(data.candidatos || []);
       }
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
