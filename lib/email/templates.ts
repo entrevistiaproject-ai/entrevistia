@@ -375,7 +375,6 @@ export function emailConviteEntrevistaTemplate(params: {
   nomeRecrutador?: string;
   linkEntrevista: string;
   prazoResposta: Date;
-  descricaoVaga?: string;
 }) {
   const {
     nomeCandidato,
@@ -384,7 +383,6 @@ export function emailConviteEntrevistaTemplate(params: {
     nomeRecrutador,
     linkEntrevista,
     prazoResposta,
-    descricaoVaga
   } = params;
 
   const prazoFormatado = formatarPrazo(prazoResposta);
@@ -465,11 +463,6 @@ export function emailConviteEntrevistaTemplate(params: {
                         </td>
                       </tr>
                     </table>
-                    ${descricaoVaga ? `
-                    <p style="margin: 16px 0 0 0; color: #475569; font-size: 14px; line-height: 1.6; border-top: 1px solid #bae6fd; padding-top: 16px;">
-                      ${descricaoVaga}
-                    </p>
-                    ` : ""}
                   </td>
                 </tr>
               </table>
@@ -509,7 +502,7 @@ export function emailConviteEntrevistaTemplate(params: {
                           </td>
                           <td style="padding-left: 12px;">
                             <p style="margin: 0; color: #334155; font-size: 14px; line-height: 1.5;">
-                              <strong>Responda às perguntas</strong> — em texto ou vídeo, no seu ritmo
+                              <strong>Responda às perguntas</strong> — em áudio, no seu ritmo
                             </p>
                           </td>
                         </tr>

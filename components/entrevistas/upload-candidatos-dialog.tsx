@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Upload, Download, Loader2, FileSpreadsheet, AlertCircle, FileWarning, CheckCircle2 } from "lucide-react";
+import { Upload, Download, Loader2, FileSpreadsheet, AlertCircle, FileWarning, CheckCircle2, Users, Mail, UserPlus, Link2, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as XLSX from "xlsx";
 
@@ -33,6 +33,17 @@ interface FormatError {
   colunasEncontradas: string[];
 }
 
+interface ResultadoImportacao {
+  total: number;
+  candidatosNovos: number;
+  candidatosExistentes?: number;
+  vinculadosEntrevista: number;
+  jaVinculadosEntrevista?: number;
+  emailsEnviados?: number;
+  emailsFalharam?: number;
+  invalidos?: number;
+}
+
 export function UploadCandidatosDialog({
   entrevistaId,
   onSuccess,
@@ -46,21 +57,26 @@ export function UploadCandidatosDialog({
   const [allData, setAllData] = useState<CandidatoData[]>([]);
   const [erro, setErro] = useState<string | null>(null);
   const [formatError, setFormatError] = useState<FormatError | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [resultado, setResultado] = useState<ResultadoImportacao | null>(null);
+  const [showResultado, setShowResultado] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
 
   const handleDownloadModelo = () => {
     // Criar planilha XLSX modelo com todos os campos
+    // Usando * para indicar campos obrigatórios (convenção comum em formulários)
     const data = [
-      { nome: "João Silva", email: "joao@example.com", "telefone (opcional)": "(11) 99999-9999", "linkedin (opcional)": "https://linkedin.com/in/joaosilva" },
-      { nome: "Maria Santos", email: "maria@example.com", "telefone (opcional)": "(11) 98888-8888", "linkedin (opcional)": "https://linkedin.com/in/mariasantos" },
+      { "nome *": "João Silva", "email *": "joao@example.com", "telefone (opcional)": "(11) 99999-9999", "linkedin (opcional)": "https://linkedin.com/in/joaosilva" },
+      { "nome *": "Maria Santos", "email *": "maria@example.com", "telefone (opcional)": "(11) 98888-8888", "linkedin (opcional)": "https://linkedin.com/in/mariasantos" },
     ];
 
     const worksheet = XLSX.utils.json_to_sheet(data);
 
     // Ajustar largura das colunas
     worksheet["!cols"] = [
-      { wch: 25 }, // nome
-      { wch: 30 }, // email
+      { wch: 25 }, // nome *
+      { wch: 30 }, // email *
       { wch: 22 }, // telefone (opcional)
       { wch: 45 }, // linkedin (opcional)
     ];
@@ -96,12 +112,12 @@ export function UploadCandidatosDialog({
             return;
           }
 
-          // Normalizar nomes das colunas (lowercase e trim, remove "(opcional)")
+          // Normalizar nomes das colunas (lowercase e trim, remove "(opcional)" e "*")
           const normalizedData: CandidatoData[] = jsonData.map((row) => {
             const normalized: Record<string, string> = {};
             for (const [key, value] of Object.entries(row)) {
-              // Remove "(opcional)" e normaliza o nome da coluna
-              const normalizedKey = key.toLowerCase().replace(/\s*\(opcional\)\s*/g, "").trim();
+              // Remove "(opcional)", "*" e normaliza o nome da coluna
+              const normalizedKey = key.toLowerCase().replace(/\s*\(opcional\)\s*/g, "").replace(/\s*\*\s*/g, "").trim();
               normalized[normalizedKey] = String(value || "").trim();
             }
             return {
@@ -144,24 +160,7 @@ export function UploadCandidatosDialog({
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    setArquivo(file);
-    setErro(null);
-    setFormatError(null);
-    setPreview([]);
-    setAllData([]);
-
-    try {
-      const data = await parseFile(file);
-      setAllData(data);
-      setPreview(data.slice(0, 5)); // Mostrar apenas 5 primeiros
-    } catch (error) {
-      if (error && typeof error === "object" && "type" in error && error.type === "format") {
-        setFormatError(error as FormatError);
-      } else {
-        setErro(error instanceof Error ? error.message : "Erro ao processar arquivo.");
-      }
-    }
+    await processFile(file);
   };
 
   const handleTryAgain = () => {
@@ -172,6 +171,69 @@ export function UploadCandidatosDialog({
     setAllData([]);
     if (inputRef.current) {
       inputRef.current.value = "";
+    }
+  };
+
+  const processFile = async (file: File) => {
+    setArquivo(file);
+    setErro(null);
+    setFormatError(null);
+    setPreview([]);
+    setAllData([]);
+
+    try {
+      const data = await parseFile(file);
+      setAllData(data);
+      setPreview(data.slice(0, 5));
+    } catch (error) {
+      if (error && typeof error === "object" && "type" in error && error.type === "format") {
+        setFormatError(error as FormatError);
+      } else {
+        setErro(error instanceof Error ? error.message : "Erro ao processar arquivo.");
+      }
+    }
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (dropZoneRef.current && !dropZoneRef.current.contains(e.relatedTarget as Node)) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      const validTypes = [
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-excel",
+        "text/csv",
+      ];
+      const validExtensions = [".xlsx", ".xls", ".csv"];
+      const hasValidExtension = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
+
+      if (validTypes.includes(file.type) || hasValidExtension) {
+        await processFile(file);
+      } else {
+        setErro("Formato de arquivo invalido. Use Excel (.xlsx, .xls) ou CSV.");
+      }
     }
   };
 
@@ -198,7 +260,7 @@ export function UploadCandidatosDialog({
         throw new Error(errorData.error || "Erro ao importar candidatos");
       }
 
-      const resultado = await response.json();
+      const resultadoData = await response.json();
 
       setOpen(false);
       setArquivo(null);
@@ -209,34 +271,8 @@ export function UploadCandidatosDialog({
         onSuccess();
       }
 
-      let mensagem = `✅ Importação concluída!\n\n`;
-      mensagem += `📊 Total processado: ${resultado.total}\n\n`;
-
-      mensagem += `✨ Candidatos novos: ${resultado.candidatosNovos}\n`;
-
-      if (resultado.candidatosExistentes > 0) {
-        mensagem += `👤 Candidatos existentes: ${resultado.candidatosExistentes}\n`;
-      }
-
-      mensagem += `\n📧 Vinculados à entrevista: ${resultado.vinculadosEntrevista}\n`;
-
-      if (resultado.jaVinculadosEntrevista > 0) {
-        mensagem += `⚠️ Já vinculados previamente: ${resultado.jaVinculadosEntrevista}\n`;
-      }
-
-      if (resultado.emailsEnviados > 0) {
-        mensagem += `\n✉️ Convites enviados: ${resultado.emailsEnviados}\n`;
-      }
-
-      if (resultado.emailsFalharam > 0) {
-        mensagem += `⚠️ Falha ao enviar: ${resultado.emailsFalharam}\n`;
-      }
-
-      if (resultado.invalidos > 0) {
-        mensagem += `\n❌ Inválidos (dados incompletos): ${resultado.invalidos}\n`;
-      }
-
-      alert(mensagem);
+      setResultado(resultadoData);
+      setShowResultado(true);
 
       router.refresh();
     } catch (error) {
@@ -307,11 +343,12 @@ export function UploadCandidatosDialog({
                 Colunas esperadas:
               </p>
               <div className="flex flex-wrap gap-2 justify-center">
-                <span className="px-2 py-1 bg-green-100 border border-green-300 rounded text-sm font-mono text-green-800">nome</span>
-                <span className="px-2 py-1 bg-green-100 border border-green-300 rounded text-sm font-mono text-green-800">email</span>
+                <span className="px-2 py-1 bg-green-100 border border-green-300 rounded text-sm font-mono text-green-800">nome *</span>
+                <span className="px-2 py-1 bg-green-100 border border-green-300 rounded text-sm font-mono text-green-800">email *</span>
                 <span className="px-2 py-1 bg-green-50 border border-green-200 rounded text-sm font-mono text-green-600">telefone (opcional)</span>
                 <span className="px-2 py-1 bg-green-50 border border-green-200 rounded text-sm font-mono text-green-600">linkedin (opcional)</span>
               </div>
+              <p className="text-xs text-green-700 mt-2">* campos obrigatórios</p>
             </div>
           </div>
 
@@ -337,6 +374,7 @@ export function UploadCandidatosDialog({
   }
 
   return (
+    <>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className={className}>
@@ -375,7 +413,7 @@ export function UploadCandidatosDialog({
             </Button>
           </div>
 
-          {/* Upload do arquivo */}
+          {/* Upload do arquivo com Drag and Drop */}
           <div className="space-y-2.5">
             <input
               ref={inputRef}
@@ -384,15 +422,41 @@ export function UploadCandidatosDialog({
               onChange={handleFileChange}
               className="hidden"
             />
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full h-12"
+            <div
+              ref={dropZoneRef}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
               onClick={() => inputRef.current?.click()}
+              className={`
+                relative flex flex-col items-center justify-center w-full p-6 border-2 border-dashed rounded-xl cursor-pointer
+                transition-all duration-200 ease-in-out
+                ${isDragging
+                  ? "border-primary bg-primary/5 scale-[1.02]"
+                  : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50"
+                }
+                ${arquivo ? "border-green-500 bg-green-50" : ""}
+              `}
             >
-              <Upload className="mr-2 h-4 w-4" />
-              {arquivo ? arquivo.name : "Escolher planilha (Excel ou CSV)"}
-            </Button>
+              {arquivo ? (
+                <>
+                  <FileSpreadsheet className="h-10 w-10 text-green-600 mb-2" />
+                  <p className="text-sm font-medium text-green-700">{arquivo.name}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Clique para trocar o arquivo</p>
+                </>
+              ) : (
+                <>
+                  <Upload className={`h-10 w-10 mb-2 transition-colors ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
+                  <p className="text-sm font-medium">
+                    {isDragging ? "Solte o arquivo aqui" : "Arraste sua planilha aqui"}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    ou clique para selecionar (Excel ou CSV)
+                  </p>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Erro genérico */}
@@ -460,5 +524,118 @@ export function UploadCandidatosDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    {/* Modal de Resultado */}
+    <Dialog open={showResultado} onOpenChange={setShowResultado}>
+      <DialogContent className="sm:max-w-[420px]">
+        <div className="flex flex-col items-center text-center pt-4">
+          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+            <CheckCircle2 className="h-8 w-8 text-green-600" />
+          </div>
+
+          <DialogTitle className="text-xl mb-2">Importação concluída!</DialogTitle>
+
+          <DialogDescription className="mb-6">
+            Confira o resumo da importação abaixo.
+          </DialogDescription>
+
+          {resultado && (
+            <div className="w-full space-y-3">
+              {/* Total processado */}
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Users className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-sm">Total processado</span>
+                </div>
+                <span className="font-semibold">{resultado.total}</span>
+              </div>
+
+              {/* Candidatos novos */}
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <UserPlus className="h-5 w-5 text-green-600" />
+                  <span className="text-sm text-green-800">Candidatos novos</span>
+                </div>
+                <span className="font-semibold text-green-700">{resultado.candidatosNovos}</span>
+              </div>
+
+              {/* Candidatos existentes */}
+              {resultado.candidatosExistentes && resultado.candidatosExistentes > 0 && (
+                <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Users className="h-5 w-5 text-blue-600" />
+                    <span className="text-sm text-blue-800">Candidatos existentes</span>
+                  </div>
+                  <span className="font-semibold text-blue-700">{resultado.candidatosExistentes}</span>
+                </div>
+              )}
+
+              {/* Vinculados à entrevista */}
+              <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Link2 className="h-5 w-5 text-purple-600" />
+                  <span className="text-sm text-purple-800">Vinculados à entrevista</span>
+                </div>
+                <span className="font-semibold text-purple-700">{resultado.vinculadosEntrevista}</span>
+              </div>
+
+              {/* Já vinculados previamente */}
+              {resultado.jaVinculadosEntrevista && resultado.jaVinculadosEntrevista > 0 && (
+                <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="h-5 w-5 text-amber-600" />
+                    <span className="text-sm text-amber-800">Já vinculados previamente</span>
+                  </div>
+                  <span className="font-semibold text-amber-700">{resultado.jaVinculadosEntrevista}</span>
+                </div>
+              )}
+
+              {/* Convites enviados */}
+              {resultado.emailsEnviados && resultado.emailsEnviados > 0 && (
+                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-5 w-5 text-green-600" />
+                    <span className="text-sm text-green-800">Convites enviados</span>
+                  </div>
+                  <span className="font-semibold text-green-700">{resultado.emailsEnviados}</span>
+                </div>
+              )}
+
+              {/* Falha ao enviar */}
+              {resultado.emailsFalharam && resultado.emailsFalharam > 0 && (
+                <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <AlertCircle className="h-5 w-5 text-red-600" />
+                    <span className="text-sm text-red-800">Falha ao enviar</span>
+                  </div>
+                  <span className="font-semibold text-red-700">{resultado.emailsFalharam}</span>
+                </div>
+              )}
+
+              {/* Inválidos */}
+              {resultado.invalidos && resultado.invalidos > 0 && (
+                <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <AlertCircle className="h-5 w-5 text-red-600" />
+                    <span className="text-sm text-red-800">Inválidos (dados incompletos)</span>
+                  </div>
+                  <span className="font-semibold text-red-700">{resultado.invalidos}</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <DialogFooter className="mt-6">
+          <Button
+            onClick={() => setShowResultado(false)}
+            className="w-full"
+          >
+            Fechar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
