@@ -328,12 +328,6 @@ export default function ConvitePage() {
               )}
             </div>
 
-            {convite?.entrevista.descricao && (
-              <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
-                {convite.entrevista.descricao}
-              </p>
-            )}
-
             {/* Prazo */}
             {tempoRestante && (
               <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3">
