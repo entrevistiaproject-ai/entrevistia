@@ -325,6 +325,11 @@ export default function CadastroEntrevistaPage() {
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl sm:text-3xl">{entrevista?.titulo}</CardTitle>
+            {entrevista?.descricao && (
+              <CardDescription className="text-base whitespace-pre-line">
+                {entrevista.descricao}
+              </CardDescription>
+            )}
           </CardHeader>
           {(entrevista?.cargo || entrevista?.nivel || entrevista?.empresa) && (
             <CardContent className="pt-0">
