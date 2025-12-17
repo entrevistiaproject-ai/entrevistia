@@ -28,7 +28,6 @@ import {
   Crown
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Logo, LogoIcon } from "@/components/logo";
 
 export default function CadastroPage() {
@@ -49,11 +48,10 @@ export default function CadastroPage() {
 
   // Dados do convite de time (se houver)
   const isConviteTime = searchParams.get("conviteTime") === "true";
+  const callbackUrl = searchParams.get("callbackUrl") || null;
   const conviteData = {
     empresa: searchParams.get("empresa") || null,
     ownerNome: searchParams.get("ownerNome") || null,
-    cargo: searchParams.get("cargo") || null,
-    callbackUrl: searchParams.get("callbackUrl") || null,
   };
 
   // Pré-preencher campos com parâmetros da URL (ex: convite de time)
@@ -159,8 +157,13 @@ export default function CadastroPage() {
       setSuccess(true);
 
       // Redireciona para verificação de email após 2 segundos
+      // Passa callbackUrl se existir (convite de time)
+      const verifyUrl = callbackUrl
+        ? `/verificar-email?email=${encodeURIComponent(formData.email)}&callbackUrl=${encodeURIComponent(callbackUrl)}`
+        : `/verificar-email?email=${encodeURIComponent(formData.email)}`;
+
       setTimeout(() => {
-        router.push(`/verificar-email?email=${encodeURIComponent(formData.email)}`);
+        router.push(verifyUrl);
       }, 2000);
 
     } catch (error) {
@@ -274,20 +277,12 @@ export default function CadastroPage() {
                       </div>
                     </div>
                   )}
-                  <div className="flex flex-wrap gap-2">
-                    {conviteData.empresa && (
-                      <Badge variant="secondary" className="text-xs">
-                        <Building2 className="w-3 h-3 mr-1" />
-                        {conviteData.empresa}
-                      </Badge>
-                    )}
-                    {conviteData.cargo && (
-                      <Badge variant="outline" className="text-xs bg-white">
-                        <Briefcase className="w-3 h-3 mr-1" />
-                        {conviteData.cargo}
-                      </Badge>
-                    )}
-                  </div>
+                  {conviteData.empresa && (
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <Building2 className="w-4 h-4 text-indigo-500" />
+                      <span>{conviteData.empresa}</span>
+                    </div>
+                  )}
                 </div>
               </>
             ) : (
@@ -405,28 +400,26 @@ export default function CadastroPage() {
                   </div>
                 )}
 
-                {/* Cargo - ocultar se for convite de time */}
-                {!isConviteTime && (
-                  <div className="space-y-2">
-                    <Label htmlFor="cargo" className="flex items-center gap-2">
-                      <Briefcase className="w-4 h-4 text-muted-foreground" />
-                      Seu cargo
-                    </Label>
-                    <Input
-                      id="cargo"
-                      name="cargo"
-                      type="text"
-                      placeholder="Ex: Analista de RH, Recrutador"
-                      value={formData.cargo}
-                      onChange={handleChange}
-                      error={!!errors.cargo}
-                      disabled={isLoading}
-                    />
-                    {errors.cargo && (
-                      <p className="text-sm text-destructive">{errors.cargo}</p>
-                    )}
-                  </div>
-                )}
+                {/* Cargo */}
+                <div className="space-y-2">
+                  <Label htmlFor="cargo" className="flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-muted-foreground" />
+                    Seu cargo
+                  </Label>
+                  <Input
+                    id="cargo"
+                    name="cargo"
+                    type="text"
+                    placeholder="Ex: Analista de RH, Recrutador"
+                    value={formData.cargo}
+                    onChange={handleChange}
+                    error={!!errors.cargo}
+                    disabled={isLoading}
+                  />
+                  {errors.cargo && (
+                    <p className="text-sm text-destructive">{errors.cargo}</p>
+                  )}
+                </div>
 
                 {/* Senha */}
                 <div className="space-y-2">

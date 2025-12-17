@@ -250,7 +250,6 @@ export default function ConviteTimePage({
     if (data.owner?.nome) {
       params.set("ownerNome", data.owner.nome);
     }
-    params.set("cargo", roleLabels[data.invitation.role] || data.invitation.role);
 
     router.push(`/cadastro?${params.toString()}`);
     return (

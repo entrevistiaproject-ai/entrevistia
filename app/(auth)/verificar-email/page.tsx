@@ -21,6 +21,7 @@ function VerificarEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailParam = searchParams.get("email");
+  const callbackUrl = searchParams.get("callbackUrl");
 
   const [code, setCode] = useState("");
   const [email] = useState(emailParam || "");
@@ -59,8 +60,13 @@ function VerificarEmailContent() {
       setSuccess(true);
 
       // Redireciona após 2 segundos
+      // Se tem callbackUrl, passa para a página de login para redirecionar após login
+      const loginUrl = callbackUrl
+        ? `/login?email_verificado=true&email=${encodeURIComponent(email)}&callbackUrl=${encodeURIComponent(callbackUrl)}`
+        : `/login?email_verificado=true&email=${encodeURIComponent(email)}`;
+
       setTimeout(() => {
-        router.push("/login?email_verificado=true");
+        router.push(loginUrl);
       }, 2000);
 
     } catch (error) {

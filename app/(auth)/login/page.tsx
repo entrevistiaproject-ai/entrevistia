@@ -26,18 +26,19 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailVerificado = searchParams.get("email_verificado");
+  const emailFromUrl = searchParams.get("email");
   const callbackUrl = searchParams.get("callbackUrl") || "/painel";
 
   const [formData, setFormData] = useState(() => {
-    // Recupera email salvo se "lembrar de mim" estava marcado
+    // Prioridade: email da URL > email salvo > vazio
     if (typeof window !== "undefined") {
       const savedEmail = localStorage.getItem("savedEmail");
       return {
-        email: savedEmail || "",
+        email: emailFromUrl || savedEmail || "",
         senha: "",
       };
     }
-    return { email: "", senha: "" };
+    return { email: emailFromUrl || "", senha: "" };
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
