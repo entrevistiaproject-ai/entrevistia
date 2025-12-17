@@ -21,6 +21,19 @@ import { Logo } from "@/components/logo";
 import { signOut } from "next-auth/react";
 import { SupportWidget } from "@/components/support/support-widget";
 
+// Função de logout que limpa dados sensíveis do localStorage
+const handleSignOut = () => {
+  // Não limpa o email salvo - isso é controlado pela opção "Lembrar meu email"
+  // que é gerenciada no login (se desmarcado, o email já foi removido no login)
+  // Mas limpamos outros dados de cache que possam causar problemas ao trocar de usuário
+  if (typeof window !== "undefined") {
+    // Remove qualquer cache de dados do usuário anterior
+    localStorage.removeItem("userCache");
+    localStorage.removeItem("usageCache");
+  }
+  signOut({ callbackUrl: "/" });
+};
+
 const mainMenuItems = [
   {
     title: "Minha Mesa",
@@ -232,7 +245,7 @@ export function Sidebar() {
                 </p>
               </div>
               <button
-                onClick={() => signOut({ callbackUrl: "/" })}
+                onClick={handleSignOut}
                 className="p-2.5 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer"
                 title="Sair"
               >

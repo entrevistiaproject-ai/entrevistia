@@ -44,13 +44,16 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(emailVerificado === "true");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(() => {
-    // Se tem email salvo, significa que "lembrar de mim" estava marcado
+  // Estado para "Lembrar meu email" - salva email no localStorage
+  const [rememberEmail, setRememberEmail] = useState(() => {
     if (typeof window !== "undefined") {
       return !!localStorage.getItem("savedEmail");
     }
     return false;
   });
+
+  // Estado para "Manter conectado" - sessão de 7 dias vs 8 horas
+  const [keepLoggedIn, setKeepLoggedIn] = useState(false);
 
   useEffect(() => {
     if (showSuccessMessage) {
@@ -76,11 +79,21 @@ function LoginForm() {
     setErrors({});
     setIsLoading(true);
 
-    // Salva ou remove email do localStorage baseado na preferência
-    if (rememberMe) {
+    // Gerencia o email salvo no localStorage
+    const savedEmail = localStorage.getItem("savedEmail");
+
+    if (rememberEmail) {
+      // Salva o email atual
       localStorage.setItem("savedEmail", formData.email);
     } else {
+      // Remove o email salvo (independente de ser o mesmo ou diferente)
       localStorage.removeItem("savedEmail");
+    }
+
+    // Se está fazendo login com email diferente do salvo, limpa dados do usuário anterior
+    if (savedEmail && savedEmail !== formData.email) {
+      localStorage.removeItem("userCache");
+      localStorage.removeItem("usageCache");
     }
 
     try {
@@ -88,7 +101,7 @@ function LoginForm() {
         redirect: false,
         email: formData.email,
         password: formData.senha,
-        rememberMe: rememberMe.toString(),
+        keepLoggedIn: keepLoggedIn.toString(),
       });
 
       if (result?.error) {
@@ -251,20 +264,39 @@ function LoginForm() {
                 )}
               </div>
 
-              {/* Lembrar de mim */}
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="rememberMe"
-                  checked={rememberMe}
-                  onCheckedChange={(checked) => setRememberMe(checked === true)}
-                  disabled={isLoading}
-                />
-                <label
-                  htmlFor="rememberMe"
-                  className="text-sm text-muted-foreground cursor-pointer select-none"
-                >
-                  Lembrar de mim e manter conectado
-                </label>
+              {/* Opções de login */}
+              <div className="space-y-3">
+                {/* Lembrar meu email */}
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="rememberEmail"
+                    checked={rememberEmail}
+                    onCheckedChange={(checked) => setRememberEmail(checked === true)}
+                    disabled={isLoading}
+                  />
+                  <label
+                    htmlFor="rememberEmail"
+                    className="text-sm text-muted-foreground cursor-pointer select-none"
+                  >
+                    Lembrar meu email
+                  </label>
+                </div>
+
+                {/* Manter conectado */}
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="keepLoggedIn"
+                    checked={keepLoggedIn}
+                    onCheckedChange={(checked) => setKeepLoggedIn(checked === true)}
+                    disabled={isLoading}
+                  />
+                  <label
+                    htmlFor="keepLoggedIn"
+                    className="text-sm text-muted-foreground cursor-pointer select-none"
+                  >
+                    Manter conectado por 7 dias
+                  </label>
+                </div>
               </div>
 
               {/* Botão de Submit */}
