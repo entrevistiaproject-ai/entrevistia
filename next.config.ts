@@ -86,7 +86,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "*.vercel.app",
+        hostname: "entrevistia.com.br",
+      },
+      {
+        protocol: "https",
+        hostname: "www.entrevistia.com.br",
       },
     ],
   },

@@ -46,7 +46,8 @@ function generateCSP(config: SecurityHeadersConfig): string {
     "'self'",
     'data:',
     'blob:',
-    'https://*.vercel.app',
+    'https://entrevistia.com.br',
+    'https://www.entrevistia.com.br',
     ...(config.allowedImageSources || []),
   ];
 
@@ -54,7 +55,8 @@ function generateCSP(config: SecurityHeadersConfig): string {
   const connectSrc = [
     "'self'",
     ...(isDev ? ['ws://localhost:*', 'http://localhost:*'] : []),
-    'https://*.vercel.app',
+    'https://entrevistia.com.br',
+    'https://www.entrevistia.com.br',
     'https://api.anthropic.com',
     'https://api.openai.com',
     'https://api.resend.com',

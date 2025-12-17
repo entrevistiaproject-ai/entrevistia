@@ -5,7 +5,6 @@ import { authConfig } from "./auth.config";
 const allowedHosts = [
   "localhost",
   "127.0.0.1",
-  "entrevistia.vercel.app",
   "entrevistia.com.br",
   "www.entrevistia.com.br",
 ];

@@ -80,7 +80,6 @@ export function validateOrigin(request: NextRequest): boolean {
   const allowedHosts = [
     process.env.NEXTAUTH_URL,
     process.env.NEXT_PUBLIC_APP_URL,
-    'https://entrevistia.vercel.app',
     'https://entrevistia.com.br',
     'https://www.entrevistia.com.br',
   ].filter(Boolean);
