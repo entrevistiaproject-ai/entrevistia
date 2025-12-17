@@ -4,12 +4,31 @@ import { z } from "zod";
 import {
   removeTeamMember,
   updateMemberRole,
+  updateMemberPermissions,
   canUserPerformAction,
   TeamRole,
 } from "@/lib/services/team-service";
 
 const updateRoleSchema = z.object({
-  role: z.enum(["admin", "recruiter", "viewer"]),
+  role: z.enum(["admin", "recruiter", "financial", "viewer"]),
+});
+
+const updatePermissionsSchema = z.object({
+  permissions: z.object({
+    canViewInterviews: z.boolean().optional(),
+    canCreateInterviews: z.boolean().optional(),
+    canEditInterviews: z.boolean().optional(),
+    canDeleteInterviews: z.boolean().optional(),
+    canViewCandidates: z.boolean().optional(),
+    canApproveCandidates: z.boolean().optional(),
+    canRejectCandidates: z.boolean().optional(),
+    canViewFinancials: z.boolean().optional(),
+    canInviteMembers: z.boolean().optional(),
+    canRemoveMembers: z.boolean().optional(),
+    canEditMemberPermissions: z.boolean().optional(),
+    canEditSettings: z.boolean().optional(),
+    canEditAutoApproval: z.boolean().optional(),
+  }),
 });
 
 /**
@@ -114,6 +133,65 @@ export async function DELETE(
     console.error("Erro ao remover membro:", error);
     return NextResponse.json(
       { error: "Erro ao remover membro" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * PATCH /api/time/membro/[id]
+ * Atualiza as permissões granulares de um membro
+ */
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const userId = await getUserId();
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Não autenticado" },
+        { status: 401 }
+      );
+    }
+
+    // Verifica permissão para editar permissões de membros
+    const canEditPermissions = await canUserPerformAction(userId, userId, "edit_permissions");
+    if (!canEditPermissions) {
+      return NextResponse.json(
+        { error: "Você não tem permissão para editar permissões de membros" },
+        { status: 403 }
+      );
+    }
+
+    const { id: memberId } = await params;
+    const body = await request.json();
+    const validation = updatePermissionsSchema.safeParse(body);
+
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: validation.error.issues[0]?.message || "Dados inválidos" },
+        { status: 400 }
+      );
+    }
+
+    const { permissions } = validation.data;
+
+    const result = await updateMemberPermissions(userId, memberId, permissions);
+
+    if (!result.success) {
+      return NextResponse.json(
+        { error: result.error },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Erro ao atualizar permissões:", error);
+    return NextResponse.json(
+      { error: "Erro ao atualizar permissões" },
       { status: 500 }
     );
   }

@@ -34,7 +34,35 @@ export const teamMembers = pgTable("team_members", {
     .references(() => users.id, { onDelete: "cascade" }),
 
   // Role do membro no time (ver enum acima para descrições)
+  // Mantido para retrocompatibilidade, mas as permissões granulares têm precedência
   role: teamRoleEnum("role").default("recruiter").notNull(),
+
+  // === PERMISSÕES GRANULARES ===
+  // Se null, usa as permissões padrão do role
+  // Se definido, sobrescreve as permissões do role
+
+  // Permissões de Entrevistas
+  canViewInterviews: boolean("can_view_interviews").default(true).notNull(),
+  canCreateInterviews: boolean("can_create_interviews").default(false).notNull(),
+  canEditInterviews: boolean("can_edit_interviews").default(false).notNull(),
+  canDeleteInterviews: boolean("can_delete_interviews").default(false).notNull(),
+
+  // Permissões de Candidatos
+  canViewCandidates: boolean("can_view_candidates").default(true).notNull(),
+  canApproveCandidates: boolean("can_approve_candidates").default(false).notNull(),
+  canRejectCandidates: boolean("can_reject_candidates").default(false).notNull(),
+
+  // Permissões Financeiras
+  canViewFinancials: boolean("can_view_financials").default(false).notNull(),
+
+  // Permissões de Time
+  canInviteMembers: boolean("can_invite_members").default(false).notNull(),
+  canRemoveMembers: boolean("can_remove_members").default(false).notNull(),
+  canEditMemberPermissions: boolean("can_edit_member_permissions").default(false).notNull(),
+
+  // Permissões de Configurações
+  canEditSettings: boolean("can_edit_settings").default(false).notNull(),
+  canEditAutoApproval: boolean("can_edit_auto_approval").default(false).notNull(),
 
   // Status ativo
   isActive: boolean("is_active").default(true).notNull(),
@@ -154,3 +182,108 @@ export type NewTeamSettings = typeof teamSettings.$inferInsert;
 
 export type TeamRole = "owner" | "admin" | "recruiter" | "financial" | "viewer";
 export type InvitationStatus = "pending" | "accepted" | "rejected" | "expired" | "cancelled";
+
+/**
+ * Tipo para permissões granulares de um membro
+ */
+export type MemberPermissions = {
+  // Entrevistas
+  canViewInterviews: boolean;
+  canCreateInterviews: boolean;
+  canEditInterviews: boolean;
+  canDeleteInterviews: boolean;
+  // Candidatos
+  canViewCandidates: boolean;
+  canApproveCandidates: boolean;
+  canRejectCandidates: boolean;
+  // Financeiro
+  canViewFinancials: boolean;
+  // Time
+  canInviteMembers: boolean;
+  canRemoveMembers: boolean;
+  canEditMemberPermissions: boolean;
+  // Configurações
+  canEditSettings: boolean;
+  canEditAutoApproval: boolean;
+};
+
+/**
+ * Permissões padrão por role (usado como template inicial)
+ */
+export const defaultPermissionsByRole: Record<TeamRole, MemberPermissions> = {
+  owner: {
+    canViewInterviews: true,
+    canCreateInterviews: true,
+    canEditInterviews: true,
+    canDeleteInterviews: true,
+    canViewCandidates: true,
+    canApproveCandidates: true,
+    canRejectCandidates: true,
+    canViewFinancials: true,
+    canInviteMembers: true,
+    canRemoveMembers: true,
+    canEditMemberPermissions: true,
+    canEditSettings: true,
+    canEditAutoApproval: true,
+  },
+  admin: {
+    canViewInterviews: true,
+    canCreateInterviews: true,
+    canEditInterviews: true,
+    canDeleteInterviews: true,
+    canViewCandidates: true,
+    canApproveCandidates: true,
+    canRejectCandidates: true,
+    canViewFinancials: false,
+    canInviteMembers: true,
+    canRemoveMembers: true,
+    canEditMemberPermissions: true,
+    canEditSettings: true,
+    canEditAutoApproval: true,
+  },
+  recruiter: {
+    canViewInterviews: true,
+    canCreateInterviews: true,
+    canEditInterviews: true,
+    canDeleteInterviews: false,
+    canViewCandidates: true,
+    canApproveCandidates: true,
+    canRejectCandidates: true,
+    canViewFinancials: false,
+    canInviteMembers: false,
+    canRemoveMembers: false,
+    canEditMemberPermissions: false,
+    canEditSettings: false,
+    canEditAutoApproval: true,
+  },
+  financial: {
+    canViewInterviews: false,
+    canCreateInterviews: false,
+    canEditInterviews: false,
+    canDeleteInterviews: false,
+    canViewCandidates: false,
+    canApproveCandidates: false,
+    canRejectCandidates: false,
+    canViewFinancials: true,
+    canInviteMembers: false,
+    canRemoveMembers: false,
+    canEditMemberPermissions: false,
+    canEditSettings: false,
+    canEditAutoApproval: false,
+  },
+  viewer: {
+    canViewInterviews: true,
+    canCreateInterviews: false,
+    canEditInterviews: false,
+    canDeleteInterviews: false,
+    canViewCandidates: true,
+    canApproveCandidates: false,
+    canRejectCandidates: false,
+    canViewFinancials: false,
+    canInviteMembers: false,
+    canRemoveMembers: false,
+    canEditMemberPermissions: false,
+    canEditSettings: false,
+    canEditAutoApproval: false,
+  },
+};

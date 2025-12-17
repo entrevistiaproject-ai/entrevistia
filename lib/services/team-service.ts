@@ -10,6 +10,8 @@ import {
   type TeamMember,
   type TeamInvitation,
   type TeamSettings,
+  type MemberPermissions,
+  defaultPermissionsByRole,
 } from "@/lib/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -18,6 +20,7 @@ import { emailConviteTimeTemplate, emailAprovacaoAutomaticaTemplate, emailReprov
 import { logger } from "@/lib/logger";
 
 export type TeamRole = "owner" | "admin" | "recruiter" | "financial" | "viewer";
+export type { MemberPermissions };
 
 // Limite máximo de membros no time (incluindo o owner)
 export const MAX_TEAM_MEMBERS = 11;
@@ -73,7 +76,7 @@ export async function getUserTeamMembership(userId: string): Promise<{
 
 /**
  * Verifica se um usuário tem acesso às páginas financeiras
- * Owner sempre tem acesso, e membros com papel 'financial' também
+ * Owner sempre tem acesso, e membros com permissão canViewFinancials também
  */
 export async function canAccessFinancials(userId: string): Promise<boolean> {
   const membership = await getUserTeamMembership(userId);
@@ -83,8 +86,100 @@ export async function canAccessFinancials(userId: string): Promise<boolean> {
     return true;
   }
 
-  // Se é membro, só tem acesso se for financial
-  return membership.role === "financial";
+  // Se é membro, verifica se é o próprio owner do time (não deveria acontecer, mas por segurança)
+  if (membership.ownerId === userId) {
+    return true;
+  }
+
+  // Usa permissões granulares
+  const permissions = await getMemberPermissions(userId, membership.ownerId!);
+  return permissions.canViewFinancials;
+}
+
+/**
+ * Obtém as permissões de um membro do time
+ * Retorna as permissões granulares definidas, ou as permissões padrão do role
+ */
+export async function getMemberPermissions(userId: string, ownerId: string): Promise<MemberPermissions> {
+  // Se é o owner, retorna todas as permissões
+  if (userId === ownerId) {
+    return defaultPermissionsByRole.owner;
+  }
+
+  const db = getDB();
+  const [member] = await db
+    .select()
+    .from(teamMembers)
+    .where(
+      and(
+        eq(teamMembers.ownerId, ownerId),
+        eq(teamMembers.memberId, userId),
+        eq(teamMembers.isActive, true)
+      )
+    )
+    .limit(1);
+
+  if (!member) {
+    // Se não é membro, retorna permissões de viewer (mais restritivo)
+    return defaultPermissionsByRole.viewer;
+  }
+
+  // Retorna as permissões granulares do membro
+  return {
+    canViewInterviews: member.canViewInterviews,
+    canCreateInterviews: member.canCreateInterviews,
+    canEditInterviews: member.canEditInterviews,
+    canDeleteInterviews: member.canDeleteInterviews,
+    canViewCandidates: member.canViewCandidates,
+    canApproveCandidates: member.canApproveCandidates,
+    canRejectCandidates: member.canRejectCandidates,
+    canViewFinancials: member.canViewFinancials,
+    canInviteMembers: member.canInviteMembers,
+    canRemoveMembers: member.canRemoveMembers,
+    canEditMemberPermissions: member.canEditMemberPermissions,
+    canEditSettings: member.canEditSettings,
+    canEditAutoApproval: member.canEditAutoApproval,
+  };
+}
+
+/**
+ * Atualiza as permissões de um membro do time
+ */
+export async function updateMemberPermissions(
+  ownerId: string,
+  memberId: string,
+  permissions: Partial<MemberPermissions>
+): Promise<{ success: boolean; error?: string }> {
+  if (ownerId === memberId) {
+    return { success: false, error: "Você não pode alterar suas próprias permissões" };
+  }
+
+  const db = getDB();
+  const [member] = await db
+    .select()
+    .from(teamMembers)
+    .where(
+      and(
+        eq(teamMembers.ownerId, ownerId),
+        eq(teamMembers.memberId, memberId),
+        eq(teamMembers.isActive, true)
+      )
+    )
+    .limit(1);
+
+  if (!member) {
+    return { success: false, error: "Membro não encontrado" };
+  }
+
+  await db
+    .update(teamMembers)
+    .set({
+      ...permissions,
+      updatedAt: new Date(),
+    })
+    .where(eq(teamMembers.id, member.id));
+
+  return { success: true };
 }
 
 /**
@@ -113,36 +208,47 @@ export async function getUserRoleInTeam(userId: string, ownerId: string): Promis
 
 /**
  * Verifica se um usuário tem permissão para uma ação no time
+ * Agora usa permissões granulares em vez de roles fixos
  */
 export async function canUserPerformAction(
   userId: string,
   ownerId: string,
-  action: "invite" | "remove" | "approve" | "reject" | "view" | "edit_settings" | "edit_auto_approval" | "manage_interviews"
+  action: "invite" | "remove" | "approve" | "reject" | "view" | "edit_settings" | "edit_auto_approval" | "manage_interviews" | "edit_permissions"
 ): Promise<boolean> {
-  const role = await getUserRoleInTeam(userId, ownerId);
+  // Owner sempre pode tudo
+  if (userId === ownerId) {
+    return true;
+  }
 
-  if (!role) return false;
+  const permissions = await getMemberPermissions(userId, ownerId);
 
   switch (action) {
-    // Apenas owner e admin podem gerenciar membros do time
     case "invite":
+      return permissions.canInviteMembers;
+
     case "remove":
-      return role === "owner" || role === "admin";
+      return permissions.canRemoveMembers;
 
-    // Owner, admin e recruiter podem editar configurações de aprovação automática
+    case "edit_permissions":
+      return permissions.canEditMemberPermissions;
+
     case "edit_settings":
+      return permissions.canEditSettings;
+
     case "edit_auto_approval":
-      return role === "owner" || role === "admin" || role === "recruiter";
+      return permissions.canEditAutoApproval;
 
-    // Owner, admin e recruiter podem aprovar/reprovar candidatos e gerenciar entrevistas
     case "approve":
-    case "reject":
-    case "manage_interviews":
-      return role === "owner" || role === "admin" || role === "recruiter";
+      return permissions.canApproveCandidates;
 
-    // Todos podem visualizar (exceto financial que só vê financeiro)
+    case "reject":
+      return permissions.canRejectCandidates;
+
+    case "manage_interviews":
+      return permissions.canCreateInterviews || permissions.canEditInterviews;
+
     case "view":
-      return role !== "financial";
+      return permissions.canViewInterviews || permissions.canViewCandidates;
 
     default:
       return false;
@@ -150,9 +256,9 @@ export async function canUserPerformAction(
 }
 
 /**
- * Lista os membros de um time
+ * Lista os membros de um time com suas permissões
  */
-export async function getTeamMembers(ownerId: string): Promise<(TeamMember & { member: { id: string; nome: string; email: string } })[]> {
+export async function getTeamMembers(ownerId: string): Promise<(TeamMember & { member: { id: string; nome: string; email: string }; permissions: MemberPermissions })[]> {
   const db = getDB();
   const members = await db
     .select({
@@ -163,6 +269,19 @@ export async function getTeamMembers(ownerId: string): Promise<(TeamMember & { m
       isActive: teamMembers.isActive,
       createdAt: teamMembers.createdAt,
       updatedAt: teamMembers.updatedAt,
+      canViewInterviews: teamMembers.canViewInterviews,
+      canCreateInterviews: teamMembers.canCreateInterviews,
+      canEditInterviews: teamMembers.canEditInterviews,
+      canDeleteInterviews: teamMembers.canDeleteInterviews,
+      canViewCandidates: teamMembers.canViewCandidates,
+      canApproveCandidates: teamMembers.canApproveCandidates,
+      canRejectCandidates: teamMembers.canRejectCandidates,
+      canViewFinancials: teamMembers.canViewFinancials,
+      canInviteMembers: teamMembers.canInviteMembers,
+      canRemoveMembers: teamMembers.canRemoveMembers,
+      canEditMemberPermissions: teamMembers.canEditMemberPermissions,
+      canEditSettings: teamMembers.canEditSettings,
+      canEditAutoApproval: teamMembers.canEditAutoApproval,
       member: {
         id: users.id,
         nome: users.nome,
@@ -177,7 +296,24 @@ export async function getTeamMembers(ownerId: string): Promise<(TeamMember & { m
     ))
     .orderBy(desc(teamMembers.createdAt));
 
-  return members as (TeamMember & { member: { id: string; nome: string; email: string } })[];
+  return members.map(m => ({
+    ...m,
+    permissions: {
+      canViewInterviews: m.canViewInterviews,
+      canCreateInterviews: m.canCreateInterviews,
+      canEditInterviews: m.canEditInterviews,
+      canDeleteInterviews: m.canDeleteInterviews,
+      canViewCandidates: m.canViewCandidates,
+      canApproveCandidates: m.canApproveCandidates,
+      canRejectCandidates: m.canRejectCandidates,
+      canViewFinancials: m.canViewFinancials,
+      canInviteMembers: m.canInviteMembers,
+      canRemoveMembers: m.canRemoveMembers,
+      canEditMemberPermissions: m.canEditMemberPermissions,
+      canEditSettings: m.canEditSettings,
+      canEditAutoApproval: m.canEditAutoApproval,
+    },
+  })) as (TeamMember & { member: { id: string; nome: string; email: string }; permissions: MemberPermissions })[];
 }
 
 /**
@@ -448,21 +584,30 @@ export async function acceptTeamInvitation(token: string, userId: string): Promi
     )
     .limit(1);
 
+  // Obtém as permissões padrão do role
+  const defaultPermissions = defaultPermissionsByRole[invitation.role as TeamRole] || defaultPermissionsByRole.viewer;
+
   if (existingMember) {
     if (existingMember.isActive) {
       return { success: false, error: "Você já faz parte deste time" };
     }
-    // Reativa membro
+    // Reativa membro com permissões padrão do role
     await db
       .update(teamMembers)
-      .set({ isActive: true, role: invitation.role, updatedAt: new Date() })
+      .set({
+        isActive: true,
+        role: invitation.role,
+        ...defaultPermissions,
+        updatedAt: new Date(),
+      })
       .where(eq(teamMembers.id, existingMember.id));
   } else {
-    // Cria novo membro
+    // Cria novo membro com permissões padrão do role
     await db.insert(teamMembers).values({
       ownerId: invitation.invitedBy,
       memberId: userId,
       role: invitation.role,
+      ...defaultPermissions,
     });
   }
 

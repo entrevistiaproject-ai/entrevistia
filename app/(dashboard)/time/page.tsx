@@ -33,9 +33,12 @@ import {
   X,
   Send,
   Wallet,
+  Settings2,
+  ChevronDown,
+  ChevronUp,
+  Check,
 } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -48,12 +51,23 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import {
+  PermissionsMatrix,
+  PermissionsPresets,
+  permissionPresets,
+  type MemberPermissions,
+} from "@/components/team/permissions-matrix";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface TeamMember {
   id: string;
   ownerId: string;
   memberId: string;
-  role: "owner" | "admin" | "recruiter" | "viewer";
+  role: "owner" | "admin" | "recruiter" | "financial" | "viewer";
   isActive: boolean;
   createdAt: string;
   member: {
@@ -61,6 +75,7 @@ interface TeamMember {
     nome: string;
     email: string;
   };
+  permissions: MemberPermissions;
 }
 
 interface TeamInvitation {
@@ -118,6 +133,23 @@ const roleColors: Record<string, string> = {
   viewer: "bg-gray-100 text-gray-800 border-gray-200",
 };
 
+// Permissões padrão para novos convites
+const defaultInvitePermissions: MemberPermissions = {
+  canViewInterviews: true,
+  canCreateInterviews: false,
+  canEditInterviews: false,
+  canDeleteInterviews: false,
+  canViewCandidates: true,
+  canApproveCandidates: false,
+  canRejectCandidates: false,
+  canViewFinancials: false,
+  canInviteMembers: false,
+  canRemoveMembers: false,
+  canEditMemberPermissions: false,
+  canEditSettings: false,
+  canEditAutoApproval: false,
+};
+
 export default function TimePage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
@@ -135,6 +167,11 @@ export default function TimePage() {
   const [removingMember, setRemovingMember] = useState<string | null>(null);
   const [cancellingInvite, setCancellingInvite] = useState<string | null>(null);
 
+  // Estado para permissões expandidas
+  const [expandedMember, setExpandedMember] = useState<string | null>(null);
+  const [memberPermissions, setMemberPermissions] = useState<Record<string, MemberPermissions>>({});
+  const [savingPermissions, setSavingPermissions] = useState<string | null>(null);
+
   // Carregar dados do time
   useEffect(() => {
     fetchTeamData();
@@ -146,6 +183,13 @@ export default function TimePage() {
       if (res.ok) {
         const data = await res.json();
         setTeamData(data);
+
+        // Inicializa o estado de permissões para cada membro
+        const perms: Record<string, MemberPermissions> = {};
+        data.members?.forEach((member: TeamMember) => {
+          perms[member.memberId] = member.permissions;
+        });
+        setMemberPermissions(perms);
       } else {
         toast({
           title: "Erro",
@@ -322,6 +366,54 @@ export default function TimePage() {
     }
   }
 
+  // Salvar permissões de um membro
+  async function handleSavePermissions(memberId: string) {
+    const permissions = memberPermissions[memberId];
+    if (!permissions) return;
+
+    setSavingPermissions(memberId);
+    try {
+      const res = await fetch(`/api/time/membro/${memberId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ permissions }),
+      });
+
+      if (res.ok) {
+        toast({
+          title: "Permissões salvas",
+          description: "As permissões do membro foram atualizadas",
+        });
+        fetchTeamData();
+        setExpandedMember(null);
+      } else {
+        const data = await res.json();
+        toast({
+          title: "Erro",
+          description: data.error || "Erro ao salvar permissões",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao salvar permissões:", error);
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar permissões",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingPermissions(null);
+    }
+  }
+
+  // Atualizar permissões localmente
+  function handlePermissionsChange(memberId: string, permissions: MemberPermissions) {
+    setMemberPermissions(prev => ({
+      ...prev,
+      [memberId]: permissions,
+    }));
+  }
+
   // Iniciais do nome
   const getInitials = (name: string) => {
     return name
@@ -339,6 +431,11 @@ export default function TimePage() {
       month: "short",
       year: "numeric",
     });
+  };
+
+  // Conta permissões ativas
+  const countActivePermissions = (permissions: MemberPermissions) => {
+    return Object.values(permissions).filter(Boolean).length;
   };
 
   if (loading) {
@@ -531,7 +628,7 @@ export default function TimePage() {
           <CardDescription>
             {teamData?.members.length === 0
               ? "Você ainda não tem membros no time. Convide alguém!"
-              : `${(teamData?.members.length || 0) + 1} membros no time`}
+              : `${(teamData?.members.length || 0) + 1} membros no time. Clique em um membro para gerenciar permissões.`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -555,93 +652,141 @@ export default function TimePage() {
                     </p>
                   </div>
                 </div>
-                <Badge variant="outline" className={`${roleColors.owner} shrink-0`}>
-                  <Crown className="mr-1 h-3 w-3" />
-                  Dono
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className={`${roleColors.owner} shrink-0`}>
+                    <Crown className="mr-1 h-3 w-3" />
+                    Dono
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">Todas as permissões</span>
+                </div>
               </div>
             )}
 
             {/* Membros */}
             {teamData?.members.map((member) => {
               const RoleIcon = roleIcons[member.role] || Eye;
+              const isExpanded = expandedMember === member.memberId;
+              const currentPermissions = memberPermissions[member.memberId] || member.permissions;
+              const activeCount = countActivePermissions(currentPermissions);
+
               return (
-                <div
+                <Collapsible
                   key={member.id}
-                  className="flex items-center justify-between p-4 rounded-lg border"
+                  open={isExpanded}
+                  onOpenChange={(open) => setExpandedMember(open ? member.memberId : null)}
                 >
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback className="bg-muted">
-                        {getInitials(member.member.nome)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{member.member.nome}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {member.member.email}
-                      </p>
-                    </div>
-                  </div>
+                  <div className="rounded-lg border overflow-hidden">
+                    <CollapsibleTrigger asChild>
+                      <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <Avatar className="h-10 w-10">
+                            <AvatarFallback className="bg-muted">
+                              {getInitials(member.member.nome)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{member.member.nome}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {member.member.email}
+                            </p>
+                          </div>
+                        </div>
 
-                  <div className="flex items-center gap-2">
-                    <Select
-                      value={member.role}
-                      onValueChange={(value) =>
-                        handleChangeRole(member.memberId, value)
-                      }
-                    >
-                      <SelectTrigger className="w-[140px]">
-                        <SelectValue>
+                        <div className="flex items-center gap-3">
                           <div className="flex items-center gap-2">
-                            <RoleIcon className="h-3 w-3" />
-                            {roleLabels[member.role]}
+                            <Badge variant="outline" className={roleColors[member.role]}>
+                              <RoleIcon className="mr-1 h-3 w-3" />
+                              {roleLabels[member.role]}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {activeCount}/13 permissões
+                            </span>
                           </div>
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="admin">
-                          <div className="flex items-center gap-2">
-                            <Shield className="h-4 w-4" />
-                            Administrador
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="recruiter">
-                          <div className="flex items-center gap-2">
-                            <UserCheck className="h-4 w-4" />
-                            Recrutador
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="financial">
-                          <div className="flex items-center gap-2">
-                            <Wallet className="h-4 w-4" />
-                            Financeiro
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="viewer">
-                          <div className="flex items-center gap-2">
-                            <Eye className="h-4 w-4" />
-                            Visualizador
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
 
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                      onClick={() => handleRemoveMember(member.memberId)}
-                      disabled={removingMember === member.memberId}
-                    >
-                      {removingMember === member.memberId ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-4 w-4" />
-                      )}
-                    </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground"
+                          >
+                            <Settings2 className="h-4 w-4 mr-1" />
+                            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveMember(member.memberId);
+                            }}
+                            disabled={removingMember === member.memberId}
+                          >
+                            {removingMember === member.memberId ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    </CollapsibleTrigger>
+
+                    <CollapsibleContent>
+                      <div className="border-t p-4 bg-muted/20">
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-medium text-sm">Permissões Granulares</h4>
+                              <p className="text-xs text-muted-foreground">
+                                Defina exatamente o que este membro pode fazer
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground">Aplicar preset:</span>
+                              <PermissionsPresets
+                                onSelect={(permissions) => handlePermissionsChange(member.memberId, permissions)}
+                              />
+                            </div>
+                          </div>
+
+                          <PermissionsMatrix
+                            permissions={currentPermissions}
+                            onChange={(permissions) => handlePermissionsChange(member.memberId, permissions)}
+                          />
+
+                          <div className="flex justify-end gap-2 pt-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setMemberPermissions(prev => ({
+                                  ...prev,
+                                  [member.memberId]: member.permissions,
+                                }));
+                                setExpandedMember(null);
+                              }}
+                            >
+                              Cancelar
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => handleSavePermissions(member.memberId)}
+                              disabled={savingPermissions === member.memberId}
+                            >
+                              {savingPermissions === member.memberId ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <Check className="mr-2 h-4 w-4" />
+                              )}
+                              Salvar Permissões
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CollapsibleContent>
                   </div>
-                </div>
+                </Collapsible>
               );
             })}
           </div>
