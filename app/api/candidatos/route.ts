@@ -139,21 +139,21 @@ export async function POST(request: Request) {
       const prazoHoras = (entrevista.configuracoes as { prazoRespostaHoras?: number })?.prazoRespostaHoras || 48;
       const prazoResposta = new Date(Date.now() + prazoHoras * 60 * 60 * 1000);
 
+      // Criar ou atualizar vínculo candidato-entrevista (sem marcar convite ainda)
+      let candidatoEntrevistaId: string;
       if (!vinculoExistente) {
-        // Criar vínculo candidato-entrevista apenas se não existir
-        await db.insert(candidatoEntrevistas).values({
+        const [novoVinculo] = await db.insert(candidatoEntrevistas).values({
           candidatoId: novoCandidato.id,
           entrevistaId,
           status: "pendente",
-          conviteEnviadoEm: new Date(),
           prazoResposta,
-        });
+        }).returning({ id: candidatoEntrevistas.id });
+        candidatoEntrevistaId = novoVinculo.id;
       } else {
-        // Atualizar convite existente (reenvio)
+        candidatoEntrevistaId = vinculoExistente.id;
         await db
           .update(candidatoEntrevistas)
           .set({
-            conviteEnviadoEm: new Date(),
             prazoResposta,
             updatedAt: new Date(),
           })
@@ -165,7 +165,7 @@ export async function POST(request: Request) {
 
       // Enviar email de convite
       try {
-        await enviarEmail({
+        const result = await enviarEmail({
           to: email,
           subject: `Convite para Entrevista - ${entrevista.cargo || entrevista.titulo} | ${recrutador?.empresa || "EntrevistIA"}`,
           html: emailConviteEntrevistaTemplate({
@@ -178,7 +178,16 @@ export async function POST(request: Request) {
           }),
         });
 
-        console.log(`✅ Email de convite enviado para ${email}`);
+        // Só marca como enviado se o email foi realmente enviado
+        if (result.sent) {
+          await db
+            .update(candidatoEntrevistas)
+            .set({ conviteEnviadoEm: new Date(), updatedAt: new Date() })
+            .where(eq(candidatoEntrevistas.id, candidatoEntrevistaId));
+          console.log(`✅ Email de convite enviado para ${email}`);
+        } else {
+          console.warn(`⚠️ Email de convite NÃO enviado para ${email} (mode: ${result.mode})`);
+        }
       } catch (emailError) {
         console.error("❌ Erro ao enviar email de convite:", emailError);
         // Não falha a criação do candidato se o email falhar

@@ -93,7 +93,7 @@ export async function processAutoDecisionForCandidate(
             .limit(1);
 
           if (owner) {
-            await enviarEmail({
+            const result = await enviarEmail({
               to: data.candidatoEmail,
               subject: `Parabéns! Você foi aprovado(a) para a próxima fase - ${data.entrevistaCargo || "Vaga"}`,
               html: emailAprovacaoAutomaticaTemplate({
@@ -103,8 +103,12 @@ export async function processAutoDecisionForCandidate(
                 mensagemPersonalizada: data.autoApprovalCandidateMessage || undefined,
               }),
             });
-            emailSent = true;
-            console.log(`[Auto-Decision] Email de aprovação enviado para ${data.candidatoEmail}`);
+            emailSent = result.sent;
+            if (result.sent) {
+              console.log(`[Auto-Decision] Email de aprovação enviado para ${data.candidatoEmail}`);
+            } else {
+              console.warn(`[Auto-Decision] Email de aprovação NÃO enviado para ${data.candidatoEmail} (mode: ${result.mode})`);
+            }
           }
         } catch (emailError) {
           console.error("[Auto-Decision] Erro ao enviar email de aprovação:", emailError);
@@ -142,7 +146,7 @@ export async function processAutoDecisionForCandidate(
             .limit(1);
 
           if (owner) {
-            await enviarEmail({
+            const result = await enviarEmail({
               to: data.candidatoEmail,
               subject: `Atualização sobre sua candidatura - ${data.entrevistaCargo || "Vaga"}`,
               html: emailReprovacaoAutomaticaTemplate({
@@ -152,8 +156,12 @@ export async function processAutoDecisionForCandidate(
                 mensagemPersonalizada: data.autoRejectCandidateMessage || undefined,
               }),
             });
-            emailSent = true;
-            console.log(`[Auto-Decision] Email de reprovação enviado para ${data.candidatoEmail}`);
+            emailSent = result.sent;
+            if (result.sent) {
+              console.log(`[Auto-Decision] Email de reprovação enviado para ${data.candidatoEmail}`);
+            } else {
+              console.warn(`[Auto-Decision] Email de reprovação NÃO enviado para ${data.candidatoEmail} (mode: ${result.mode})`);
+            }
           }
         } catch (emailError) {
           console.error("[Auto-Decision] Erro ao enviar email de reprovação:", emailError);

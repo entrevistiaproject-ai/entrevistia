@@ -241,7 +241,7 @@ export async function GET(request: NextRequest) {
                   .limit(1);
 
                 if (owner) {
-                  await enviarEmail({
+                  const result = await enviarEmail({
                     to: candidato.candidatoEmail,
                     subject: `Parabéns! Você foi aprovado(a) para a próxima fase - ${candidato.entrevistaCargo || "Vaga"}`,
                     html: emailAprovacaoAutomaticaTemplate({
@@ -251,6 +251,19 @@ export async function GET(request: NextRequest) {
                       mensagemPersonalizada: candidato.autoApprovalCandidateMessage || undefined,
                     }),
                   });
+                  if (result.sent) {
+                    // Atualiza o registro com a data de envio do email
+                    await db
+                      .update(candidatoEntrevistas)
+                      .set({ emailDecisaoEnviadoEm: new Date(), updatedAt: new Date() })
+                      .where(eq(candidatoEntrevistas.id, candidato.candidatoEntrevistaId));
+                  } else {
+                    logger.warn("[CRON] Email de aprovação NÃO enviado", {
+                      cronId,
+                      candidatoEntrevistaId: candidato.candidatoEntrevistaId,
+                      mode: result.mode,
+                    });
+                  }
                 }
               } catch (emailError) {
                 // Log mas não falha o processamento
@@ -299,7 +312,7 @@ export async function GET(request: NextRequest) {
                   .limit(1);
 
                 if (owner) {
-                  await enviarEmail({
+                  const result = await enviarEmail({
                     to: candidato.candidatoEmail,
                     subject: `Atualização sobre sua candidatura - ${candidato.entrevistaCargo || "Vaga"}`,
                     html: emailReprovacaoAutomaticaTemplate({
@@ -309,6 +322,19 @@ export async function GET(request: NextRequest) {
                       mensagemPersonalizada: candidato.autoRejectCandidateMessage || undefined,
                     }),
                   });
+                  if (result.sent) {
+                    // Atualiza o registro com a data de envio do email
+                    await db
+                      .update(candidatoEntrevistas)
+                      .set({ emailDecisaoEnviadoEm: new Date(), updatedAt: new Date() })
+                      .where(eq(candidatoEntrevistas.id, candidato.candidatoEntrevistaId));
+                  } else {
+                    logger.warn("[CRON] Email de reprovação NÃO enviado", {
+                      cronId,
+                      candidatoEntrevistaId: candidato.candidatoEntrevistaId,
+                      mode: result.mode,
+                    });
+                  }
                 }
               } catch (emailError) {
                 logger.error("[CRON] Erro ao enviar email de reprovação", {

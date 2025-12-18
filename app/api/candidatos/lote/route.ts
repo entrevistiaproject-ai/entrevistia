@@ -188,7 +188,7 @@ export async function POST(request: Request) {
       const prazoHoras = (entrevista.configuracoes as { prazoRespostaHoras?: number })?.prazoRespostaHoras || 48;
       const prazoResposta = new Date(Date.now() + prazoHoras * 60 * 60 * 1000);
 
-      // Criar vínculos com a entrevista
+      // Criar vínculos com a entrevista (sem marcar convite ainda)
       if (candidatosParaVincular.length > 0) {
         const vinculosCriados = await db
           .insert(candidatoEntrevistas)
@@ -197,21 +197,25 @@ export async function POST(request: Request) {
               candidatoId: c.id,
               entrevistaId,
               status: "pendente",
-              conviteEnviadoEm: new Date(),
               prazoResposta,
               podeRefazer: false,
             }))
           )
-          .returning();
+          .returning({ id: candidatoEntrevistas.id, candidatoId: candidatoEntrevistas.candidatoId });
 
         vinculosEntrevistaInseridos = vinculosCriados.length;
+
+        // Criar mapa de candidatoId para vinculoId
+        const candidatoIdParaVinculoId = new Map(
+          vinculosCriados.map((v) => [v.candidatoId, v.id])
+        );
 
         // Enviar emails de convite para cada candidato vinculado
         for (const candidato of candidatosParaVincular) {
           try {
             const linkEntrevista = `${getBaseUrl()}/convite/${entrevista.slug}?candidatoId=${candidato.id}`;
 
-            await enviarEmail({
+            const result = await enviarEmail({
               to: candidato.email,
               subject: `Convite para Entrevista - ${entrevista.cargo || entrevista.titulo} | ${recrutador?.empresa || "EntrevistIA"}`,
               html: emailConviteEntrevistaTemplate({
@@ -224,8 +228,21 @@ export async function POST(request: Request) {
               }),
             });
 
-            emailsEnviados++;
-            console.log(`✅ Email de convite enviado para ${candidato.email}`);
+            // Só marca como enviado se o email foi realmente enviado
+            if (result.sent) {
+              const vinculoId = candidatoIdParaVinculoId.get(candidato.id);
+              if (vinculoId) {
+                await db
+                  .update(candidatoEntrevistas)
+                  .set({ conviteEnviadoEm: new Date(), updatedAt: new Date() })
+                  .where(eq(candidatoEntrevistas.id, vinculoId));
+              }
+              emailsEnviados++;
+              console.log(`✅ Email de convite enviado para ${candidato.email}`);
+            } else {
+              emailsFalharam++;
+              console.warn(`⚠️ Email de convite NÃO enviado para ${candidato.email} (mode: ${result.mode})`);
+            }
           } catch (emailError) {
             emailsFalharam++;
             console.error(`❌ Erro ao enviar email para ${candidato.email}:`, emailError);

@@ -118,7 +118,7 @@ export async function POST(
     // Calcular novo prazo
     const novoPrazo = new Date(Date.now() + prazoHoras * 60 * 60 * 1000);
 
-    // Resetar a sessão candidato-entrevista
+    // Resetar a sessão candidato-entrevista (sem marcar convite ainda)
     await db
       .update(candidatoEntrevistas)
       .set({
@@ -137,20 +137,21 @@ export async function POST(
         decisaoRecrutadorEm: null,
         decisaoRecrutadorObservacao: null,
         emailEncerramentoEnviadoEm: null,
-        // Novo prazo e convite
+        emailDecisaoEnviadoEm: null,
+        // Novo prazo (convite será marcado após envio com sucesso)
         prazoResposta: novoPrazo,
-        conviteEnviadoEm: enviarEmailConvite ? new Date() : null,
         // Atualizar timestamp
         updatedAt: new Date(),
       })
       .where(eq(candidatoEntrevistas.id, candidatoEntrevistaId));
 
     // Enviar email de convite se solicitado
+    let emailRealmenteEnviado = false;
     if (enviarEmailConvite) {
       try {
         const linkEntrevista = `${getBaseUrl()}/convite/${entrevista.slug}?candidatoId=${candidato.id}`;
 
-        await enviarEmail({
+        const result = await enviarEmail({
           to: candidato.email,
           subject: `Nova oportunidade - ${entrevista.cargo || entrevista.titulo} | ${recrutador?.empresa || "EntrevistIA"}`,
           html: emailConviteEntrevistaTemplate({
@@ -163,7 +164,17 @@ export async function POST(
           }),
         });
 
-        console.log(`✅ Email de reenvio enviado para ${candidato.email}`);
+        // Só marca como enviado se o email foi realmente enviado
+        if (result.sent) {
+          await db
+            .update(candidatoEntrevistas)
+            .set({ conviteEnviadoEm: new Date(), updatedAt: new Date() })
+            .where(eq(candidatoEntrevistas.id, candidatoEntrevistaId));
+          emailRealmenteEnviado = true;
+          console.log(`✅ Email de reenvio enviado para ${candidato.email}`);
+        } else {
+          console.warn(`⚠️ Email de reenvio NÃO enviado para ${candidato.email} (mode: ${result.mode})`);
+        }
       } catch (emailError) {
         console.error("❌ Erro ao enviar email de reenvio:", emailError);
         // Não falha a operação se o email falhar
@@ -174,7 +185,7 @@ export async function POST(
       success: true,
       message: "Entrevista reenviada com sucesso",
       novoPrazo,
-      emailEnviado: enviarEmailConvite,
+      emailEnviado: emailRealmenteEnviado,
     });
   } catch (error) {
     console.error("Erro ao reenviar entrevista:", error);

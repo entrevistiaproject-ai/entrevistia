@@ -110,30 +110,38 @@ export async function POST(
     });
 
     // Enviar o email
-    await enviarEmail({
+    const result = await enviarEmail({
       to: candidato.email,
       subject: `Atualização sobre sua candidatura - ${entrevista.empresa || "Processo Seletivo"}`,
       html: htmlEmail,
     });
 
-    // Registrar que o email foi enviado
-    await db
-      .update(candidatoEntrevistas)
-      .set({
-        emailEncerramentoEnviadoEm: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(
-        and(
-          eq(candidatoEntrevistas.entrevistaId, entrevistaId),
-          eq(candidatoEntrevistas.candidatoId, candidatoId)
-        )
-      );
+    // Só registra como enviado se o email foi realmente enviado
+    if (result.sent) {
+      await db
+        .update(candidatoEntrevistas)
+        .set({
+          emailEncerramentoEnviadoEm: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(candidatoEntrevistas.entrevistaId, entrevistaId),
+            eq(candidatoEntrevistas.candidatoId, candidatoId)
+          )
+        );
 
-    return NextResponse.json({
-      success: true,
-      message: "Email de encerramento enviado com sucesso",
-    });
+      return NextResponse.json({
+        success: true,
+        message: "Email de encerramento enviado com sucesso",
+      });
+    } else {
+      console.warn(`Email de encerramento NÃO enviado para ${candidato.email} (mode: ${result.mode})`);
+      return NextResponse.json(
+        { error: "Falha ao enviar email. Verifique a configuração do remetente." },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     console.error("Erro ao enviar email de encerramento:", error);
     return NextResponse.json(
