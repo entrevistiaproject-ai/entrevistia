@@ -890,26 +890,39 @@ async function enviarNotificacao75(
 `;
 
   try {
-    await enviarEmail({
+    const result = await enviarEmail({
       to: email,
       subject: "⚠️ Alerta: 75% do seu crédito gratuito foi utilizado - EntrevistIA",
       html,
     });
 
-    // Marca como enviado no banco
-    await db
-      .update(users)
-      .set({
-        notificacao75EnviadaEm: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, userId));
+    // Só marca como enviado se o email foi REALMENTE enviado
+    if (result.sent) {
+      await db
+        .update(users)
+        .set({
+          notificacao75EnviadaEm: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, userId));
 
-    logger.info("[BILLING] Notificação de 75% enviada com sucesso", {
-      userId,
-      email,
-      percentualUsado: usage.percentualUsado,
-    });
+      logger.info("[BILLING] Notificação de 75% enviada com sucesso", {
+        userId,
+        email,
+        emailId: result.emailId,
+        percentualUsado: usage.percentualUsado,
+      });
+    } else {
+      // Email NÃO foi enviado (domínio não verificado, etc)
+      logger.warn("[BILLING] Notificação de 75% NÃO foi enviada - problema com Resend", {
+        userId,
+        email,
+        mode: result.mode,
+        percentualUsado: usage.percentualUsado,
+      });
+      // Não lança erro, mas também não marca como enviado
+      // Assim o sistema vai tentar novamente na próxima análise
+    }
   } catch (error) {
     logger.error("[BILLING] Erro ao enviar notificação de 75%", {
       userId,
