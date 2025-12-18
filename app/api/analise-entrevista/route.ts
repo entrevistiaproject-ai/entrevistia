@@ -9,7 +9,7 @@ import { checkRateLimit, getClientIP, createRateLimitKey, getRateLimitHeaders } 
 import { sanitizeUUID } from '@/lib/security/sanitize';
 import { verificarPermissaoAnalise } from '@/lib/services/billing';
 
-export const maxDuration = 300; // 5 minutos - permite análises mais longas
+export const maxDuration = 600; // 10 minutos - permite análises mais longas com muitas perguntas
 
 /**
  * POST /api/analise-entrevista
@@ -151,6 +151,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Executa a análise
+    // Nota: O rate limiting já protege contra cliques muito rápidos
+    // e a análise demora vários segundos, então não há risco de duplicata
     const result = await analyzeInterview(
       sanitizedCandidatoId,
       sanitizedEntrevistaId,

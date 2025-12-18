@@ -258,6 +258,7 @@ export async function registrarTransacao(params: {
   userId: string;
   tipo: TipoTransacao;
   entrevistaId?: string;
+  candidatoId?: string;
   respostaId?: string;
   descricao?: string;
   metadados?: {
@@ -287,6 +288,7 @@ export async function registrarTransacao(params: {
     ownerId: ownerId,
     tipo: params.tipo,
     entrevistaId: params.entrevistaId,
+    candidatoId: params.candidatoId,
     respostaId: params.respostaId,
   });
 
@@ -357,6 +359,7 @@ export async function registrarTransacao(params: {
       const validacaoPre = await validarNovaCobranca({
         userId: params.userId,
         entrevistaId: params.entrevistaId,
+        candidatoId: params.candidatoId,
         tipo: params.tipo,
       });
 
@@ -518,6 +521,7 @@ export async function registrarTransacao(params: {
 export async function registrarAnalisePerguntas(params: {
   userId: string;
   entrevistaId: string;
+  candidatoId: string;
   perguntas: Array<{
     perguntaId: string;
     perguntaTexto: string;
@@ -528,6 +532,7 @@ export async function registrarAnalisePerguntas(params: {
   logger.info("[BILLING] Iniciando cobrança de análise de candidato", {
     userId: params.userId,
     entrevistaId: params.entrevistaId,
+    candidatoId: params.candidatoId,
     totalPerguntas: params.perguntas.length,
   });
 
@@ -540,6 +545,7 @@ export async function registrarAnalisePerguntas(params: {
     userId: params.userId,
     tipo: "taxa_base_candidato",
     entrevistaId: params.entrevistaId,
+    candidatoId: params.candidatoId,
     descricao: `Taxa base - análise de candidato`,
     metadados: {
       totalPerguntas: params.perguntas.length,
@@ -582,6 +588,7 @@ export async function registrarAnalisePerguntas(params: {
       userId: params.userId,
       tipo: "analise_pergunta",
       entrevistaId: params.entrevistaId,
+      candidatoId: params.candidatoId,
       respostaId: pergunta.respostaId,
       descricao: `Análise: ${pergunta.perguntaTexto.substring(0, 50)}...`,
       metadados: {

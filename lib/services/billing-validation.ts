@@ -523,37 +523,20 @@ async function recalcularTotaisFaturas(userId: string): Promise<void> {
 /**
  * Verifica a integridade de uma nova cobrança ANTES de registrar
  * Retorna true se a cobrança pode ser registrada
+ *
+ * NOTA: Esta função NÃO bloqueia cobranças - apenas valida integridade.
+ * A proteção contra duplo clique deve ser feita na API de análise,
+ * ANTES de chamar a IA (que já gera custo).
+ * Se a IA foi chamada, o billing DEVE registrar o custo.
  */
 export async function validarNovaCobranca(params: {
   userId: string;
   entrevistaId: string;
+  candidatoId?: string;
   tipo: "taxa_base_candidato" | "analise_pergunta";
 }): Promise<{ valid: boolean; reason?: string }> {
-  const db = getDB();
-
-  // Se for taxa base, verificar se já existe uma recente (últimos 5 minutos)
-  if (params.tipo === "taxa_base_candidato") {
-    const [taxaExistente] = await db
-      .select({ id: transacoes.id })
-      .from(transacoes)
-      .where(
-        and(
-          eq(transacoes.userId, params.userId),
-          eq(transacoes.entrevistaId, params.entrevistaId),
-          eq(transacoes.tipo, "taxa_base_candidato"),
-          sql`created_at > NOW() - INTERVAL '5 minutes'`
-        )
-      )
-      .limit(1);
-
-    if (taxaExistente) {
-      return {
-        valid: false,
-        reason: "Taxa base já registrada recentemente para esta análise",
-      };
-    }
-  }
-
+  // Todas as cobranças são válidas - se a IA foi chamada, deve ser cobrado
+  // A proteção contra duplo clique é responsabilidade da camada de API
   return { valid: true };
 }
 

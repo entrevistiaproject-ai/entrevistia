@@ -244,6 +244,7 @@ Retorne APENAS o JSON, sem texto adicional, sem markdown, sem explicações.`;
         const billingResult = await registrarAnalisePerguntas({
           userId: data.entrevista.userId,
           entrevistaId: entrevistaId,
+          candidatoId: candidatoId,
           perguntas: data.respostas.map(r => ({
             perguntaId: r.perguntaId,
             perguntaTexto: r.perguntaTexto,
