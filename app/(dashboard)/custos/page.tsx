@@ -121,6 +121,7 @@ interface AvaliacaoAgrupada {
 // Componente de Detalhamento de Transações
 function DetalhamentoTransacoes({ transacoes }: { transacoes: DadosCustos["transacoesRecentes"] }) {
   // Agrupar transações por avaliação de candidato
+  // Cada taxa_base_candidato representa uma análise única
   const avaliacoesAgrupadas: AvaliacaoAgrupada[] = (() => {
     if (!transacoes || transacoes.length === 0) return [];
 
@@ -129,73 +130,100 @@ function DetalhamentoTransacoes({ transacoes }: { transacoes: DadosCustos["trans
       (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
 
-    // Agrupar por entrevistaId + timestamp arredondado (janela de 5 minutos)
-    const grupos: Map<string, typeof transacoesOrdenadas> = new Map();
+    // Encontrar todas as taxas base (cada uma representa uma análise)
+    const taxasBase = transacoesOrdenadas.filter(t => t.tipo === "taxa_base_candidato");
+    const perguntasTransacoes = transacoesOrdenadas.filter(t => t.tipo === "analise_pergunta");
+    const outrasTransacoes = transacoesOrdenadas.filter(
+      t => t.tipo !== "taxa_base_candidato" && t.tipo !== "analise_pergunta"
+    );
 
-    transacoesOrdenadas.forEach((t) => {
-      if (t.tipo === "taxa_base_candidato" || t.tipo === "analise_pergunta") {
-        const data = new Date(t.createdAt);
-        const minutos = Math.floor(data.getMinutes() / 5) * 5;
-        data.setMinutes(minutos, 0, 0);
+    // Para cada taxa base, encontrar as perguntas associadas (próximas no tempo, mesma entrevista)
+    const perguntasUsadas = new Set<string>();
 
-        const entrevistaId = t.entrevistaId || "sem-entrevista";
-        const chave = `${entrevistaId}_${data.toISOString()}`;
+    taxasBase.forEach((taxaBase) => {
+      const taxaBaseTime = new Date(taxaBase.createdAt).getTime();
 
-        if (!grupos.has(chave)) {
-          grupos.set(chave, []);
-        }
-        grupos.get(chave)!.push(t);
-      } else {
-        const chave = t.id;
-        grupos.set(chave, [t]);
-      }
+      // Encontrar perguntas da mesma entrevista que foram criadas até 2 minutos após a taxa base
+      const perguntasDaAnalise = perguntasTransacoes.filter((p) => {
+        if (perguntasUsadas.has(p.id)) return false;
+        if (p.entrevistaId !== taxaBase.entrevistaId) return false;
+
+        const perguntaTime = new Date(p.createdAt).getTime();
+        const diffMs = perguntaTime - taxaBaseTime;
+
+        // Perguntas devem estar entre 0 e 120 segundos após a taxa base
+        return diffMs >= -1000 && diffMs <= 120000;
+      });
+
+      // Marcar perguntas como usadas
+      perguntasDaAnalise.forEach((p) => perguntasUsadas.add(p.id));
+
+      const valorPerguntas = perguntasDaAnalise.reduce((sum, t) => sum + t.valorCobrado, 0);
+      const totalPerguntas = perguntasDaAnalise.length;
+
+      avaliacoes.push({
+        id: taxaBase.id,
+        descricao: taxaBase.descricao || "Candidato avaliado",
+        totalPerguntas,
+        taxaBase: taxaBase.valorCobrado,
+        valorPerguntas,
+        valorTotal: taxaBase.valorCobrado + valorPerguntas,
+        createdAt: taxaBase.createdAt,
+        status: taxaBase.status,
+      });
     });
 
-    // Converter grupos em avaliações
-    grupos.forEach((trans, chave) => {
-      const taxaBaseTransacao = trans.find(t => t.tipo === "taxa_base_candidato");
-      const perguntasTransacoes = trans.filter(t => t.tipo === "analise_pergunta");
+    // Perguntas órfãs (sem taxa base associada) - agrupar por entrevista + janela de tempo
+    const perguntasOrfas = perguntasTransacoes.filter((p) => !perguntasUsadas.has(p.id));
+    if (perguntasOrfas.length > 0) {
+      const gruposOrfas: Map<string, typeof perguntasOrfas> = new Map();
 
-      if (taxaBaseTransacao || perguntasTransacoes.length > 0) {
-        const taxaBase = taxaBaseTransacao?.valorCobrado || 0;
-        const valorPerguntas = perguntasTransacoes.reduce((sum, t) => sum + t.valorCobrado, 0);
-        const totalPerguntas = perguntasTransacoes.length;
+      perguntasOrfas.forEach((p) => {
+        const data = new Date(p.createdAt);
+        const minutos = Math.floor(data.getMinutes() / 2) * 2;
+        data.setMinutes(minutos, 0, 0);
+        const chave = `${p.entrevistaId || "sem-entrevista"}_${data.toISOString()}`;
 
-        const descricao = taxaBaseTransacao?.descricao || "Candidato avaliado";
+        if (!gruposOrfas.has(chave)) {
+          gruposOrfas.set(chave, []);
+        }
+        gruposOrfas.get(chave)!.push(p);
+      });
 
+      gruposOrfas.forEach((perguntas, chave) => {
+        const valorPerguntas = perguntas.reduce((sum, t) => sum + t.valorCobrado, 0);
         avaliacoes.push({
           id: chave,
-          descricao,
-          totalPerguntas,
-          taxaBase,
+          descricao: "Candidato avaliado",
+          totalPerguntas: perguntas.length,
+          taxaBase: 0,
           valorPerguntas,
-          valorTotal: taxaBase + valorPerguntas,
-          createdAt: taxaBaseTransacao?.createdAt || perguntasTransacoes[0]?.createdAt || "",
-          status: taxaBaseTransacao?.status || perguntasTransacoes[0]?.status || "concluida",
+          valorTotal: valorPerguntas,
+          createdAt: perguntas[0].createdAt,
+          status: perguntas[0].status,
         });
-      } else {
-        trans.forEach((t) => {
-          const tipoLabels: Record<string, string> = {
-            taxa_base_candidato: "Taxa Base por Candidato",
-            analise_pergunta: "Análise por Pergunta",
-            transcricao_audio: "Transcrição de Áudio",
-            analise_ia: "Análise de IA",
-            pergunta_criada: "Criação de Pergunta",
-            entrevista_criada: "Criação de Entrevista",
-          };
+      });
+    }
 
-          avaliacoes.push({
-            id: t.id,
-            descricao: t.descricao || tipoLabels[t.tipo] || t.tipo,
-            totalPerguntas: 0,
-            taxaBase: t.valorCobrado,
-            valorPerguntas: 0,
-            valorTotal: t.valorCobrado,
-            createdAt: t.createdAt,
-            status: t.status,
-          });
-        });
-      }
+    // Outras transações (não são análises de candidato)
+    outrasTransacoes.forEach((t) => {
+      const tipoLabels: Record<string, string> = {
+        transcricao_audio: "Transcrição de Áudio",
+        analise_ia: "Análise de IA",
+        pergunta_criada: "Criação de Pergunta",
+        entrevista_criada: "Criação de Entrevista",
+      };
+
+      avaliacoes.push({
+        id: t.id,
+        descricao: t.descricao || tipoLabels[t.tipo] || t.tipo,
+        totalPerguntas: 0,
+        taxaBase: t.valorCobrado,
+        valorPerguntas: 0,
+        valorTotal: t.valorCobrado,
+        createdAt: t.createdAt,
+        status: t.status,
+      });
     });
 
     return avaliacoes.sort((a, b) =>
