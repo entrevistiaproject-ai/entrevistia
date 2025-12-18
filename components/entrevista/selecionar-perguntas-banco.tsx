@@ -26,6 +26,8 @@ interface Pergunta {
   categoria: string;
   competencia: string;
   isPadrao: boolean;
+  isFavorita?: boolean;
+  isOculta?: boolean;
 }
 
 interface SelecionarPerguntasBancoProps {
@@ -80,7 +82,23 @@ export function SelecionarPerguntasBanco({
         const params = new URLSearchParams({ limit: "100", cargo, nivel });
         const response = await fetch(`/api/perguntas?${params.toString()}`);
         const data = await response.json();
-        setPerguntasRecomendadasRaw(data.perguntas || []);
+        const { perguntas: perguntasData = [], favoritasIds = [], ocultasIds = [] } = data;
+
+        // Marca perguntas como favoritas/ocultas e filtra ocultas
+        const perguntasProcessadas = perguntasData
+          .map((p: Pergunta) => ({
+            ...p,
+            isFavorita: favoritasIds.includes(p.id),
+            isOculta: ocultasIds.includes(p.id),
+          }))
+          .filter((p: Pergunta) => !p.isOculta)
+          .sort((a: Pergunta, b: Pergunta) => {
+            if (a.isFavorita && !b.isFavorita) return -1;
+            if (!a.isFavorita && b.isFavorita) return 1;
+            return 0;
+          });
+
+        setPerguntasRecomendadasRaw(perguntasProcessadas);
       } catch (error) {
         console.error("Erro ao buscar perguntas recomendadas:", error);
       } finally {
@@ -100,7 +118,23 @@ export function SelecionarPerguntasBanco({
         setLoadingTodas(true);
         const response = await fetch("/api/perguntas?limit=100");
         const data = await response.json();
-        setTodasPerguntasRaw(data.perguntas || []);
+        const { perguntas: perguntasData = [], favoritasIds = [], ocultasIds = [] } = data;
+
+        // Marca perguntas como favoritas/ocultas e filtra ocultas
+        const perguntasProcessadas = perguntasData
+          .map((p: Pergunta) => ({
+            ...p,
+            isFavorita: favoritasIds.includes(p.id),
+            isOculta: ocultasIds.includes(p.id),
+          }))
+          .filter((p: Pergunta) => !p.isOculta)
+          .sort((a: Pergunta, b: Pergunta) => {
+            if (a.isFavorita && !b.isFavorita) return -1;
+            if (!a.isFavorita && b.isFavorita) return 1;
+            return 0;
+          });
+
+        setTodasPerguntasRaw(perguntasProcessadas);
       } catch (error) {
         console.error("Erro ao buscar todas as perguntas:", error);
       } finally {
@@ -367,6 +401,8 @@ function ListaPerguntas({
               "flex items-start gap-3 rounded-lg border p-4 transition-colors",
               jaSelecionada
                 ? "bg-primary/5 border-primary"
+                : pergunta.isFavorita
+                ? "bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-950/30 dark:hover:bg-yellow-950/50 border-yellow-200 dark:border-yellow-800"
                 : isOutroCargo
                 ? "bg-muted/30 hover:bg-muted/50"
                 : "hover:bg-accent"
@@ -391,9 +427,14 @@ function ListaPerguntas({
                     {pergunta.competencia}
                   </Badge>
                 )}
-                {pergunta.isPadrao && (
+                {pergunta.isFavorita && (
                   <Badge variant="default" className="text-xs bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300">
-                    <Star className="h-3 w-3 mr-1" />
+                    <Star className="h-3 w-3 mr-1 fill-current" />
+                    Favorita
+                  </Badge>
+                )}
+                {pergunta.isPadrao && !pergunta.isFavorita && (
+                  <Badge variant="secondary" className="text-xs bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
                     Padrão
                   </Badge>
                 )}
