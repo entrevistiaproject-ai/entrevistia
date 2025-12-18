@@ -2,6 +2,7 @@ import { Sidebar } from "@/components/dashboard/sidebar";
 import { BottomNav } from "@/components/dashboard/bottom-nav";
 import { OnboardingCheck } from "@/components/dashboard/onboarding-check";
 import { UsageProvider } from "@/contexts/usage-context";
+import { BlockedAccountBannerWrapper } from "@/components/billing/blocked-account-banner-wrapper";
 
 export default function DashboardLayout({
   children,
@@ -11,6 +12,7 @@ export default function DashboardLayout({
   return (
     <UsageProvider>
       <div className="min-h-screen bg-background">
+        <BlockedAccountBannerWrapper />
         <OnboardingCheck />
         <Sidebar />
         <BottomNav />

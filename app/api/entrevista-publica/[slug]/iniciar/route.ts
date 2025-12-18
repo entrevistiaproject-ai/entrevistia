@@ -14,6 +14,7 @@ import {
   withBotProtection,
   recordFailedAttempt,
 } from "@/lib/security";
+import { verificarAcessoIA } from "@/lib/services/billing";
 
 const iniciarEntrevistaSchema = z.object({
   nome: z.string().min(3, "Nome deve ter pelo menos 3 caracteres").max(100),
@@ -142,6 +143,18 @@ export async function POST(
       return NextResponse.json(
         { error: "Link de entrevista expirado" },
         { status: 410 }
+      );
+    }
+
+    // Verificar se o owner da entrevista atingiu o limite financeiro
+    const acessoIA = await verificarAcessoIA(entrevista.userId);
+    if (!acessoIA.permitido) {
+      return NextResponse.json(
+        {
+          error: "Esta entrevista está temporariamente indisponível. O recrutador precisa atualizar seu plano para continuar recebendo candidatos.",
+          code: "OWNER_LIMITE_ATINGIDO"
+        },
+        { status: 403 }
       );
     }
 

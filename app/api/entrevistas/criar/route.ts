@@ -5,6 +5,7 @@ import { entrevistas, perguntas, perguntasTemplates } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { canCreateEntrevista, canAddPerguntas, incrementEntrevistasCount } from "@/lib/services/plan-limits";
 import { getEffectiveOwnerId } from "@/lib/services/team-service";
+import { verificarAcessoIA } from "@/lib/services/billing";
 
 interface PerguntaRequest {
   id?: string; // ID se for do banco de perguntas
@@ -42,6 +43,19 @@ export async function POST(request: NextRequest) {
 
     // Usa o owner efetivo para membros de time criarem entrevistas para o owner
     const effectiveOwnerId = await getEffectiveOwnerId(userId);
+
+    // Verifica se a conta tem acesso (limite financeiro não atingido)
+    const acessoIA = await verificarAcessoIA(effectiveOwnerId);
+    if (!acessoIA.permitido) {
+      return NextResponse.json(
+        {
+          error: "Seu bônus de testes acabou! Cadastre seu cartão de crédito para continuar criando entrevistas.",
+          code: "LIMITE_FREE_TRIAL_ATINGIDO",
+          precisaUpgrade: true,
+        },
+        { status: 402 }
+      );
+    }
 
     const body: CreateEntrevistaRequest = await request.json();
 
