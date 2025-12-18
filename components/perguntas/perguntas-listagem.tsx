@@ -90,27 +90,36 @@ export function PerguntasListagem({
   const niveis = Array.from(new Set(perguntas.map((p) => p.nivel)));
 
   // Aplicar filtros
-  const perguntasFiltradas = perguntas.filter((pergunta) => {
-    // Filtrar ocultas
-    const isOculta = perguntasOcultasIds.includes(pergunta.id);
-    if (!mostrarOcultas && isOculta) return false;
+  const perguntasFiltradas = perguntas
+    .filter((pergunta) => {
+      // Filtrar ocultas
+      const isOculta = perguntasOcultasIds.includes(pergunta.id);
+      if (!mostrarOcultas && isOculta) return false;
 
-    const matchTexto =
-      filtroTexto === "" ||
-      pergunta.texto.toLowerCase().includes(filtroTexto.toLowerCase()) ||
-      (pergunta.competencia && pergunta.competencia.toLowerCase().includes(filtroTexto.toLowerCase()));
+      const matchTexto =
+        filtroTexto === "" ||
+        pergunta.texto.toLowerCase().includes(filtroTexto.toLowerCase()) ||
+        (pergunta.competencia && pergunta.competencia.toLowerCase().includes(filtroTexto.toLowerCase()));
 
-    const matchCargo =
-      filtroCargo === "todos" || pergunta.cargo === filtroCargo;
+      const matchCargo =
+        filtroCargo === "todos" || pergunta.cargo === filtroCargo;
 
-    const matchCategoria =
-      filtroCategoria === "todas" || pergunta.categoria === filtroCategoria;
+      const matchCategoria =
+        filtroCategoria === "todas" || pergunta.categoria === filtroCategoria;
 
-    const matchNivel =
-      filtroNivel === "todos" || pergunta.nivel === filtroNivel;
+      const matchNivel =
+        filtroNivel === "todos" || pergunta.nivel === filtroNivel;
 
-    return matchTexto && matchCargo && matchCategoria && matchNivel;
-  });
+      return matchTexto && matchCargo && matchCategoria && matchNivel;
+    })
+    // Ordenar favoritas primeiro
+    .sort((a, b) => {
+      const aFavorita = perguntasFavoritasIds.includes(a.id);
+      const bFavorita = perguntasFavoritasIds.includes(b.id);
+      if (aFavorita && !bFavorita) return -1;
+      if (!aFavorita && bFavorita) return 1;
+      return 0;
+    });
 
   // Paginação client-side
   const totalPages = Math.ceil(perguntasFiltradas.length / itemsPerPage);
@@ -270,24 +279,22 @@ export function PerguntasListagem({
                     )}
                   </div>
                   <div className="flex gap-1">
-                    {/* Botão de favoritar/desfavoritar para perguntas padrão */}
-                    {pergunta.isPadrao && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => {
-                          if (isFavorita) {
-                            onDesfavoritarPergunta?.(pergunta.id);
-                          } else {
-                            onFavoritarPergunta?.(pergunta.id);
-                          }
-                        }}
-                        title={isFavorita ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-                      >
-                        <Star className={`h-4 w-4 ${isFavorita ? "fill-yellow-500 text-yellow-500" : ""}`} />
-                      </Button>
-                    )}
+                    {/* Botão de favoritar/desfavoritar para todas as perguntas */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => {
+                        if (isFavorita) {
+                          onDesfavoritarPergunta?.(pergunta.id);
+                        } else {
+                          onFavoritarPergunta?.(pergunta.id);
+                        }
+                      }}
+                      title={isFavorita ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                    >
+                      <Star className={`h-4 w-4 ${isFavorita ? "fill-yellow-500 text-yellow-500" : ""}`} />
+                    </Button>
                     {/* Botão de ocultar/restaurar para perguntas padrão */}
                     {pergunta.isPadrao && (
                       <Button
