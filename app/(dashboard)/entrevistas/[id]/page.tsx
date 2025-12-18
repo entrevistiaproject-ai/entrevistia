@@ -792,7 +792,7 @@ export default function EntrevistaDetalhesPage() {
                       <div className="flex items-center gap-4">
                         {/* Info do candidato - clicável */}
                         <Link
-                          href={`/candidatos/${candidato.id}/resultado`}
+                          href={`/candidatos/${candidato.id}/resultado?entrevistaId=${entrevista.id}`}
                           className="flex-1 min-w-0 hover:text-primary transition-colors"
                         >
                           <p className="font-semibold text-foreground truncate">
@@ -859,7 +859,7 @@ export default function EntrevistaDetalhesPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem asChild>
-                                <Link href={`/candidatos/${candidato.id}/resultado`}>
+                                <Link href={`/candidatos/${candidato.id}/resultado?entrevistaId=${entrevista.id}`}>
                                   <FileText className="h-4 w-4 mr-2" />
                                   Ver detalhes
                                 </Link>
