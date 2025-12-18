@@ -38,6 +38,7 @@ import { DecisaoCandidato } from "@/components/entrevistas/decisao-candidato";
 import { EditarEntrevistaDialog } from "@/components/entrevistas/editar-entrevista-dialog";
 import { EditarPerguntasDialog } from "@/components/entrevistas/editar-perguntas-dialog";
 import { AutoDecisionConfig } from "@/components/entrevistas/auto-decision-config";
+import { MensagemSugeridaSelector } from "@/components/entrevistas/mensagem-sugerida-selector";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -1244,12 +1245,18 @@ export default function EntrevistaDetalhesPage() {
 
                     {autoApprovalNotifyCandidate && (
                       <div className="space-y-2">
-                        <Label>Mensagem Personalizada (opcional)</Label>
+                        <div className="flex items-center justify-between">
+                          <Label>Mensagem Personalizada (opcional)</Label>
+                          <MensagemSugeridaSelector
+                            tipo="aprovacao"
+                            onSelect={setAutoApprovalCandidateMessage}
+                          />
+                        </div>
                         <Textarea
                           value={autoApprovalCandidateMessage}
                           onChange={(e) => setAutoApprovalCandidateMessage(e.target.value)}
                           placeholder="Deixe em branco para usar a mensagem padrão..."
-                          rows={2}
+                          rows={4}
                         />
                       </div>
                     )}
@@ -1323,12 +1330,18 @@ export default function EntrevistaDetalhesPage() {
 
                     {autoRejectNotifyCandidate && (
                       <div className="space-y-2">
-                        <Label>Mensagem Personalizada (opcional)</Label>
+                        <div className="flex items-center justify-between">
+                          <Label>Mensagem Personalizada (opcional)</Label>
+                          <MensagemSugeridaSelector
+                            tipo="reprovacao"
+                            onSelect={setAutoRejectCandidateMessage}
+                          />
+                        </div>
                         <Textarea
                           value={autoRejectCandidateMessage}
                           onChange={(e) => setAutoRejectCandidateMessage(e.target.value)}
                           placeholder="Deixe em branco para usar a mensagem padrão..."
-                          rows={2}
+                          rows={4}
                         />
                       </div>
                     )}
