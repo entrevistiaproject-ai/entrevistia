@@ -284,8 +284,9 @@ export default function LandingPage() {
       {/* Social Proof - Metrics */}
       <section className="py-12 sm:py-16 border-b bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 text-center">
             {[
+              { value: "4.500+", label: "perguntas prontas grátis" },
               { value: "90%", label: "menos tempo em triagem" },
               { value: "~R$ 3", label: "por candidato avaliado" },
               { value: "24/7", label: "disponível para candidatos" },
@@ -317,7 +318,7 @@ export default function LandingPage() {
                 {
                   icon: FileText,
                   title: "Crie a entrevista",
-                  desc: "Escolha perguntas do banco ou crie as suas. Configure em minutos."
+                  desc: "Escolha entre 4.500+ perguntas prontas ou crie as suas. Configure em minutos."
                 },
                 {
                   icon: Users,
