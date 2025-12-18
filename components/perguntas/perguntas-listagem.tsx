@@ -32,6 +32,11 @@ interface PerguntasListagemProps {
   onDesfavoritarPergunta?: (perguntaId: string) => void;
   onEditarPergunta?: (perguntaId: string) => void;
   onDeletarPergunta?: (perguntaId: string) => void;
+  // Props controlados para sincronizar filtros com KPIs
+  onFilterChange?: (tipo: "cargo" | "categoria" | "nivel", valor: string) => void;
+  filtroCargo?: string;
+  filtroCategoria?: string;
+  filtroNivel?: string;
 }
 
 const categoriaColors: Record<string, string> = {
@@ -60,14 +65,24 @@ export function PerguntasListagem({
   onDesfavoritarPergunta,
   onEditarPergunta,
   onDeletarPergunta,
+  onFilterChange,
+  filtroCargo: filtroCargoControlado,
+  filtroCategoria: filtroCategoriaControlado,
+  filtroNivel: filtroNivelControlado,
 }: PerguntasListagemProps) {
   const [filtroTexto, setFiltroTexto] = useState("");
-  const [filtroCargo, setFiltroCargo] = useState<string>("todos");
-  const [filtroCategoria, setFiltroCategoria] = useState<string>("todas");
-  const [filtroNivel, setFiltroNivel] = useState<string>("todos");
+  // Usar valores controlados se fornecidos, senão usar estado local
+  const [filtroCargoLocal, setFiltroCargoLocal] = useState<string>("todos");
+  const [filtroCategoriaLocal, setFiltroCategoriaLocal] = useState<string>("todas");
+  const [filtroNivelLocal, setFiltroNivelLocal] = useState<string>("todos");
   const [mostrarOcultas, setMostrarOcultas] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
+
+  // Usar valores controlados se fornecidos
+  const filtroCargo = filtroCargoControlado ?? filtroCargoLocal;
+  const filtroCategoria = filtroCategoriaControlado ?? filtroCategoriaLocal;
+  const filtroNivel = filtroNivelControlado ?? filtroNivelLocal;
 
   // Extrair valores únicos para filtros
   const cargos = Array.from(new Set(perguntas.map((p) => p.cargo)));
@@ -103,9 +118,31 @@ export function PerguntasListagem({
   const endIndex = startIndex + itemsPerPage;
   const perguntasPaginadas = perguntasFiltradas.slice(startIndex, endIndex);
 
-  // Reset página quando filtros mudam
-  const handleFilterChange = (setter: (value: string) => void, value: string) => {
-    setter(value);
+  // Handlers de filtro que notificam o pai
+  const handleCargoChange = (value: string) => {
+    if (onFilterChange) {
+      onFilterChange("cargo", value);
+    } else {
+      setFiltroCargoLocal(value);
+    }
+    setCurrentPage(1);
+  };
+
+  const handleCategoriaChange = (value: string) => {
+    if (onFilterChange) {
+      onFilterChange("categoria", value);
+    } else {
+      setFiltroCategoriaLocal(value);
+    }
+    setCurrentPage(1);
+  };
+
+  const handleNivelChange = (value: string) => {
+    if (onFilterChange) {
+      onFilterChange("nivel", value);
+    } else {
+      setFiltroNivelLocal(value);
+    }
     setCurrentPage(1);
   };
 
@@ -123,7 +160,7 @@ export function PerguntasListagem({
           />
         </div>
 
-        <Select value={filtroCargo} onValueChange={(v) => handleFilterChange(setFiltroCargo, v)}>
+        <Select value={filtroCargo} onValueChange={handleCargoChange}>
           <SelectTrigger className="w-full md:w-[180px]">
             <SelectValue placeholder="Cargo" />
           </SelectTrigger>
@@ -137,7 +174,7 @@ export function PerguntasListagem({
           </SelectContent>
         </Select>
 
-        <Select value={filtroCategoria} onValueChange={(v) => handleFilterChange(setFiltroCategoria, v)}>
+        <Select value={filtroCategoria} onValueChange={handleCategoriaChange}>
           <SelectTrigger className="w-full md:w-[180px]">
             <SelectValue placeholder="Categoria" />
           </SelectTrigger>
@@ -151,7 +188,7 @@ export function PerguntasListagem({
           </SelectContent>
         </Select>
 
-        <Select value={filtroNivel} onValueChange={(v) => handleFilterChange(setFiltroNivel, v)}>
+        <Select value={filtroNivel} onValueChange={handleNivelChange}>
           <SelectTrigger className="w-full md:w-[180px]">
             <SelectValue placeholder="Nível" />
           </SelectTrigger>

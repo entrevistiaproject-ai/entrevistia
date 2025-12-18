@@ -195,21 +195,6 @@ export function FormularioPergunta({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="tipo">Tipo de Resposta</Label>
-            <Select value={tipo} onValueChange={setTipo}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="texto">Texto</SelectItem>
-                <SelectItem value="audio">Áudio</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              Atualmente trabalhamos apenas com respostas em texto e áudio
-            </p>
-          </div>
         </CardContent>
       </Card>
 
