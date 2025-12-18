@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trash2, GripVertical, Database, FileText } from "lucide-react";
@@ -39,6 +40,40 @@ export function ListaPerguntasSelecionadas({
   onRemover,
   onReordenar,
 }: ListaPerguntasSelecionadasProps) {
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", index.toString());
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverIndex(index);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, toIndex: number) => {
+    e.preventDefault();
+    const fromIndex = draggedIndex;
+    if (fromIndex !== null && fromIndex !== toIndex) {
+      onReordenar(fromIndex, toIndex);
+    }
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -54,7 +89,17 @@ export function ListaPerguntasSelecionadas({
         {perguntas.map((pergunta, index) => (
           <div
             key={pergunta.id}
-            className="flex items-start gap-3 rounded-lg border p-4 bg-card hover:bg-accent/50 transition-colors group"
+            draggable
+            onDragStart={(e) => handleDragStart(e, index)}
+            onDragOver={(e) => handleDragOver(e, index)}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, index)}
+            onDragEnd={handleDragEnd}
+            className={cn(
+              "flex items-start gap-3 rounded-lg border p-4 bg-card hover:bg-accent/50 transition-colors group",
+              draggedIndex === index && "opacity-50",
+              dragOverIndex === index && draggedIndex !== index && "border-primary border-2"
+            )}
           >
             {/* Handle para arrastar */}
             <div className="flex items-center gap-2 text-muted-foreground">
