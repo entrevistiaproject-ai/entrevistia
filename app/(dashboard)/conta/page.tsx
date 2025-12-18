@@ -80,6 +80,15 @@ export default function ContaPage() {
       return;
     }
 
+    if (telefone && !validarTelefone(telefone)) {
+      toast({
+        title: "Erro",
+        description: "Telefone inválido. Use o formato (11) 99999-9999",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSaving(true);
     try {
       const res = await fetch("/api/user", {
@@ -180,6 +189,36 @@ export default function ContaPage() {
     }
   };
 
+  // Função para formatar telefone
+  const formatarTelefone = (valor: string) => {
+    // Remove tudo que não é número
+    const numeros = valor.replace(/\D/g, "");
+
+    // Aplica a máscara (11) 99999-9999 ou (11) 9999-9999
+    if (numeros.length <= 10) {
+      return numeros
+        .replace(/(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{4})(\d)/, "$1-$2");
+    } else {
+      return numeros
+        .replace(/(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{5})(\d)/, "$1-$2")
+        .replace(/(-\d{4})\d+?$/, "$1");
+    }
+  };
+
+  // Validar telefone (deve ter 10 ou 11 dígitos)
+  const validarTelefone = (valor: string) => {
+    if (!valor) return true; // telefone é opcional
+    const numeros = valor.replace(/\D/g, "");
+    return numeros.length >= 10 && numeros.length <= 11;
+  };
+
+  // Handler para telefone com máscara
+  const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTelefone(formatarTelefone(e.target.value));
+  };
+
   // Iniciais do nome para o avatar
   const getInitials = (name: string) => {
     return name
@@ -266,8 +305,9 @@ export default function ContaPage() {
                 <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="telefone"
+                  type="tel"
                   value={telefone}
-                  onChange={(e) => setTelefone(e.target.value)}
+                  onChange={handleTelefoneChange}
                   className="pl-10"
                   placeholder="(11) 99999-9999"
                 />

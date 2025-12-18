@@ -36,8 +36,36 @@ export function AdicionarCandidatoDialog({
   const [telefone, setTelefone] = useState("");
   const [linkedin, setLinkedin] = useState("");
 
+  // Função para formatar telefone
+  const formatarTelefone = (valor: string) => {
+    const numeros = valor.replace(/\D/g, "");
+    if (numeros.length <= 10) {
+      return numeros
+        .replace(/(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{4})(\d)/, "$1-$2");
+    } else {
+      return numeros
+        .replace(/(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{5})(\d)/, "$1-$2")
+        .replace(/(-\d{4})\d+?$/, "$1");
+    }
+  };
+
+  // Validar telefone
+  const validarTelefone = (valor: string) => {
+    if (!valor) return true;
+    const numeros = valor.replace(/\D/g, "");
+    return numeros.length >= 10 && numeros.length <= 11;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (telefone && !validarTelefone(telefone)) {
+      alert("Telefone inválido. Use o formato (11) 99999-9999");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -125,7 +153,7 @@ export function AdicionarCandidatoDialog({
                 id="telefone"
                 type="tel"
                 value={telefone}
-                onChange={(e) => setTelefone(e.target.value)}
+                onChange={(e) => setTelefone(formatarTelefone(e.target.value))}
                 placeholder="(11) 99999-9999"
               />
             </div>
