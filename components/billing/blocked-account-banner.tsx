@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlertTriangle, CreditCard, X } from "lucide-react";
+import { ArrowRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 
@@ -34,45 +34,36 @@ export function BlockedAccountBanner({ onDismiss }: BlockedAccountBannerProps) {
 
   return (
     <div
-      className="sticky top-0 z-50 w-full bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg"
+      className="sticky top-0 z-50 w-full bg-zinc-900 text-white"
       role="alert"
     >
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <div className="flex items-center gap-3 flex-1">
-            <div className="shrink-0 p-1.5 bg-white/20 rounded-full">
-              <AlertTriangle className="h-5 w-5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm sm:text-base">
-                Seu bônus de testes acabou!
-              </p>
-              <p className="text-xs sm:text-sm text-red-100">
-                Cadastre seu cartão de crédito para continuar criando entrevistas e analisando candidatos.
-              </p>
-            </div>
-          </div>
+      <div className="container mx-auto px-4 py-2.5">
+        <div className="flex items-center justify-center gap-x-6 gap-y-2 flex-wrap">
+          <p className="text-sm">
+            <span className="font-medium">Seu período de testes acabou.</span>
+            {" "}
+            <span className="text-zinc-400">Cadastre seu cartão para continuar.</span>
+          </p>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Link href="/upgrade" className="flex-1 sm:flex-none">
+          <div className="flex items-center gap-3">
+            <Link href="/upgrade">
               <Button
                 size="sm"
-                className="w-full bg-white text-red-700 hover:bg-red-50 font-semibold"
+                variant="secondary"
+                className="h-7 px-3 text-xs font-medium bg-white text-zinc-900 hover:bg-zinc-100"
               >
-                <CreditCard className="h-4 w-4 mr-2" />
-                Cadastrar Cartão
+                Fazer upgrade
+                <ArrowRight className="h-3 w-3 ml-1.5" />
               </Button>
             </Link>
 
-            <Button
-              size="sm"
-              variant="ghost"
-              className="shrink-0 text-white/80 hover:text-white hover:bg-white/10"
+            <button
               onClick={handleDismiss}
+              className="text-zinc-400 hover:text-white transition-colors"
               aria-label="Fechar aviso"
             >
               <X className="h-4 w-4" />
-            </Button>
+            </button>
           </div>
         </div>
       </div>

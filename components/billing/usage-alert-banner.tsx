@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlertTriangle, TrendingUp, X } from "lucide-react";
+import { TrendingUp, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
@@ -18,47 +18,39 @@ export function UsageAlertBanner({
 }: UsageAlertBannerProps) {
   const [dismissed, setDismissed] = useState(false);
 
-  // Não mostrar se foi dispensado ou se está abaixo de 70%
-  if (dismissed || percentualUsado < 70) {
+  // Não mostrar se:
+  // - Foi dispensado
+  // - Está abaixo de 70%
+  // - Limite atingido (banner global cuida disso)
+  if (dismissed || percentualUsado < 70 || limiteAtingido) {
     return null;
   }
 
   // Determina o estilo baseado no percentual
   const isWarning = percentualUsado >= 70 && percentualUsado < 90;
-  const isDanger = percentualUsado >= 90 && !limiteAtingido;
-  const isBlocked = limiteAtingido;
+  const isDanger = percentualUsado >= 90;
 
   const getBgColor = () => {
-    if (isBlocked) return "bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-900";
     if (isDanger) return "bg-orange-50 dark:bg-orange-950/50 border-orange-200 dark:border-orange-900";
     return "bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-900";
   };
 
   const getIconColor = () => {
-    if (isBlocked) return "text-red-600 dark:text-red-400";
     if (isDanger) return "text-orange-600 dark:text-orange-400";
     return "text-amber-600 dark:text-amber-400";
   };
 
   const getTextColor = () => {
-    if (isBlocked) return "text-red-900 dark:text-red-100";
     if (isDanger) return "text-orange-900 dark:text-orange-100";
     return "text-amber-900 dark:text-amber-100";
   };
 
   const getSubTextColor = () => {
-    if (isBlocked) return "text-red-700 dark:text-red-300";
     if (isDanger) return "text-orange-700 dark:text-orange-300";
     return "text-amber-700 dark:text-amber-300";
   };
 
   const getMessage = () => {
-    if (isBlocked) {
-      return {
-        title: "Cota de testes esgotada",
-        description: "Cadastre seu cartão para continuar usando a análise por IA.",
-      };
-    }
     if (isDanger) {
       return {
         title: `${Math.round(percentualUsado)}% do crédito utilizado`,
@@ -79,11 +71,7 @@ export function UsageAlertBanner({
       role="alert"
     >
       <div className={`shrink-0 ${getIconColor()}`}>
-        {isBlocked ? (
-          <AlertTriangle className="h-5 w-5" />
-        ) : (
-          <TrendingUp className="h-5 w-5" />
-        )}
+        <TrendingUp className="h-5 w-5" />
       </div>
 
       <div className="flex-1 min-w-0">
@@ -99,28 +87,22 @@ export function UsageAlertBanner({
         <Link href="/upgrade" className="flex-1 sm:flex-none">
           <Button
             size="sm"
-            variant={isBlocked ? "default" : "outline"}
-            className={
-              isBlocked
-                ? "w-full bg-red-600 hover:bg-red-700 text-white"
-                : `w-full border-current ${getTextColor()}`
-            }
+            variant="outline"
+            className={`w-full border-current ${getTextColor()}`}
           >
-            {isBlocked ? "Cadastrar Cartão" : "Fazer Upgrade"}
+            Fazer Upgrade
           </Button>
         </Link>
 
-        {!isBlocked && (
-          <Button
-            size="sm"
-            variant="ghost"
-            className={`shrink-0 ${getSubTextColor()} hover:bg-transparent`}
-            onClick={() => setDismissed(true)}
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Dispensar</span>
-          </Button>
-        )}
+        <Button
+          size="sm"
+          variant="ghost"
+          className={`shrink-0 ${getSubTextColor()} hover:bg-transparent`}
+          onClick={() => setDismissed(true)}
+        >
+          <X className="h-4 w-4" />
+          <span className="sr-only">Dispensar</span>
+        </Button>
       </div>
     </div>
   );
