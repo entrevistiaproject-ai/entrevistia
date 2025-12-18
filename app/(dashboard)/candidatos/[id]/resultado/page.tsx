@@ -19,6 +19,7 @@ import {
   MessageSquare,
   Clock,
   Download,
+  Mail,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { DecisaoCandidato } from "@/components/entrevistas/decisao-candidato";
@@ -71,6 +72,8 @@ interface Participacao {
   decisaoRecrutadorObservacao: string | null;
   // Email de encerramento
   emailEncerramentoEnviadoEm: Date | null;
+  // Email de decisão (aprovação/reprovação)
+  emailDecisaoEnviadoEm: Date | null;
 }
 
 // Funções para notas de 0-100 (competências e compatibilidade)
@@ -605,6 +608,22 @@ export default function ResultadoCandidatoPage() {
                 onDecisaoAtualizada={fetchData}
                 showActionButtons
               />
+              {/* Confirmação visual de email enviado */}
+              {participacao.emailDecisaoEnviadoEm && (
+                <div className="mt-4 flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <Mail className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-green-700">
+                    Email de feedback enviado em{" "}
+                    {new Date(participacao.emailDecisaoEnviadoEm).toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+              )}
             </div>
             {participacao.decisaoRecrutadorObservacao && (
               <div className="mt-4 p-3 bg-slate-50 rounded-lg">

@@ -83,16 +83,6 @@ export async function processAutoDecisionForCandidate(
     if (shouldApprove) {
       console.log(`[Auto-Decision] Aprovando candidato ${data.candidatoNome} (Score: ${score}, Compatibilidade: ${compatibility})`);
 
-      await db
-        .update(candidatoEntrevistas)
-        .set({
-          decisaoRecrutador: "aprovado",
-          decisaoRecrutadorEm: new Date(),
-          decisaoRecrutadorObservacao: `Aprovado automaticamente (Score: ${score.toFixed(1)}%, Compatibilidade: ${compatibility.toFixed(1)}%)`,
-          updatedAt: new Date(),
-        })
-        .where(eq(candidatoEntrevistas.id, data.candidatoEntrevistaId));
-
       // Envia email se configurado
       if (data.autoApprovalNotifyCandidate) {
         try {
@@ -121,6 +111,18 @@ export async function processAutoDecisionForCandidate(
         }
       }
 
+      // Atualiza o registro com a decisão e status do email
+      await db
+        .update(candidatoEntrevistas)
+        .set({
+          decisaoRecrutador: "aprovado",
+          decisaoRecrutadorEm: new Date(),
+          decisaoRecrutadorObservacao: `Aprovado automaticamente (Score: ${score.toFixed(1)}%, Compatibilidade: ${compatibility.toFixed(1)}%)`,
+          emailDecisaoEnviadoEm: emailSent ? new Date() : null,
+          updatedAt: new Date(),
+        })
+        .where(eq(candidatoEntrevistas.id, data.candidatoEntrevistaId));
+
       return { processed: true, decision: "aprovado", emailSent };
     }
   }
@@ -129,16 +131,6 @@ export async function processAutoDecisionForCandidate(
   if (data.autoRejectEnabled) {
     if (score <= (data.autoRejectMaxScore || 0)) {
       console.log(`[Auto-Decision] Reprovando candidato ${data.candidatoNome} (Score: ${score})`);
-
-      await db
-        .update(candidatoEntrevistas)
-        .set({
-          decisaoRecrutador: "reprovado",
-          decisaoRecrutadorEm: new Date(),
-          decisaoRecrutadorObservacao: `Reprovado automaticamente (Score: ${score.toFixed(1)}%)`,
-          updatedAt: new Date(),
-        })
-        .where(eq(candidatoEntrevistas.id, data.candidatoEntrevistaId));
 
       // Envia email se configurado
       if (data.autoRejectNotifyCandidate) {
@@ -167,6 +159,18 @@ export async function processAutoDecisionForCandidate(
           console.error("[Auto-Decision] Erro ao enviar email de reprovação:", emailError);
         }
       }
+
+      // Atualiza o registro com a decisão e status do email
+      await db
+        .update(candidatoEntrevistas)
+        .set({
+          decisaoRecrutador: "reprovado",
+          decisaoRecrutadorEm: new Date(),
+          decisaoRecrutadorObservacao: `Reprovado automaticamente (Score: ${score.toFixed(1)}%)`,
+          emailDecisaoEnviadoEm: emailSent ? new Date() : null,
+          updatedAt: new Date(),
+        })
+        .where(eq(candidatoEntrevistas.id, data.candidatoEntrevistaId));
 
       return { processed: true, decision: "reprovado", emailSent };
     }

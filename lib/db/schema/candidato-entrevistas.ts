@@ -57,6 +57,9 @@ export const candidatoEntrevistas = pgTable("candidato_entrevistas", {
   // Email de encerramento (quando não aprovado)
   emailEncerramentoEnviadoEm: timestamp("email_encerramento_enviado_em", { mode: "date" }),
 
+  // Email de decisão automática (aprovação/reprovação)
+  emailDecisaoEnviadoEm: timestamp("email_decisao_enviado_em", { mode: "date" }),
+
   // Arquivamento (para limpeza visual e workflow concluído)
   arquivadoEm: timestamp("arquivado_em", { mode: "date" }),
 
