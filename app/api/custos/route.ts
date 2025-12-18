@@ -341,6 +341,7 @@ export async function GET(request: Request) {
         descricao: transacoes.descricao,
         status: transacoes.status,
         entrevistaId: transacoes.entrevistaId,
+        analiseId: transacoes.analiseId, // UUID para agrupar transações da mesma análise
         createdAt: transacoes.createdAt,
       })
       .from(transacoes)

@@ -9,6 +9,7 @@ import { logger } from "@/lib/logger";
 import { validarNovaCobranca, validarCobrancaRegistrada } from "./billing-validation";
 import { enviarEmail } from "@/lib/email/resend";
 import { getEffectiveOwnerId } from "./team-service";
+import { randomUUID } from "crypto";
 
 /**
  * Verifica se a conta é uma conta de teste
@@ -260,6 +261,7 @@ export async function registrarTransacao(params: {
   entrevistaId?: string;
   candidatoId?: string;
   respostaId?: string;
+  analiseId?: string; // UUID que agrupa taxa_base_candidato com suas analise_pergunta
   descricao?: string;
   metadados?: {
     modeloIA?: string;
@@ -418,6 +420,7 @@ export async function registrarTransacao(params: {
         faturaId: faturaAtual.id,
         entrevistaId: params.entrevistaId,
         respostaId: params.respostaId,
+        analiseId: params.analiseId, // Agrupa transações da mesma análise
         tipo: params.tipo,
         custoBase: custoBase.toFixed(6),
         markup: "2.5",
@@ -527,12 +530,16 @@ export async function registrarAnalisePerguntas(params: {
     perguntaTexto: string;
     respostaId?: string;
   }>;
-}): Promise<{ success: boolean; totalCobrado: number; error?: string }> {
+}): Promise<{ success: boolean; totalCobrado: number; analiseId?: string; error?: string }> {
+  // Gera um UUID único para agrupar todas as transações desta análise
+  const analiseId = randomUUID();
+
   // Log início do processo de cobrança
   logger.info("[BILLING] Iniciando cobrança de análise de candidato", {
     userId: params.userId,
     entrevistaId: params.entrevistaId,
     candidatoId: params.candidatoId,
+    analiseId,
     totalPerguntas: params.perguntas.length,
   });
 
@@ -546,6 +553,7 @@ export async function registrarAnalisePerguntas(params: {
     tipo: "taxa_base_candidato",
     entrevistaId: params.entrevistaId,
     candidatoId: params.candidatoId,
+    analiseId, // Vincula à análise
     descricao: `Taxa base - análise de candidato`,
     metadados: {
       totalPerguntas: params.perguntas.length,
@@ -590,6 +598,7 @@ export async function registrarAnalisePerguntas(params: {
       entrevistaId: params.entrevistaId,
       candidatoId: params.candidatoId,
       respostaId: pergunta.respostaId,
+      analiseId, // Vincula à mesma análise
       descricao: `Análise: ${pergunta.perguntaTexto.substring(0, 50)}...`,
       metadados: {
         modeloIA: "claude-sonnet-4-5-20250929",
@@ -650,6 +659,7 @@ export async function registrarAnalisePerguntas(params: {
   return {
     success: falhasRegistro === 0,
     totalCobrado,
+    analiseId, // Retorna o ID para rastreamento
     error: falhasRegistro > 0 ? `${falhasRegistro} transação(ões) falharam` : undefined,
   };
 }

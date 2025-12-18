@@ -66,8 +66,13 @@ export const transacoes = pgTable("transacoes", {
   respostaId: uuid("resposta_id")
     .references(() => respostas.id, { onDelete: "set null" }),
 
+  // Agrupamento de análise
+  // Cada análise (avaliação de candidato) gera um UUID único
+  // que vincula a taxa_base_candidato com suas analise_pergunta
+  analiseId: uuid("analise_id"),
+
   // Tipo de transação
-  tipo: text("tipo").notNull(), // transcricao_audio, analise_ia, pergunta_criada, entrevista_criada
+  tipo: text("tipo").notNull(), // transcricao_audio, analise_ia, pergunta_criada, entrevista_criada, taxa_base_candidato, analise_pergunta
 
   // Valores
   custoBase: decimal("custo_base", { precision: 10, scale: 6 }).notNull(), // Custo da API (Claude, Whisper, etc)

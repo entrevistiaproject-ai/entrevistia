@@ -116,7 +116,10 @@
       "Bash(npx shadcn@latest add:*)",
       "Bash(timeout 60 npx tsc:*)",
       "Bash(timeout 120 npx tsc:*)",
-      "Bash(gh run list:*)"
+      "Bash(gh run list:*)",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_g2zYchr0DQlE@ep-long-paper-acu62wj1-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require\" node:*)",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_g2zYchr0DQlE@ep-long-paper-acu62wj1-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require\" RESEND_API_KEY=\"re_hNHfA2Tf_Ex6CKVmMP784uqDtaj9ZvSSA\" node:*)",
+      "Bash(timeout 10 bash -c 'printf \"\"area\\n\"\" | npm run db:generate -- --name add-analise-id-to-transacoes 2>&1')"
     ],
     "deny": [],
     "ask": []
