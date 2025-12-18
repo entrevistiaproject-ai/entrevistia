@@ -55,7 +55,7 @@ export function MensagemSugeridaSelector({ tipo, onSelect }: MensagemSugeridaSel
           <ChevronDown className="h-3 w-3 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="start">
+      <PopoverContent className="w-80 p-0 shadow-lg" align="start">
         <div className="p-3 border-b bg-muted/50">
           <p className="text-sm font-medium">
             {tipo === "aprovacao" ? "Mensagens de Aprovação" : "Mensagens de Reprovação"}
@@ -72,8 +72,8 @@ export function MensagemSugeridaSelector({ tipo, onSelect }: MensagemSugeridaSel
                 key={key}
                 onClick={() => handleSelect(key, mensagem)}
                 className={cn(
-                  "w-full flex items-start gap-3 p-3 rounded-lg text-left transition-colors",
-                  "hover:bg-muted/50",
+                  "w-full flex items-start gap-3 p-3 rounded-lg text-left transition-colors cursor-pointer",
+                  "hover:bg-muted",
                   selectedKey === key && "bg-primary/5"
                 )}
               >
