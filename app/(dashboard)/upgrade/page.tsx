@@ -102,7 +102,7 @@ export default function UpgradePage() {
       <div className="grid gap-8 lg:grid-cols-5">
         {/* Coluna Principal - Plano */}
         <div className="lg:col-span-3 space-y-6">
-          {/* Card do Plano Professional */}
+          {/* Card do Plano Profissional */}
           <Card className="relative overflow-hidden border-2 border-violet-200 dark:border-violet-800">
             {/* Badge de destaque */}
             <div className="absolute top-0 right-0">
@@ -117,8 +117,8 @@ export default function UpgradePage() {
                   <Sparkles className="h-6 w-6 text-violet-600 dark:text-violet-400" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl">Plano Professional</CardTitle>
-                  <CardDescription>Pay-per-use sem limites</CardDescription>
+                  <CardTitle className="text-xl">Plano Profissional</CardTitle>
+                  <CardDescription>Pague apenas pelo que usar</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -224,23 +224,23 @@ export default function UpgradePage() {
                     <span className="font-semibold">Exemplo de custo</span>
                   </div>
                   <Badge className="bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-300">
-                    10 candidatos
+                    1 candidato
                   </Badge>
                 </div>
 
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">10 candidatos × R$ 1,00</span>
-                    <span>R$ 10,00</span>
+                    <span className="text-muted-foreground">1 candidato × R$ 1,00</span>
+                    <span>R$ 1,00</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">100 perguntas × R$ 0,25</span>
-                    <span>R$ 25,00</span>
+                    <span className="text-muted-foreground">7 perguntas × R$ 0,25</span>
+                    <span>R$ 1,75</span>
                   </div>
                   <Separator className="my-2" />
                   <div className="flex justify-between font-semibold text-base">
-                    <span>Total estimado</span>
-                    <span className="text-violet-600">R$ 35,00</span>
+                    <span>Total</span>
+                    <span className="text-violet-600">R$ 2,75</span>
                   </div>
                 </div>
               </div>
