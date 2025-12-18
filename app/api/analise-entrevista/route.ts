@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { analyzeInterview } from '@/lib/ai/agent';
+import { processAutoDecisionForCandidate } from '@/lib/ai/process-auto-decision';
 import { getDB } from '@/lib/db';
 import { candidatos, candidatoEntrevistas, entrevistas } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -166,10 +167,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Processa decisão automática imediatamente após a análise
+    let autoDecisionResult = null;
+    try {
+      autoDecisionResult = await processAutoDecisionForCandidate(
+        sanitizedCandidatoId,
+        sanitizedEntrevistaId
+      );
+    } catch (autoDecisionError) {
+      console.error('[API Análise] Erro ao processar decisão automática:', autoDecisionError);
+      // Não falha a resposta - o CRON vai processar depois se necessário
+    }
+
     return NextResponse.json({
       success: true,
       avaliacaoId: result.avaliacaoId,
       message: 'Análise concluída com sucesso',
+      autoDecision: autoDecisionResult,
     });
   } catch (error) {
     // Log sem expor detalhes sensíveis em produção

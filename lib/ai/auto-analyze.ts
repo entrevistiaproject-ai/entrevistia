@@ -1,4 +1,5 @@
 import { analyzeInterview } from './agent';
+import { processAutoDecisionForCandidate } from './process-auto-decision';
 
 /**
  * Executa a análise de entrevista em background
@@ -24,6 +25,14 @@ export async function onCandidatoFinalizouEntrevista(
 
     if (result.success) {
       console.log(`[Auto-Analyze] ✅ Análise do candidato ${candidatoNome} concluída com sucesso. ID: ${result.avaliacaoId}`);
+
+      // Processa decisão automática imediatamente após a análise
+      try {
+        await processAutoDecisionForCandidate(candidatoId, entrevistaId);
+      } catch (autoDecisionError) {
+        // Log mas não falha - o CRON vai processar depois se necessário
+        console.error(`[Auto-Analyze] ⚠️ Erro ao processar decisão automática (será processado pelo CRON):`, autoDecisionError);
+      }
     } else {
       console.error(`[Auto-Analyze] ❌ Falha na análise do candidato ${candidatoNome}:`, result.error);
     }
