@@ -9,7 +9,7 @@ import { checkRateLimit, getClientIP, createRateLimitKey, getRateLimitHeaders } 
 import { sanitizeUUID } from '@/lib/security/sanitize';
 import { verificarPermissaoAnalise } from '@/lib/services/billing';
 
-export const maxDuration = 600; // 10 minutos - permite análises mais longas com muitas perguntas
+export const maxDuration = 300; // 5 minutos - limite máximo do plano Hobby da Vercel
 
 /**
  * POST /api/analise-entrevista

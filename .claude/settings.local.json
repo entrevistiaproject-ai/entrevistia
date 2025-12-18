@@ -115,7 +115,8 @@
       "Bash(npx shadcn@latest add collapsible:*)",
       "Bash(npx shadcn@latest add:*)",
       "Bash(timeout 60 npx tsc:*)",
-      "Bash(timeout 120 npx tsc:*)"
+      "Bash(timeout 120 npx tsc:*)",
+      "Bash(gh run list:*)"
     ],
     "deny": [],
     "ask": []
