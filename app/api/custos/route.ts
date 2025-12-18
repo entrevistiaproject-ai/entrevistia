@@ -426,6 +426,7 @@ export async function GET(request: Request) {
         descricao: t.descricao,
         status: t.status,
         entrevistaId: t.entrevistaId,
+        analiseId: t.analiseId, // UUID para agrupar transações da mesma análise
         createdAt: t.createdAt.toISOString(),
       })),
     });
