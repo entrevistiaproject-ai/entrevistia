@@ -72,7 +72,26 @@ export const perguntasOcultas = pgTable("perguntas_ocultas", {
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 
+/**
+ * Tabela de perguntas favoritas do usuário
+ * Permite que cada usuário favorite perguntas padrão do sistema para fácil acesso
+ */
+export const perguntasFavoritas = pgTable("perguntas_favoritas", {
+  id: uuid("id").defaultRandom().primaryKey(),
+
+  // Usuário que favoritou a pergunta
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+
+  // Pergunta padrão que foi favoritada
+  perguntaId: uuid("pergunta_id").notNull().references(() => perguntasTemplates.id, { onDelete: "cascade" }),
+
+  // Quando foi favoritada
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+});
+
 export type PerguntaTemplate = typeof perguntasTemplates.$inferSelect;
 export type NewPerguntaTemplate = typeof perguntasTemplates.$inferInsert;
 export type PerguntaOculta = typeof perguntasOcultas.$inferSelect;
 export type NewPerguntaOculta = typeof perguntasOcultas.$inferInsert;
+export type PerguntaFavorita = typeof perguntasFavoritas.$inferSelect;
+export type NewPerguntaFavorita = typeof perguntasFavoritas.$inferInsert;

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getUserId } from "@/lib/auth/get-user";
 import { getDB } from "@/lib/db";
-import { perguntasTemplates } from "@/lib/db/schema";
-import { isNull, desc, or, eq, and, sql } from "drizzle-orm";
+import { perguntasTemplates, perguntasFavoritas, perguntasOcultas } from "@/lib/db/schema";
+import { isNull, desc, or, eq, and, sql, inArray } from "drizzle-orm";
 import { sugerirCategoria } from "@/lib/utils/classificacao-perguntas";
 import { getEffectiveOwnerId } from "@/lib/services/team-service";
 
@@ -128,7 +128,24 @@ export async function GET(request: Request) {
       allowedLimits: ALLOWED_LIMITS,
     };
 
-    return NextResponse.json({ perguntas, pagination });
+    // Buscar IDs de perguntas favoritas e ocultas do usuário
+    let favoritasIds: string[] = [];
+    let ocultasIds: string[] = [];
+
+    if (userId) {
+      const [favoritas, ocultas] = await Promise.all([
+        db.select({ perguntaId: perguntasFavoritas.perguntaId })
+          .from(perguntasFavoritas)
+          .where(eq(perguntasFavoritas.userId, userId)),
+        db.select({ perguntaId: perguntasOcultas.perguntaId })
+          .from(perguntasOcultas)
+          .where(eq(perguntasOcultas.userId, userId)),
+      ]);
+      favoritasIds = favoritas.map(f => f.perguntaId);
+      ocultasIds = ocultas.map(o => o.perguntaId);
+    }
+
+    return NextResponse.json({ perguntas, pagination, favoritasIds, ocultasIds });
   } catch (error) {
     console.error("Erro ao buscar perguntas:", error);
     return NextResponse.json(

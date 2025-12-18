@@ -19,14 +19,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Search, Star, Edit, Trash2, EyeOff, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Star, Edit, Trash2, EyeOff, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
 import { getLabelNivel } from "@/lib/constants/niveis";
 
 interface PerguntasListagemProps {
   perguntas: PerguntaTemplate[];
   perguntasOcultasIds?: string[];
+  perguntasFavoritasIds?: string[];
   onOcultarPergunta?: (perguntaId: string) => void;
   onReexibirPergunta?: (perguntaId: string) => void;
+  onFavoritarPergunta?: (perguntaId: string) => void;
+  onDesfavoritarPergunta?: (perguntaId: string) => void;
   onEditarPergunta?: (perguntaId: string) => void;
   onDeletarPergunta?: (perguntaId: string) => void;
 }
@@ -50,8 +53,11 @@ const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50, 100];
 export function PerguntasListagem({
   perguntas,
   perguntasOcultasIds = [],
+  perguntasFavoritasIds = [],
   onOcultarPergunta,
   onReexibirPergunta,
+  onFavoritarPergunta,
+  onDesfavoritarPergunta,
   onEditarPergunta,
   onDeletarPergunta,
 }: PerguntasListagemProps) {
@@ -183,6 +189,7 @@ export function PerguntasListagem({
       <div className="grid gap-4 md:grid-cols-2">
         {perguntasPaginadas.map((pergunta) => {
           const isOculta = perguntasOcultasIds.includes(pergunta.id);
+          const isFavorita = perguntasFavoritasIds.includes(pergunta.id);
 
           return (
             <Card
@@ -202,9 +209,14 @@ export function PerguntasListagem({
                       <Badge variant="outline">{pergunta.cargo}</Badge>
                       <Badge variant="outline">{getLabelNivel(pergunta.nivel)}</Badge>
                       {pergunta.isPadrao && (
-                        <Badge variant="default" className="bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-300 dark:hover:bg-yellow-800">
-                          <Star className="mr-1 h-3 w-3" />
+                        <Badge variant="secondary" className="bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700">
                           Padrão
+                        </Badge>
+                      )}
+                      {isFavorita && (
+                        <Badge variant="default" className="bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-300 dark:hover:bg-yellow-800">
+                          <Star className="mr-1 h-3 w-3 fill-current" />
+                          Favorita
                         </Badge>
                       )}
                       {isOculta && (
@@ -221,7 +233,25 @@ export function PerguntasListagem({
                     )}
                   </div>
                   <div className="flex gap-1">
-                    {/* Botão de ocultar/reexibir para perguntas padrão */}
+                    {/* Botão de favoritar/desfavoritar para perguntas padrão */}
+                    {pergunta.isPadrao && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          if (isFavorita) {
+                            onDesfavoritarPergunta?.(pergunta.id);
+                          } else {
+                            onFavoritarPergunta?.(pergunta.id);
+                          }
+                        }}
+                        title={isFavorita ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                      >
+                        <Star className={`h-4 w-4 ${isFavorita ? "fill-yellow-500 text-yellow-500" : ""}`} />
+                      </Button>
+                    )}
+                    {/* Botão de ocultar/restaurar para perguntas padrão */}
                     {pergunta.isPadrao && (
                       <Button
                         variant="ghost"
@@ -234,9 +264,13 @@ export function PerguntasListagem({
                             onOcultarPergunta?.(pergunta.id);
                           }
                         }}
-                        title={isOculta ? "Reexibir pergunta" : "Ocultar pergunta"}
+                        title={isOculta ? "Restaurar pergunta" : "Ocultar pergunta"}
                       >
-                        <EyeOff className={`h-4 w-4 ${isOculta ? "text-primary" : ""}`} />
+                        {isOculta ? (
+                          <RotateCcw className="h-4 w-4 text-primary" />
+                        ) : (
+                          <EyeOff className="h-4 w-4" />
+                        )}
                       </Button>
                     )}
                     {/* Botões de editar/deletar para perguntas do usuário */}

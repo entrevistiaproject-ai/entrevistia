@@ -20,7 +20,7 @@ import { users } from "./users";
 import { candidatos } from "./candidatos";
 import { entrevistas } from "./entrevistas";
 import { perguntas } from "./perguntas";
-import { perguntasTemplates, perguntasOcultas, areaProfissionalEnum } from "./perguntas-templates";
+import { perguntasTemplates, perguntasOcultas, perguntasFavoritas, areaProfissionalEnum } from "./perguntas-templates";
 import { respostas } from "./respostas";
 import { auditLogs } from "./audit-logs";
 import { verificationCodes } from "./verification-codes";
@@ -55,6 +55,7 @@ export const schema = {
   perguntas,
   perguntasTemplates,
   perguntasOcultas,
+  perguntasFavoritas,
   areaProfissionalEnum,
   respostas,
   auditLogs,

@@ -20,16 +20,21 @@ import { AREAS_LABELS, AreaProfissional } from "@/lib/db/seeds/banco-perguntas-v
 interface PerguntasListagemClientProps {
   perguntas: PerguntaTemplate[];
   perguntasOcultasIdsInicial: string[];
+  perguntasFavoritasIdsInicial: string[];
 }
 
 export function PerguntasListagemClient({
   perguntas,
   perguntasOcultasIdsInicial,
+  perguntasFavoritasIdsInicial,
 }: PerguntasListagemClientProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [perguntasOcultasIds, setPerguntasOcultasIds] = useState<string[]>(
     perguntasOcultasIdsInicial
+  );
+  const [perguntasFavoritasIds, setPerguntasFavoritasIds] = useState<string[]>(
+    perguntasFavoritasIdsInicial
   );
   const [loading, setLoading] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -152,6 +157,69 @@ export function PerguntasListagemClient({
       toast({
         title: "Erro",
         description: "Não foi possível reexibir a pergunta.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFavoritarPergunta = async (perguntaId: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/perguntas/favoritar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ perguntaId }),
+      });
+
+      if (response.ok) {
+        setPerguntasFavoritasIds([...perguntasFavoritasIds, perguntaId]);
+        toast({
+          title: "Pergunta favoritada",
+          description: "A pergunta foi adicionada aos seus favoritos.",
+        });
+        router.refresh();
+      } else {
+        throw new Error("Erro ao favoritar pergunta");
+      }
+    } catch (error) {
+      console.error("Erro ao favoritar pergunta:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível favoritar a pergunta.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDesfavoritarPergunta = async (perguntaId: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `/api/perguntas/favoritar?perguntaId=${perguntaId}`,
+        { method: "DELETE" }
+      );
+
+      if (response.ok) {
+        setPerguntasFavoritasIds(
+          perguntasFavoritasIds.filter((id) => id !== perguntaId)
+        );
+        toast({
+          title: "Pergunta removida dos favoritos",
+          description: "A pergunta foi removida dos seus favoritos.",
+        });
+        router.refresh();
+      } else {
+        throw new Error("Erro ao desfavoritar pergunta");
+      }
+    } catch (error) {
+      console.error("Erro ao desfavoritar pergunta:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível remover a pergunta dos favoritos.",
         variant: "destructive",
       });
     } finally {
@@ -297,8 +365,11 @@ export function PerguntasListagemClient({
       <PerguntasListagem
         perguntas={perguntasFiltradas}
         perguntasOcultasIds={perguntasOcultasIds}
+        perguntasFavoritasIds={perguntasFavoritasIds}
         onOcultarPergunta={handleOcultarPergunta}
         onReexibirPergunta={handleReexibirPergunta}
+        onFavoritarPergunta={handleFavoritarPergunta}
+        onDesfavoritarPergunta={handleDesfavoritarPergunta}
         onEditarPergunta={handleEditarPergunta}
         onDeletarPergunta={handleDeletarPergunta}
       />

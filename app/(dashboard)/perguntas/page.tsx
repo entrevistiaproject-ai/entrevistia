@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { getDB } from "@/lib/db";
-import { perguntasTemplates, perguntasOcultas } from "@/lib/db/schema";
+import { perguntasTemplates, perguntasOcultas, perguntasFavoritas } from "@/lib/db/schema";
 import { desc, eq, or, isNull, and } from "drizzle-orm";
 import { PerguntasListagemClient } from "@/components/perguntas/perguntas-listagem-client";
 import { Button } from "@/components/ui/button";
@@ -43,11 +43,24 @@ async function getPerguntasOcultas(userId?: string) {
   return ocultas.map(o => o.perguntaId);
 }
 
+async function getPerguntasFavoritas(userId?: string) {
+  if (!userId) return [];
+
+  const db = getDB();
+  const favoritas = await db
+    .select({ perguntaId: perguntasFavoritas.perguntaId })
+    .from(perguntasFavoritas)
+    .where(eq(perguntasFavoritas.userId, userId));
+
+  return favoritas.map(f => f.perguntaId);
+}
+
 export default async function PerguntasPage() {
   const userId = await getUserId();
-  const [perguntas, ocultasIds] = await Promise.all([
+  const [perguntas, ocultasIds, favoritasIds] = await Promise.all([
     getPerguntas(userId || undefined),
     getPerguntasOcultas(userId || undefined),
+    getPerguntasFavoritas(userId || undefined),
   ]);
 
   // Estatísticas (excluindo ocultas das contagens visíveis)
@@ -126,6 +139,7 @@ export default async function PerguntasPage() {
         <PerguntasListagemClient
           perguntas={perguntas}
           perguntasOcultasIdsInicial={ocultasIds}
+          perguntasFavoritasIdsInicial={favoritasIds}
         />
       </Suspense>
     </div>

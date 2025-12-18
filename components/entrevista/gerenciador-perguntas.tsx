@@ -39,6 +39,8 @@ interface PerguntaBanco {
   categoria: string;
   competencia: string;
   isPadrao: boolean;
+  isFavorita?: boolean;
+  isOculta?: boolean;
 }
 
 export interface PerguntaSelecionada {
@@ -101,9 +103,27 @@ export function GerenciadorPerguntas({
   useEffect(() => {
     async function fetchPerguntas() {
       try {
-        const response = await fetch("/api/perguntas");
+        const response = await fetch("/api/perguntas?limit=100");
         const data = await response.json();
-        setPerguntasBanco(data);
+        const { perguntas: perguntasData, favoritasIds = [], ocultasIds = [] } = data;
+
+        // Marca perguntas como favoritas ou ocultas e filtra as ocultas
+        const perguntasProcessadas = (perguntasData || [])
+          .map((p: PerguntaBanco) => ({
+            ...p,
+            isFavorita: favoritasIds.includes(p.id),
+            isOculta: ocultasIds.includes(p.id),
+          }))
+          .filter((p: PerguntaBanco) => !p.isOculta); // Remove perguntas ocultas da visualização
+
+        // Ordena: favoritas primeiro, depois por data
+        perguntasProcessadas.sort((a: PerguntaBanco, b: PerguntaBanco) => {
+          if (a.isFavorita && !b.isFavorita) return -1;
+          if (!a.isFavorita && b.isFavorita) return 1;
+          return 0;
+        });
+
+        setPerguntasBanco(perguntasProcessadas);
       } catch (error) {
         console.error("Erro ao buscar perguntas:", error);
       } finally {
@@ -117,14 +137,16 @@ export function GerenciadorPerguntas({
   // Sincronizar mudanças com o componente pai
   useEffect(() => {
     onChange(perguntas);
-  }, [perguntas, onChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [perguntas]); // onChange é excluído intencionalmente para evitar loops
 
   // Atualizar perguntas quando perguntasIniciais mudar (modo edição)
   useEffect(() => {
     if (modoEdicao && perguntasIniciais.length > 0) {
       setPerguntas(perguntasIniciais);
     }
-  }, [modoEdicao, perguntasIniciais]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modoEdicao, JSON.stringify(perguntasIniciais)]); // Usa stringify para comparar conteúdo real
 
   // Extrair cargos e níveis únicos para os filtros
   const cargosUnicos = useMemo(() => {
@@ -545,37 +567,45 @@ export function GerenciadorPerguntas({
             <h3 className="text-sm font-medium">
               Perguntas Selecionadas ({perguntas.length})
             </h3>
-            <Badge variant="outline" className="text-xs">
-              Use as setas para reordenar
-            </Badge>
+            <div className="flex items-center gap-2">
+              <GripVertical className="h-4 w-4 text-muted-foreground" />
+              <Badge variant="outline" className="text-xs">
+                Use as setas para reordenar
+              </Badge>
+            </div>
           </div>
 
           <div className="space-y-2">
             {perguntas.map((pergunta, index) => (
               <div
                 key={pergunta.id}
-                className="flex items-start gap-3 rounded-lg border p-4 bg-card hover:bg-accent/50 transition-colors group"
+                className="flex items-start gap-2 rounded-lg border p-4 bg-card hover:bg-accent/50 transition-colors group"
               >
+                {/* Indicador de arrastar */}
+                <div className="flex items-center justify-center text-muted-foreground/50 pt-2">
+                  <GripVertical className="h-5 w-5" />
+                </div>
+
                 {/* Controles de ordem */}
-                <div className="flex flex-col items-center gap-1 text-muted-foreground">
+                <div className="flex flex-col items-center gap-0.5 text-muted-foreground min-w-10">
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6"
+                    className="h-7 w-7 hover:bg-primary/10"
                     onClick={() => handleMover(index, "cima")}
                     disabled={index === 0}
                   >
                     <ChevronUp className="h-4 w-4" />
                   </Button>
-                  <span className="text-sm font-medium text-foreground">
+                  <span className="text-sm font-bold text-foreground bg-muted rounded px-2 py-0.5">
                     {index + 1}
                   </span>
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6"
+                    className="h-7 w-7 hover:bg-primary/10"
                     onClick={() => handleMover(index, "baixo")}
                     disabled={index === perguntas.length - 1}
                   >
@@ -706,6 +736,8 @@ function ListaPerguntasBanco({
               "flex items-start gap-3 rounded-lg border p-4 transition-colors",
               jaSelecionada
                 ? "bg-primary/5 border-primary"
+                : pergunta.isFavorita
+                ? "bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-950/30 dark:hover:bg-yellow-950/50 border-yellow-200 dark:border-yellow-800"
                 : isOutroCargo
                 ? "bg-muted/30 hover:bg-muted/50"
                 : "hover:bg-accent"
@@ -730,9 +762,14 @@ function ListaPerguntasBanco({
                     {pergunta.competencia}
                   </Badge>
                 )}
-                {pergunta.isPadrao && (
+                {pergunta.isFavorita && (
                   <Badge variant="default" className="text-xs bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300">
-                    <Star className="h-3 w-3 mr-1" />
+                    <Star className="h-3 w-3 mr-1 fill-current" />
+                    Favorita
+                  </Badge>
+                )}
+                {pergunta.isPadrao && !pergunta.isFavorita && (
+                  <Badge variant="secondary" className="text-xs bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
                     Padrão
                   </Badge>
                 )}
