@@ -1,6 +1,8 @@
 // Export all schemas
 export * from "./users";
 export * from "./candidatos";
+export * from "./candidato-perfil";
+export * from "./magic-links";
 export * from "./entrevistas";
 export * from "./perguntas";
 export * from "./perguntas-templates";
@@ -18,6 +20,22 @@ export * from "./user-cargo-preferences";
 // Export schema for Drizzle migrations
 import { users } from "./users";
 import { candidatos } from "./candidatos";
+import {
+  candidatoExperiencias,
+  candidatoFormacoes,
+  candidatoSkills,
+  candidatoIdiomas,
+  candidatoCertificacoes,
+  candidatoTags,
+  candidatoPreferencias,
+  nivelExperienciaEnum,
+  nivelFormacaoEnum,
+  nivelIdiomaEnum,
+  nivelSkillEnum,
+  statusCandidatoEnum,
+  preferenciaTrabalhoEnum,
+} from "./candidato-perfil";
+import { magicLinks } from "./magic-links";
 import { entrevistas } from "./entrevistas";
 import { perguntas } from "./perguntas";
 import { perguntasTemplates, perguntasOcultas, perguntasFavoritas, areaProfissionalEnum } from "./perguntas-templates";
@@ -51,6 +69,20 @@ import { userCargoPreferences } from "./user-cargo-preferences";
 export const schema = {
   users,
   candidatos,
+  candidatoExperiencias,
+  candidatoFormacoes,
+  candidatoSkills,
+  candidatoIdiomas,
+  candidatoCertificacoes,
+  candidatoTags,
+  candidatoPreferencias,
+  nivelExperienciaEnum,
+  nivelFormacaoEnum,
+  nivelIdiomaEnum,
+  nivelSkillEnum,
+  statusCandidatoEnum,
+  preferenciaTrabalhoEnum,
+  magicLinks,
   entrevistas,
   perguntas,
   perguntasTemplates,

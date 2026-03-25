@@ -1,8 +1,11 @@
 import type { NextAuthConfig } from "next-auth";
+import type { JWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
+import LinkedIn from "next-auth/providers/linkedin";
+import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { getDB } from "@/lib/db";
-import { users, teamMembers, defaultPermissionsByRole, type MemberPermissions } from "@/lib/db/schema";
+import { users, teamMembers, candidatos, defaultPermissionsByRole, type MemberPermissions } from "@/lib/db/schema";
 import { eq, sql, and } from "drizzle-orm";
 
 // Permissões padrão do owner (todas habilitadas)
@@ -19,20 +22,91 @@ export const authConfig = {
       // Lógica de autorização movida para o middleware
       return true;
     },
-    async jwt({ token, user }) {
+    async signIn({ user, account, profile }) {
+      // Para OAuth providers (LinkedIn, Google), criar ou atualizar candidato
+      if (account?.provider === "linkedin" || account?.provider === "google") {
+        try {
+          const db = getDB();
+          const email = user.email?.toLowerCase();
+
+          if (!email) {
+            console.error("OAuth sign-in: email not provided");
+            return false;
+          }
+
+          // Busca candidato existente pelo email
+          const [existingCandidato] = await db
+            .select()
+            .from(candidatos)
+            .where(eq(candidatos.email, email));
+
+          if (existingCandidato) {
+            // Atualiza dados do candidato se necessário
+            const updateData: Record<string, unknown> = {
+              updatedAt: new Date(),
+            };
+
+            // Atualiza LinkedIn URL se veio do LinkedIn
+            if (account.provider === "linkedin" && profile?.sub) {
+              updateData.linkedin = `https://www.linkedin.com/in/${profile.sub}`;
+            }
+
+            // Atualiza nome se estava vazio
+            if (!existingCandidato.nome && user.name) {
+              updateData.nome = user.name;
+            }
+
+            await db
+              .update(candidatos)
+              .set(updateData)
+              .where(eq(candidatos.id, existingCandidato.id));
+
+            // Armazena o ID do candidato no user para o JWT
+            user.candidatoId = existingCandidato.id;
+            user.isCandidate = true;
+          } else {
+            // Não cria candidato automaticamente - precisa de contexto (entrevista, recrutador)
+            // O candidato será redirecionado para completar o cadastro
+            user.isCandidate = true;
+            user.needsRegistration = true;
+          }
+
+          return true;
+        } catch (error) {
+          console.error("OAuth sign-in error:", error);
+          return false;
+        }
+      }
+
+      return true;
+    },
+    async jwt({ token, user, account }) {
       if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.name = user.name;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const userAny = user as any;
-        const keepLoggedIn = userAny.keepLoggedIn === true;
+        token.id = user.id!;
+        token.email = user.email ?? undefined;
+        token.name = user.name ?? undefined;
+        const keepLoggedIn = user.keepLoggedIn === true;
         token.keepLoggedIn = keepLoggedIn;
 
-        // Armazena informações de time e permissões calculadas no login
-        token.isTeamMember = userAny.isTeamMember ?? false;
-        token.teamOwnerId = userAny.teamOwnerId ?? null;
-        token.permissions = userAny.permissions ?? ownerPermissions;
+        // Para OAuth (candidatos)
+        if (account?.provider === "linkedin" || account?.provider === "google") {
+          token.isCandidate = true;
+          token.candidatoId = user.candidatoId ?? null;
+          token.needsRegistration = user.needsRegistration ?? false;
+          token.provider = account.provider;
+          token.providerAccountId = account.providerAccountId;
+          // Candidatos não têm permissões de recrutador
+          token.permissions = null;
+          token.isTeamMember = false;
+          token.teamOwnerId = null;
+        } else {
+          // Credentials (recrutadores)
+          token.isCandidate = false;
+          // Armazena informações de time e permissões calculadas no login
+          token.isTeamMember = user.isTeamMember ?? false;
+          token.teamOwnerId = user.teamOwnerId ?? null;
+          token.permissions = user.permissions ?? ownerPermissions;
+        }
 
         // Define expiração baseada na preferência do usuário
         // Se "manter conectado" está marcado: 7 dias
@@ -44,20 +118,54 @@ export const authConfig = {
     },
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.id = token.id as string;
-        session.user.email = token.email as string;
-        session.user.name = token.name as string;
-        // Passa informações de time e permissões para a sessão
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const userAny = session.user as any;
-        userAny.isTeamMember = token.isTeamMember ?? false;
-        userAny.teamOwnerId = token.teamOwnerId ?? null;
-        userAny.permissions = token.permissions ?? ownerPermissions;
+        // Type assertion para usar os tipos definidos em types/next-auth.d.ts
+        const t = token as JWT;
+
+        session.user.id = t.id;
+        session.user.email = t.email ?? "";
+        session.user.name = t.name ?? "";
+
+        // Informações de candidato (OAuth)
+        session.user.isCandidate = t.isCandidate ?? false;
+        session.user.candidatoId = t.candidatoId ?? null;
+        session.user.needsRegistration = t.needsRegistration ?? false;
+        session.user.provider = t.provider ?? null;
+
+        // Informações de recrutador (Credentials)
+        session.user.isTeamMember = t.isTeamMember ?? false;
+        session.user.teamOwnerId = t.teamOwnerId ?? null;
+        const perms = t.permissions ?? (t.isCandidate ? null : ownerPermissions);
+        session.user.permissions = perms === null ? undefined : perms;
       }
       return session;
     },
   },
   providers: [
+    // LinkedIn OAuth - para candidatos se cadastrarem
+    LinkedIn({
+      clientId: process.env.AUTH_LINKEDIN_ID!,
+      clientSecret: process.env.AUTH_LINKEDIN_SECRET!,
+      authorization: {
+        params: {
+          scope: "openid profile email",
+        },
+      },
+    }),
+
+    // Google OAuth - alternativa para candidatos
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID!,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
+    }),
+
+    // Credentials - para recrutadores
     Credentials({
       name: "Credentials",
       credentials: {
