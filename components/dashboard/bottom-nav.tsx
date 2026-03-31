@@ -15,6 +15,8 @@ import {
   MessageSquare,
   Home,
   UsersRound,
+  CalendarDays,
+  Mail,
 } from "lucide-react";
 import { useState } from "react";
 import {
@@ -63,6 +65,18 @@ const moreItems = [
     icon: HelpCircle,
     label: "Perguntas",
     description: "Banco de perguntas",
+  },
+  {
+    href: "/agenda",
+    icon: CalendarDays,
+    label: "Agenda",
+    description: "Calendário e agendamentos",
+  },
+  {
+    href: "/mensagens",
+    icon: Mail,
+    label: "Mensagens",
+    description: "Comunicação com candidatos",
   },
   {
     href: "/time",

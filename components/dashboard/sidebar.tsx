@@ -16,6 +16,8 @@ import {
   MessageSquare,
   UsersRound,
   Home,
+  CalendarDays,
+  Mail,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { signOut, useSession } from "next-auth/react";
@@ -64,6 +66,16 @@ const mainMenuItems = [
     title: "Perguntas",
     href: "/perguntas",
     icon: HelpCircle,
+  },
+  {
+    title: "Agenda",
+    href: "/agenda",
+    icon: CalendarDays,
+  },
+  {
+    title: "Mensagens",
+    href: "/mensagens",
+    icon: Mail,
   },
 ];
 

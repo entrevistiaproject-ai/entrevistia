@@ -16,6 +16,8 @@ export * from "./system-config";
 export * from "./tickets";
 export * from "./team";
 export * from "./user-cargo-preferences";
+export * from "./agendamentos";
+export * from "./mensagens";
 
 // Export schema for Drizzle migrations
 import { users } from "./users";
@@ -65,6 +67,22 @@ import {
   invitationStatusEnum,
 } from "./team";
 import { userCargoPreferences } from "./user-cargo-preferences";
+import {
+  agendamentos,
+  disponibilidades,
+  bloqueiosHorario,
+  selfSchedulingLinks,
+  googleCalendarTokens,
+  tipoEventoEnum,
+  statusEventoEnum,
+} from "./agendamentos";
+import {
+  mensagens,
+  templatesMensagem,
+  canalMensagemEnum,
+  statusMensagemEnum,
+  tipoTemplateMensagemEnum,
+} from "./mensagens";
 
 export const schema = {
   users,
@@ -113,4 +131,16 @@ export const schema = {
   teamRoleEnum,
   invitationStatusEnum,
   userCargoPreferences,
+  agendamentos,
+  disponibilidades,
+  bloqueiosHorario,
+  selfSchedulingLinks,
+  googleCalendarTokens,
+  tipoEventoEnum,
+  statusEventoEnum,
+  mensagens,
+  templatesMensagem,
+  canalMensagemEnum,
+  statusMensagemEnum,
+  tipoTemplateMensagemEnum,
 };

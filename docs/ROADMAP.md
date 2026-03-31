@@ -32,6 +32,25 @@
 - Portal LGPD (acesso, exclusão, portabilidade de dados)
 - Preferências de trabalho (remoto, híbrido, salário, disponibilidade)
 
+**Módulo 12 - Agenda e Calendário (v1.01.00):**
+- Integração Google Calendar (OAuth, criação de eventos, free/busy)
+- Self-scheduling (candidato escolhe horário via link público)
+- Cálculo inteligente de slots disponíveis
+- Detecção de conflitos de horário
+- Lembretes automáticos (24h, 1h, 15min via cron)
+- Calendário visual com views semana/mês
+- Configuração de disponibilidade por dia da semana
+- Bloqueios de horário
+- Geração automática de Google Meet
+
+**Módulo 13 - Comunicação Básica (v1.01.00):**
+- 9 templates de email padrão pré-configurados
+- Variáveis dinâmicas e condicionais em templates
+- Caixa de entrada unificada com filtros e busca
+- Envio de mensagens com seleção de template
+- Histórico de comunicações por candidato
+- Tracking de status de email (enviada, aberta, erro)
+
 ### 🤖 IA Atualmente em Uso
 | Funcionalidade | Provedor | Modelo | Arquivo |
 |----------------|----------|--------|---------|
@@ -794,108 +813,144 @@ BLOB_READ_WRITE_TOKEN=seu_blob_token
 
 ---
 
-## 🎯 Módulo 12: Agenda e Calendário
+## 🎯 Módulo 12: Agenda e Calendário ✅ IMPLEMENTADO
 
 > **Objetivo:** Agendamento integrado de entrevistas e etapas com calendários existentes.
+>
+> **Status:** ✅ Implementado em v1.01.00 (30/03/2026)
 
 ### 12.1 Integração com Calendários
-- [ ] Google Calendar (OAuth 2.0)
-- [ ] Microsoft Outlook / Office 365
-- [ ] Apple Calendar (iCal/CalDAV)
-- [ ] Sincronização bidirecional:
-  - Evento criado na Entrevistia → aparece no calendário
-  - Horário bloqueado no calendário → indisponível na Entrevistia
+- [x] Google Calendar (OAuth 2.0) - conexão/desconexão, criação de eventos, free/busy
+- [ ] Microsoft Outlook / Office 365 *(pendente)*
+- [ ] Apple Calendar (iCal/CalDAV) *(pendente)*
+- [x] Sincronização:
+  - [x] Evento criado na Entrevistia → aparece no calendário
+  - [x] Horário bloqueado no calendário → indisponível na Entrevistia (via free/busy)
 
 ### 12.2 Agendamento Inteligente
-- [ ] **Self-scheduling:**
-  - Candidato recebe link com horários disponíveis
-  - Escolhe o que preferir
-  - Confirmação automática
-- [ ] **Detecção de conflitos:**
-  - Avisa se recrutador tem compromisso
-  - Sugere horários alternativos
-- [ ] **Múltiplos participantes:**
-  - Encontra horário que funciona para todos
-  - RH + Gestor + Candidato
-- [ ] **Fusos horários:**
-  - Detecta fuso do candidato
-  - Mostra horário local para cada um
+- [x] **Self-scheduling:**
+  - [x] Candidato recebe link com horários disponíveis (`/agendar/[token]`)
+  - [x] Escolhe o que preferir
+  - [x] Confirmação automática + criação de evento no Google Calendar
+- [x] **Detecção de conflitos:**
+  - [x] Verifica agendamentos existentes, bloqueios e Google Calendar
+  - [x] Retorna erro 409 se houver conflito
+- [ ] **Múltiplos participantes:** *(pendente)*
+- [ ] **Fusos horários:** suporte básico implementado *(melhorias pendentes)*
 
 ### 12.3 Lembretes e Confirmações
-- [ ] Confirmação automática ao agendar
-- [ ] Lembretes configuráveis:
-  - 24 horas antes
-  - 1 hora antes
-  - 15 minutos antes
-- [ ] Link da reunião incluído (Meet, Zoom, Teams)
-- [ ] Botão para adicionar ao calendário pessoal
-- [ ] Reagendamento pelo candidato (com limite)
-- [ ] Cancelamento com antecedência mínima
+- [x] Confirmação automática ao agendar via self-scheduling
+- [x] Lembretes automáticos via cron:
+  - [x] 24 horas antes
+  - [x] 1 hora antes
+  - [x] 15 minutos antes
+- [x] Link da reunião incluído (Google Meet gerado automaticamente)
+- [ ] Botão para adicionar ao calendário pessoal *(pendente)*
+- [x] Reagendamento pelo candidato (com limite configurável)
+- [x] Cancelamento com motivo
 
 ### 12.4 Visão Geral
-- [ ] Calendário visual de todas as entrevistas
-- [ ] Views: dia, semana, mês
-- [ ] Filtros: por vaga, recrutador, etapa
-- [ ] Cores por tipo de evento
-- [ ] Métricas:
-  - Entrevistas por dia/semana
-  - Taxa de no-show
-  - Tempo médio de entrevista
+- [x] Calendário visual de todas as entrevistas (`/agenda`)
+- [x] Views: semana, mês
+- [x] Cores por status do evento
+- [x] Lista de próximos eventos
+- [ ] Filtros: por vaga, recrutador, etapa *(pendente)*
+- [ ] Métricas *(pendente)*
+
+### 12.5 Configuração de Disponibilidade
+- [x] Configuração por dia da semana (`/agenda/configurar`)
+- [x] Horário de início e fim por dia
+- [x] Duração de slot e intervalo configuráveis
+- [x] Bloqueios de horário (feriados, férias)
+
+### 📁 Arquivos Implementados (Módulo 12)
+
+**Schemas:** `lib/db/schema/agendamentos.ts` (disponibilidades, bloqueios, agendamentos, self-scheduling, google tokens)
+
+**Serviços:**
+- `lib/calendar/google-calendar.ts` - Integração Google Calendar via REST API
+- `lib/calendar/scheduling.ts` - Cálculo de slots disponíveis
+
+**APIs:**
+- `app/api/agendamentos/route.ts` - CRUD de agendamentos
+- `app/api/agendamentos/[id]/route.ts` - Detalhes/atualização/cancelamento
+- `app/api/agendamentos/disponibilidade/route.ts` - Configurar disponibilidade
+- `app/api/agendamentos/slots/route.ts` - Buscar slots disponíveis
+- `app/api/agendamentos/self-scheduling/route.ts` - Criar link de self-scheduling
+- `app/api/agendamentos/self-scheduling/[token]/route.ts` - Candidato escolhe horário
+- `app/api/calendar/google/connect/route.ts` - Conectar Google Calendar
+- `app/api/calendar/google/callback/route.ts` - Callback OAuth
+- `app/api/calendar/google/status/route.ts` - Status da conexão
+- `app/api/cron/send-reminders/route.ts` - Cron de lembretes
+
+**Páginas:**
+- `app/(dashboard)/agenda/page.tsx` - Calendário visual
+- `app/(dashboard)/agenda/configurar/page.tsx` - Configurar disponibilidade
+- `app/(public)/agendar/[token]/page.tsx` - Self-scheduling (candidato)
 
 ---
 
-## 🎯 Módulo 13: Comunicação Centralizada
+## 🎯 Módulo 13: Comunicação Centralizada ✅ IMPLEMENTADO
 
 > **Objetivo:** Todas as mensagens com candidatos em um único lugar, com templates e automações.
+>
+> **Status:** ✅ Implementado em v1.01.00 (30/03/2026)
 
 ### 13.1 Canais Integrados
-- [ ] **Email:**
-  - Envio e recebimento dentro da plataforma
-  - Domínio próprio ou @entrevistia.com.br
-  - Templates HTML responsivos
-- [ ] **WhatsApp Business API:**
-  - Mensagens automatizadas
-  - Templates aprovados
-  - Resposta dentro da plataforma
-- [ ] **SMS (opcional):**
-  - Para lembretes urgentes
-  - Fallback se WhatsApp não entregue
-- [ ] **Mensagens internas:**
-  - Chat dentro da plataforma
-  - Notificações push (browser)
+- [x] **Email:**
+  - [x] Envio dentro da plataforma (Resend API)
+  - [x] Templates HTML responsivos
+  - [x] Tracking de status (enviada, aberta, erro)
+- [ ] **WhatsApp Business API:** *(pendente)*
+- [ ] **SMS (opcional):** *(pendente)*
+- [ ] **Mensagens internas:** *(pendente)*
 
 ### 13.2 Templates e Automações
-- [ ] Templates por etapa/evento:
-  - Convite para processo
-  - Agendamento de entrevista
-  - Lembrete de entrevista
-  - Aprovação para próxima etapa
-  - Reprovação (com feedback)
-  - Proposta enviada
-  - Proposta aceita/recusada
-- [ ] Variáveis dinâmicas: {{nome}}, {{vaga}}, {{data}}, {{link}}
-- [ ] Personalização por IA (tom adequado ao contexto)
-- [ ] Envio automático em eventos
-- [ ] Sequências de follow-up:
-  - Se não respondeu em 3 dias, enviar lembrete
-  - Se ainda não respondeu em 7 dias, segundo lembrete
-  - Se não respondeu em 14 dias, encerrar
+- [x] 9 templates padrão por etapa/evento:
+  - [x] Convite para entrevista
+  - [x] Lembrete de entrevista (24h e 1h)
+  - [x] Confirmação de agendamento
+  - [x] Reagendamento
+  - [x] Cancelamento
+  - [x] Aprovação de etapa
+  - [x] Reprovação de etapa
+  - [x] Boas-vindas
+- [x] Variáveis dinâmicas: {{nome}}, {{vaga}}, {{empresa}}, {{data}}, {{hora}}, {{link}}, etc.
+- [x] Condicionais em templates: {{#var}}conteúdo{{/var}}
+- [x] Templates customizáveis pelo recrutador
+- [ ] Personalização por IA *(pendente)*
+- [ ] Sequências de follow-up *(pendente)*
 
 ### 13.3 Caixa de Entrada Unificada
-- [ ] Todas as conversas em um lugar
-- [ ] Filtros: por candidato, vaga, canal, status
-- [ ] Status: pendente, respondido, arquivado, spam
-- [ ] Atribuição para membros da equipe
-- [ ] Resposta rápida com templates
-- [ ] Atalhos de teclado
-- [ ] Notificações de novas mensagens
+- [x] Todas as conversas em um lugar (`/mensagens`)
+- [x] Filtros: por candidato, busca por texto, não lidas, arquivadas
+- [x] Marcar como lida/não lida
+- [x] Arquivar mensagens
+- [x] Enviar nova mensagem com seleção de template
+- [ ] Atribuição para membros da equipe *(pendente)*
+- [ ] Atalhos de teclado *(pendente)*
+- [ ] Notificações de novas mensagens *(pendente)*
 
 ### 13.4 Histórico
-- [ ] Timeline completa por candidato
-- [ ] Todos os canais na mesma timeline
-- [ ] Busca em mensagens (texto completo)
-- [ ] Anexos e documentos centralizados
-- [ ] Exportação do histórico
+- [x] Histórico de mensagens por candidato (filtro por candidatoId)
+- [x] Busca em mensagens (texto completo)
+- [ ] Timeline visual completa *(pendente)*
+- [ ] Exportação do histórico *(pendente)*
+
+### 📁 Arquivos Implementados (Módulo 13)
+
+**Schemas:** `lib/db/schema/mensagens.ts` (templates, mensagens)
+
+**Serviços:**
+- `lib/mensagens/template-renderer.ts` - Renderização de templates com variáveis
+
+**APIs:**
+- `app/api/mensagens/route.ts` - Listar e enviar mensagens
+- `app/api/mensagens/[id]/route.ts` - Atualizar mensagem (lida, arquivada)
+- `app/api/mensagens/templates/route.ts` - CRUD de templates
+
+**Páginas:**
+- `app/(dashboard)/mensagens/page.tsx` - Caixa de entrada unificada
 
 ---
 
@@ -1364,7 +1419,7 @@ BLOB_READ_WRITE_TOKEN=seu_blob_token
 
 ## 📅 Fases de Implementação
 
-### Fase 1 - Fundação (v1.01.xx) 🔄 EM ANDAMENTO
+### Fase 1 - Fundação (v1.01.xx) ✅ CONCLUÍDA
 > Base para entrada de candidatos e comunicação
 
 1. **Módulo 1:** Página do Candidato ✅ **CONCLUÍDO**
@@ -1375,35 +1430,51 @@ BLOB_READ_WRITE_TOKEN=seu_blob_token
    - ✅ Portal LGPD (acesso, exclusão, portabilidade)
    - ⏳ Pendente: Importação em lote, foto de perfil, histórico de alterações
 
-2. **Módulo 12:** Agenda e Calendário ⏳ **PRÓXIMO**
-   - [ ] Integração Google Calendar, self-scheduling
+2. **Módulo 12:** Agenda e Calendário ✅ **CONCLUÍDO**
+   - ✅ Integração Google Calendar (OAuth, criação de eventos, free/busy)
+   - ✅ Self-scheduling (candidato escolhe horário via link público)
+   - ✅ Detecção de conflitos e cálculo de slots disponíveis
+   - ✅ Lembretes automáticos (24h, 1h, 15min via cron)
+   - ✅ Calendário visual com views semana/mês
+   - ✅ Configuração de disponibilidade por dia da semana
+   - ⏳ Pendente: Microsoft Outlook, múltiplos participantes, métricas
 
-3. **Módulo 13:** Comunicação Básica ⏳ **PRÓXIMO**
-   - [ ] Email integrado, templates, histórico
+3. **Módulo 13:** Comunicação Básica ✅ **CONCLUÍDO**
+   - ✅ 9 templates de email padrão (convite, lembrete, aprovação, reprovação, etc.)
+   - ✅ Variáveis dinâmicas e condicionais em templates
+   - ✅ Caixa de entrada unificada com filtros e busca
+   - ✅ Envio de mensagens com seleção de template
+   - ✅ Histórico de comunicações por candidato
+   - ⏳ Pendente: WhatsApp, SMS, sequências de follow-up, personalização por IA
 
 ---
 
 ### 📋 Instruções para Fase 2
 
-Antes de iniciar a Fase 2, complete os itens pendentes da Fase 1:
+A Fase 2 foca em **Inteligência** - IA para triagem e matching de candidatos.
 
-**Módulo 1 - Itens Pendentes:**
-1. Importação em lote de candidatos (CSV, Excel)
-2. Upload de foto de perfil (Vercel Blob)
-3. Histórico de alterações (audit trail no perfil)
-4. Disparo automático de convite para completar perfil
+**Pré-requisitos:**
+1. Aplicar migração `0005_agenda_comunicacao.sql` (`npm run db:migrate`)
+2. Configurar Google Calendar OAuth (se desejado)
+3. Configurar cron para lembretes: `CRON_SECRET` + Vercel Cron em `/api/cron/send-reminders`
 
-**Módulo 12 - Agenda e Calendário:**
-1. Criar integração OAuth com Google Calendar API
-2. Implementar self-scheduling (candidato escolhe horário)
-3. Sincronização bidirecional de eventos
-4. Detecção de conflitos e sugestão de horários
+**Módulo 2 - Banco de Skills:**
+1. Criar taxonomia padronizada de skills (~5.000 skills iniciais)
+2. Implementar extração automática de skills por IA (a partir do CV parser existente)
+3. Hierarquia e sinônimos de skills
+4. Página de skills do candidato com indicador de confiança
 
-**Módulo 13 - Comunicação Básica:**
-1. Templates de email por evento (convite, lembrete, aprovação, reprovação)
-2. Caixa de entrada unificada
-3. Histórico de comunicações por candidato
-4. Variáveis dinâmicas em templates
+**Módulo 8 - Triagem Automática:**
+1. Análise automática de CV vs requisitos da vaga (scoring 0-100%)
+2. Critérios configuráveis (obrigatórios, desejáveis, pesos)
+3. Ranking de candidatos com justificativa da IA
+4. Aprovação/reprovação automática por threshold
+
+**Módulo 3 - Scanner Inteligente:**
+1. Matching vaga x candidatos do banco (score de fit)
+2. Convite automático para candidatos com alto fit
+3. Busca manual assistida com filtros avançados
+4. Alertas quando novo candidato com alto fit se cadastra
 
 ---
 
@@ -1579,4 +1650,5 @@ Empresa contratando 1 pessoa:
 
 *Documento criado em: 25/03/2026*
 *Versão base: v1.00.00*
-*Última atualização: 25/03/2026*
+*Última atualização: 30/03/2026*
+*Fase 1 concluída: Módulos 1, 12 e 13*
