@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 
+// Redeploy da versão v1.00.00 (commit cd2bfbe) — 2026-05-12
 const isDev = process.env.NODE_ENV === "development";
 
 const nextConfig: NextConfig = {
